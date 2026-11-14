@@ -121,10 +121,16 @@ def splits(groups, seed=0):
 
 
 def main():
-    folder = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'data')
+    default = len(sys.argv) <= 1
+    folder = sys.argv[1] if not default else os.path.join(HERE, 'data')
     if not os.path.isabs(folder):
         folder = os.path.join(HERE, folder)
     paths = find_csvs(folder)
+    if default:
+        real = [p for p in paths if os.sep + 'fake' + os.sep not in p]
+        if real:
+            paths = real  # with real recordings present, leave the fake sessions out
+    print('files: ' + ', '.join(os.path.basename(p) for p in paths))
     if not paths:
         print(f'no CSV files under {folder}. Record with web/index.html, or run: python make_fake_data.py')
         return 1

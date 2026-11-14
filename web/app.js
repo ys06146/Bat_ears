@@ -88,9 +88,20 @@
     document.querySelectorAll('#labels button').forEach((b) => b.classList.toggle('sel', b.dataset.label === BatRecorder.label));
     $('rec').textContent = BatRecorder.recording ? '■ 기록 정지' : '● 기록 시작';
     $('recCount').textContent = `${BatRecorder.count}줄`;
+    if (!BatRecorder.canPickFolder) {
+      $('pickDir').disabled = true;
+      $('saveStatus').textContent = '이 브라우저는 자동 저장을 지원하지 않아요. CSV 저장 버튼을 쓰세요.';
+    } else if (BatRecorder.lastError) {
+      $('saveStatus').textContent = `⚠️ 자동 저장 실패: ${BatRecorder.lastError}`;
+    } else if (BatRecorder.folderName) {
+      $('saveStatus').textContent = `✅ 자동 저장: ${BatRecorder.folderName}` + (BatRecorder.lastSaved ? ` · 마지막 ${BatRecorder.lastSaved}` : '');
+    }
   }
   BatRecorder.onChange(renderRecorder);
   renderRecorder();
+  $('pickDir').onclick = async () => {
+    try { await BatRecorder.pickFolder(); } catch (e) { if (e.name !== 'AbortError') $('saveStatus').textContent = '⚠️ ' + e.message; }
+  };
   $('rec').onclick = () => BatRecorder.toggle();
   $('save').onclick = () => BatRecorder.download();
   $('clear').onclick = () => BatRecorder.clear();

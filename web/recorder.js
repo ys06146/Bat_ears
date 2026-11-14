@@ -2,8 +2,10 @@
  *
  * window.BatRecorder
  *   start(), stop(), toggle(), setLabel(name), download(), clear()
- *   onChange(fn)       called when the label, the row count or the recording state changes
- *   labels, label, recording, count
+ *   pickFolder()       choose a folder once (e.g. Google Drive > nhng > ml > data). After that, each
+ *                      recording is saved there automatically (every 15 s while recording, and on stop).
+ *   onChange(fn)       called when the label, rows, recording state or save status changes
+ *   labels, label, recording, count, canPickFolder, folderName, lastSaved, lastError
  *
  * Hotkeys: 1 idle, 2 push, 3 pull, 4 wave, 5 other (typing, walking by, ...)
  * Columns: session, t_ms, label, gesture, dUp_db, dDown_db, up_db, down_db, v_mps, snr_db,
@@ -13,9 +15,13 @@
   'use strict';
 
   const LABELS = ['idle', 'push', 'pull', 'wave', 'other'];
+  const HEAD = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db',
+    'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6'];
+  const AUTOSAVE_MS = 15000;
   const rows = [];
   const watchers = [];
   let recording = false, label = 'idle', pendingGesture = '', session = '';
+  let dir = null, timer = 0, saving = false, lastSaved = '', lastError = '';
 
   const num = (x, d) => (Number.isFinite(x) ? x.toFixed(d) : '');
   const stamp = () => {
@@ -40,10 +46,32 @@
     if (recording) pendingGesture = g.kind + (g.simulated ? '_sim' : '');
   });
 
-  function toCsv() {
-    const head = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db', 'carrier_db', 'noise_db',
-      'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6'];
-    return [head.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  function toCsv(onlySession) {
+    const body = onlySession ? rows.filter((r) => r[0] === onlySession) : rows;
+    return [HEAD.join(','), ...body.map((r) => r.join(','))].join('\n');
+  }
+
+  // One file per recording (session), overwritten as it grows, so the training script never double-counts.
+  async function saveToFolder(sess) {
+    if (!dir || !sess || saving) return false;
+    saving = true;
+    try {
+      const name = `batears_${sess}.csv`;
+      const fh = await dir.getFileHandle(name, { create: true });
+      const w = await fh.createWritable();
+      await w.write(toCsv(sess));
+      await w.close();
+      lastSaved = name;
+      lastError = '';
+      return true;
+    } catch (e) {
+      lastError = e.message || String(e);
+      console.error('[BatRecorder] autosave failed', e);
+      return false;
+    } finally {
+      saving = false;
+      notify();
+    }
   }
 
   const api = {
@@ -51,12 +79,36 @@
     get label() { return label; },
     get recording() { return recording; },
     get count() { return rows.length; },
-    start() { if (!recording) { recording = true; session = stamp(); notify(); } },
-    stop() { if (recording) { recording = false; notify(); } },
+    get canPickFolder() { return typeof window.showDirectoryPicker === 'function'; },
+    get folderName() { return dir ? dir.name : ''; },
+    get lastSaved() { return lastSaved; },
+    get lastError() { return lastError; },
+    start() {
+      if (recording) return;
+      recording = true;
+      session = stamp();
+      if (dir) timer = setInterval(() => saveToFolder(session), AUTOSAVE_MS);
+      notify();
+    },
+    stop() {
+      if (!recording) return;
+      recording = false;
+      clearInterval(timer);
+      timer = 0;
+      if (dir) saveToFolder(session);
+      notify();
+    },
     toggle() { if (recording) api.stop(); else api.start(); },
     setLabel(name) { if (LABELS.includes(name)) { label = name; notify(); } },
     clear() { rows.length = 0; notify(); },
     onChange(fn) { watchers.push(fn); },
+    async pickFolder() {
+      if (!api.canPickFolder) throw new Error('이 브라우저는 폴더 저장을 지원하지 않아요. 크롬으로 열어 주세요.');
+      dir = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' });
+      if (recording && !timer) timer = setInterval(() => saveToFolder(session), AUTOSAVE_MS);
+      notify();
+      return dir.name;
+    },
     download() {
       const blob = new Blob([toCsv()], { type: 'text/csv' });
       const a = document.createElement('a');
