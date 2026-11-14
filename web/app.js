@@ -168,11 +168,13 @@
     });
     if (res && BatEars.info) showSettings(BatEars.info);
     $('stereo').checked = BatEars.stereo;
+    if (BatCollect.lastMeta) ExpLog.addFromMeta(BatCollect.lastMeta);
   }
+  ExpLog.init($('explog'));
   $('collect').onclick = startCollect;
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
-    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && !document.body.classList.contains('speed-on') && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
       e.preventDefault();
       startCollect();
     }
