@@ -122,8 +122,28 @@
     if (ok && BatEars.info) showSettings(BatEars.info);
   };
 
-  // ---- game
+  // ---- game / sonar view
   ForcePush.init($('game'));
+  SonarView.init($('sonar'), $('cam'));
+  function setView(view) {
+    const sonar = view === 'sonar';
+    $('game').hidden = sonar;
+    $('sonar').hidden = !sonar;
+    $('camBtn').hidden = !sonar;
+    $('tabGame').classList.toggle('sel', !sonar);
+    $('tabSonar').classList.toggle('sel', sonar);
+    document.body.classList.toggle('sonar-on', sonar);
+    SonarView.setActive(sonar);
+    if (!sonar) { SonarView.stopCamera(); $('camBox').hidden = true; $('camBtn').classList.remove('sel'); }
+  }
+  $('tabGame').onclick = () => setView('game');
+  $('tabSonar').onclick = () => setView('sonar');
+  $('camBtn').onclick = async () => {
+    const on = await SonarView.toggleCamera();
+    $('camBox').hidden = !on;
+    $('camBtn').classList.toggle('sel', on);
+  };
+  if (params.get('view') === 'sonar') setView('sonar');
   setStatus({ running: false });
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)

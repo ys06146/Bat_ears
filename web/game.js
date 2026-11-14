@@ -80,6 +80,7 @@
 
   function onGesture(e) {
     if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
+    if (document.body.classList.contains('sonar-on')) return; // sonar view is showing instead of the game
     if (!S.running) { if (e.kind === 'push') start(); return; }
     const power = Math.min(2, 0.6 + (e.speed || 0.5));
     if (e.kind === 'wave') {
