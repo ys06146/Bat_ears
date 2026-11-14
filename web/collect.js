@@ -163,7 +163,7 @@
     if (S) return null;
     const speed = opt.speed || 1;
     const who = String(opt.who || 'anon').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
-    const dist = Number(opt.dist) || 20;
+    const dist = Math.max(1, Math.min(150, Math.round(Number(opt.dist)))) || 20; // typed in cm
     let noise = opt.noise === 'noisy' ? 'noisy' : opt.noise === 'quiet' ? 'quiet' : 'auto';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
     const queue = plan(perGesture, !!opt.wave, !!opt.swipe);
