@@ -116,7 +116,7 @@
       running: true, over: false, t0: performance.now(), score: 0, lives: 3, objs: [], parts: [], nextSpawn: 0,
       combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, waveLeft: 1, ring: null, rank: -1, lastTick: 0,
     });
-    say('START!', '#7fe0c8');
+    say('START!', '#ff5a60');
     sfx.start();
   }
 
@@ -289,7 +289,7 @@
   function drawHud(now) {
     const { g, W, H } = S;
     g.fillStyle = '#e8e8e8';
-    g.font = '600 18px system-ui';
+    g.font = '600 18px Inter, system-ui';
     g.textAlign = 'left';
     g.fillText(`점수 ${S.score}`, 16, 28);
     g.fillStyle = '#ff6b6b';
@@ -297,7 +297,7 @@
     if (S.running) {
       const left = Math.max(0, ROUND_MS - (now - S.t0)) / 1000;
       g.textAlign = 'right';
-      g.fillStyle = left <= 5 ? '#ff8a80' : '#e8e8e8';
+      g.fillStyle = left <= 5 ? '#fbbf24' : '#e8e8e8';
       g.fillText(`${left.toFixed(1)}초`, W - 16, 28);
       g.font = '13px system-ui';
       g.fillStyle = S.waveLeft ? '#b39ddb' : '#5a6070';
@@ -305,19 +305,19 @@
       // time bar
       g.fillStyle = '#ffffff22';
       g.fillRect(0, H - 4, W, 4);
-      g.fillStyle = left <= 5 ? '#ff8a80' : '#7fe0c8';
+      g.fillStyle = left <= 5 ? '#fbbf24' : '#c5050c';
       g.fillRect(0, H - 4, W * left / (ROUND_MS / 1000), 4);
       if (S.combo >= 2) {
         g.textAlign = 'left';
         g.font = '700 15px system-ui';
-        g.fillStyle = '#7fe0c8';
+        g.fillStyle = '#ff5a60';
         g.fillText(`${S.combo} 콤보`, 16, 76);
       }
     }
     g.textAlign = 'center';
     if (S.flash && now < S.flash.until) {
       g.fillStyle = S.flash.color;
-      g.font = '800 40px system-ui';
+      g.font = '800 40px Inter, system-ui';
       g.fillText(S.flash.text, W / 2, H * 0.22);
     }
     if (sfx.muted) {
@@ -332,7 +332,7 @@
     g.fillRect(0, 0, W, H);
     g.textAlign = 'center';
     g.fillStyle = '#e8e8e8';
-    g.font = '800 34px system-ui';
+    g.font = '800 34px Inter, system-ui';
     const top = S.over ? H / 2 - 110 : H / 2 - 30;
     g.fillText(S.over ? (S.rank === 0 ? `🏆 신기록! ${S.score}점` : `끝! 점수 ${S.score}`) : 'FORCE PUSH', W / 2, top);
     g.font = '16px system-ui';
@@ -356,7 +356,7 @@
     g.fillText('순위표', W / 2, top + 92);
     g.font = '15px ui-monospace, Menlo, monospace';
     list.forEach((e, i) => {
-      g.fillStyle = i === S.rank ? '#7fe0c8' : '#9aa3b2';
+      g.fillStyle = i === S.rank ? '#ff5a60' : '#9aa3b2';
       const line = `${i + 1}.  ${String(e.score).padStart(5)}점   콤보 ${String(e.combo || 0).padStart(2)}`;
       g.fillText(line + (i === S.rank ? '  ◀' : '   '), W / 2, top + 116 + i * 22);
     });
