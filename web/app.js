@@ -32,7 +32,7 @@
     $('nPush').textContent = c.push || 0;
     $('nPull').textContent = c.pull || 0;
     const g = $('gesture');
-    g.textContent = e.kind === 'push' ? '밀기 ⟶' : '⟵ 당기기';
+    g.textContent = e.kind === 'push' ? '밀기 ⟶' : e.kind === 'pull' ? '⟵ 당기기' : '〰 흔들기';
     g.className = e.kind;
     clearAt = performance.now() + 600;
   });

@@ -14,7 +14,9 @@
     cv: null, g: null, W: 0, H: 0,
     running: false, over: false, t0: 0, score: 0, lives: 3, best: 0,
     objs: [], parts: [], stars: [], nextSpawn: 0, flash: null, shake: 0,
+    lastShock: -1e9, ring: 0,
   };
+  const SHOCK_COOLDOWN_MS = 8000;
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
@@ -80,6 +82,18 @@
     if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
     if (!S.running) { if (e.kind === 'push') start(); return; }
     const power = Math.min(2, 0.6 + (e.speed || 0.5));
+    if (e.kind === 'wave') {
+      const now = performance.now();
+      if (now - S.lastShock < SHOCK_COOLDOWN_MS) { say('충격파 충전 중…', '#9aa3b2'); return; }
+      S.lastShock = now;
+      S.ring = now;
+      let hit = 0;
+      for (const o of S.objs) if (!o.dead && !o.star) { o.dead = true; burst(o, '#b388ff', 18, 1.2); hit++; }
+      S.score += hit * 8;
+      S.shake = 0.25;
+      say(`SHOCKWAVE ×${hit} +${hit * 8}`, '#b388ff');
+      return;
+    }
     if (e.kind === 'push') {
       const o = nearest(false);
       if (!o) { say('PUSH', '#4fc3f7'); return; }
@@ -153,6 +167,14 @@
       g.fillRect(p.x, p.y, 3, 3);
     }
     g.globalAlpha = 1;
+    if (S.ring && now - S.ring < 600) {
+      const k = (now - S.ring) / 600;
+      g.strokeStyle = `rgba(179,136,255,${1 - k})`;
+      g.lineWidth = 6 * (1 - k) + 1;
+      g.beginPath();
+      g.arc(W / 2, H / 2, k * Math.max(W, H) * 0.7, 0, Math.PI * 2);
+      g.stroke();
+    }
     g.restore();
 
     g.fillStyle = '#e8e8e8';
@@ -164,6 +186,10 @@
       const left = Math.max(0, ROUND_MS - (now - S.t0)) / 1000;
       g.textAlign = 'right';
       g.fillText(`${left.toFixed(1)}초`, W - 16, 28);
+      const cd = Math.max(0, SHOCK_COOLDOWN_MS - (now - S.lastShock)) / 1000;
+      g.font = '14px system-ui';
+      g.fillStyle = cd > 0 ? '#9aa3b2' : '#b388ff';
+      g.fillText(cd > 0 ? `충격파 ${cd.toFixed(0)}초` : '〰 손 흔들면 충격파!', W - 16, 52);
     }
     g.textAlign = 'center';
     if (S.flash && now < S.flash.until) {

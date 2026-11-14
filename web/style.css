@@ -14,6 +14,7 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 12px; pa
 #gesture { position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; font-size: 36px; font-weight: 800; pointer-events: none; }
 #gesture.push { color: var(--push); }
 #gesture.pull { color: var(--pull); }
+#gesture.wave { color: #b388ff; }
 aside { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .card { background: var(--card); border-radius: 10px; padding: 10px 12px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
