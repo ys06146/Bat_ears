@@ -146,25 +146,32 @@
   // ---- game / sonar view, scoreboard
   ForcePush.init($('game'));
   SonarView.init($('sonar'), $('cam'));
+  SpeedGun.init($('speed'));
   function setView(view) {
-    const sonar = view === 'sonar';
-    $('game').hidden = sonar;
+    const sonar = view === 'sonar', speed = view === 'speed';
+    $('game').hidden = view !== 'game';
     $('sonar').hidden = !sonar;
+    $('speed').hidden = !speed;
     $('camBtn').hidden = !sonar;
-    $('tabGame').classList.toggle('sel', !sonar);
+    $('tabGame').classList.toggle('sel', view === 'game');
     $('tabSonar').classList.toggle('sel', sonar);
+    $('tabSpeed').classList.toggle('sel', speed);
     document.body.classList.toggle('sonar-on', sonar);
+    document.body.classList.toggle('speed-on', speed);
+    $('intro').hidden = view !== 'game' || $('intro').hidden;
     SonarView.setActive(sonar);
+    SpeedGun.setActive(speed);
     if (!sonar) { SonarView.stopCamera(); $('camBox').hidden = true; $('camBtn').classList.remove('sel'); }
   }
   $('tabGame').onclick = () => setView('game');
   $('tabSonar').onclick = () => setView('sonar');
+  $('tabSpeed').onclick = () => { setView('speed'); $('tabSpeed').blur(); };
   $('camBtn').onclick = async () => {
     const on = await SonarView.toggleCamera();
     $('camBox').hidden = !on;
     $('camBtn').classList.toggle('sel', on);
   };
-  if (params.get('view') === 'sonar') setView('sonar');
+  if (params.get('view') === 'sonar' || params.get('view') === 'speed') setView(params.get('view'));
   setStatus({ running: false });
   showIntro(params.get('auto') === '1' ? null : 'steps');
   $('introStart').onclick = () => { showIntro('cal'); startEngine(); };

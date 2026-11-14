@@ -19,10 +19,12 @@
     <div class="tabs">
       <button id="tabGame" class="tab sel">🎮 게임</button>
       <button id="tabSonar" class="tab">🛰️ 소나 뷰</button>
+      <button id="tabSpeed" class="tab">🎯 스피드건</button>
       <button id="camBtn" class="tab" hidden>📷 실제 손과 비교</button>
     </div>
     <canvas id="game"></canvas>
     <canvas id="sonar" hidden></canvas>
+    <div id="speed" class="speedgun" hidden></div>
     <div id="camBox" hidden><video id="cam" autoplay muted playsinline></video><span>📷 실제 손 (비교용)</span></div>
     <div id="gesture">–</div>
 
@@ -142,6 +144,7 @@
 <script src="game.js"></script>
 <script src="collect.js"></script>
 <script src="sonar.js"></script>
+<script src="speed.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

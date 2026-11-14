@@ -175,7 +175,7 @@
 
   function onGesture(e) {
     if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
-    if (document.body.classList.contains('sonar-on')) return; // sonar view is showing instead of the game
+    if (document.body.classList.contains('sonar-on') || document.body.classList.contains('speed-on')) return; // another view is showing
     if (!S.running) {
       if (e.kind === 'push' && S.ready) start();
       return;
