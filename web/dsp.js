@@ -29,7 +29,11 @@
   const SUB_EDGES = [25, 50, 80, 120, 170, 230, 300];
 
   const config = {
-    detector: 'robust',  // 'robust' = bravo's RobustDetector (web/robust.js); 'v2' = the simpler rules below
+    // 'burst' (default): bravo's adaptive floors + decide each burst by its LARGEST hand speed. Real recordings
+    //   showed people wind up before a pull and swing back after a push; first-crossing rules got 15% of
+    //   prompts right, this rule 80% (ml/replay_burst.py). 'robust' = RobustDetector's own decisions; 'v2' = old rules.
+    detector: 'burst',
+    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150 },
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -66,11 +70,12 @@
     // stereo mode (left/right swipes): one tone per speaker, analysed separately
     stereo: false, oscL: null, oscR: null, gainL: null, gainR: null, sch: null, lastR: null, scand: null, scandFrames: 0,
     scandSince: 0, prevStereoT: 0,
+    burst: null, burstLock: 0,
   };
 
   // Mono detector from robust.js (adaptive floor, impulse veto, hysteresis, return-stroke lock, wave).
   function makeRobust() {
-    if (config.detector !== 'robust' || !window.BatRobust) return null;
+    if (config.detector === 'v2' || !window.BatRobust) return null;
     return new window.BatRobust.RobustDetector({
       onDb: config.threshold, margin: config.margin, minSnr: config.minSnr,
       confirm: config.confirmFrames, refractoryMs: config.refractoryMs,
@@ -178,6 +183,8 @@
       st.base = null;
       st.sch = { L: newChan(config.stereoFreqs[0]), R: newChan(config.stereoFreqs[1]) };
       st.robust = makeRobust(); // fresh floors for every new calibration
+      st.burst = null;
+      st.burstLock = 0;
       st.wasCalibrating = true;
       emit('state', snapshot());
     }
@@ -314,8 +321,16 @@
           const ex = st.robust.excess(m);
           dUp = ex.up;
           dDown = ex.dn;
-          const g = st.robust.update({ t: now, up: m.up, down: m.down, noise: m.noise, snr: m.snr, v });
-          if (g) fire(g.kind, { speed: peak, strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
+          const g = st.robust.update({ t: now, up: m.up, down: m.down, noise: m.noise, snr: m.snr, v }); // keeps the floors learning
+          if (config.detector === 'burst') {
+            // claps, speech or music hits lift the far band too (robust.js impulse veto): drop the burst
+            const vetoed = now < st.robust.vetoUntil;
+            if (vetoed && st.burst) { st.burst = null; st.burstLock = now + config.burst.lockMs; }
+            const b = !vetoed && m.snr >= config.minSnr ? burstStep(now, dUp, dDown, v) : null;
+            if (b) b.kinds.forEach((k) => fire(k, { speed: b.speed, strength: Math.max(dUp, dDown), simulated: false }));
+          } else if (g) {
+            fire(g.kind, { speed: peak, strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
+          }
         } else if (st.base) {
           // Broadband noise (claps, crowd) lifts the far noise floor as much as the sidebands; a hand echo
           // only lifts the sidebands. Subtract the noise-floor rise so loud rooms don't look like gestures.
@@ -403,6 +418,37 @@
   function fire(kind, extra) {
     st.counts[kind] = (st.counts[kind] || 0) + 1;
     emit('gesture', { kind, t: performance.now(), ...extra });
+  }
+
+  // Burst rule (same logic as ml/replay_burst.py, so offline tuning on recordings carries over).
+  // A burst starts when the echo rises aOn dB over the adaptive floor and ends after gapMs of quiet (or maxMs).
+  // Fire early when the hand speed passes vFire; otherwise, at the end, fire the direction of the larger speed
+  // peak if it reached vMin. waveFlips direction changes (|v| > vMin) inside one burst = a wave.
+  function burstStep(now, up, dn, v) {
+    const B = config.burst;
+    const active = Math.max(up, dn) > B.aOn;
+    let ev = st.burst;
+    if (!ev) {
+      if (!active || now < st.burstLock) return null;
+      ev = st.burst = { start: now, last: now, vmax: v, vmin: v, fired: false, waved: false, flips: 0, sign: 0 };
+    }
+    if (active) ev.last = now;
+    ev.vmax = Math.max(ev.vmax, v);
+    ev.vmin = Math.min(ev.vmin, v);
+    const s = v > B.vMin ? 1 : v < -B.vMin ? -1 : 0;
+    if (s && ev.sign && s !== ev.sign) ev.flips++;
+    if (s) ev.sign = s;
+    const kinds = [];
+    if (!ev.waved && ev.flips >= B.waveFlips) { kinds.push('wave'); ev.waved = ev.fired = true; }
+    else if (!ev.fired && v > B.vFire) { kinds.push('push'); ev.fired = true; }
+    else if (!ev.fired && v < -B.vFire) { kinds.push('pull'); ev.fired = true; }
+    const maxMs = ev.flips >= 2 ? 3000 : B.maxMs; // a wave keeps going; don't chop it into extra pushes/pulls
+    if (now - ev.last > B.gapMs || now - ev.start > maxMs) {
+      if (!ev.fired && Math.max(ev.vmax, -ev.vmin) >= B.vMin) kinds.push(ev.vmax >= -ev.vmin ? 'push' : 'pull');
+      st.burst = null;
+      st.burstLock = now + B.lockMs;
+    }
+    return kinds.length ? { kinds, speed: Math.max(ev.vmax, -ev.vmin) } : null;
   }
 
   // Peak |v| over the last 150 ms (time-based, so 60 / 120 / 144 Hz screens behave the same).

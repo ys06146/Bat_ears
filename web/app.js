@@ -167,11 +167,14 @@
   if (params.get('auto') === '1') {
     (async () => {
       if (params.get('stereo') === '1') $('stereo').checked = true;
+      const t0 = performance.now(), events = [];
+      BatEars.on('gesture', (e) => events.push(`${e.kind}@${((e.t - t0) / 1000).toFixed(2)}`));
+      window.__autoEvents = events;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();
       await sleep(Number(params.get('secs') || 8) * 1000);
       const summary = ok ? await BatEars.stop() : null;
-      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, summary, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
+      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, events: window.__autoEvents, summary, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
       document.title = 'DONE';
     })();
   }
