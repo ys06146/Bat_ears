@@ -28,7 +28,7 @@
             <label class="check"><input id="camCovered" type="checkbox"> 가렸어요</label></li>
           <li><b>🔊 내장 스피커·마이크</b>를 쓰고 볼륨은 50% 이상. 헤드폰·블루투스는 빼 주세요.</li>
           <li><b>✋ 시작을 누르면</b> 마이크를 허용하고, 1.5초 동안 손을 화면에서 치워 주세요. 주변 소리 기준값을 잡아요.</li>
-          <li><b>🎮 화면 앞 10~20cm</b>에서 손바닥을 밀면 운석 💥, 당기면 별 ⭐, 흔들면 SHOCKWAVE 〰 (한 판에 1번).</li>
+          <li><b>🎮 화면 앞 10~20cm</b>에서 손바닥을 밀면 운석 💥, 당기면 별 ⭐, 흔들면 충격파 〰 (8초 충전).</li>
         </ol>
         <div class="row center">
           <button id="introStart">▶ 마이크 켜고 시작</button>
@@ -45,6 +45,15 @@
   </section>
 
   <aside>
+    <div class="card">
+      <div class="row">
+        <button id="collect">🎯 데이터 수집 (2분)</button>
+        <label>거리 <select id="dist"><option>10</option><option selected>20</option><option>30</option></select>cm</label>
+        <label>참가자 <select id="who"><option>p1</option><option>p2</option><option>p3</option><option>p4</option></select></label>
+      </div>
+      <p class="hint">누르면 저장 폴더(드라이브 nhng/ml/data)를 한 번 고르고, 화면 지시대로 손만 움직이면 라벨과 저장이 자동이에요.</p>
+    </div>
+
     <div class="card">
       <div class="row">
         <button id="start">▶ 시작</button>
@@ -93,6 +102,10 @@
       <summary>데이터 기록 (분류·실험용)</summary>
       <div class="row" id="labels"></div>
       <div class="row">
+        <button id="pickDir" class="secondary">📁 자동 저장 폴더</button>
+        <span id="saveStatus" class="hint">폴더를 고르면 기록이 자동 저장돼요 (드라이브 nhng/ml/data 추천)</span>
+      </div>
+      <div class="row">
         <button id="rec" class="secondary">● 기록 시작</button>
         <button id="save" class="secondary">CSV 저장</button>
         <button id="clear" class="secondary">비우기</button>
@@ -107,6 +120,7 @@
         <li>노트북 내장 스피커·마이크 사용 (헤드폰·블루투스 X), 볼륨 50% 이상.</li>
         <li>▶ 시작 → 마이크 허용 → 1.5초 동안 손 치우기 (기준값).</li>
         <li>화면 앞 10~20cm에서 손바닥을 화면 쪽으로 밀면 운석이 날아가요. 당기면 별을 잡아요. 빨리 연달아 맞히면 콤보 배수가 붙어요.</li>
+        <li>손을 앞뒤로 빠르게 흔들면 충격파(화면의 운석 전부 파괴, 8초 충전).</li>
         <li>마이크 없이 게임만 볼 때는 키보드 ↑ (밀기), ↓ (당기기), W (흔들기), M (효과음 끄기). 슬라이더를 누른 뒤엔 빈 곳을 한 번 클릭하세요.</li>
       </ol>
     </details>
@@ -116,6 +130,7 @@
 <script src="dsp.js"></script>
 <script src="recorder.js"></script>
 <script src="game.js"></script>
+<script src="collect.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

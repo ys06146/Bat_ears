@@ -48,7 +48,7 @@
     $('nPush').textContent = c.push || 0;
     $('nPull').textContent = c.pull || 0;
     const g = $('gesture');
-    g.textContent = e.kind === 'push' ? '밀기 ⟶' : '⟵ 당기기';
+    g.textContent = e.kind === 'push' ? '밀기 ⟶' : e.kind === 'pull' ? '⟵ 당기기' : '〰 흔들기';
     g.className = e.kind;
     clearAt = performance.now() + 600;
   });
@@ -109,12 +109,33 @@
     document.querySelectorAll('#labels button').forEach((b) => b.classList.toggle('sel', b.dataset.label === BatRecorder.label));
     $('rec').textContent = BatRecorder.recording ? '■ 기록 정지' : '● 기록 시작';
     $('recCount').textContent = `${BatRecorder.count}줄`;
+    if (!BatRecorder.canPickFolder) {
+      $('pickDir').disabled = true;
+      $('saveStatus').textContent = '이 브라우저는 자동 저장을 지원하지 않아요. CSV 저장 버튼을 쓰세요.';
+    } else if (BatRecorder.lastError) {
+      $('saveStatus').textContent = `⚠️ 자동 저장 실패: ${BatRecorder.lastError}`;
+    } else if (BatRecorder.folderName) {
+      $('saveStatus').textContent = `✅ 자동 저장: ${BatRecorder.folderName}` + (BatRecorder.lastSaved ? ` · 마지막 ${BatRecorder.lastSaved}` : '');
+    }
   }
   BatRecorder.onChange(renderRecorder);
   renderRecorder();
+  $('pickDir').onclick = async () => {
+    try { await BatRecorder.pickFolder(); } catch (e) { if (e.name !== 'AbortError') $('saveStatus').textContent = '⚠️ ' + e.message; }
+  };
   $('rec').onclick = () => BatRecorder.toggle();
   $('save').onclick = () => BatRecorder.download();
   $('clear').onclick = () => BatRecorder.clear();
+
+  // ---- guided data collection
+  $('collect').onclick = async () => {
+    if (BatCollect.active) return;
+    if (BatRecorder.canPickFolder && !BatRecorder.folderName) {
+      try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: the CSV is downloaded at the end instead */ }
+    }
+    const ok = await BatCollect.start({ dist: $('dist').value, who: $('who').value, freq: Number($('freq').value) });
+    if (ok && BatEars.info) showSettings(BatEars.info);
+  };
 
   // ---- game, scoreboard
   ForcePush.init($('game'));
@@ -144,6 +165,23 @@
   $('resetScores').onclick = () => { try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ } renderScores(); };
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
+  // ---- self-test of the guided collection: index.html?collect=1&fast=0.15
+  if (params.get('collect') === '1') {
+    (async () => {
+      const res = await BatCollect.start({ speed: Number(params.get('fast') || 0.15), dist: '20', who: 'p0', noDownload: true });
+      const lines = res ? BatRecorder.toCsv(res.session).split('\n') : [];
+      const head = lines[0] ? lines[0].split(',') : [];
+      const li = head.indexOf('label'), ci = head.indexOf('cue'), byLabel = {}, cues = {};
+      lines.slice(1).forEach((l) => {
+        const c = l.split(',');
+        byLabel[c[li]] = (byLabel[c[li]] || 0) + 1;
+        if (c[ci]) cues[c[ci]] = (cues[c[ci]] || 0) + 1;
+      });
+      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, gameRunning: ForcePush.state.running }));
+      document.title = 'DONE';
+    })();
+  }
+
   if (params.get('auto') === '1') {
     (async () => {
       const ok = await startEngine();

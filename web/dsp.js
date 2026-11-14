@@ -11,12 +11,13 @@
  *   drawZoom(canvas), drawWide(canvas)
  *
  * events
- *   'gesture' { kind: 'push' | 'pull', speed (m/s), strength (dB), t (ms), simulated }
- *   'frame'   { t, tone, calibrating, dUp, dDown, up, down, v, snr, carrier, noise, bandsUp[6], bandsDown[6] }
+ *   'gesture' { kind: 'push' | 'pull' | 'wave', speed (m/s, recent peak), strength (dB), t (ms), simulated }
+ *   'frame'   { t, tone, calibrating, dUp, dDown, up, down, v, snr, carrier, noise, bandsUp[6], bandsDown[6],
+ *               thUp, thDown }   thUp/thDown = current thresholds (rise automatically in noisy rooms)
  *   'state'   { running, tone, calibrating, busy }
  *   'error'   { where, name, message }
  *
- * Keyboard simulation (no mic needed): ArrowUp = push, ArrowDown = pull.
+ * Keyboard simulation (no mic needed): ArrowUp = push, ArrowDown = pull, W = wave.
  */
 (function () {
   'use strict';
@@ -26,7 +27,12 @@
   const SUB_EDGES = [25, 50, 80, 120, 170, 230, 300];
 
   const config = {
-    threshold: 6,        // dB above baseline that counts as motion
+    threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
+    autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
+    waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
+    waveWindowMs: 1000,
+    holdFlipMs: 350,     // two flips this close together = fast back-and-forth, so hold push/pull
+    waveMinV: 0.12,      // m/s; slower wiggles don't count toward a wave
     margin: 3,           // dB the winning side must beat the other side by
     minSnr: 15,          // dB; below this the echo is too weak to trust
     confirmFrames: 2,    // consecutive frames before a gesture fires
@@ -47,9 +53,10 @@
     ctx: null, osc: null, gain: null, stream: null, analyser: null, data: null,
     raf: 0, running: false, tone: false, busy: false, raw: true,
     f0: 20000, binHz: 0, G: 0, W: 0,
-    calibFrom: 0, calibUntil: 0, calib: null, base: null, wasCalibrating: false,
+    calibFrom: 0, calibUntil: 0, calib: null, base: null, noiseBase: null, wasCalibrating: false,
     cand: null, candFrames: 0, lastFire: 0,
-    last: null, agg: null, counts: { push: 0, pull: 0 },
+    wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
+    last: null, agg: null, counts: { push: 0, pull: 0, wave: 0 },
   };
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -137,7 +144,8 @@
       const now = performance.now();
       st.calibFrom = now + config.settleMs;
       st.calibUntil = now + config.calibMs;
-      st.calib = { ups: [], downs: [] };
+      st.calib = { ups: [], downs: [], noises: [] };
+      st.noiseBase = null;
       st.base = null;
       st.wasCalibrating = true;
       emit('state', snapshot());
@@ -183,7 +191,8 @@
       running: true, tone: false, busy: false, raw, f0, binHz,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
       base: null, cand: null, candFrames: 0, lastFire: 0, last: null,
-      counts: { push: 0, pull: 0 },
+      wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
+      counts: { push: 0, pull: 0, wave: 0 },
       agg: { frames: 0, snrSum: 0, snrMin: Infinity, carrierSum: 0, noiseSum: 0, maxUp: -Infinity, maxDown: -Infinity },
     });
     const s = track.getSettings();
@@ -213,7 +222,7 @@
 
   function summary() {
     const a = st.agg;
-    const out = { push: st.counts.push, pull: st.counts.pull };
+    const out = { push: st.counts.push, pull: st.counts.pull, wave: st.counts.wave || 0 };
     if (a && a.frames) {
       Object.assign(out, {
         frames: a.frames, snrAvg: +(a.snrSum / a.frames).toFixed(1), snrMin: +a.snrMin.toFixed(1),
@@ -236,12 +245,24 @@
     let dUp = 0, dDown = 0;
     if (st.tone) {
       if (calibrating) {
-        if (now >= st.calibFrom && Number.isFinite(m.up) && Number.isFinite(m.down)) { st.calib.ups.push(m.up); st.calib.downs.push(m.down); }
+        if (now >= st.calibFrom && Number.isFinite(m.up) && Number.isFinite(m.down)) {
+          st.calib.ups.push(m.up); st.calib.downs.push(m.down);
+          if (Number.isFinite(m.noise)) st.calib.noises.push(m.noise);
+        }
       } else {
-        if (!st.base && st.calib && st.calib.ups.length) st.base = { up: median(st.calib.ups), down: median(st.calib.downs) };
+        if (!st.base && st.calib && st.calib.ups.length) {
+          st.base = { up: median(st.calib.ups), down: median(st.calib.downs) };
+          // robust spread (MAD x 1.48 ~ std) of the idle echo, used to raise the threshold in noisy rooms
+          const mad = (xs, med) => median(xs.map((x) => Math.abs(x - med))) * 1.4826;
+          st.wobble = { up: Math.max(0.5, mad(st.calib.ups, st.base.up)), down: Math.max(0.5, mad(st.calib.downs, st.base.down)) };
+          st.noiseBase = st.calib.noises.length ? median(st.calib.noises) : null;
+        }
         if (st.base) {
-          dUp = m.up - st.base.up;
-          dDown = m.down - st.base.down;
+          // Broadband noise (claps, crowd) lifts the far noise floor as much as the sidebands; a hand echo
+          // only lifts the sidebands. Subtract the noise-floor rise so loud rooms don't look like gestures.
+          const rise = st.noiseBase != null && Number.isFinite(m.noise) ? Math.max(0, m.noise - st.noiseBase) : 0;
+          dUp = m.up - st.base.up - rise;
+          dDown = m.down - st.base.down - rise;
           detect(m, dUp, dDown, now);
           if (Number.isFinite(m.snr)) {
             const a = st.agg;
@@ -255,31 +276,64 @@
     if (st.wasCalibrating && !calibrating) { st.wasCalibrating = false; emit('state', snapshot(now)); }
     const v = m.centroid * C / (2 * st.f0);
     st.last = { ...m, dUp, dDown, v };
+    const th = thresholds();
     emit('frame', {
       t: now, tone: st.tone, calibrating, dUp, dDown, up: m.up, down: m.down, v,
       snr: m.snr, carrier: m.carrier, noise: m.noise, bandsUp: m.bandsUp, bandsDown: m.bandsDown,
+      thUp: th.up, thDown: th.down,
     });
   }
 
+  function thresholds() {
+    return {
+      up: Math.max(config.threshold, config.autoK * st.wobble.up),
+      down: Math.max(config.threshold, config.autoK * st.wobble.down),
+    };
+  }
+
   // Push = hand moving toward the laptop, so the echo shifts up. Pull = it shifts down.
+  // Wave = the direction flips back and forth several times within about a second.
   function detect(m, dUp, dDown, now) {
     if (!(m.snr >= config.minSnr)) { st.cand = null; st.candFrames = 0; return; }
+    const th = thresholds();
+    const v = m.centroid * C / (2 * st.f0);
+    st.vHist.push(Math.abs(v));
+    if (st.vHist.length > 8) st.vHist.shift();
+    const recentSpeed = Math.max(...st.vHist);
+
+    const moving = dUp > th.up * 0.6 || dDown > th.down * 0.6;
+    const sign = moving && Math.abs(v) > config.waveMinV ? Math.sign(v) : 0;
+    if (sign && st.lastSign && sign !== st.lastSign) st.flips.push(now);
+    if (sign) st.lastSign = sign;
+    st.flips = st.flips.filter((t) => now - t < config.waveWindowMs);
+    if (st.flips.length >= config.waveFlips && now - st.lastWave > 1200) {
+      st.lastWave = now;
+      st.lastFire = now;
+      st.flips = [];
+      st.cand = null;
+      st.candFrames = 0;
+      fire('wave', { speed: recentSpeed, strength: Math.max(dUp, dDown), simulated: false });
+      return;
+    }
+
+    const recentFlips = st.flips.filter((t) => now - t < config.holdFlipMs).length;
+    if (recentFlips >= 2) { st.cand = null; st.candFrames = 0; return; } // a wave is probably forming
+
     let c = null;
-    if (dUp > config.threshold && dUp - dDown > config.margin) c = 'push';
-    else if (dDown > config.threshold && dDown - dUp > config.margin) c = 'pull';
+    if (dUp > th.up && dUp - dDown > config.margin) c = 'push';
+    else if (dDown > th.down && dDown - dUp > config.margin) c = 'pull';
     if (c && c === st.cand) st.candFrames++;
     else { st.cand = c; st.candFrames = c ? 1 : 0; }
     if (c && st.candFrames >= config.confirmFrames && now - st.lastFire > config.refractoryMs) {
       st.lastFire = now;
-      fire(c, {
-        speed: Math.abs(m.centroid * C / (2 * st.f0)),
-        strength: Math.max(dUp, dDown),
-        simulated: false,
-      });
+      fire(c, { speed: recentSpeed, strength: Math.max(dUp, dDown), simulated: false });
     }
-    if (!c && st.base) {
+    if (!c && !moving && st.base) {
+      // follow slow drift of the baseline and of the idle wobble
       st.base.up += (m.up - st.base.up) * 0.01;
       st.base.down += (m.down - st.base.down) * 0.01;
+      st.wobble.up = Math.max(0.5, st.wobble.up * 0.995 + Math.abs(dUp) * 1.25 * 0.005);
+      st.wobble.down = Math.max(0.5, st.wobble.down * 0.995 + Math.abs(dDown) * 1.25 * 0.005);
     }
   }
 
@@ -402,7 +456,7 @@
     if (!config.keyboard || e.repeat) return;
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-    const kind = e.key === 'ArrowUp' ? 'push' : e.key === 'ArrowDown' ? 'pull' : null;
+    const kind = e.key === 'ArrowUp' ? 'push' : e.key === 'ArrowDown' ? 'pull' : (e.key === 'w' || e.key === 'W') ? 'wave' : null;
     if (!kind) return;
     e.preventDefault();
     fire(kind, { speed: 0.8, strength: 15, simulated: true });

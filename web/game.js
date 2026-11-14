@@ -2,7 +2,7 @@
  *
  * Push  = blast the nearest incoming meteor (a harder push scores more; quick hits build a combo).
  * Pull  = grab the nearest star for bonus points.
- * Wave  = SHOCKWAVE: clears every meteor on screen, once per round (key W without a mic).
+ * Wave  = SHOCKWAVE: clears every meteor on screen, 8-second recharge (key W without a mic).
  * Push while the game is not running = start a new 30-second round.
  *
  * Sound effects use their own AudioContext with sine/triangle tones under ~2 kHz,
@@ -20,10 +20,11 @@
   const S = {
     cv: null, g: null, W: 0, H: 0,
     running: false, over: false, ready: true, t0: 0, score: 0, lives: 3, best: 0,
-    combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, waveLeft: 1, ring: null,
+    combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, ring: null,
     objs: [], parts: [], stars: [], nextSpawn: 0, flash: null, shake: 0,
-    rank: -1, endListeners: [], lastTick: 0,
+    rank: -1, endListeners: [], lastTick: 0, lastShock: -1e9,
   };
+  const SHOCK_COOLDOWN_MS = 8000;
 
   // ---------------------------------------------------------------- scoreboard
   function loadScores() {
@@ -101,12 +102,11 @@
     for (let i = 0; i < 120; i++) S.stars.push({ x: Math.random(), y: Math.random(), s: Math.random() * 1.5 + 0.3 });
     S.best = loadScores().reduce((m, e) => Math.max(m, e.score), 0);
     BatEars.on('gesture', onGesture);
-    // the engine has no wave key, so simulate it here (W) for keyboard-only play
+    // W (wave) is simulated by the engine itself; M mutes the sound effects
     window.addEventListener('keydown', (e) => {
       const tag = (e.target && e.target.tagName) || '';
       if (e.repeat || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      if (e.key === 'w' || e.key === 'W') onGesture({ kind: 'wave', simulated: true });
-      else if (e.key === 'm' || e.key === 'M') setMuted(!sfx.muted);
+      if (e.key === 'm' || e.key === 'M') setMuted(!sfx.muted);
     });
     requestAnimationFrame(frame);
   }
@@ -114,7 +114,7 @@
   function start() {
     Object.assign(S, {
       running: true, over: false, t0: performance.now(), score: 0, lives: 3, objs: [], parts: [], nextSpawn: 0,
-      combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, waveLeft: 1, ring: null, rank: -1, lastTick: 0,
+      combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, ring: null, rank: -1, lastTick: 0, lastShock: -1e9,
     });
     say('START!', '#ff5a60');
     sfx.start();
@@ -174,6 +174,7 @@
   }
 
   function onGesture(e) {
+    if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
     if (!S.running) {
       if (e.kind === 'push' && S.ready) start();
       return;
@@ -200,14 +201,14 @@
       say(`GRAB ★ +${25 * mult}`, '#ffe082');
       sfx.grab();
     } else if (e.kind === 'wave') {
-      if (S.waveLeft <= 0) { say('SHOCKWAVE 다 썼어요', '#9aa3b2'); return; }
-      S.waveLeft--;
+      if (now - S.lastShock < SHOCK_COOLDOWN_MS) { say('충격파 충전 중…', '#9aa3b2'); return; }
+      S.lastShock = now;
       let n = 0;
-      for (const o of S.objs) if (!o.dead && !o.star) { o.dead = true; burst(o, '#b39ddb', 18, 1.2); n++; }
-      S.score += n * 15;
+      for (const o of S.objs) if (!o.dead && !o.star) { o.dead = true; burst(o, '#b388ff', 18, 1.2); n++; }
+      S.score += n * 8;
       S.ring = { t0: now };
       S.shake = 0.25;
-      say(`SHOCKWAVE +${n * 15}`, '#b39ddb');
+      say(`SHOCKWAVE ×${n} +${n * 8}`, '#b388ff');
       sfx.wave();
     }
   }
@@ -275,7 +276,7 @@
     if (S.ring) {
       const k = (now - S.ring.t0) / 600;
       g.globalAlpha = 1 - k;
-      g.strokeStyle = '#b39ddb';
+      g.strokeStyle = '#b388ff';
       g.lineWidth = 6 * (1 - k) + 1;
       g.beginPath(); g.arc(W / 2, H / 2, k * Math.max(W, H) * 0.7, 0, Math.PI * 2); g.stroke();
     }
@@ -299,9 +300,10 @@
       g.textAlign = 'right';
       g.fillStyle = left <= 5 ? '#fbbf24' : '#e8e8e8';
       g.fillText(`${left.toFixed(1)}초`, W - 16, 28);
-      g.font = '13px system-ui';
-      g.fillStyle = S.waveLeft ? '#b39ddb' : '#5a6070';
-      g.fillText(S.waveLeft ? '흔들기 SHOCKWAVE 1회' : 'SHOCKWAVE 사용함', W - 16, 50);
+      const cd = Math.max(0, SHOCK_COOLDOWN_MS - (now - S.lastShock)) / 1000;
+      g.font = '13px Inter, system-ui';
+      g.fillStyle = cd > 0 ? '#9aa3b2' : '#b388ff';
+      g.fillText(cd > 0 ? `충격파 ${cd.toFixed(0)}초` : '〰 손 흔들면 충격파!', W - 16, 50);
       // time bar
       g.fillStyle = '#ffffff22';
       g.fillRect(0, H - 4, W, 4);
@@ -343,7 +345,7 @@
     g.fillText(hint, W / 2, top + 30);
     if (!S.over) {
       g.font = '14px system-ui';
-      g.fillText('밀기 ⟶ 운석 부수기 · 당기기 ⟵ 별 잡기 · 흔들기 〰 SHOCKWAVE(W)', W / 2, top + 56);
+      g.fillText('밀기 ⟶ 운석 부수기 · 당기기 ⟵ 별 잡기 · 흔들기 〰 충격파 (W)', W / 2, top + 56);
       return;
     }
     g.fillStyle = '#c8cdd6';
