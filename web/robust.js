@@ -18,24 +18,31 @@
 
   const sortNum = (a) => Float64Array.from(a).sort();
   const medianOf = (s) => (s.length ? s[s.length >> 1] : NaN);
+  const nowMs = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
 
   // ------------------------------------------------------------ 1. adaptive floor
   // Median/MAD over the last `size` QUIET frames. Robust to the occasional spike, follows slow drift
   // (people sitting down, laptop moved, mic gain changes) without learning the gestures themselves.
+  // Window is limited both by count (`size`) and by time (`windowMs`), so it spans ~4 s at any frame rate.
   class AdaptiveFloor {
-    constructor({ size = 240, minSpread = 0.4 } = {}) {
-      this.size = size; this.minSpread = minSpread;
-      this.buf = new Float64Array(size); this.n = 0; this.i = 0; this.dirty = true;
+    constructor({ size = 300, windowMs = 4000, keep = 20, minSpread = 0.4 } = {}) {
+      this.size = size; this.windowMs = windowMs; this.keep = keep; this.minSpread = minSpread;
+      this.xs = []; this.ts = []; this.dirty = true;
       this._level = NaN; this._spread = minSpread;
     }
-    push(x) {
+    get n() { return this.xs.length; }
+    push(x, t) {
       if (!Number.isFinite(x)) return;
-      this.buf[this.i] = x; this.i = (this.i + 1) % this.size; this.n = Math.min(this.n + 1, this.size);
+      this.xs.push(x); this.ts.push(Number.isFinite(t) ? t : -Infinity);
+      while (this.xs.length > this.size) { this.xs.shift(); this.ts.shift(); }
+      if (Number.isFinite(t)) {
+        while (this.xs.length > this.keep && this.ts[0] < t - this.windowMs) { this.xs.shift(); this.ts.shift(); }
+      }
       this.dirty = true;
     }
     _update() {
       if (!this.dirty) return;
-      const s = sortNum(this.buf.subarray(0, this.n));
+      const s = sortNum(this.xs);
       const med = medianOf(s);
       const dev = sortNum(Array.from(s, (x) => Math.abs(x - med)));
       this._level = med;
@@ -55,8 +62,12 @@
     offDb: 3,           // must fall below this to re-arm (hysteresis: on > off)
     kOn: 4, kOff: 2,    // ...or k * sigma of the floor, whichever is larger
     margin: 3,          // winning side must beat the other side by this (dB)
-    confirm: 2,         // consecutive candidate frames before firing
-    release: 4,         // consecutive quiet frames before re-arming
+    // Timing is in ms so 30 / 60 / 120 Hz screens (requestAnimationFrame rate) behave the same.
+    confirm: 2,         // candidate frames before firing (at least)...
+    confirmMs: 15,      // ...and the candidate must have lasted this long
+    release: 2,         // quiet frames before re-arming (at least)...
+    releaseMs: 50,      // ...and quiet for this long
+    learnEveryMs: 15,   // floors learn at most one sample per 15 ms (240 samples ~ 3.6 s at any fps)
     refractoryMs: 450,
     oppositeLockMs: 600, // the hand coming back after a push looks like a pull: ignore it...
     oppositeOverrideDb: 6, // ...unless it is clearly stronger than an ordinary return
@@ -66,17 +77,18 @@
     impulseHoldMs: 250,
     waveFlips: 2,       // direction changes inside one event that make it a 'wave'
     stuckMs: 4000,      // still 'active' after this long: re-learn the floor so we cannot lock up
-    onsetDb: 4,         // must have risen this much within the last onsetFrames (fast onset = intent)
-    onsetFrames: 9,     // ~150 ms at 60 fps
-    floorSize: 240,
+    onsetDb: 4,         // must have risen this much within the last onsetMs (fast onset = intent)
+    onsetMs: 150,
+    floorSize: 300,     // max samples per floor
+    floorMs: 4000,      // ...and at most this much history
   };
 
   class RobustDetector {
     constructor(opt = {}) {
       this.o = { ...DEFAULTS, ...opt };
-      this.fUp = new AdaptiveFloor({ size: this.o.floorSize });
-      this.fDn = new AdaptiveFloor({ size: this.o.floorSize });
-      this.fNoise = new AdaptiveFloor({ size: this.o.floorSize });
+      this.fUp = new AdaptiveFloor({ size: this.o.floorSize, windowMs: this.o.floorMs });
+      this.fDn = new AdaptiveFloor({ size: this.o.floorSize, windowMs: this.o.floorMs });
+      this.fNoise = new AdaptiveFloor({ size: this.o.floorSize, windowMs: this.o.floorMs });
       this.reset();
     }
     reset() {
@@ -84,10 +96,21 @@
       this.lastFire = -1e9; this.lastKind = null; this.vetoUntil = -1e9;
       this.evStart = 0; this.evKind = null; this.disp = 0; this.flips = 0; this.side = 0; this.waved = false;
       this.prevT = null; this.stats = { vetoes: 0, longEvents: 0, oppositeBlocked: 0 };
-      this.hUp = []; this.hDn = [];
+      this.hist = []; this.candSince = 0; this.quietSince = null; this.lastLearn = -1e9; this.lastNoiseLearn = -1e9;
     }
-    // Feed calibration frames (hand away). Same as update() but never fires.
-    learn(f) { this.fUp.push(f.up); this.fDn.push(f.down); this.fNoise.push(f.noise); }
+    // Feed calibration frames (hand away). Never fires. Pass `t` (ms, same clock as update) if you can;
+    // otherwise performance.now() is used, which matches dsp.js.
+    learn(f) { const t = Number.isFinite(f.t) ? f.t : nowMs(); this._learnUpDn(f, t); this._learnNoise(f, t); }
+    _learnUpDn(f, t) {
+      if (t - this.lastLearn < this.o.learnEveryMs) return;
+      this.lastLearn = t;
+      this.fUp.push(f.up, t); this.fDn.push(f.down, t);
+    }
+    _learnNoise(f, t) {
+      if (t - this.lastNoiseLearn < this.o.learnEveryMs) return;
+      this.lastNoiseLearn = t;
+      this.fNoise.push(f.noise, t);
+    }
 
     excess(f) {
       return { up: f.up - this.fUp.level, dn: f.down - this.fDn.level, noise: f.noise - this.fNoise.level };
@@ -111,13 +134,15 @@
       const snrOk = !(f.snr < o.minSnr);
       // The far-band floor always learns: a 60 ms clap barely moves a 4 s median, but continuous
       // music or chatter becomes the new normal after ~2 s instead of vetoing forever.
-      this.fNoise.push(f.noise);
+      this._learnNoise(f, f.t);
 
       // onset sharpness: a deliberate push/pull rises within ~150 ms; a person walking by or a slow
-      // body sway creeps up over seconds. Compare with the minimum of the last `onsetFrames` frames.
-      this.hUp.push(e.up); this.hDn.push(e.dn);
-      if (this.hUp.length > o.onsetFrames) { this.hUp.shift(); this.hDn.shift(); }
-      const riseUp = e.up - Math.min(...this.hUp), riseDn = e.dn - Math.min(...this.hDn);
+      // body sway creeps up over seconds. Compare with the minimum over the last onsetMs.
+      this.hist.push({ t: f.t, up: e.up, dn: e.dn });
+      while (this.hist.length > 1 && this.hist[0].t < f.t - o.onsetMs) this.hist.shift();
+      let minUp = Infinity, minDn = Infinity;
+      for (const h of this.hist) { if (h.up < minUp) minUp = h.up; if (h.dn < minDn) minDn = h.dn; }
+      const riseUp = e.up - minUp, riseDn = e.dn - minDn;
 
       let c = null;
       if (!vetoed && snrOk) {
@@ -131,8 +156,8 @@
       let out = null;
 
       if (this.state === 'idle') {
-        if (c && c === this.cand) this.candN++; else { this.cand = c; this.candN = c ? 1 : 0; }
-        if (c && this.candN >= o.confirm && f.t - this.lastFire >= o.refractoryMs) {
+        if (c && c === this.cand) this.candN++; else { this.cand = c; this.candN = c ? 1 : 0; this.candSince = f.t; }
+        if (c && this.candN >= o.confirm && f.t - this.candSince >= o.confirmMs && f.t - this.lastFire >= o.refractoryMs) {
           const strength = c === 'push' ? e.up : e.dn;
           const opposite = this.lastKind && c !== this.lastKind && f.t - this.lastFire < o.oppositeLockMs;
           if (opposite && strength < (c === 'push' ? onUp : onDn) + o.oppositeOverrideDb) {
@@ -144,10 +169,10 @@
             this.state = 'active'; this.evStart = f.t; this.evKind = c;
             this.disp = 0; this.flips = 0; this.side = c === 'push' ? 1 : -1; this.waved = false;
           }
-          this.cand = null; this.candN = 0; this.quietN = 0;
+          this.cand = null; this.candN = 0; this.quietN = 0; this.quietSince = null;
         } else if (!c && !vetoed) {
           // idle, non-candidate frames teach the up/down floors (the median shrugs off gesture tails)
-          this.fUp.push(f.up); this.fDn.push(f.down);
+          this._learnUpDn(f, f.t);
         }
       } else { // active: one event per burst; wait for quiet frames to re-arm
         this.disp += (f.v || 0) * dt;
@@ -159,9 +184,11 @@
         }
         if (f.t - this.evStart > o.maxEventMs && this.evKind !== 'long') { this.evKind = 'long'; this.stats.longEvents++; }
         // stuck (level stepped up for good, e.g. a new reflector or interference): let the floor follow
-        if (f.t - this.evStart > o.stuckMs) { this.fUp.push(f.up); this.fDn.push(f.down); }
-        this.quietN = quiet ? this.quietN + 1 : 0;
-        if (this.quietN >= o.release) { this.state = 'idle'; this.quietN = 0; }
+        if (f.t - this.evStart > o.stuckMs) this._learnUpDn(f, f.t);
+        if (quiet) { this.quietN++; if (this.quietSince == null) this.quietSince = f.t; } else { this.quietN = 0; this.quietSince = null; }
+        if (this.quietN >= o.release && f.t - this.quietSince >= o.releaseMs) {
+          this.state = 'idle'; this.quietN = 0; this.quietSince = null;
+        }
       }
       return out;
     }

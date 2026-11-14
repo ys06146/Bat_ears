@@ -36,7 +36,8 @@
     waveWindowMs: 1000,
     holdFlipMs: 350,     // two flips this close together = fast back-and-forth, so hold push/pull
     stereoFreqs: [19000, 20500], // stereo mode: left speaker tone, right speaker tone (Hz)
-    oneSidedFrames: 5,   // stereo: frames to wait when only one tone moved (lets the other side catch up)
+    stereoConfirmMs: 30, // stereo: a candidate must last this long (both tones agree)...
+    oneSidedMs: 80,      // ...or this long when only one tone moved (lets the other side catch up)
     waveMinV: 0.12,      // m/s; slower wiggles don't count toward a wave
     margin: 3,           // dB the winning side must beat the other side by
     minSnr: 15,          // dB; below this the echo is too weak to trust
@@ -64,6 +65,7 @@
     last: null, agg: null, counts: { push: 0, pull: 0, wave: 0 },
     // stereo mode (left/right swipes): one tone per speaker, analysed separately
     stereo: false, oscL: null, oscR: null, gainL: null, gainR: null, sch: null, lastR: null, scand: null, scandFrames: 0,
+    scandSince: 0, prevStereoT: 0,
   };
 
   // Mono detector from robust.js (adaptive floor, impulse veto, hysteresis, return-stroke lock, wave).
@@ -231,7 +233,7 @@
     const binHz = ctx.sampleRate / analyser.fftSize;
     Object.assign(st, {
       ctx, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount),
-      stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0,
+      stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0, scandSince: 0, prevStereoT: 0,
       running: true, tone: false, busy: false, raw, f0, binHz,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
       base: null, cand: null, candFrames: 0, lastFire: 0, last: null,
@@ -295,7 +297,7 @@
         if (now >= st.calibFrom && Number.isFinite(m.up) && Number.isFinite(m.down)) {
           st.calib.ups.push(m.up); st.calib.downs.push(m.down);
           if (Number.isFinite(m.noise)) st.calib.noises.push(m.noise);
-          if (st.robust) st.robust.learn({ up: m.up, down: m.down, noise: m.noise });
+          if (st.robust) st.robust.learn({ t: now, up: m.up, down: m.down, noise: m.noise });
         }
       } else {
         if (!st.base && st.calib && st.calib.ups.length) {
@@ -307,14 +309,13 @@
         }
         if (st.robust && st.robust.fUp.ready) {
           const v = m.centroid * C / (2 * st.f0);
-          st.vHist.push(Math.abs(v));
-          if (st.vHist.length > 8) st.vHist.shift();
+          const peak = recentPeak(now, v);
           st.robust.o.onDb = config.threshold; // follow the sensitivity control
           const ex = st.robust.excess(m);
           dUp = ex.up;
           dDown = ex.dn;
           const g = st.robust.update({ t: now, up: m.up, down: m.down, noise: m.noise, snr: m.snr, v });
-          if (g) fire(g.kind, { speed: Math.max(...st.vHist), strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
+          if (g) fire(g.kind, { speed: peak, strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
         } else if (st.base) {
           // Broadband noise (claps, crowd) lifts the far noise floor as much as the sidebands; a hand echo
           // only lifts the sidebands. Subtract the noise-floor rise so loud rooms don't look like gestures.
@@ -361,9 +362,7 @@
     if (!(m.snr >= config.minSnr)) { st.cand = null; st.candFrames = 0; return; }
     const th = thresholds();
     const v = m.centroid * C / (2 * st.f0);
-    st.vHist.push(Math.abs(v));
-    if (st.vHist.length > 8) st.vHist.shift();
-    const recentSpeed = Math.max(...st.vHist);
+    const recentSpeed = recentPeak(now, v);
 
     const moving = dUp > th.up * 0.6 || dDown > th.down * 0.6;
     const sign = moving && Math.abs(v) > config.waveMinV ? Math.sign(v) : 0;
@@ -404,6 +403,15 @@
   function fire(kind, extra) {
     st.counts[kind] = (st.counts[kind] || 0) + 1;
     emit('gesture', { kind, t: performance.now(), ...extra });
+  }
+
+  // Peak |v| over the last 150 ms (time-based, so 60 / 120 / 144 Hz screens behave the same).
+  function recentPeak(now, v) {
+    st.vHist.push({ t: now, v: Math.abs(v) });
+    while (st.vHist.length > 1 && st.vHist[0].t < now - 150) st.vHist.shift();
+    let p = 0;
+    for (const h of st.vHist) p = Math.max(p, h.v);
+    return p;
   }
 
   // ---------------------------------------------------------------- stereo mode (left / right swipes)
@@ -462,12 +470,12 @@
       return 0;
     };
     const dL = dirOf(L, chanThresholds(st.sch.L)), dR = dirOf(R, chanThresholds(st.sch.R));
-    let c = null, need = config.confirmFrames;
+    let c = null, needMs = config.stereoConfirmMs;
     if (dL && dR) c = dL === dR ? (dL > 0 ? 'push' : 'pull') : (dL < 0 ? 'right' : 'left');
-    else if (dL || dR) { c = (dL || dR) > 0 ? 'push' : 'pull'; need = config.oneSidedFrames; }
+    else if (dL || dR) { c = (dL || dR) > 0 ? 'push' : 'pull'; needMs = config.oneSidedMs; }
     if (c && c === st.scand) st.scandFrames++;
-    else { st.scand = c; st.scandFrames = c ? 1 : 0; }
-    if (c && st.scandFrames >= need && now - st.lastFire > config.refractoryMs) {
+    else { st.scand = c; st.scandFrames = c ? 1 : 0; st.scandSince = now; }
+    if (c && st.scandFrames >= 2 && now - st.scandSince >= needMs && now - st.lastFire > config.refractoryMs) {
       st.lastFire = now;
       fire(c, {
         speed: Math.max(Math.abs(L.v), Math.abs(R.v)),
@@ -475,14 +483,18 @@
         simulated: false,
       });
     }
-    if (!c) {
+    // follow slow drift while nothing is happening (time constants in seconds, so the frame rate doesn't matter)
+    const dt = st.prevStereoT ? Math.min(0.1, (now - st.prevStereoT) / 1000) : 0;
+    st.prevStereoT = now;
+    if (!c && dt > 0) {
+      const aBase = 1 - Math.exp(-dt / 1.7), aWob = 1 - Math.exp(-dt / 3.3);
       for (const [key, r] of [['L', L], ['R', R]]) {
         const ch = st.sch[key];
         if (!ch.base) continue;
-        ch.base.up += (r.m.up - ch.base.up) * 0.01;
-        ch.base.down += (r.m.down - ch.base.down) * 0.01;
-        ch.wobble.up = Math.max(0.5, ch.wobble.up * 0.995 + Math.abs(r.dUp) * 1.25 * 0.005);
-        ch.wobble.down = Math.max(0.5, ch.wobble.down * 0.995 + Math.abs(r.dDown) * 1.25 * 0.005);
+        ch.base.up += (r.m.up - ch.base.up) * aBase;
+        ch.base.down += (r.m.down - ch.base.down) * aBase;
+        ch.wobble.up = Math.max(0.5, ch.wobble.up * (1 - aWob) + Math.abs(r.dUp) * 1.25 * aWob);
+        ch.wobble.down = Math.max(0.5, ch.wobble.down * (1 - aWob) + Math.abs(r.dDown) * 1.25 * aWob);
       }
     }
   }

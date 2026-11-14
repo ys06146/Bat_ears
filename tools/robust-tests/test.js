@@ -5,7 +5,7 @@ const R = require('../../web/robust.js');
 let seed = Number(process.env.SEED || 7);
 const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
 const gauss = () => { let u = 0; for (let i = 0; i < 6; i++) u += rnd(); return (u - 3) / Math.sqrt(0.5); };
-const FPS = 60, DT = 1000 / FPS;
+const FPS = Number(process.env.FPS || 60), DT = 1000 / FPS;
 
 // bump(t0, dur, peakDb): raised-cosine dB bump
 const bump = (t, t0, dur, peak) => (t < t0 || t > t0 + dur ? 0 : peak * 0.5 * (1 - Math.cos(2 * Math.PI * (t - t0) / dur)));
@@ -29,9 +29,9 @@ function makeFrames(secs, events, { jitter = 1, drift = 0 } = {}) {
 
 function run(name, frames, expect, opt) {
   const det = new R.RobustDetector(opt);
-  for (const f of frames.slice(0, 90)) det.learn(f); // 1.5 s calibration, hand away
+  for (const f of frames.slice(0, Math.round(1.5 * FPS))) det.learn(f); // 1.5 s calibration, hand away
   const got = [];
-  for (const f of frames.slice(90)) { const g = det.update(f); if (g) got.push(g); }
+  for (const f of frames.slice(Math.round(1.5 * FPS))) { const g = det.update(f); if (g) got.push(g); }
   const kinds = got.map((g) => g.kind);
   const pass = JSON.stringify(kinds) === JSON.stringify(expect);
   console.log(`${pass ? 'PASS' : 'FAIL'}  ${name.padEnd(44)} expected [${expect}] got [${kinds}]` +
