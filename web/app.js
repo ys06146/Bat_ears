@@ -113,7 +113,7 @@
   $('clear').onclick = () => BatRecorder.clear();
 
   // ---- guided data collection (settings remembered on this laptop)
-  const SETTINGS = ['who', 'dist', 'noise', 'perGesture', 'incWave', 'incTyping'];
+  const SETTINGS = ['who', 'dist', 'noise', 'perGesture', 'incWave', 'incSwipe', 'incTyping'];
   try {
     const saved = JSON.parse(localStorage.getItem('batears-settings') || '{}');
     SETTINGS.forEach((id) => {
@@ -143,9 +143,10 @@
     }
     const res = await BatCollect.start({
       who, dist: $('dist').value, noise: $('noise').value, perGesture: Number($('perGesture').value),
-      wave: $('incWave').checked, typing: $('incTyping').checked, freq: Number($('freq').value),
+      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: $('incTyping').checked, freq: Number($('freq').value),
     });
     if (res && BatEars.info) showSettings(BatEars.info);
+    $('stereo').checked = BatEars.stereo;
   }
   $('collect').onclick = startCollect;
   window.addEventListener('keydown', (e) => {
@@ -187,7 +188,7 @@
       if (params.get('undo') === '1') setTimeout(() => BatCollect.undo(), 6000); // exercise undo mid-session
       const res = await BatCollect.start({
         speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: 'quiet',
-        perGesture: Number(params.get('n') || 3), wave: false, typing: true, noDownload: true,
+        perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: true, noDownload: true,
       });
       const session = res && res.session;
       const lines = session ? BatRecorder.toCsv(session).split('\n') : [];
@@ -198,7 +199,9 @@
         byLabel[c[li]] = (byLabel[c[li]] || 0) + 1;
         if (c[ci]) cues[c[ci]] = (cues[c[ci]] || 0) + 1;
       });
-      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, gameRunning: ForcePush.state.running }));
+      const vli = head.indexOf('vL');
+      const stereoRows = lines.slice(1).filter((l) => l.split(',')[vli] !== '').length;
+      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, gameRunning: ForcePush.state.running }));
       document.title = 'DONE';
     })();
   }

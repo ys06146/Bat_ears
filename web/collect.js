@@ -1,7 +1,8 @@
 /* Guided trials: "3, 2, 1, 밀기!" with a beep. Every trial is labelled, scored live and saved automatically.
  *
  * window.BatCollect
- *   start(settings)  { who, dist, noise, perGesture, wave, typing, freq, speed, noDownload }
+ *   start(settings)  { who, dist, noise, perGesture, wave, swipe, typing, freq, speed, noDownload }
+ *                    swipe: add left/right trials (switches the engine to stereo mode)
  *                    who: short code (letters/numbers, e.g. seojin or p1); dist: 10/20/30 cm; noise: quiet/noisy;
  *                    perGesture: trials per gesture; wave: add wave trials; typing: 15 s typing block (false triggers)
  *                    speed < 1 shortens everything (self-tests)
@@ -15,11 +16,13 @@
 (function () {
   'use strict';
 
-  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기' };
+  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽' };
   const HOW = {
     push: '손바닥을 화면 쪽으로 빠르게 ⟶ (돌아올 땐 천천히)',
     pull: '손을 내 쪽으로 빠르게 ⟵ (돌아올 땐 천천히)',
     wave: '손바닥을 앞뒤로 빠르게 〰',
+    left: '화면 앞에서 손을 왼쪽으로 쓸기 ◀ (키보드 위 10~20cm)',
+    right: '화면 앞에서 손을 오른쪽으로 쓸기 ▶ (키보드 위 10~20cm)',
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -112,10 +115,11 @@
     });
   }
 
-  function plan(perGesture, wave) {
+  function plan(perGesture, wave, swipe) {
     const list = [];
     for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
     if (wave) for (let i = 0; i < Math.ceil(perGesture / 2); i++) list.push('wave');
+    if (swipe) for (let i = 0; i < perGesture; i++) list.push('left', 'right');
     for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
     return list;
   }
@@ -134,23 +138,25 @@
     const dist = Number(opt.dist) || 20;
     const noise = opt.noise === 'noisy' ? 'noisy' : 'quiet';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
-    const queue = plan(perGesture, !!opt.wave);
+    const queue = plan(perGesture, !!opt.wave, !!opt.swipe);
     const target = { push: perGesture, pull: perGesture };
     if (opt.wave) target.wave = Math.ceil(perGesture / 2);
+    if (opt.swipe) { target.left = perGesture; target.right = perGesture; }
     S = {
       opt, speed, who, dist, noise, queue, target, trials: [], win: null, aborted: false,
       typingFrom: 0, typingFalse: 0, startedAt: new Date().toISOString(), device: deviceId(),
     };
     show(true);
     feedback('');
-    ui.head.textContent = `${who} · ${dist}cm · ${noise === 'noisy' ? '시끄러움' : '조용함'} · 기기 ${S.device}`;
+    ui.head.textContent = `${who} · ${dist}cm · ${noise === 'noisy' ? '시끄러움' : '조용함'}${opt.swipe ? ' · 스테레오' : ''} · 기기 ${S.device}`;
     renderProgress();
     let result = null;
     const off = BatEars.on('gesture', onGesture);
     try {
       say('준비', '마이크를 켜는 중이에요. 손을 치워 주세요');
+      if (BatEars.running && BatEars.stereo !== !!opt.swipe) await BatEars.stop(); // switch mono <-> stereo
       if (!BatEars.running) {
-        const ok = await BatEars.start({ freq: opt.freq, raw: true });
+        const ok = await BatEars.start({ freq: opt.freq, raw: true, stereo: !!opt.swipe });
         if (!ok) { say('마이크를 열 수 없어요', '주소창 왼쪽에서 마이크를 허용하고 다시 눌러 주세요'); await sleep(3000); return null; }
       }
       say('준비', '기준값을 잡는 중이에요. 손을 치우고 가만히');
@@ -249,7 +255,7 @@
     const n = S.trials.length, hits = S.trials.filter((t) => t.result === 'hit').length;
     const meta = {
       session: S.session, who: S.who, dist: S.dist, noise: S.noise, device: S.device,
-      perGesture: S.opt.perGesture, wave: !!S.opt.wave, typing: !!S.opt.typing,
+      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, typing: !!S.opt.typing,
       startedAt: S.startedAt, finishedAt: new Date().toISOString(), aborted: S.aborted,
       live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
       engine: BatEars.info, detector: BatEars.config.detector, trials: S.trials,

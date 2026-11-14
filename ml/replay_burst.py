@@ -40,7 +40,8 @@ def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250):
 
 
 def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, wave_flips=3, lock_ms=150,
-                 onset_db=0.0, onset_ms=150, peak_min=0.0, reject_capped=True):
+                 onset_db=0.0, onset_ms=150, peak_min=0.0, reject_capped=True, wave_vmin=None,
+                 asym_db=None, cap_lock=True):
     """Return [(t, kind)] fired by the burst rule.
     Optional robust.js-style filters: onset_db (energy must have risen this much within onset_ms before the
     burst: slow body sway fails), peak_min (minimum peak energy before firing), reject_capped (a push/pull
@@ -58,14 +59,16 @@ def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, w
         if ev is None:
             if active and t >= lock_until and a - min(h for _, h in hist) >= onset_db:
                 ev = {'start': t, 'last': t, 'vmax': x['v'], 'vmin': x['v'], 'fired': False, 'waved': False, 'flips': 0,
-                      'sign': 0, 'peak': a}
+                      'sign': 0, 'peak': a, 'pu': x['up'], 'pd': x['dn']}
             else:
                 continue
         if active:
             ev['last'] = t
         ev['peak'] = max(ev['peak'], a)
+        ev['pu'], ev['pd'] = max(ev['pu'], x['up']), max(ev['pd'], x['dn'])
         ev['vmax'], ev['vmin'] = max(ev['vmax'], x['v']), min(ev['vmin'], x['v'])
-        s = 1 if x['v'] > v_min else -1 if x['v'] < -v_min else 0
+        wv = v_min if wave_vmin is None else wave_vmin  # speed that counts toward a wave's direction flips
+        s = 1 if x['v'] > wv else -1 if x['v'] < -wv else 0
         if s and ev['sign'] and s != ev['sign']:
             ev['flips'] += 1
         if s:
@@ -83,9 +86,61 @@ def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, w
         capped = t - ev['start'] > cap
         ended = (t - ev['last'] > gap_ms) or capped
         if ended:
-            if not ev['fired'] and strong and max(ev['vmax'], -ev['vmin']) >= v_min and not (reject_capped and capped):
-                out.append((t, 'push' if ev['vmax'] >= -ev['vmin'] else 'pull'))
-            ev, lock_until = None, t + lock_ms
+            if not ev['fired'] and strong and not (reject_capped and capped):
+                if max(ev['vmax'], -ev['vmin']) >= v_min:
+                    out.append((t, 'push' if ev['vmax'] >= -ev['vmin'] else 'pull'))
+                elif asym_db is not None and abs(ev['pu'] - ev['pd']) >= asym_db:
+                    # slow but clearly one-sided echo: the louder side tells the direction
+                    out.append((t, 'push' if ev['pu'] > ev['pd'] else 'pull'))
+            lock_until = t + lock_ms if (cap_lock or not capped) else t
+            ev = None
+    return out
+
+
+def peak_detect(fr, a_on=10.0, v_min=0.7, decide_ms=300, override=1.15, refr_ms=350, opp_lock_ms=700,
+                opp_ratio=1.3, wave_n=3, wave_ms=1000, settle_ms=60):
+    """Peak-picking alternative to bursts. Each local max of |v| (>= v_min, echo above a_on) is a candidate.
+    Wait decide_ms for a stronger opposite peak (wind-up before a pull, or a push after a slow return) and fire
+    the stronger one. After firing, ignore opposite peaks for opp_lock_ms unless opp_ratio x stronger (return
+    strokes are slower). wave_n alternating peaks within wave_ms = wave."""
+    vet = impulse_vetoes(fr)
+    out, pending, last_fire, peaks = [], None, None, []
+    cand = None  # running local max: (t, sign, mag)
+    for x, vt in zip(fr, vet):
+        t, v = x['t'], x['v']
+        loud = max(x['up'], x['dn']) > a_on and not vt
+        mag, sgn = abs(v), (1 if v > 0 else -1)
+        # track the current excursion's peak; confirm it once |v| has fallen or settle_ms has passed
+        if loud and mag >= v_min:
+            if cand is None or sgn != cand[1] or mag > cand[2]:
+                if cand is not None and sgn != cand[1]:
+                    peaks.append(cand)
+                cand = (t, sgn, mag) if (cand is None or sgn != cand[1] or mag > cand[2]) else cand
+        if cand is not None and (t - cand[0] >= settle_ms or not loud or mag < 0.8 * cand[2] or (mag >= v_min and sgn != cand[1])):
+            if (mag < 0.8 * cand[2]) or not loud or t - cand[0] >= settle_ms:
+                peaks.append(cand)
+                cand = None
+        # handle confirmed peaks in order
+        while peaks:
+            pt, ps, pm = peaks.pop(0)
+            if last_fire and ps != last_fire[1] and pt - last_fire[0] < opp_lock_ms and pm < opp_ratio * last_fire[2]:
+                continue  # return stroke
+            if last_fire and ps == last_fire[1] and pt - last_fire[0] < refr_ms:
+                continue
+            if pending is None:
+                pending = {'t': pt, 's': ps, 'm': pm, 'alts': [(pt, ps)]}
+            else:
+                if ps != pending['alts'][-1][1]:
+                    pending['alts'].append((pt, ps))
+                if ps != pending['s'] and pm > override * pending['m']:
+                    pending.update({'s': ps, 'm': pm})
+        if pending is not None:
+            alts = [a for a in pending['alts'] if t - a[0] <= wave_ms]
+            if len(alts) >= wave_n:
+                out.append((t, 'wave')); last_fire = (t, pending['s'], 9.9); pending = None
+            elif t - pending['t'] >= decide_ms:
+                kind = 'push' if pending['s'] > 0 else 'pull'
+                out.append((t, kind)); last_fire = (t, pending['s'], pending['m']); pending = None
     return out
 
 
