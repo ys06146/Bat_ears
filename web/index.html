@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bat Ears</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>🦇 Bat Ears <span>손짓으로 쓰는 포스 · 카메라 안 씀</span></h1>
+  <div id="status" class="chip">정지</div>
+</header>
+
+<main>
+  <section class="stage">
+    <canvas id="game"></canvas>
+    <div id="gesture">–</div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <div class="row">
+        <button id="start">▶ 시작</button>
+        <button id="stop" class="secondary" disabled>■ 정지</button>
+        <button id="check" class="secondary" disabled>대역 점검</button>
+      </div>
+      <label class="wide">주파수 <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"> <b id="freqLabel">20.0 kHz</b></label>
+      <label class="wide">음량 <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"></label>
+      <div class="row">
+        <label>민감도 <input id="th" type="number" value="6" min="2" max="20" step="0.5"> dB</label>
+        <label><input id="raw" type="checkbox" checked> 마이크 보정 3종 끄기</label>
+      </div>
+      <div id="settings" class="hint"></div>
+      <div id="warn"></div>
+    </div>
+
+    <div class="card stats">
+      <div class="stat">밀기<b id="nPush">0</b></div>
+      <div class="stat">당기기<b id="nPull">0</b></div>
+      <div class="stat">SNR<b id="snr">–</b></div>
+      <div class="stat">손 속도<b id="vel">–</b></div>
+    </div>
+
+    <div class="card">
+      <div class="bars">
+        <span>높아짐 (밀기)</span><div class="bar"><div id="barUp" class="up"></div></div><span id="vUp">–</span>
+        <span>낮아짐 (당기기)</span><div class="bar"><div id="barDown" class="down"></div></div><span id="vDown">–</span>
+      </div>
+      <canvas id="zoom" class="spec"></canvas>
+      <canvas id="wide" class="spec"></canvas>
+      <p class="hint">위: 톤 주변 ±600Hz (파랑 = 밀기, 주황 = 당기기). 아래: 10kHz 이상 전체.</p>
+    </div>
+
+    <details class="card" id="recBox">
+      <summary>데이터 기록 (분류·실험용)</summary>
+      <div class="row" id="labels"></div>
+      <div class="row">
+        <button id="rec" class="secondary">● 기록 시작</button>
+        <button id="save" class="secondary">CSV 저장</button>
+        <button id="clear" class="secondary">비우기</button>
+        <span id="recCount" class="hint">0줄</span>
+      </div>
+      <p class="hint">숫자키 1~5로 라벨 바꾸기 (1 가만히, 2 밀기, 3 당기기, 4 흔들기, 5 기타). 라벨을 먼저 고른 뒤 그 동작을 하세요.</p>
+    </details>
+
+    <details class="card">
+      <summary>사용법</summary>
+      <ol class="hint">
+        <li>노트북 내장 스피커·마이크 사용 (헤드폰·블루투스 X), 볼륨 50% 이상.</li>
+        <li>▶ 시작 → 마이크 허용 → 1.5초 동안 손 치우기 (기준값).</li>
+        <li>화면 앞 10~20cm에서 손바닥을 화면 쪽으로 밀면 운석이 날아가요. 당기면 별을 잡아요.</li>
+        <li>마이크 없이 게임만 볼 때는 키보드 ↑ (밀기), ↓ (당기기). 슬라이더를 누른 뒤엔 빈 곳을 한 번 클릭하세요.</li>
+      </ol>
+    </details>
+  </aside>
+</main>
+
+<script src="dsp.js"></script>
+<script src="recorder.js"></script>
+<script src="game.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

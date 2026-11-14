@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bat Ears 테스트 (alpha)</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; background: #0f1115; color: #e8e8e8; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .hint { color: #9aa3b2; font-size: 13px; margin: 4px 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+  button { font: inherit; padding: 10px 16px; border-radius: 8px; border: 0; background: #2d6cdf; color: #fff; cursor: pointer; }
+  button.secondary { background: #3a3f4b; }
+  button:disabled { opacity: .45; cursor: default; }
+  label { display: inline-flex; gap: 6px; align-items: center; }
+  input[type=range] { width: 220px; }
+  input[type=number] { width: 70px; font: inherit; }
+  #gesture { font-size: 44px; font-weight: 700; text-align: center; min-height: 64px; margin: 6px 0; }
+  #gesture.push { color: #4fc3f7; }
+  #gesture.pull { color: #ffb74d; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; }
+  .stat { background: #1a1d24; padding: 8px 10px; border-radius: 8px; font-size: 12px; color: #9aa3b2; }
+  .stat b { display: block; font-size: 20px; color: #e8e8e8; }
+  .bars { display: grid; grid-template-columns: 120px 1fr 56px; gap: 6px 8px; align-items: center; margin-top: 10px; font-size: 13px; }
+  .bar { height: 14px; background: #1a1d24; border-radius: 7px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; }
+  canvas { width: 100%; height: 170px; background: #151821; border-radius: 8px; display: block; margin-top: 8px; }
+  #warn { color: #ff8a80; min-height: 1.4em; margin: 4px 0; }
+  #settings { font-size: 13px; color: #c8cdd6; min-height: 1.4em; }
+  pre, textarea { width: 100%; white-space: pre-wrap; word-break: break-all; background: #151821; color: #c8cdd6; padding: 8px; border-radius: 8px; border: 0; font: 12px/1.4 ui-monospace, Consolas, monospace; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; }
+  ol { padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>🦇 Bat Ears 테스트: 초음파 도플러 손동작</h1>
+<p class="hint">스피커로 거의 안 들리는 고음을 내고, 손에 반사돼 돌아온 소리의 주파수 변화(도플러)로 밀기·당기기를 알아냅니다. 헤드폰·블루투스 말고 노트북 내장 스피커와 마이크로 하세요.</p>
+
+<div class="row">
+  <button id="start">▶ 시작</button>
+  <button id="stop" class="secondary" disabled>■ 정지</button>
+  <button id="check" class="secondary" disabled>대역 점검</button>
+  <button id="copy" class="secondary">결과 복사</button>
+</div>
+<div class="row">
+  <label>주파수 <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"> <b id="freqLabel">20.0 kHz</b></label>
+</div>
+<div class="row">
+  <label>음량 <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"></label>
+  <label>민감도 <input id="th" type="number" value="6" min="2" max="20" step="0.5"> dB</label>
+  <label><input id="raw" type="checkbox" checked> 마이크 보정 3종 끄기</label>
+</div>
+<div id="settings"></div>
+<div id="warn"></div>
+
+<div id="gesture">–</div>
+<div class="stats">
+  <div class="stat">밀기 (가까이)<b id="nPush">0</b></div>
+  <div class="stat">당기기 (멀리)<b id="nPull">0</b></div>
+  <div class="stat">반사 신호 SNR<b id="snr">–</b></div>
+  <div class="stat">손 속도 추정<b id="vel">–</b></div>
+  <div class="stat">마이크 샘플레이트<b id="sr">–</b></div>
+</div>
+<div class="bars">
+  <span>높아짐 (밀기)</span><div class="bar"><div id="barUp" style="background:#4fc3f7"></div></div><span id="vUp">–</span>
+  <span>낮아짐 (당기기)</span><div class="bar"><div id="barDown" style="background:#ffb74d"></div></div><span id="vDown">–</span>
+</div>
+<canvas id="zoom"></canvas>
+<p class="hint">위: 톤 주변 ±600Hz 확대 (파랑 = 밀기 구간, 주황 = 당기기 구간). 아래: 10kHz부터 최고 주파수까지 전체.</p>
+<canvas id="wide"></canvas>
+
+<details open>
+  <summary>손 테스트 방법</summary>
+  <ol class="hint">
+    <li>▶ 시작 → 주소창 아래 마이크 요청에서 <b>허용</b>.</li>
+    <li>처음 1.5초는 손을 치우고 가만히 (기준값 잡는 중).</li>
+    <li>"반사 신호 SNR"이 20dB 이상인지 확인. 낮으면 음량을 올리거나 주파수를 19kHz, 18kHz로 낮춰 보기.</li>
+    <li>손바닥을 화면 앞 10~20cm에서 화면 쪽으로 빠르게 <b>밀기 5번</b>, 몇 초 쉬고 <b>당기기 5번</b>.</li>
+    <li>손을 치우고 10초 동안 가만히 두면서 저절로 숫자가 오르지 않는지 확인.</li>
+    <li><b>대역 점검</b>을 한 번 누른 뒤 <b>결과 복사</b> → 디스코드에 붙여넣기.</li>
+  </ol>
+</details>
+<details>
+  <summary>측정 정보</summary>
+  <pre id="info">–</pre>
+  <textarea id="out" rows="4" placeholder="복사가 안 되면 여기에 결과가 나와요"></textarea>
+</details>
+
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const C = 343;                              // speed of sound, m/s
+const GUARD_HZ = 25;                        // skip the carrier's own skirt
+const BAND_HZ = 300;                        // Doppler window on each side
+const NOISE_NEAR = 600, NOISE_FAR = 1200;   // reference band for SNR
+
+const st = {
+  ctx: null, osc: null, gain: null, stream: null, analyser: null, data: null,
+  raf: 0, running: false, tone: false, busy: false, raw: true,
+  f0: 20000, binHz: 0, G: 0, W: 0,
+  calibUntil: 0, calib: null, base: null,
+  cand: null, candFrames: 0, lastFire: 0, clearAt: 0,
+  counts: { push: 0, pull: 0 }, agg: null, events: [],
+  startInfo: null, lastCheck: null, lastSummary: null,
+};
+
+const dbv = (a, k) => (k >= 0 && k < a.length && Number.isFinite(a[k])) ? a[k] : -200;
+const lin = (db) => Math.pow(10, db / 10);
+function median(vals) { if (!vals.length) return NaN; const s = Float64Array.from(vals).sort(); return s[s.length >> 1]; }
+function warn(msg, auto) { const w = $('warn'); w.textContent = msg; w.dataset.auto = auto ? '1' : ''; }
+function log(obj) { console.log('BATEARS ' + JSON.stringify(obj)); }
+
+function peakNear(a, k0, span) {
+  let kp = k0, best = -Infinity;
+  for (let k = k0 - span; k <= k0 + span; k++) { const v = dbv(a, k); if (v > best) { best = v; kp = k; } }
+  return kp;
+}
+
+function localNoise(a, kp, binHz) {
+  const near = Math.ceil(NOISE_NEAR / binHz), far = Math.ceil(NOISE_FAR / binHz), vals = [];
+  for (let k = kp - far; k <= kp - near; k++) { const v = dbv(a, k); if (v > -199) vals.push(v); }
+  for (let k = kp + near; k <= kp + far; k++) { const v = dbv(a, k); if (v > -199) vals.push(v); }
+  return median(vals);
+}
+
+// Carrier level, noise floor, and energy just above / below the carrier (relative to the carrier).
+function measure(a, f0) {
+  const { binHz, G, W } = st;
+  const kp = peakNear(a, Math.round(f0 / binHz), 3);
+  const carrier = dbv(a, kp), noise = localNoise(a, kp, binHz);
+  let upL = 0, dnL = 0, num = 0, den = 0;
+  for (let i = G; i <= W; i++) {
+    const pu = lin(dbv(a, kp + i)), pd = lin(dbv(a, kp - i));
+    upL += pu; dnL += pd; num += i * binHz * (pu - pd); den += pu + pd;
+  }
+  const cL = lin(carrier);
+  return {
+    kp, carrier, noise, snr: carrier - noise,
+    up: 10 * Math.log10(upL / cL), down: 10 * Math.log10(dnL / cL),
+    centroid: den > 0 ? num / den : 0,
+  };
+}
+
+async function start(opt = {}) {
+  if (st.running) return true;
+  const f0 = Number(opt.freq ?? $('freq').value);
+  const raw = opt.raw ?? $('raw').checked;
+  warn('');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    warn('이 브라우저에서는 마이크를 쓸 수 없어요. 크롬으로 열어 주세요.');
+    return false;
+  }
+  const ctx = new AudioContext({ latencyHint: 'interactive' });
+  try { await ctx.resume(); } catch (_) { /* ignore */ }
+  const audio = { echoCancellation: !raw, noiseSuppression: !raw, autoGainControl: !raw, channelCount: { ideal: 1 } };
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio, video: false });
+  } catch (e) {
+    warn('마이크를 열 수 없어요 (' + e.name + '). 주소창 왼쪽 아이콘 → 마이크 허용 후 새로고침해 주세요.');
+    log({ type: 'error', name: e.name, msg: e.message });
+    try { await ctx.close(); } catch (_) { /* ignore */ }
+    return false;
+  }
+  const track = stream.getAudioTracks()[0];
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = Number(params.get('fft') || 8192);
+  analyser.smoothingTimeConstant = 0.2;
+  ctx.createMediaStreamSource(stream).connect(analyser);
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = f0;
+  const gain = ctx.createGain();
+  gain.gain.value = 0;
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  const binHz = ctx.sampleRate / analyser.fftSize;
+  Object.assign(st, {
+    ctx, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount),
+    running: true, tone: false, busy: false, raw, f0, binHz,
+    G: Math.ceil(GUARD_HZ / binHz), W: Math.floor(BAND_HZ / binHz),
+    base: null, cand: null, candFrames: 0, lastFire: 0, clearAt: 0,
+    counts: { push: 0, pull: 0 }, events: [], lastSummary: null,
+    agg: { frames: 0, snrSum: 0, snrMin: Infinity, carrierSum: 0, noiseSum: 0, maxUp: -Infinity, maxDown: -Infinity },
+  });
+  const s = track.getSettings();
+  st.startInfo = {
+    f0, raw, ctxRate: ctx.sampleRate, micRate: s.sampleRate, ec: s.echoCancellation, ns: s.noiseSuppression,
+    agc: s.autoGainControl, ch: s.channelCount, fft: analyser.fftSize, binHz: +binHz.toFixed(2), mic: track.label,
+  };
+  showSettings(s, ctx.sampleRate);
+  $('info').textContent = JSON.stringify(st.startInfo, null, 2);
+  log({ type: 'start', ...st.startInfo });
+  $('nPush').textContent = '0';
+  $('nPull').textContent = '0';
+  $('start').disabled = true; $('stop').disabled = false; $('check').disabled = false;
+  if (opt.toneOn !== false) setTone(true);
+  st.raf = requestAnimationFrame(loop);
+  return true;
+}
+
+function showSettings(s, ctxRate) {
+  const mark = (v) => (v === false ? '✅ 꺼짐' : v === true ? '⚠️ 켜짐' : '? 모름');
+  $('settings').textContent = `마이크 ${s.sampleRate ? s.sampleRate + 'Hz' : '?'} · 처리 ${ctxRate}Hz · 에코 제거 ${mark(s.echoCancellation)} · 잡음 억제 ${mark(s.noiseSuppression)} · 자동 음량 ${mark(s.autoGainControl)}`;
+  $('sr').textContent = (s.sampleRate || ctxRate) + ' Hz';
+  if (s.sampleRate && s.sampleRate < 40000) {
+    warn(`마이크가 ${s.sampleRate}Hz라서 ${s.sampleRate / 2}Hz 위는 못 받아요. 다른 마이크를 고르거나 윈도우 소리 설정에서 마이크 형식을 48000Hz로 바꿔 주세요.`);
+  }
+}
+
+function setTone(on, f) {
+  const { ctx, gain, osc } = st;
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  if (f) { st.f0 = f; osc.frequency.setValueAtTime(f, t); }
+  gain.gain.cancelScheduledValues(t);
+  gain.gain.setTargetAtTime(on ? Number($('vol').value) : 0, t, 0.03);
+  st.tone = on;
+  if (on) { st.calibUntil = performance.now() + 1500; st.calib = { n: 0, up: 0, down: 0 }; st.base = null; }
+}
+
+async function stop() {
+  if (!st.running) return null;
+  setTone(false);
+  st.running = false;
+  cancelAnimationFrame(st.raf);
+  await sleep(150);
+  try { st.osc.stop(); } catch (_) { /* ignore */ }
+  st.stream.getTracks().forEach((t) => t.stop());
+  try { await st.ctx.close(); } catch (_) { /* ignore */ }
+  st.ctx = null;
+  const s = summarize();
+  st.lastSummary = s;
+  log({ type: 'stop', ...s });
+  $('start').disabled = false; $('stop').disabled = true; $('check').disabled = true;
+  return s;
+}
+
+function summarize() {
+  const a = st.agg;
+  const out = { push: st.counts.push, pull: st.counts.pull };
+  if (a && a.frames) {
+    Object.assign(out, {
+      frames: a.frames, snrAvg: +(a.snrSum / a.frames).toFixed(1), snrMin: +a.snrMin.toFixed(1),
+      carrierDb: +(a.carrierSum / a.frames).toFixed(1), noiseDb: +(a.noiseSum / a.frames).toFixed(1),
+      maxUp: +a.maxUp.toFixed(1), maxDown: +a.maxDown.toFixed(1),
+    });
+  }
+  return out;
+}
+
+function loop() {
+  if (!st.running) return;
+  st.raf = requestAnimationFrame(loop);
+  if (st.busy) return;
+  st.analyser.getFloatFrequencyData(st.data);
+  const m = measure(st.data, st.f0);
+  const now = performance.now();
+  let dUp = 0, dDown = 0;
+  if (st.tone) {
+    if (now < st.calibUntil) {
+      if (Number.isFinite(m.up) && Number.isFinite(m.down)) { st.calib.n++; st.calib.up += m.up; st.calib.down += m.down; }
+    } else {
+      if (!st.base && st.calib.n) st.base = { up: st.calib.up / st.calib.n, down: st.calib.down / st.calib.n };
+      if (st.base) {
+        dUp = m.up - st.base.up;
+        dDown = m.down - st.base.down;
+        detect(m, dUp, dDown, now);
+        if (Number.isFinite(m.snr)) {
+          const a = st.agg;
+          a.frames++; a.snrSum += m.snr; a.snrMin = Math.min(a.snrMin, m.snr);
+          a.carrierSum += m.carrier; a.noiseSum += m.noise;
+          a.maxUp = Math.max(a.maxUp, dUp); a.maxDown = Math.max(a.maxDown, dDown);
+        }
+      }
+    }
+  }
+  render(m, dUp, dDown, now);
+}
+
+// Push = hand moving toward the laptop = reflected tone shifts up. Pull = shifts down.
+function detect(m, dUp, dDown, now) {
+  if (!(m.snr >= 15)) { st.cand = null; st.candFrames = 0; return; }
+  const th = Number($('th').value) || 6, margin = 3;
+  let c = null;
+  if (dUp > th && dUp - dDown > margin) c = 'push';
+  else if (dDown > th && dDown - dUp > margin) c = 'pull';
+  if (c && c === st.cand) st.candFrames++;
+  else { st.cand = c; st.candFrames = c ? 1 : 0; }
+  if (c && st.candFrames >= 2 && now - st.lastFire > 450) {
+    st.lastFire = now;
+    st.counts[c]++;
+    $(c === 'push' ? 'nPush' : 'nPull').textContent = st.counts[c];
+    const g = $('gesture');
+    g.textContent = c === 'push' ? '밀기 ⟶' : '⟵ 당기기';
+    g.className = c;
+    st.clearAt = now + 700;
+    const ev = {
+      kind: c, t: +(now / 1000).toFixed(2), dUp: +dUp.toFixed(1), dDown: +dDown.toFixed(1),
+      snr: +m.snr.toFixed(0), v: +(m.centroid * C / (2 * st.f0)).toFixed(2),
+    };
+    st.events.push(ev);
+    log({ type: 'gesture', ...ev });
+  }
+  if (!c && st.base) {
+    st.base.up += (m.up - st.base.up) * 0.01;
+    st.base.down += (m.down - st.base.down) * 0.01;
+  }
+}
+
+function render(m, dUp, dDown, now) {
+  $('snr').textContent = Number.isFinite(m.snr) ? m.snr.toFixed(0) + ' dB' : '–';
+  const v = m.centroid * C / (2 * st.f0);
+  $('vel').textContent = (dUp > 3 || dDown > 3) ? (v >= 0 ? '+' : '') + v.toFixed(2) + ' m/s' : '–';
+  const pct = (d) => Math.max(0, Math.min(100, d * 5)) + '%';
+  $('barUp').style.width = pct(dUp);
+  $('barDown').style.width = pct(dDown);
+  $('vUp').textContent = st.base ? dUp.toFixed(1) : '…';
+  $('vDown').textContent = st.base ? dDown.toFixed(1) : '…';
+  const g = $('gesture');
+  if (st.tone && now < st.calibUntil) { g.textContent = '기준값 잡는 중… 손 치우기'; g.className = ''; }
+  else if (g.textContent.startsWith('기준값')) g.textContent = '–';
+  if (st.clearAt && now > st.clearAt) { g.textContent = '–'; g.className = ''; st.clearAt = 0; }
+  if (st.tone && now > st.calibUntil && !(m.snr >= 15)) {
+    warn('반사 신호가 약해요 (SNR 15dB 미만). 음량을 올리거나, 헤드폰을 빼거나, 주파수를 낮춰 보세요.', true);
+  } else if ($('warn').dataset.auto === '1') warn('');
+  drawZoom(m);
+  drawWide();
+}
+
+function fit(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr);
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  const g = c.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return [g, c.clientWidth, c.clientHeight];
+}
+
+function drawZoom(m) {
+  const [g, W, H] = fit($('zoom'));
+  const a = st.data, span = Math.ceil(600 / st.binHz), k1 = m.kp - span, k2 = m.kp + span;
+  const carrier = m.carrier > -199 ? m.carrier : -60;
+  const noise = Number.isFinite(m.noise) ? m.noise : -140;
+  const top = carrier + 5, bot = Math.min(noise - 15, top - 50);
+  const x = (k) => (k - k1) / (k2 - k1) * W;
+  const y = (db) => Math.max(0, Math.min(H, (top - db) / (top - bot) * H));
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = 'rgba(79,195,247,.16)';
+  g.fillRect(x(m.kp + st.G), 0, x(m.kp + st.W) - x(m.kp + st.G), H);
+  g.fillStyle = 'rgba(255,183,77,.16)';
+  g.fillRect(x(m.kp - st.W), 0, x(m.kp - st.G) - x(m.kp - st.W), H);
+  g.strokeStyle = '#7fe0c8';
+  g.lineWidth = 1.5;
+  g.beginPath();
+  for (let k = k1; k <= k2; k++) { const px = x(k), py = y(dbv(a, k)); if (k === k1) g.moveTo(px, py); else g.lineTo(px, py); }
+  g.stroke();
+  g.fillStyle = '#9aa3b2';
+  g.font = '12px system-ui';
+  g.fillText(`${(m.kp * st.binHz / 1000).toFixed(2)} kHz ±600 Hz`, 8, 16);
+}
+
+function drawWide() {
+  const [g, W, H] = fit($('wide'));
+  const a = st.data, nyq = st.ctx.sampleRate / 2;
+  const k1 = Math.floor(10000 / st.binHz), k2 = a.length - 1, top = -20, bot = -150;
+  const x = (k) => (k - k1) / (k2 - k1) * W;
+  const y = (db) => Math.max(0, Math.min(H, (top - db) / (top - bot) * H));
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = '#2a2f3a';
+  g.fillStyle = '#9aa3b2';
+  g.font = '11px system-ui';
+  g.lineWidth = 1;
+  for (let f = 10000; f <= nyq; f += 2000) {
+    const px = x(f / st.binHz);
+    g.beginPath(); g.moveTo(px, 0); g.lineTo(px, H); g.stroke();
+    g.fillText(f / 1000 + 'k', px + 2, H - 4);
+  }
+  g.strokeStyle = '#ff7043';
+  const fx = x(st.f0 / st.binHz);
+  g.beginPath(); g.moveTo(fx, 0); g.lineTo(fx, H); g.stroke();
+  g.strokeStyle = '#c8cdd6';
+  g.beginPath();
+  for (let k = k1; k <= k2; k++) { const px = x(k), py = y(dbv(a, k)); if (k === k1) g.moveTo(px, py); else g.lineTo(px, py); }
+  g.stroke();
+}
+
+async function grab(ms) {
+  const n = st.analyser.frequencyBinCount, acc = new Float64Array(n), tmp = new Float32Array(n);
+  let frames = 0;
+  const end = performance.now() + ms;
+  while (performance.now() < end) {
+    st.analyser.getFloatFrequencyData(tmp);
+    for (let k = 0; k < n; k++) acc[k] += lin(Number.isFinite(tmp[k]) ? tmp[k] : -200);
+    frames++;
+    await sleep(30);
+  }
+  const out = new Float32Array(n);
+  for (let k = 0; k < n; k++) out[k] = 10 * Math.log10(acc[k] / Math.max(1, frames));
+  return out;
+}
+
+// Short sweep: how strongly each frequency comes back through this speaker + mic + browser.
+async function bandCheck() {
+  if (!st.running || st.busy) return null;
+  st.busy = true;
+  $('check').disabled = true;
+  $('gesture').textContent = '대역 점검 중…';
+  $('gesture').className = '';
+  const keepF = st.f0, keepTone = st.tone, nyq = st.ctx.sampleRate / 2;
+  setTone(false);
+  await sleep(250);
+  const steps = [15000, 16000, 17000, 18000, 19000, 19500, 20000, 20500, 21000, 21500, 22000, 23000].filter((f) => f <= nyq - 500);
+  const sweep = [];
+  for (const f of steps) {
+    setTone(true, f);
+    await sleep(220);
+    const spec = await grab(260);
+    setTone(false);
+    await sleep(60);
+    const kp = peakNear(spec, Math.round(f / st.binHz), 3);
+    const peak = dbv(spec, kp), noise = localNoise(spec, kp, st.binHz);
+    sweep.push({ f, snr: +(peak - noise).toFixed(1), peak: +peak.toFixed(1) });
+  }
+  setTone(keepTone, keepF);
+  st.busy = false;
+  $('check').disabled = false;
+  $('gesture').textContent = '–';
+  st.lastCheck = sweep;
+  log({ type: 'bandcheck', sweep });
+  $('info').textContent = JSON.stringify(st.startInfo, null, 2) + '\n\n대역 점검 (주파수: SNR)\n' +
+    sweep.map((s) => `${(s.f / 1000).toFixed(1)}kHz: ${s.snr} dB`).join('\n');
+  return sweep;
+}
+
+function report() {
+  return {
+    page: 'batears-alpha-v1', at: new Date().toISOString(), info: st.startInfo,
+    summary: st.running ? summarize() : (st.lastSummary || summarize()),
+    bandCheck: st.lastCheck, events: st.events.slice(-12),
+    ua: navigator.userAgent.replace(/^Mozilla\/5\.0 /, ''),
+  };
+}
+
+$('start').onclick = () => start();
+$('stop').onclick = () => stop();
+$('check').onclick = () => bandCheck();
+$('copy').onclick = async () => {
+  const text = JSON.stringify(report());
+  $('out').value = text;
+  try {
+    await navigator.clipboard.writeText(text);
+    $('copy').textContent = '복사됨 ✓';
+    setTimeout(() => { $('copy').textContent = '결과 복사'; }, 1500);
+  } catch (_) {
+    $('out').closest('details').open = true;
+    $('out').select();
+  }
+};
+$('freq').oninput = () => {
+  const f = Number($('freq').value);
+  $('freqLabel').textContent = (f / 1000).toFixed(1) + ' kHz';
+  if (st.running && !st.busy) setTone(st.tone, f);
+};
+$('vol').oninput = () => {
+  if (st.ctx && st.tone) st.gain.gain.setTargetAtTime(Number($('vol').value), st.ctx.currentTime, 0.03);
+};
+$('raw').onchange = () => { if (st.running) warn('보정 설정은 정지 후 다시 시작해야 적용돼요.'); };
+
+// Unattended self-test: ?auto=1&secs=8&sweep=1
+async function auto() {
+  const f0 = Number(params.get('freq') || 20000);
+  $('freq').value = f0;
+  $('freqLabel').textContent = (f0 / 1000).toFixed(1) + ' kHz';
+  const ok = await start({ freq: f0, raw: params.get('raw') !== '0' });
+  if (!ok) { log({ type: 'auto', ok: false }); document.title = 'DONE'; return; }
+  await sleep(Number(params.get('secs') || 8) * 1000);
+  if (params.get('sweep') === '1') await bandCheck();
+  const s = await stop();
+  log({ type: 'auto', ok: true, summary: s, events: st.events, check: st.lastCheck });
+  document.title = 'DONE';
+}
+if (params.get('auto') === '1') auto();
+</script>
+</body>
+</html>
