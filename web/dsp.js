@@ -33,7 +33,9 @@
     //   showed people wind up before a pull and swing back after a push; first-crossing rules got 15% of
     //   prompts right, this rule 80% (ml/replay_burst.py). 'robust' = RobustDetector's own decisions; 'v2' = old rules.
     detector: 'burst',
-    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150 },
+    // rejectCapped: a burst that runs into maxMs without an early fire is body motion, not a gesture
+    //   (robust.js's long-event idea; on real data it cut false triggers 4.5 -> 3.0 per minute, hits unchanged)
+    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150, rejectCapped: true },
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -443,8 +445,11 @@
     else if (!ev.fired && v > B.vFire) { kinds.push('push'); ev.fired = true; }
     else if (!ev.fired && v < -B.vFire) { kinds.push('pull'); ev.fired = true; }
     const maxMs = ev.flips >= 2 ? 3000 : B.maxMs; // a wave keeps going; don't chop it into extra pushes/pulls
-    if (now - ev.last > B.gapMs || now - ev.start > maxMs) {
-      if (!ev.fired && Math.max(ev.vmax, -ev.vmin) >= B.vMin) kinds.push(ev.vmax >= -ev.vmin ? 'push' : 'pull');
+    const capped = now - ev.start > maxMs;
+    if (now - ev.last > B.gapMs || capped) {
+      if (!ev.fired && !(B.rejectCapped && capped) && Math.max(ev.vmax, -ev.vmin) >= B.vMin) {
+        kinds.push(ev.vmax >= -ev.vmin ? 'push' : 'pull');
+      }
       st.burst = null;
       st.burstLock = now + B.lockMs;
     }
