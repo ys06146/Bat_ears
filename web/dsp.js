@@ -29,6 +29,7 @@
   const SUB_EDGES = [25, 50, 80, 120, 170, 230, 300];
 
   const config = {
+    detector: 'robust',  // 'robust' = bravo's RobustDetector (web/robust.js); 'v2' = the simpler rules below
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -64,6 +65,15 @@
     // stereo mode (left/right swipes): one tone per speaker, analysed separately
     stereo: false, oscL: null, oscR: null, gainL: null, gainR: null, sch: null, lastR: null, scand: null, scandFrames: 0,
   };
+
+  // Mono detector from robust.js (adaptive floor, impulse veto, hysteresis, return-stroke lock, wave).
+  function makeRobust() {
+    if (config.detector !== 'robust' || !window.BatRobust) return null;
+    return new window.BatRobust.RobustDetector({
+      onDb: config.threshold, margin: config.margin, minSnr: config.minSnr,
+      confirm: config.confirmFrames, refractoryMs: config.refractoryMs,
+    });
+  }
 
   function newChan(f) { return { f, ups: [], downs: [], noises: [], base: null, wobble: { up: 1, down: 1 }, noiseBase: null }; }
   function chanThresholds(ch) {
@@ -165,6 +175,7 @@
       st.noiseBase = null;
       st.base = null;
       st.sch = { L: newChan(config.stereoFreqs[0]), R: newChan(config.stereoFreqs[1]) };
+      st.robust = makeRobust(); // fresh floors for every new calibration
       st.wasCalibrating = true;
       emit('state', snapshot());
     }
@@ -284,6 +295,7 @@
         if (now >= st.calibFrom && Number.isFinite(m.up) && Number.isFinite(m.down)) {
           st.calib.ups.push(m.up); st.calib.downs.push(m.down);
           if (Number.isFinite(m.noise)) st.calib.noises.push(m.noise);
+          if (st.robust) st.robust.learn({ up: m.up, down: m.down, noise: m.noise });
         }
       } else {
         if (!st.base && st.calib && st.calib.ups.length) {
@@ -293,13 +305,25 @@
           st.wobble = { up: Math.max(0.5, mad(st.calib.ups, st.base.up)), down: Math.max(0.5, mad(st.calib.downs, st.base.down)) };
           st.noiseBase = st.calib.noises.length ? median(st.calib.noises) : null;
         }
-        if (st.base) {
+        if (st.robust && st.robust.fUp.ready) {
+          const v = m.centroid * C / (2 * st.f0);
+          st.vHist.push(Math.abs(v));
+          if (st.vHist.length > 8) st.vHist.shift();
+          st.robust.o.onDb = config.threshold; // follow the sensitivity control
+          const ex = st.robust.excess(m);
+          dUp = ex.up;
+          dDown = ex.dn;
+          const g = st.robust.update({ t: now, up: m.up, down: m.down, noise: m.noise, snr: m.snr, v });
+          if (g) fire(g.kind, { speed: Math.max(...st.vHist), strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
+        } else if (st.base) {
           // Broadband noise (claps, crowd) lifts the far noise floor as much as the sidebands; a hand echo
           // only lifts the sidebands. Subtract the noise-floor rise so loud rooms don't look like gestures.
           const rise = st.noiseBase != null && Number.isFinite(m.noise) ? Math.max(0, m.noise - st.noiseBase) : 0;
           dUp = m.up - st.base.up - rise;
           dDown = m.down - st.base.down - rise;
           detect(m, dUp, dDown, now);
+        }
+        if (st.base || (st.robust && st.robust.fUp.ready)) {
           if (Number.isFinite(m.snr)) {
             const a = st.agg;
             a.frames++; a.snrSum += m.snr; a.snrMin = Math.min(a.snrMin, m.snr);
@@ -321,6 +345,10 @@
   }
 
   function thresholds() {
+    if (st.robust && st.robust.fUp.ready) {
+      const o = st.robust.o;
+      return { up: st.robust.fUp.rise(o.kOn, o.onDb), down: st.robust.fDn.rise(o.kOn, o.onDb) };
+    }
     return {
       up: Math.max(config.threshold, config.autoK * st.wobble.up),
       down: Math.max(config.threshold, config.autoK * st.wobble.down),
