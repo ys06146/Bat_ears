@@ -6,7 +6,7 @@
 <title>Bat Ears</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="style.css?v=20261114163511">
+<link rel="stylesheet" href="style.css?v=20261114163558">
 </head>
 <body>
 <header>
@@ -69,7 +69,7 @@
       <div class="row"><b>🎯 데이터 수집</b><span class="hint">3·2·1 신호에 손짓 → 바로 ✅/❌ 표시 → 자동 저장</span></div>
       <div class="row">
         <label>이름 <input id="who" type="text" maxlength="16" size="8" placeholder="seojin"></label>
-        <label>거리 <select id="dist"><option>10</option><option selected>20</option><option>30</option></select>cm</label>
+        <label>거리 <input id="dist" type="number" min="1" max="150" step="1" value="20" style="width:64px">cm</label>
         <label>소음 <select id="noise"><option value="auto" selected>자동 측정</option><option value="quiet">조용</option><option value="noisy">시끄러움</option></select></label>
       </div>
       <div class="row">
@@ -157,14 +157,14 @@
   </aside>
 </main>
 
-<script src="robust.js?v=20261114163511"></script>
-<script src="dsp.js?v=20261114163511"></script>
-<script src="recorder.js?v=20261114163511"></script>
-<script src="game.js?v=20261114163511"></script>
-<script src="collect.js?v=20261114163511"></script>
-<script src="sonar.js?v=20261114163511"></script>
-<script src="speed.js?v=20261114163511"></script>
-<script src="lr.js?v=20261114163511"></script>
-<script src="app.js?v=20261114163511"></script>
+<script src="robust.js?v=20261114163558"></script>
+<script src="dsp.js?v=20261114163558"></script>
+<script src="recorder.js?v=20261114163558"></script>
+<script src="game.js?v=20261114163558"></script>
+<script src="collect.js?v=20261114163558"></script>
+<script src="sonar.js?v=20261114163558"></script>
+<script src="speed.js?v=20261114163558"></script>
+<script src="lr.js?v=20261114163558"></script>
+<script src="app.js?v=20261114163558"></script>
 </body>
 </html>
