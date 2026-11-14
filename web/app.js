@@ -8,7 +8,23 @@
 
   function warn(msg, auto) { const w = $('warn'); w.textContent = msg; w.dataset.auto = auto ? '1' : ''; }
 
+  // ---- start screen: covered webcam + calibration guide
+  let calStart = 0, newScoreAt = 0;
+  function showIntro(which) { // 'steps' | 'cal' | null
+    $('intro').hidden = !which;
+    $('introSteps').hidden = which !== 'steps';
+    $('introCal').hidden = which !== 'cal';
+  }
+
   function setStatus(s) {
+    if (s.running && s.calibrating) {
+      if (!calStart) calStart = performance.now();
+      showIntro('cal');
+    } else {
+      calStart = 0;
+      if (s.running) showIntro(null);
+    }
+    ForcePush.setReady(!(s.running && (s.calibrating || s.busy)));
     const chip = $('status');
     chip.className = 'chip' + (s.running ? (s.calibrating ? ' cal' : ' on') : '');
     chip.textContent = !s.running ? '정지' : s.busy ? '대역 점검 중' : s.calibrating ? '기준값 잡는 중 · 손 치우기' : '듣는 중';
@@ -47,6 +63,10 @@
     if (f.tone && !f.calibrating && !(f.snr >= BatEars.config.minSnr)) {
       warn('반사 신호가 약해요 (SNR 15dB 미만). 음량을 올리거나, 헤드폰을 빼거나, 주파수를 낮춰 보세요.', true);
     } else if ($('warn').dataset.auto === '1') warn('');
+    if (calStart) {
+      const total = (BatEars.config.settleMs || 0) + (BatEars.config.calibMs || 1500);
+      $('calBar').style.width = Math.min(98, (performance.now() - calStart) / total * 100) + '%';
+    }
     if (clearAt && performance.now() > clearAt) { $('gesture').textContent = '–'; $('gesture').className = ''; clearAt = 0; }
     BatEars.drawZoom($('zoom'));
     BatEars.drawWide($('wide'));
@@ -57,6 +77,7 @@
     warn('');
     const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked });
     if (ok) showSettings(BatEars.info);
+    else showIntro(null);
     return ok;
   }
   $('start').onclick = startEngine;
@@ -95,9 +116,32 @@
   $('save').onclick = () => BatRecorder.download();
   $('clear').onclick = () => BatRecorder.clear();
 
-  // ---- game
+  // ---- game, scoreboard
   ForcePush.init($('game'));
   setStatus({ running: false });
+  showIntro(params.get('auto') === '1' ? null : 'steps');
+  $('introStart').onclick = () => { showIntro('cal'); startEngine(); };
+  $('introKeys').onclick = () => { showIntro(null); document.activeElement.blur(); };
+
+  function renderScores() {
+    const list = ForcePush.scores();
+    const ol = $('scores');
+    ol.innerHTML = '';
+    if (!list.length) { ol.innerHTML = '<li>아직 기록이 없어요</li>'; return; }
+    list.forEach((e) => {
+      const li = document.createElement('li');
+      if (e.t === newScoreAt) li.className = 'new';
+      const d = new Date(e.t);
+      li.innerHTML = `<b>${e.score}점</b><span>콤보 ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
+      ol.appendChild(li);
+    });
+  }
+  ForcePush.onEnd((r) => { newScoreAt = r.t; renderScores(); });
+  renderScores();
+  const renderMute = () => { $('mute').textContent = ForcePush.muted ? '🔇 효과음' : '🔊 효과음'; };
+  $('mute').onclick = () => { ForcePush.setMuted(!ForcePush.muted); renderMute(); $('mute').blur(); };
+  window.addEventListener('keydown', (e) => { if (e.key === 'm' || e.key === 'M') setTimeout(renderMute, 0); });
+  $('resetScores').onclick = () => { try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ } renderScores(); };
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
   if (params.get('auto') === '1') {

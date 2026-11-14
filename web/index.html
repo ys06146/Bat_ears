@@ -16,6 +16,30 @@
   <section class="stage">
     <canvas id="game"></canvas>
     <div id="gesture">–</div>
+
+    <div id="intro" class="overlay">
+      <div class="panel" id="introSteps">
+        <h2>🦇 손짓으로 운석을 밀어내요</h2>
+        <p class="lead">카메라 없이, 노트북 스피커가 내는 들리지 않는 20kHz 소리의 메아리로 손을 느껴요.</p>
+        <ol class="steps">
+          <li><b>📷 웹캠을 가려 주세요.</b> 포스트잇이나 손가락으로요. 카메라는 전혀 쓰지 않아요.
+            <label class="check"><input id="camCovered" type="checkbox"> 가렸어요</label></li>
+          <li><b>🔊 내장 스피커·마이크</b>를 쓰고 볼륨은 50% 이상. 헤드폰·블루투스는 빼 주세요.</li>
+          <li><b>✋ 시작을 누르면</b> 마이크를 허용하고, 1.5초 동안 손을 화면에서 치워 주세요. 주변 소리 기준값을 잡아요.</li>
+          <li><b>🎮 화면 앞 10~20cm</b>에서 손바닥을 밀면 운석 💥, 당기면 별 ⭐, 흔들면 SHOCKWAVE 〰 (한 판에 1번).</li>
+        </ol>
+        <div class="row center">
+          <button id="introStart">▶ 마이크 켜고 시작</button>
+          <button id="introKeys" class="secondary">⌨ 키보드로만 해보기</button>
+        </div>
+        <p class="hint center">키보드: ↑ 밀기 · ↓ 당기기 · W 흔들기 · M 소리 끄기</p>
+      </div>
+      <div class="panel" id="introCal" hidden>
+        <h2>✋ 손을 치워 주세요</h2>
+        <p class="lead">조용히 기준값을 잡는 중이에요…</p>
+        <div class="progress"><div id="calBar"></div></div>
+      </div>
+    </div>
   </section>
 
   <aside>
@@ -52,6 +76,17 @@
       <p class="hint">위: 톤 주변 ±600Hz (파랑 = 밀기, 주황 = 당기기). 아래: 10kHz 이상 전체.</p>
     </div>
 
+    <div class="card">
+      <div class="row between">
+        <b>🏆 순위표</b>
+        <span class="row">
+          <button id="mute" class="secondary small">🔊 효과음</button>
+          <button id="resetScores" class="secondary small">지우기</button>
+        </span>
+      </div>
+      <ol id="scores" class="scores"></ol>
+    </div>
+
     <details class="card" id="recBox">
       <summary>데이터 기록 (분류·실험용)</summary>
       <div class="row" id="labels"></div>
@@ -69,8 +104,8 @@
       <ol class="hint">
         <li>노트북 내장 스피커·마이크 사용 (헤드폰·블루투스 X), 볼륨 50% 이상.</li>
         <li>▶ 시작 → 마이크 허용 → 1.5초 동안 손 치우기 (기준값).</li>
-        <li>화면 앞 10~20cm에서 손바닥을 화면 쪽으로 밀면 운석이 날아가요. 당기면 별을 잡아요.</li>
-        <li>마이크 없이 게임만 볼 때는 키보드 ↑ (밀기), ↓ (당기기). 슬라이더를 누른 뒤엔 빈 곳을 한 번 클릭하세요.</li>
+        <li>화면 앞 10~20cm에서 손바닥을 화면 쪽으로 밀면 운석이 날아가요. 당기면 별을 잡아요. 빨리 연달아 맞히면 콤보 배수가 붙어요.</li>
+        <li>마이크 없이 게임만 볼 때는 키보드 ↑ (밀기), ↓ (당기기), W (흔들기), M (효과음 끄기). 슬라이더를 누른 뒤엔 빈 곳을 한 번 클릭하세요.</li>
       </ol>
     </details>
   </aside>
