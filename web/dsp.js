@@ -42,6 +42,11 @@
     waveWindowMs: 1000,
     holdFlipMs: 350,     // two flips this close together = fast back-and-forth, so hold push/pull
     stereoFreqs: [19000, 20500], // stereo mode: left speaker tone, right speaker tone (Hz)
+    // stereo decisions: 'velocity' (default) = per burst, compare sideways speed (vR - vL)/2 with forward
+    // speed (vL + vR)/2, like the mono burst rule; 'energy' = the older threshold rule
+    stereoDetector: 'velocity',
+    stereoBurst: { latMin: 0.5, latFire: 1.0, dom: 1.3 },
+    swapLR: false,       // flip left/right if a laptop's channels are wired the other way
     stereoConfirmMs: 30, // stereo: a candidate must last this long (both tones agree)...
     oneSidedMs: 80,      // ...or this long when only one tone moved (lets the other side catch up)
     waveMinV: 0.12,      // m/s; slower wiggles don't count toward a wave
@@ -72,7 +77,7 @@
     // stereo mode (left/right swipes): one tone per speaker, analysed separately
     stereo: false, oscL: null, oscR: null, gainL: null, gainR: null, sch: null, lastR: null, scand: null, scandFrames: 0,
     scandSince: 0, prevStereoT: 0,
-    burst: null, burstLock: 0,
+    burst: null, burstLock: 0, sburst: null, sburstLock: 0,
   };
 
   // Mono detector from robust.js (adaptive floor, impulse veto, hysteresis, return-stroke lock, wave).
@@ -195,6 +200,8 @@
       st.robust = makeRobust(); // fresh floors for every new calibration
       st.burst = null;
       st.burstLock = 0;
+      st.sburst = null;
+      st.sburstLock = 0;
       st.wasCalibrating = true;
       emit('state', snapshot());
     }
@@ -506,9 +513,15 @@
       }
       res[key] = { m, dUp, dDown, v: m.centroid * C / (2 * ch.f) };
     }
-    if (st.tone && !calibrating && st.sch.L.base && st.sch.R.base) detectStereo(res, now);
+    const ready = st.tone && !calibrating && st.sch.L.base && st.sch.R.base;
+    if (ready) detectStereo(res, now); // energy rule (fires only in 'energy' mode) + baseline drift
+    if (ready && config.stereoDetector === 'velocity' && res.L.m.snr >= config.minSnr && res.R.m.snr >= config.minSnr) {
+      const b = stereoBurst(now, res.L, res.R);
+      if (b) fire(b.kind, { speed: b.speed, strength: Math.max(res.L.dUp, res.L.dDown, res.R.dUp, res.R.dDown), simulated: false });
+    }
     if (st.wasCalibrating && !calibrating) { st.wasCalibrating = false; emit('state', snapshot(now)); }
     const L = res.L, R = res.R, thL = chanThresholds(st.sch.L);
+    const sw = config.swapLR ? -1 : 1;
     st.last = { ...L.m, dUp: L.dUp, dDown: L.dDown, v: L.v };
     st.lastR = { ...R.m, dUp: R.dUp, dDown: R.dDown, v: R.v };
     emit('frame', {
@@ -516,8 +529,45 @@
       up: L.m.up, down: L.m.down, v: (L.v + R.v) / 2, snr: Math.min(L.m.snr, R.m.snr),
       carrier: L.m.carrier, noise: L.m.noise, bandsUp: L.m.bandsUp, bandsDown: L.m.bandsDown,
       thUp: thL.up, thDown: thL.down, ambient: ambientLevel(st.data),
-      stereo: { dUpL: L.dUp, dDownL: L.dDown, dUpR: R.dUp, dDownR: R.dDown, vL: L.v, vR: R.v },
+      stereo: {
+        dUpL: L.dUp, dDownL: L.dDown, dUpR: R.dUp, dDownR: R.dDown, vL: L.v, vR: R.v,
+        lat: sw * (R.v - L.v) / 2, dep: (L.v + R.v) / 2, snrL: L.m.snr, snrR: R.m.snr,
+      },
     });
+  }
+
+  // Velocity burst for stereo: same structure as burstStep, deciding between sideways and forward motion.
+  function stereoBurst(now, L, R) {
+    const B = config.burst, S = config.stereoBurst;
+    const lat = (config.swapLR ? -1 : 1) * (R.v - L.v) / 2; // + = hand moving right
+    const dep = (L.v + R.v) / 2;                              // + = toward the laptop
+    const active = Math.max(L.dUp, L.dDown, R.dUp, R.dDown) > B.aOn;
+    let ev = st.sburst;
+    if (!ev) {
+      if (!active || now < st.sburstLock) return null;
+      ev = st.sburst = { start: now, last: now, latMax: lat, latMin: lat, depMax: dep, depMin: dep, fired: false };
+    }
+    if (active) ev.last = now;
+    ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
+    ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
+    let kind = null;
+    if (!ev.fired) {
+      if (Math.abs(lat) > S.latFire && Math.abs(lat) > S.dom * Math.abs(dep)) kind = lat > 0 ? 'right' : 'left';
+      else if (Math.abs(dep) > B.vFire && Math.abs(dep) > S.dom * Math.abs(lat)) kind = dep > 0 ? 'push' : 'pull';
+      if (kind) ev.fired = true;
+    }
+    const capped = now - ev.start > B.maxMs;
+    if (now - ev.last > B.gapMs || capped) {
+      if (!ev.fired && !(B.rejectCapped && capped)) {
+        const latPk = ev.latMax >= -ev.latMin ? ev.latMax : ev.latMin;
+        const depPk = ev.depMax >= -ev.depMin ? ev.depMax : ev.depMin;
+        if (Math.abs(latPk) >= S.latMin && Math.abs(latPk) >= Math.abs(depPk)) kind = latPk > 0 ? 'right' : 'left';
+        else if (Math.abs(depPk) >= B.vMin) kind = depPk > 0 ? 'push' : 'pull';
+      }
+      st.sburst = null;
+      st.sburstLock = now + B.lockMs;
+    }
+    return kind ? { kind, speed: Math.max(Math.abs(ev.latMax), Math.abs(ev.latMin), Math.abs(ev.depMax), Math.abs(ev.depMin)) } : null;
   }
 
   function detectStereo(res, now) {
@@ -532,9 +582,10 @@
     let c = null, needMs = config.stereoConfirmMs;
     if (dL && dR) c = dL === dR ? (dL > 0 ? 'push' : 'pull') : (dL < 0 ? 'right' : 'left');
     else if (dL || dR) { c = (dL || dR) > 0 ? 'push' : 'pull'; needMs = config.oneSidedMs; }
+    if (c && config.swapLR && (c === 'left' || c === 'right')) c = c === 'left' ? 'right' : 'left';
     if (c && c === st.scand) st.scandFrames++;
     else { st.scand = c; st.scandFrames = c ? 1 : 0; st.scandSince = now; }
-    if (c && st.scandFrames >= 2 && now - st.scandSince >= needMs && now - st.lastFire > config.refractoryMs) {
+    if (config.stereoDetector === 'energy' && c && st.scandFrames >= 2 && now - st.scandSince >= needMs && now - st.lastFire > config.refractoryMs) {
       st.lastFire = now;
       fire(c, {
         speed: Math.max(Math.abs(L.v), Math.abs(R.v)),
@@ -701,6 +752,16 @@
       const t = st.ctx.currentTime;
       if (st.stereo) { ramp(st.gainL.gain, config.volume, t); ramp(st.gainR.gain, config.volume, t); }
       else ramp(st.gain.gain, config.volume, t);
+    },
+    // change the stereo tone pair (e.g. when a laptop's speakers are weak at 20.5 kHz); recalibrates
+    setStereoFreqs(fl, fr) {
+      config.stereoFreqs = [Number(fl), Number(fr)];
+      if (st.ctx && st.oscL) {
+        const t = st.ctx.currentTime;
+        st.oscL.frequency.setValueAtTime(config.stereoFreqs[0], t);
+        st.oscR.frequency.setValueAtTime(config.stereoFreqs[1], t);
+        if (st.stereo && st.tone) setTone(true);
+      }
     },
     get running() { return st.running; },
     get stereo() { return st.stereo; },

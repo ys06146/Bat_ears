@@ -196,3 +196,13 @@ body.present .panel { max-width: 760px; font-size: 18px; }
 body.present .panel h2 { font-size: 32px; }
 
 body.speed-on #gesture { display: none; }
+
+/* ---- left/right test */
+.lrtest { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 8px; padding: 56px 16px 12px; background: #04060b; border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); }
+.lrtest[hidden] { display: none; }
+.lr-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.lr-controls select { font: inherit; }
+.lr-canvas { flex: 1; width: 100%; min-height: 260px; display: block; border-radius: 8px; }
+.lr-hint { margin: 0; }
+body.lr-on #gesture { display: none; }
+body.present .lrtest { border-radius: 0; border: 0; padding-top: 72px; }

@@ -20,12 +20,14 @@
       <button id="tabGame" class="tab sel">🎮 게임</button>
       <button id="tabSonar" class="tab">🛰️ 소나 뷰</button>
       <button id="tabSpeed" class="tab">🎯 스피드건</button>
+      <button id="tabLR" class="tab">↔ 좌우 테스트</button>
       <button id="presentBtn" class="tab">⛶ 발표 모드</button>
       <button id="camBtn" class="tab" hidden>📷 실제 손과 비교</button>
     </div>
     <canvas id="game"></canvas>
     <canvas id="sonar" hidden></canvas>
     <div id="speed" class="speedgun" hidden></div>
+    <div id="lr" class="lrtest" hidden></div>
     <form id="nameBox" class="namebox" hidden>
       <b id="nameTitle">🏆 순위표에 올랐어요!</b>
       <div class="row center">
@@ -162,6 +164,7 @@
 <script src="collect.js"></script>
 <script src="sonar.js"></script>
 <script src="speed.js"></script>
+<script src="lr.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

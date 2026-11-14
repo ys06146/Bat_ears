@@ -182,7 +182,7 @@
 
   function onGesture(e) {
     if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
-    if (document.body.classList.contains('sonar-on') || document.body.classList.contains('speed-on')) return; // another view is showing
+    if (['sonar-on', 'speed-on', 'lr-on'].some((c) => document.body.classList.contains(c))) return; // another view is showing
     if (!S.running) {
       if (e.kind === 'push' && S.ready) start();
       return;
