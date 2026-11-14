@@ -32,7 +32,8 @@
     $('nPush').textContent = c.push || 0;
     $('nPull').textContent = c.pull || 0;
     const g = $('gesture');
-    g.textContent = e.kind === 'push' ? '밀기 ⟶' : e.kind === 'pull' ? '⟵ 당기기' : '〰 흔들기';
+    const names = { push: '밀기 ⟶', pull: '⟵ 당기기', wave: '〰 흔들기', left: '◀ 왼쪽', right: '오른쪽 ▶' };
+    g.textContent = names[e.kind] || e.kind;
     g.className = e.kind;
     clearAt = performance.now() + 600;
   });
@@ -55,10 +56,15 @@
   // ---- controls
   async function startEngine() {
     warn('');
-    const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked });
+    const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked, stereo: $('stereo').checked });
     if (ok) showSettings(BatEars.info);
     return ok;
   }
+  $('stereo').onchange = async () => {
+    if (!BatEars.running) return;
+    await BatEars.stop();
+    await startEngine();
+  };
   $('start').onclick = startEngine;
   $('stop').onclick = () => BatEars.stop();
   $('check').onclick = async () => {
@@ -140,6 +146,7 @@
 
   if (params.get('auto') === '1') {
     (async () => {
+      if (params.get('stereo') === '1') $('stereo').checked = true;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();
       await sleep(Number(params.get('secs') || 8) * 1000);

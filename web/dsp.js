@@ -1,7 +1,9 @@
 /* Bat Ears engine: ultrasonic Doppler push/pull detection in the browser (Web Audio).
  *
  * window.BatEars
- *   start({ freq, raw })   -> Promise<boolean>  open the mic, play the tone, start detecting
+ *   start({ freq, raw, stereo }) -> Promise<boolean>  open the mic, play the tone, start detecting.
+ *                          stereo: true plays a different tone on each speaker (config.stereoFreqs) and adds
+ *                          'left' / 'right' swipe gestures (experimental; depends on the laptop's speakers)
  *   stop()                 -> Promise<object>   stop and return a summary
  *   bandCheck()            -> Promise<Array>    short sweep, SNR per frequency
  *   setFreq(hz), setVolume(0..1)
@@ -11,13 +13,13 @@
  *   drawZoom(canvas), drawWide(canvas)
  *
  * events
- *   'gesture' { kind: 'push' | 'pull' | 'wave', speed (m/s, recent peak), strength (dB), t (ms), simulated }
+ *   'gesture' { kind: 'push' | 'pull' | 'wave' | 'left' | 'right', speed (m/s, recent peak), strength (dB), t (ms), simulated }
  *   'frame'   { t, tone, calibrating, dUp, dDown, up, down, v, snr, carrier, noise, bandsUp[6], bandsDown[6],
  *               thUp, thDown }   thUp/thDown = current thresholds (rise automatically in noisy rooms)
  *   'state'   { running, tone, calibrating, busy }
  *   'error'   { where, name, message }
  *
- * Keyboard simulation (no mic needed): ArrowUp = push, ArrowDown = pull, W = wave.
+ * Keyboard simulation (no mic needed): ArrowUp = push, ArrowDown = pull, ArrowLeft/Right = swipe, W = wave.
  */
 (function () {
   'use strict';
@@ -32,6 +34,8 @@
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
     waveWindowMs: 1000,
     holdFlipMs: 350,     // two flips this close together = fast back-and-forth, so hold push/pull
+    stereoFreqs: [19000, 20500], // stereo mode: left speaker tone, right speaker tone (Hz)
+    oneSidedFrames: 5,   // stereo: frames to wait when only one tone moved (lets the other side catch up)
     waveMinV: 0.12,      // m/s; slower wiggles don't count toward a wave
     margin: 3,           // dB the winning side must beat the other side by
     minSnr: 15,          // dB; below this the echo is too weak to trust
@@ -57,7 +61,14 @@
     cand: null, candFrames: 0, lastFire: 0,
     wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
     last: null, agg: null, counts: { push: 0, pull: 0, wave: 0 },
+    // stereo mode (left/right swipes): one tone per speaker, analysed separately
+    stereo: false, oscL: null, oscR: null, gainL: null, gainR: null, sch: null, lastR: null, scand: null, scandFrames: 0,
   };
+
+  function newChan(f) { return { f, ups: [], downs: [], noises: [], base: null, wobble: { up: 1, down: 1 }, noiseBase: null }; }
+  function chanThresholds(ch) {
+    return { up: Math.max(config.threshold, config.autoK * ch.wobble.up), down: Math.max(config.threshold, config.autoK * ch.wobble.down) };
+  }
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const dbv = (a, k) => (k >= 0 && k < a.length && Number.isFinite(a[k])) ? a[k] : -200;
@@ -132,13 +143,19 @@
   }
 
   // ---------------------------------------------------------------- audio
+  function ramp(param, value, t) {
+    param.cancelScheduledValues(t);
+    param.setTargetAtTime(value, t, 0.03);
+  }
+
   function setTone(on, f) {
     const { ctx, gain, osc } = st;
     if (!ctx) return;
     const t = ctx.currentTime;
     if (f) { st.f0 = f; osc.frequency.setValueAtTime(f, t); }
-    gain.gain.cancelScheduledValues(t);
-    gain.gain.setTargetAtTime(on ? config.volume : 0, t, 0.03);
+    const vol = on ? config.volume : 0;
+    ramp(gain.gain, st.stereo ? 0 : vol, t);
+    if (st.gainL) { ramp(st.gainL.gain, st.stereo ? vol : 0, t); ramp(st.gainR.gain, st.stereo ? vol : 0, t); }
     st.tone = on;
     if (on) {
       const now = performance.now();
@@ -147,6 +164,7 @@
       st.calib = { ups: [], downs: [], noises: [] };
       st.noiseBase = null;
       st.base = null;
+      st.sch = { L: newChan(config.stereoFreqs[0]), R: newChan(config.stereoFreqs[1]) };
       st.wasCalibrating = true;
       emit('state', snapshot());
     }
@@ -156,6 +174,7 @@
     if (st.running) return true;
     const f0 = Number(opt.freq || st.f0 || 20000);
     const raw = opt.raw !== false;
+    const stereo = !!opt.stereo;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       emit('error', { where: 'start', name: 'NoMediaDevices', message: 'getUserMedia is not available here' });
       return false;
@@ -185,19 +204,34 @@
     gain.gain.value = 0;
     osc.connect(gain).connect(ctx.destination);
     osc.start();
+    // stereo pair: a different tone on each speaker (silent unless stereo mode is on)
+    const merger = ctx.createChannelMerger(2);
+    const oscL = ctx.createOscillator(), oscR = ctx.createOscillator();
+    oscL.frequency.value = config.stereoFreqs[0];
+    oscR.frequency.value = config.stereoFreqs[1];
+    const gainL = ctx.createGain(), gainR = ctx.createGain();
+    gainL.gain.value = 0;
+    gainR.gain.value = 0;
+    oscL.connect(gainL).connect(merger, 0, 0);
+    oscR.connect(gainR).connect(merger, 0, 1);
+    merger.connect(ctx.destination);
+    oscL.start();
+    oscR.start();
     const binHz = ctx.sampleRate / analyser.fftSize;
     Object.assign(st, {
       ctx, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount),
+      stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0,
       running: true, tone: false, busy: false, raw, f0, binHz,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
       base: null, cand: null, candFrames: 0, lastFire: 0, last: null,
       wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
-      counts: { push: 0, pull: 0, wave: 0 },
+      counts: { push: 0, pull: 0, wave: 0, left: 0, right: 0 },
       agg: { frames: 0, snrSum: 0, snrMin: Infinity, carrierSum: 0, noiseSum: 0, maxUp: -Infinity, maxDown: -Infinity },
     });
     const s = track.getSettings();
     api.info = {
-      f0, raw, ctxRate: ctx.sampleRate, micRate: s.sampleRate, ec: s.echoCancellation, ns: s.noiseSuppression,
+      f0, raw, stereo, stereoFreqs: stereo ? config.stereoFreqs.slice() : null,
+      ctxRate: ctx.sampleRate, micRate: s.sampleRate, ec: s.echoCancellation, ns: s.noiseSuppression,
       agc: s.autoGainControl, ch: s.channelCount, fft: analyser.fftSize, binHz: +binHz.toFixed(2), mic: track.label,
     };
     setTone(true);
@@ -211,7 +245,7 @@
     st.running = false;
     cancelAnimationFrame(st.raf);
     await sleep(150);
-    try { st.osc.stop(); } catch (_) { /* ignore */ }
+    try { st.osc.stop(); st.oscL.stop(); st.oscR.stop(); } catch (_) { /* ignore */ }
     st.stream.getTracks().forEach((t) => t.stop());
     try { await st.ctx.close(); } catch (_) { /* ignore */ }
     st.ctx = null;
@@ -223,6 +257,7 @@
   function summary() {
     const a = st.agg;
     const out = { push: st.counts.push, pull: st.counts.pull, wave: st.counts.wave || 0 };
+    if (st.stereo) Object.assign(out, { left: st.counts.left || 0, right: st.counts.right || 0 });
     if (a && a.frames) {
       Object.assign(out, {
         frames: a.frames, snrAvg: +(a.snrSum / a.frames).toFixed(1), snrMin: +a.snrMin.toFixed(1),
@@ -239,6 +274,7 @@
     st.raf = requestAnimationFrame(loop);
     if (st.busy) return;
     st.analyser.getFloatFrequencyData(st.data);
+    if (st.stereo) { stereoStep(performance.now()); return; }
     const m = measure(st.data, st.f0);
     const now = performance.now();
     const calibrating = st.tone && now < st.calibUntil;
@@ -342,6 +378,87 @@
     emit('gesture', { kind, t: performance.now(), ...extra });
   }
 
+  // ---------------------------------------------------------------- stereo mode (left / right swipes)
+  // Left speaker plays fL, right speaker plays fR. A hand moving right gets farther from the left speaker
+  // (fL echo shifts down) and closer to the right one (fR echo shifts up); moving left is the opposite.
+  // Both tones shifting the same way is a push (up) or a pull (down).
+  function stereoStep(now) {
+    const calibrating = st.tone && now < st.calibUntil;
+    const res = {};
+    for (const key of ['L', 'R']) {
+      const ch = st.sch[key];
+      const m = measure(st.data, ch.f);
+      let dUp = 0, dDown = 0;
+      if (st.tone) {
+        if (calibrating) {
+          if (now >= st.calibFrom && Number.isFinite(m.up) && Number.isFinite(m.down)) {
+            ch.ups.push(m.up); ch.downs.push(m.down);
+            if (Number.isFinite(m.noise)) ch.noises.push(m.noise);
+          }
+        } else {
+          if (!ch.base && ch.ups.length) {
+            ch.base = { up: median(ch.ups), down: median(ch.downs) };
+            const mad = (xs, med) => median(xs.map((x) => Math.abs(x - med))) * 1.4826;
+            ch.wobble = { up: Math.max(0.5, mad(ch.ups, ch.base.up)), down: Math.max(0.5, mad(ch.downs, ch.base.down)) };
+            ch.noiseBase = ch.noises.length ? median(ch.noises) : null;
+          }
+          if (ch.base) {
+            const rise = ch.noiseBase != null && Number.isFinite(m.noise) ? Math.max(0, m.noise - ch.noiseBase) : 0;
+            dUp = m.up - ch.base.up - rise;
+            dDown = m.down - ch.base.down - rise;
+          }
+        }
+      }
+      res[key] = { m, dUp, dDown, v: m.centroid * C / (2 * ch.f) };
+    }
+    if (st.tone && !calibrating && st.sch.L.base && st.sch.R.base) detectStereo(res, now);
+    if (st.wasCalibrating && !calibrating) { st.wasCalibrating = false; emit('state', snapshot(now)); }
+    const L = res.L, R = res.R, thL = chanThresholds(st.sch.L);
+    st.last = { ...L.m, dUp: L.dUp, dDown: L.dDown, v: L.v };
+    st.lastR = { ...R.m, dUp: R.dUp, dDown: R.dDown, v: R.v };
+    emit('frame', {
+      t: now, tone: st.tone, calibrating, dUp: Math.max(L.dUp, R.dUp), dDown: Math.max(L.dDown, R.dDown),
+      up: L.m.up, down: L.m.down, v: (L.v + R.v) / 2, snr: Math.min(L.m.snr, R.m.snr),
+      carrier: L.m.carrier, noise: L.m.noise, bandsUp: L.m.bandsUp, bandsDown: L.m.bandsDown,
+      thUp: thL.up, thDown: thL.down,
+      stereo: { dUpL: L.dUp, dDownL: L.dDown, dUpR: R.dUp, dDownR: R.dDown, vL: L.v, vR: R.v },
+    });
+  }
+
+  function detectStereo(res, now) {
+    const L = res.L, R = res.R;
+    if (!(L.m.snr >= config.minSnr) || !(R.m.snr >= config.minSnr)) { st.scand = null; st.scandFrames = 0; return; }
+    const dirOf = (r, th) => {
+      if (r.dUp > th.up && r.dUp - r.dDown > config.margin) return 1;
+      if (r.dDown > th.down && r.dDown - r.dUp > config.margin) return -1;
+      return 0;
+    };
+    const dL = dirOf(L, chanThresholds(st.sch.L)), dR = dirOf(R, chanThresholds(st.sch.R));
+    let c = null, need = config.confirmFrames;
+    if (dL && dR) c = dL === dR ? (dL > 0 ? 'push' : 'pull') : (dL < 0 ? 'right' : 'left');
+    else if (dL || dR) { c = (dL || dR) > 0 ? 'push' : 'pull'; need = config.oneSidedFrames; }
+    if (c && c === st.scand) st.scandFrames++;
+    else { st.scand = c; st.scandFrames = c ? 1 : 0; }
+    if (c && st.scandFrames >= need && now - st.lastFire > config.refractoryMs) {
+      st.lastFire = now;
+      fire(c, {
+        speed: Math.max(Math.abs(L.v), Math.abs(R.v)),
+        strength: Math.max(L.dUp, L.dDown, R.dUp, R.dDown),
+        simulated: false,
+      });
+    }
+    if (!c) {
+      for (const [key, r] of [['L', L], ['R', R]]) {
+        const ch = st.sch[key];
+        if (!ch.base) continue;
+        ch.base.up += (r.m.up - ch.base.up) * 0.01;
+        ch.base.down += (r.m.down - ch.base.down) * 0.01;
+        ch.wobble.up = Math.max(0.5, ch.wobble.up * 0.995 + Math.abs(r.dUp) * 1.25 * 0.005);
+        ch.wobble.down = Math.max(0.5, ch.wobble.down * 0.995 + Math.abs(r.dDown) * 1.25 * 0.005);
+      }
+    }
+  }
+
   // ---------------------------------------------------------------- band check
   async function grab(ms) {
     const n = st.analyser.frequencyBinCount, acc = new Float64Array(n), tmp = new Float32Array(n);
@@ -362,8 +479,9 @@
     if (!st.running || st.busy) return null;
     st.busy = true;
     emit('state', snapshot());
-    const keepF = st.f0, keepTone = st.tone, nyq = st.ctx.sampleRate / 2;
+    const keepF = st.f0, keepTone = st.tone, keepStereo = st.stereo, nyq = st.ctx.sampleRate / 2;
     setTone(false);
+    st.stereo = false; // the sweep always uses the single (both-speaker) tone
     await sleep(250);
     const steps = [15000, 16000, 17000, 18000, 19000, 19500, 20000, 20500, 21000, 21500, 22000, 23000].filter((f) => f <= nyq - 500);
     const sweep = [];
@@ -377,6 +495,8 @@
       const peak = dbv(spec, kp), noise = localNoise(spec, kp);
       sweep.push({ f, snr: +(peak - noise).toFixed(1), peak: +peak.toFixed(1) });
     }
+    setTone(false);
+    st.stereo = keepStereo;
     setTone(keepTone, keepF);
     st.busy = false;
     emit('state', snapshot());
@@ -395,16 +515,24 @@
   }
 
   function drawZoom(canvas) {
-    const m = st.last;
-    if (!m || !st.data) return;
+    if (!st.last || !st.data) return;
     const [g, W, H] = fit(canvas);
+    g.clearRect(0, 0, W, H);
+    if (st.stereo && st.lastR) {
+      drawPanel(g, st.last, 0, W / 2 - 4, H, 'L');
+      drawPanel(g, st.lastR, W / 2 + 4, W / 2 - 4, H, 'R');
+    } else {
+      drawPanel(g, st.last, 0, W, H, '');
+    }
+  }
+
+  function drawPanel(g, m, x0, W, H, tag) {
     const a = st.data, span = Math.ceil(600 / st.binHz), k1 = m.kp - span, k2 = m.kp + span;
     const carrier = m.carrier > -199 ? m.carrier : -60;
     const noise = Number.isFinite(m.noise) ? m.noise : -140;
     const top = carrier + 5, bot = Math.min(noise - 15, top - 50);
-    const x = (k) => (k - k1) / (k2 - k1) * W;
+    const x = (k) => x0 + (k - k1) / (k2 - k1) * W;
     const y = (db) => Math.max(0, Math.min(H, (top - db) / (top - bot) * H));
-    g.clearRect(0, 0, W, H);
     g.fillStyle = 'rgba(79,195,247,.16)';
     g.fillRect(x(m.kp + st.G), 0, x(m.kp + st.W) - x(m.kp + st.G), H);
     g.fillStyle = 'rgba(255,183,77,.16)';
@@ -419,7 +547,7 @@
     g.stroke();
     g.fillStyle = '#9aa3b2';
     g.font = '12px system-ui';
-    g.fillText(`${(m.kp * st.binHz / 1000).toFixed(2)} kHz ±600 Hz`, 8, 16);
+    g.fillText(`${tag ? tag + ' ' : ''}${(m.kp * st.binHz / 1000).toFixed(2)} kHz ±600 Hz`, x0 + 8, 16);
   }
 
   function drawWide(canvas) {
@@ -456,7 +584,8 @@
     if (!config.keyboard || e.repeat) return;
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-    const kind = e.key === 'ArrowUp' ? 'push' : e.key === 'ArrowDown' ? 'pull' : (e.key === 'w' || e.key === 'W') ? 'wave' : null;
+    const keys = { ArrowUp: 'push', ArrowDown: 'pull', ArrowLeft: 'left', ArrowRight: 'right', w: 'wave', W: 'wave' };
+    const kind = keys[e.key] || null;
     if (!kind) return;
     e.preventDefault();
     fire(kind, { speed: 0.8, strength: 15, simulated: true });
@@ -468,9 +597,13 @@
     setFreq(hz) { if (st.running && !st.busy) setTone(st.tone, Number(hz)); else st.f0 = Number(hz); },
     setVolume(v) {
       config.volume = Number(v);
-      if (st.ctx && st.tone) st.gain.gain.setTargetAtTime(config.volume, st.ctx.currentTime, 0.03);
+      if (!st.ctx || !st.tone) return;
+      const t = st.ctx.currentTime;
+      if (st.stereo) { ramp(st.gainL.gain, config.volume, t); ramp(st.gainR.gain, config.volume, t); }
+      else ramp(st.gain.gain, config.volume, t);
     },
     get running() { return st.running; },
+    get stereo() { return st.stereo; },
     get freq() { return st.f0; },
     get counts() { return { ...st.counts }; },
   };

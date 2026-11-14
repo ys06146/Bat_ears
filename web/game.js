@@ -94,6 +94,17 @@
       say(`SHOCKWAVE ×${hit} +${hit * 8}`, '#b388ff');
       return;
     }
+    if (e.kind === 'left' || e.kind === 'right') {
+      const side = e.kind === 'left' ? -1 : 1;
+      let hit = 0;
+      for (const o of S.objs) {
+        if (!o.dead && !o.star && (o.x < 0 ? -1 : 1) === side) { o.dead = true; burst(o, '#80deea', 24, 1.0); hit++; }
+      }
+      S.score += hit * 12;
+      S.slash = { side, t: performance.now() };
+      say(hit ? `SLASH ${side < 0 ? '◀' : '▶'} ×${hit} +${hit * 12}` : (side < 0 ? '◀ SLASH' : 'SLASH ▶'), '#80deea');
+      return;
+    }
     if (e.kind === 'push') {
       const o = nearest(false);
       if (!o) { say('PUSH', '#4fc3f7'); return; }
@@ -167,6 +178,15 @@
       g.fillRect(p.x, p.y, 3, 3);
     }
     g.globalAlpha = 1;
+    if (S.slash && now - S.slash.t < 300) {
+      const k = (now - S.slash.t) / 300, x0 = S.slash.side < 0 ? 0 : W / 2;
+      g.strokeStyle = `rgba(128,222,234,${1 - k})`;
+      g.lineWidth = 8 * (1 - k) + 2;
+      g.beginPath();
+      g.moveTo(x0 + W * 0.05, H * (0.15 + 0.7 * k));
+      g.lineTo(x0 + W * 0.45, H * (0.85 - 0.7 * k));
+      g.stroke();
+    }
     if (S.ring && now - S.ring < 600) {
       const k = (now - S.ring) / 600;
       g.strokeStyle = `rgba(179,136,255,${1 - k})`;
