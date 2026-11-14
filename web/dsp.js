@@ -673,6 +673,7 @@
   // ---------------------------------------------------------------- keyboard simulation
   window.addEventListener('keydown', (e) => {
     if (!config.keyboard || e.repeat) return;
+    if (window.BatCollect && window.BatCollect.active) return; // typing during data collection must not fake gestures
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     const keys = { ArrowUp: 'push', ArrowDown: 'pull', ArrowLeft: 'left', ArrowRight: 'right', w: 'wave', W: 'wave' };

@@ -137,9 +137,12 @@ def build_dataset(paths, seed=0):
         segs = segments(rows, fps)
         for (i, j) in segs:
             part = rows[i:j]
+            lab = majority([r['label'] for r in part])
+            if lab == 'skip':  # trial undone during guided collection
+                continue
             feats = featurize(part, base)
             X.append([feats[k] for k in FEATURES])
-            y.append(majority([r['label'] for r in part]))
+            y.append(lab)
             groups.append(key)
             fired = [r['gesture'].replace('_sim', '') for r in part if r.get('gesture')]
             meta.append({'rule': fired[0] if fired else 'none', 'start_ms': _f(part[0]['t_ms'])})

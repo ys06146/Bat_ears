@@ -107,7 +107,7 @@
       notify();
     },
     toggle() { if (recording) api.stop(); else api.start(); },
-    setLabel(name) { if (LABELS.includes(name)) { label = name; notify(); } },
+    setLabel(name) { if (LABELS.includes(name) || name === 'skip') { label = name; notify(); } },
     clear() { rows.length = 0; notify(); },
     onChange(fn) { watchers.push(fn); },
     async pickFolder() {
@@ -118,18 +118,49 @@
       return dir.name;
     },
     download(onlySession) {
-      const blob = new Blob([toCsv(onlySession)], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `batears_${onlySession || stamp()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      downloadBlob(new Blob([toCsv(onlySession)], { type: 'text/csv' }), `batears_${onlySession || stamp()}.csv`);
+    },
+    // Rows of the current session between fromT and toT (performance.now() ms) get a new label;
+    // 'skip' also clears their cue so the trial is ignored by training and scoring.
+    relabel(fromT, toT, newLabel) {
+      for (const r of rows) {
+        const t = Number(r[1]);
+        if (r[0] === session && t >= fromT && t <= toT) {
+          r[2] = newLabel;
+          if (newLabel === 'skip') r[r.length - 1] = '';
+        }
+      }
+      notify();
+    },
+    // Session metadata next to the CSV: into the chosen folder, otherwise downloaded.
+    async saveJson(name, obj) {
+      const text = JSON.stringify(obj, null, 1);
+      if (dir) {
+        try {
+          const fh = await dir.getFileHandle(name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(text);
+          await w.close();
+          return true;
+        } catch (e) { lastError = e.message || String(e); notify(); }
+      }
+      downloadBlob(new Blob([text], { type: 'application/json' }), name);
+      return false;
     },
     toCsv,
   };
 
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
   window.addEventListener('keydown', (e) => {
+    if (window.BatCollect && window.BatCollect.active) return; // guided trials set labels themselves
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     const i = '12345'.indexOf(e.key);
