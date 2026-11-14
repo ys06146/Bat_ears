@@ -11,16 +11,25 @@ Bats find their way in total darkness by listening to echoes. We wondered whethe
 Bat Ears turns the laptop's own speaker and microphone into a gesture sensor:
 - The speaker plays a steady ~20 kHz tone, which most people can't hear.
 - When your hand moves toward the screen, its echo comes back slightly higher in pitch. When it moves away, the echo comes back lower. This is the Doppler effect.
-- Bat Ears reads that shift dozens of times per second and recognizes a **push** or a **pull**, along with how fast your hand moved.
-- We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars. The webcam can stay taped over the whole time.
+- Bat Ears reads that shift about 60 times per second and recognizes a **push**, a **pull** and a **wave**, along with how fast your hand moved.
+- In an experimental stereo mode, the left and right speakers play different tones, which adds **left and right swipes**.
+- We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars, wave for a shockwave, and swipe to slash. The webcam can stay taped over the whole time.
+- A guided 2-minute **data collection** mode prompts you ("Push!") and labels everything automatically. We used it to measure accuracy and train a classifier.
 
-Everything runs inside the browser on the device. Nothing to install, no server, and no audio leaves the laptop.
+Everything runs inside the browser on the device. Nothing to install and no server; the audio is analysed on the device and never recorded or sent anywhere.
+
+Try it: https://ys06146.github.io/nhng/web/ (Chrome on a laptop, built-in speaker and mic)
+
+## Prior work, and what's new here
+The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Microsoft Research's **SoundWave** (CHI 2012) showed it on laptops, and **FingerIO** (CHI 2016) used active sonar on phones to track fingers. Some laptops also ship ultrasound **presence** detection (Elliptic Labs). Those were native research prototypes or built-in vendor features. Bat Ears is, to our knowledge, a **zero-install web page** that does it with any laptop's stock speaker and mic: open a link and wave your hand. We also handle the problems a browser adds, such as voice-processing filters that erase ultrasound and microphones that run at too low a sample rate.
 
 ## How we built it
 - **Web Audio API:** an `OscillatorNode` plays the tone, and an `AnalyserNode` takes an 8192-point FFT of the mic (≈5.9 Hz per bin at 48 kHz).
 - **Raw microphone:** we turn off echo cancellation, noise suppression and auto gain. We found that Chrome's voice processing erases the 20 kHz band; the level dropped from −32 dB to −179 dB in our test.
 - **Doppler math:** Δf = 2·v·f₀ / c, so a hand moving at 0.5 m/s shifts a 20 kHz echo by about 58 Hz. We measure the echo energy 25–300 Hz above and below the carrier against a baseline calibrated in the first 1.5 s. A push shows up as energy above the carrier, a pull as energy below.
-- **Detection:** a rule-based detector with thresholds, multi-frame confirmation and a refractory period, plus a learned classifier (softmax regression[, random forest]). The classifier uses features from each motion segment: duration, asymmetry, velocity sign changes, and the energy profile in 12 sub-bands.
+- **Detection:** a rule-based detector with multi-frame confirmation and a refractory period. Its thresholds adapt to how much the room's echo wobbles while idle. Broadband noise (claps, crowd) is cancelled by subtracting the rise of the far noise floor, since a hand echo only lifts the bands next to the carrier. A wave is several direction flips within a second.
+- **Left/right swipes (stereo):** each speaker plays its own tone (19 kHz left, 20.5 kHz right). Moving right shifts the left tone down and the right tone up, and moving left does the opposite.
+- **Classifier:** a learned classifier (softmax regression[, random forest]) uses features from each motion segment: duration, asymmetry, velocity sign changes, and the energy profile in 12 sub-bands.
 - **Data tools:** an in-page recorder with live labels exports CSV, and a pure-Python pipeline does segmentation, feature extraction and leave-one-session-out evaluation.
 - **Testing without a room full of noise:** we generate synthetic microphone input (a 20 kHz carrier with Doppler-shifted echoes) and run the app in headless Chrome to check every gesture end to end.
 - **Game:** HTML Canvas with no dependencies.
