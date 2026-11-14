@@ -20,11 +20,20 @@
       <button id="tabGame" class="tab sel">🎮 게임</button>
       <button id="tabSonar" class="tab">🛰️ 소나 뷰</button>
       <button id="tabSpeed" class="tab">🎯 스피드건</button>
+      <button id="presentBtn" class="tab">⛶ 발표 모드</button>
       <button id="camBtn" class="tab" hidden>📷 실제 손과 비교</button>
     </div>
     <canvas id="game"></canvas>
     <canvas id="sonar" hidden></canvas>
     <div id="speed" class="speedgun" hidden></div>
+    <form id="nameBox" class="namebox" hidden>
+      <b id="nameTitle">🏆 순위표에 올랐어요!</b>
+      <div class="row center">
+        <input id="nameInput" maxlength="12" placeholder="이름 (12자까지)" autocomplete="off">
+        <button type="submit">저장</button>
+        <button type="button" id="nameSkip" class="secondary">건너뛰기</button>
+      </div>
+    </form>
     <div id="camBox" hidden><video id="cam" autoplay muted playsinline></video><span>📷 실제 손 (비교용)</span></div>
     <div id="gesture">–</div>
 

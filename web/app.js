@@ -186,16 +186,61 @@
       const li = document.createElement('li');
       if (e.t === newScoreAt) li.className = 'new';
       const d = new Date(e.t);
-      li.innerHTML = `<b>${e.score}점</b><span>콤보 ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
+      li.innerHTML = `<b></b><span>콤보 ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
+      li.querySelector('b').textContent = `${e.name || '익명'} · ${e.score}점`;
       ol.appendChild(li);
     });
   }
-  ForcePush.onEnd((r) => { newScoreAt = r.t; renderScores(); });
+  // name entry after a game that made the top 10
+  let nameFor = 0;
+  ForcePush.onEnd((r) => {
+    newScoreAt = r.t;
+    renderScores();
+    if (r.rank < 0) return;
+    nameFor = r.t;
+    $('nameTitle').textContent = r.record ? `🏆 신기록! ${r.score}점 · 이름을 남겨 주세요` : `🏆 ${r.rank + 1}등! ${r.score}점 · 이름을 남겨 주세요`;
+    $('nameInput').value = '';
+    $('nameBox').hidden = false;
+    setTimeout(() => $('nameInput').focus(), 50);
+  });
+  function closeName(save) {
+    if (save && nameFor) ForcePush.setName(nameFor, $('nameInput').value);
+    nameFor = 0;
+    $('nameBox').hidden = true;
+    $('nameInput').blur();
+    renderScores();
+  }
+  $('nameBox').onsubmit = (e) => { e.preventDefault(); closeName(true); };
+  $('nameSkip').onclick = () => closeName(false);
+  BatEars.on('gesture', () => { if (!$('nameBox').hidden && ForcePush.state.running) closeName(false); });
+
+  // presentation mode: fullscreen, no side panel, bigger text
+  function setPresent(on) {
+    document.body.classList.toggle('present', on);
+    $('presentBtn').textContent = on ? '✕ 발표 모드 끄기' : '⛶ 발표 모드';
+    $('presentBtn').blur();
+  }
+  $('presentBtn').onclick = async () => {
+    const on = !document.body.classList.contains('present');
+    try {
+      if (on && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      if (!on && document.fullscreenElement) await document.exitFullscreen();
+    } catch (_) { /* fullscreen not allowed: still switch the layout */ }
+    setPresent(on);
+  };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) setPresent(false); });
+  if (params.get('present') === '1') setPresent(true);
   renderScores();
   const renderMute = () => { $('mute').textContent = ForcePush.muted ? '🔇 효과음' : '🔊 효과음'; };
   $('mute').onclick = () => { ForcePush.setMuted(!ForcePush.muted); renderMute(); $('mute').blur(); };
   window.addEventListener('keydown', (e) => { if (e.key === 'm' || e.key === 'M') setTimeout(renderMute, 0); });
-  $('resetScores').onclick = () => { try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ } renderScores(); };
+  $('resetScores').onclick = () => {
+    const b = $('resetScores');
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = '정말 지울까요?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '지우기'; }, 3000); return; }
+    try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ }
+    b.dataset.armed = ''; b.textContent = '지우기';
+    renderScores();
+  };
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
   // ---- self-test of the guided collection: index.html?collect=1&fast=0.15

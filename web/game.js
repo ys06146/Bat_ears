@@ -18,7 +18,7 @@
   const COMBO_MS = 1800;          // a hit within this window of the last hit keeps the combo
   const SCORE_KEY = 'batears.scores';
   const S = {
-    cv: null, g: null, W: 0, H: 0,
+    cv: null, g: null, W: 0, H: 0, k: 1,
     running: false, over: false, ready: true, t0: 0, score: 0, lives: 3, best: 0,
     combo: 0, lastHit: 0, maxCombo: 0, hits: 0, misses: 0, ring: null,
     objs: [], parts: [], stars: [], nextSpawn: 0, flash: null, shake: 0,
@@ -30,11 +30,18 @@
   function loadScores() {
     try { const a = JSON.parse(localStorage.getItem(SCORE_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (_) { return []; }
   }
+  function setName(t, name) {
+    const list = loadScores();
+    const e = list.find((x) => x.t === t);
+    if (!e) return;
+    e.name = String(name || '').trim().slice(0, 12) || '익명';
+    try { localStorage.setItem(SCORE_KEY, JSON.stringify(list)); } catch (_) { /* private mode */ }
+  }
   function saveScore(entry) {
     const list = loadScores();
     list.push(entry);
     list.sort((a, b) => b.score - a.score || a.t - b.t);
-    const top = list.slice(0, 5);
+    const top = list.slice(0, 10);
     try { localStorage.setItem(SCORE_KEY, JSON.stringify(top)); } catch (_) { /* private mode */ }
     return top.indexOf(entry);
   }
@@ -255,6 +262,7 @@
   // ---------------------------------------------------------------- drawing
   function draw(now) {
     const { g, W, H } = S;
+    S.k = Math.max(1, Math.min(2, W / 900));
     g.save();
     if (S.shake > 0) g.translate((Math.random() - 0.5) * 16 * S.shake, (Math.random() - 0.5) * 16 * S.shake);
     const bg = g.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, Math.max(W, H) * 0.7);
@@ -314,20 +322,20 @@
   function drawHud(now) {
     const { g, W, H } = S;
     g.fillStyle = '#e8e8e8';
-    g.font = '600 18px Inter, system-ui';
+    g.font = `600 ${Math.round(18 * S.k)}px Inter, system-ui`;
     g.textAlign = 'left';
-    g.fillText(`점수 ${S.score}`, 16, 28);
+    g.fillText(`점수 ${S.score}`, 16, 28 * S.k);
     g.fillStyle = '#ff6b6b';
-    g.fillText('❤'.repeat(Math.max(0, S.lives)) + '♡'.repeat(Math.max(0, 3 - S.lives)), 16, 52);
+    g.fillText('❤'.repeat(Math.max(0, S.lives)) + '♡'.repeat(Math.max(0, 3 - S.lives)), 16, 52 * S.k);
     if (S.running) {
       const left = Math.max(0, ROUND_MS - (now - S.t0)) / 1000;
       g.textAlign = 'right';
       g.fillStyle = left <= 5 ? '#fbbf24' : '#e8e8e8';
-      g.fillText(`${left.toFixed(1)}초`, W - 16, 28);
+      g.fillText(`${left.toFixed(1)}초`, W - 16, 28 * S.k);
       const cd = Math.max(0, SHOCK_COOLDOWN_MS - (now - S.lastShock)) / 1000;
-      g.font = '13px Inter, system-ui';
+      g.font = `${Math.round(13 * S.k)}px Inter, system-ui`;
       g.fillStyle = cd > 0 ? '#9aa3b2' : '#b388ff';
-      g.fillText(cd > 0 ? `충격파 ${cd.toFixed(0)}초` : '〰 손 흔들면 충격파!', W - 16, 50);
+      g.fillText(cd > 0 ? `충격파 ${cd.toFixed(0)}초` : '〰 손 흔들면 충격파!', W - 16, 50 * S.k);
       // time bar
       g.fillStyle = '#ffffff22';
       g.fillRect(0, H - 4, W, 4);
@@ -335,56 +343,57 @@
       g.fillRect(0, H - 4, W * left / (ROUND_MS / 1000), 4);
       if (S.combo >= 2) {
         g.textAlign = 'left';
-        g.font = '700 15px system-ui';
+        g.font = `700 ${Math.round(15 * S.k)}px system-ui`;
         g.fillStyle = '#ff5a60';
-        g.fillText(`${S.combo} 콤보`, 16, 76);
+        g.fillText(`${S.combo} 콤보`, 16, 76 * S.k);
       }
     }
     g.textAlign = 'center';
     if (S.flash && now < S.flash.until) {
       g.fillStyle = S.flash.color;
-      g.font = '800 40px Inter, system-ui';
+      g.font = `800 ${Math.round(40 * S.k)}px Inter, system-ui`;
       g.fillText(S.flash.text, W / 2, H * 0.22);
     }
     if (sfx.muted) {
-      g.textAlign = 'right'; g.font = '12px system-ui'; g.fillStyle = '#9aa3b2';
+      g.textAlign = 'right'; g.font = `${Math.round(12 * S.k)}px system-ui`; g.fillStyle = '#9aa3b2';
       g.fillText('🔇 M', W - 16, H - 12);
     }
   }
 
   function drawIdle() {
-    const { g, W, H } = S;
+    const { g, W, H } = S, k = S.k;
     g.fillStyle = '#07080daa';
     g.fillRect(0, 0, W, H);
     g.textAlign = 'center';
     g.fillStyle = '#e8e8e8';
-    g.font = '800 34px Inter, system-ui';
-    const top = S.over ? H / 2 - 110 : H / 2 - 30;
+    g.font = `800 ${Math.round(34 * k)}px Inter, system-ui`;
+    const top = S.over ? H / 2 - 170 * k : H / 2 - 30 * k;
     g.fillText(S.over ? (S.rank === 0 ? `🏆 신기록! ${S.score}점` : `끝! 점수 ${S.score}`) : 'FORCE PUSH', W / 2, top);
-    g.font = '16px system-ui';
+    g.font = `${Math.round(16 * k)}px system-ui`;
     g.fillStyle = '#9aa3b2';
     const hint = !S.ready ? '기준값 잡는 중… 손을 화면에서 치워 주세요'
       : S.over ? '손바닥을 밀면 다시 시작'
         : '손바닥을 화면 쪽으로 밀면 시작 (키보드 ↑ 도 가능)';
-    g.fillText(hint, W / 2, top + 30);
+    g.fillText(hint, W / 2, top + 30 * k);
     if (!S.over) {
-      g.font = '14px system-ui';
-      g.fillText('밀기 ⟶ 운석 부수기 · 당기기 ⟵ 별 잡기 · 흔들기 〰 충격파 (W)', W / 2, top + 56);
+      g.font = `${Math.round(14 * k)}px system-ui`;
+      g.fillText('밀기 ⟶ 운석 부수기 · 당기기 ⟵ 별 잡기 · 흔들기 〰 충격파 (W)', W / 2, top + 56 * k);
       return;
     }
     g.fillStyle = '#c8cdd6';
-    g.font = '14px system-ui';
-    g.fillText(`맞힌 수 ${S.hits} · 최대 콤보 ${S.maxCombo} · 놓친 운석 ${S.misses}`, W / 2, top + 56);
-    // top 5
+    g.font = `${Math.round(14 * k)}px system-ui`;
+    g.fillText(`맞힌 수 ${S.hits} · 최대 콤보 ${S.maxCombo} · 놓친 운석 ${S.misses}`, W / 2, top + 56 * k);
+    // top 10
     const list = loadScores();
-    g.font = '700 15px system-ui';
+    g.font = `700 ${Math.round(15 * k)}px system-ui`;
     g.fillStyle = '#e8e8e8';
-    g.fillText('순위표', W / 2, top + 92);
-    g.font = '15px ui-monospace, Menlo, monospace';
+    g.fillText('🏆 상위 10', W / 2, top + 90 * k);
+    g.font = `${Math.round(14 * k)}px ui-monospace, Menlo, monospace`;
     list.forEach((e, i) => {
       g.fillStyle = i === S.rank ? '#ff5a60' : '#9aa3b2';
-      const line = `${i + 1}.  ${String(e.score).padStart(5)}점   콤보 ${String(e.combo || 0).padStart(2)}`;
-      g.fillText(line + (i === S.rank ? '  ◀' : '   '), W / 2, top + 116 + i * 22);
+      const name = (e.name || (i === S.rank ? '이름 입력 중…' : '익명')).padEnd(8, ' ').slice(0, 10);
+      const line = `${String(i + 1).padStart(2)}. ${name} ${String(e.score).padStart(5)}점  콤보 ${String(e.combo || 0).padStart(2)}`;
+      g.fillText(line + (i === S.rank ? ' ◀' : '  '), W / 2, top + (112 + i * 20) * k);
     });
   }
 
@@ -415,6 +424,7 @@
     setReady(r) { S.ready = !!r; },
     scores: loadScores,
     onEnd(fn) { S.endListeners.push(fn); },
+    setName,
     get muted() { return sfx.muted; },
     get state() { return { running: S.running, score: S.score, lives: S.lives, best: S.best, combo: S.combo, maxCombo: S.maxCombo }; },
   };

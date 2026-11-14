@@ -41,7 +41,7 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 12px; pa
 #game, #sonar { width: 100%; height: 100%; border-radius: calc(var(--radius) + 4px); border: 1px solid var(--border); display: block; background: #07080d; }
 #game[hidden], #sonar[hidden] { display: none; }
 .tabs { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
-.tab { height: 32px; padding: 0 12px; font-size: 13px; background: #18181bd9; border-color: var(--border); color: var(--text); }
+.tab { height: 32px; padding: 0 12px; font-size: 13px; white-space: nowrap; background: #18181bd9; border-color: var(--border); color: var(--text); }
 .tab:hover:not(:disabled) { background: #27272a; }
 .tab.sel { background: var(--primary); border-color: var(--primary); }
 #camBox { position: absolute; top: 52px; right: 12px; width: 30%; min-width: 180px; border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); overflow: hidden; background: #000; z-index: 2; }
@@ -161,3 +161,26 @@ ol { padding-left: 18px; margin: 6px 0; }
 .sg-top li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 4px 8px; border-bottom: 1px solid var(--muted-bg); text-align: left; font-variant-numeric: tabular-nums; }
 .sg-top li.new { background: var(--primary-soft); border-radius: 6px; }
 .sg-top li.new b { color: var(--ring); }
+
+/* ---- name entry after a top-10 game */
+.namebox { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 18px; background: var(--card); border: 1px solid var(--primary); border-radius: calc(var(--radius) + 4px); box-shadow: 0 10px 40px #000a; }
+.namebox input { font: inherit; color: var(--text); background: transparent; border: 1px solid var(--input); border-radius: var(--radius); height: 36px; padding: 0 10px; width: 170px; }
+
+/* ---- presentation mode: fullscreen stage, no side panel, bigger text */
+body.present header, body.present aside { display: none; }
+body.present main { grid-template-columns: 1fr; height: 100vh; padding: 0; }
+body.present .stage { min-height: 100vh; }
+body.present #game, body.present #sonar, body.present .speedgun { border-radius: 0; border: 0; }
+body.present .tabs { top: 14px; }
+body.present .tab { height: 40px; font-size: 16px; padding: 0 16px; }
+body.present #gesture { font-size: 64px; bottom: 32px; }
+body.present .speedgun { padding-top: 72px; }
+body.present .sg-title { font-size: clamp(26px, 5vh, 44px); }
+body.present .sg-sub { font-size: clamp(15px, 2.6vh, 22px); }
+body.present .sg-big { font-size: clamp(56px, 13vh, 120px); }
+body.present .sg-gauge { width: min(640px, 90%); height: clamp(170px, 32vh, 320px); }
+body.present .sg-phys { font-size: clamp(12px, 2vh, 16px); }
+body.present .panel { max-width: 760px; font-size: 18px; }
+body.present .panel h2 { font-size: 32px; }
+
+body.speed-on #gesture { display: none; }

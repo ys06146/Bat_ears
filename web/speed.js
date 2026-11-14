@@ -44,7 +44,7 @@
       actx = actx || new AudioContext();
       if (actx.state === 'suspended') actx.resume();
       const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
-      o.type = 'triangle'; o.frequency.value = f;
+      o.type = 'sine'; o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.05);
     } catch (_) { /* no audio */ }
