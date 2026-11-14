@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const PAIRS = [[19000, 20500], [18000, 19500], [17500, 19000], [20000, 21000]];
+  const PAIRS = [[18000, 19500], [19000, 20500], [17500, 19000], [20000, 21000]];
   const NAMES = { left: '◀ 왼쪽', right: '오른쪽 ▶', push: '밀기 ⟶', pull: '⟵ 당기기', wave: '〰 흔들기' };
   const COLORS = { left: '#80deea', right: '#80deea', push: '#4fc3f7', pull: '#ffb74d', wave: '#b388ff' };
   const S = { root: null, cv: null, g: null, W: 0, H: 0, active: false, f: null, x: 0, y: 0, trail: [], last: null, counts: {}, lastT: 0 };
@@ -24,10 +24,10 @@
         <label><input type="checkbox" class="lr-swap"> 좌우 바꾸기</label>
         <button class="lr-start">▶ 스테레오로 시작</button>
         <button class="secondary lr-reset">숫자 지우기</button>
-        <button class="secondary lr-collect">🎯 좌우만 수집 (✅/❌ 기록)</button>
+        <button class="secondary lr-collect" title="좌우 5번씩 쓸어서 이 노트북에서 좌우가 되는지 확인하고 배워요">🧭 좌우 점검 (5+5번)</button>
       </div>
       <canvas class="lr-canvas"></canvas>
-      <p class="hint lr-hint">키보드 위 10~20cm에서 손바닥을 세우고 왼쪽 ↔ 오른쪽으로 빠르게 쓸어 보세요. 두 톤의 SNR이 모두 20dB 이상이어야 해요. 낮은 쪽이 있으면 다른 톤 쌍을 고르세요. 방향이 반대로 나오면 '좌우 바꾸기'를 켜세요.</p>`;
+      <p class="hint lr-hint">키보드 위 10~15cm에서 손바닥을 세우고 왼쪽 끝 ↔ 오른쪽 끝까지 넓게, 빠르게 쓸어 보세요. 두 톤의 SNR이 모두 20dB 이상이어야 해요. 낮은 쪽이 있으면 다른 톤 쌍을 고르세요. 방향이 반대로 나오면 '좌우 바꾸기'를 켜세요. 윈도우는 소리 효과가 좌우를 섞을 수 있어요: 설정 &gt; 시스템 &gt; 소리 &gt; 스피커에서 '오디오 향상'·'공간 음향' 끄기, 설정 &gt; 접근성 &gt; 오디오에서 '모노 오디오' 끄기, Dolby Atmos 끄기. 18kHz는 귀가 좋은 사람에게 아주 작게 들릴 수 있어요.</p>`;
     S.cv = root.querySelector('.lr-canvas');
     S.g = S.cv.getContext('2d');
     root.querySelector('.lr-pair').onchange = (e) => {
@@ -147,6 +147,12 @@
     g.fillStyle = '#9aa3b2';
     const c = S.counts;
     g.fillText(`왼쪽 ${c.left || 0} · 오른쪽 ${c.right || 0} · 밀기 ${c.push || 0} · 당기기 ${c.pull || 0}`, x0, H - 60);
+    // left/right only fires after the check found a usable signal for the tone pair playing now
+    const m = BatEars.config.lrModel;
+    if (BatEars.running && BatEars.stereo) {
+      g.fillStyle = BatEars.hasLrModel ? '#a5d6a7' : '#ffe082';
+      g.fillText(BatEars.hasLrModel ? `좌우 판정 켜짐 (점검 교차검증 ${Math.round((m.looAcc || 0) * 100)}%)` : '좌우 판정 꺼짐: 🧭 좌우 점검을 먼저 해 주세요', x0, H - 82);
+    }
     if (S.last && now - S.last.t < 900) {
       g.fillStyle = COLORS[S.last.kind] || '#fff';
       g.font = '800 34px system-ui';

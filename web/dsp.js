@@ -18,6 +18,10 @@
  *               thUp, thDown }   thUp/thDown = current thresholds (rise automatically in noisy rooms)
  *   'state'   { running, tone, calibrating, busy }
  *   'error'   { where, name, message }
+ *   'burst'   { t, start, feat, capped }  stereo only: a motion burst ended; feat = swipe.js features
+ *               { ilat, balSlope, latPk, depPk, n, ms } (the left/right check learns from these)
+ *   'foreign' { t, tones: [kHz, ...] }  another ultrasonic tone (e.g. a second laptop running Bat Ears) has been
+ *               audible for 1 s, or the list changed / cleared ([]). Also readable as BatEars.foreign.
  *
  * Keyboard simulation (no mic needed): ArrowUp = push, ArrowDown = pull, ArrowLeft/Right = swipe, W = wave.
  */
@@ -44,11 +48,17 @@
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
     waveWindowMs: 1000,
     holdFlipMs: 350,     // two flips this close together = fast back-and-forth, so hold push/pull
-    stereoFreqs: [19000, 20500], // stereo mode: left speaker tone, right speaker tone (Hz)
-    // stereo decisions: 'velocity' (default) = per burst, compare sideways speed (vR - vL)/2 with forward
-    // speed (vL + vR)/2, like the mono burst rule; 'energy' = the older threshold rule
+    // stereo mode: left speaker tone, right speaker tone (Hz). 18/19.5 kHz: laptop speakers are louder there than at
+    // 20.5 kHz, and the 1.5 kHz gap keeps both Doppler skirts (+-300 Hz) apart
+    stereoFreqs: [18000, 19500],
+    // stereo decisions: 'velocity' (default) = per burst: push/pull by forward speed (vL + vR)/2 like the mono
+    // burst rule, left/right by swipe.js + config.lrModel; 'energy' = the older threshold rule
     stereoDetector: 'velocity',
-    stereoBurst: { latMin: 0.5, latFire: 1.0, dom: 1.3 },
+    // left/right: a sideways hand barely changes the instantaneous sideways speed (lat ~0.2 x hand speed, bravo's
+    // physics model), so each burst is judged as a whole by window.BatSwipe (swipe.js: ilat = integral of lat,
+    // balSlope = slope of the L-R echo balance) with a per-laptop model from the left/right check:
+    // { pair: [fl, fr], model }. null (or another tone pair) = no usable left/right here, so none fire.
+    lrModel: null,
     swapLR: false,       // flip left/right if a laptop's channels are wired the other way
     stereoConfirmMs: 30, // stereo: a candidate must last this long (both tones agree)...
     oneSidedMs: 80,      // ...or this long when only one tone moved (lets the other side catch up)
@@ -64,6 +74,7 @@
     noiseNearHz: 600,    // SNR reference band
     noiseFarHz: 1200,
     fftSize: 8192,
+    foreignDb: 30,       // a narrow peak this far above the 15-23 kHz floor that isn't ours = another device's tone
     volume: 0.6,
     keyboard: true,      // ArrowUp / ArrowDown simulate gestures
   };
@@ -143,6 +154,45 @@
     for (let k = kp - far; k <= kp - near; k++) { const v = dbv(a, k); if (v > -199) vals.push(v); }
     for (let k = kp + near; k <= kp + far; k++) { const v = dbv(a, k); if (v > -199) vals.push(v); }
     return median(vals);
+  }
+
+  // Another laptop running Bat Ears (or any ultrasonic beacon) puts its tone, and its Doppler echoes off our hand,
+  // into our bands; a real session where that seems to have happened scored 1/20. Look for narrow peaks between
+  // 15 and 23 kHz that are not ours (our tones, their Doppler skirt, and the stereo pair's intermodulation).
+  function ownTones() {
+    if (st.stereo && st.sch) {
+      const a = st.sch.L.f, b = st.sch.R.f;
+      return [a, b, 2 * a - b, 2 * b - a];
+    }
+    return [st.f0];
+  }
+  function scanForeign(a, now) {
+    const lo = Math.ceil(15000 / st.binHz), hi = Math.min(a.length - 5, Math.floor(23000 / st.binHz));
+    if (hi <= lo + 10) return;
+    const vals = [];
+    for (let k = lo; k <= hi; k++) vals.push(dbv(a, k));
+    const floor = median(vals), own = ownTones(), seen = st.foreignSeen;
+    for (let k = lo + 4; k <= hi - 4; k++) {
+      const v = dbv(a, k);
+      if (v < floor + config.foreignDb || v < dbv(a, k - 1) || v < dbv(a, k + 1)) continue; // tall local max
+      if (v - dbv(a, k - 4) < 10 || v - dbv(a, k + 4) < 10) continue;                      // narrow = a tone
+      const f = k * st.binHz;
+      if (own.some((o) => Math.abs(f - o) < 450)) continue;
+      const key = Math.round(f / 100) / 10;
+      const e = seen.get(key) || { first: now, last: now };
+      e.last = now;
+      seen.set(key, e);
+    }
+    const list = [];
+    seen.forEach((e, key) => {
+      if (now - e.last > 1500) seen.delete(key);
+      else if (e.last - e.first >= 1000) list.push(key);
+    });
+    list.sort((x, y) => x - y);
+    if (list.join() !== api.foreign.join()) {
+      api.foreign = list;
+      emit('foreign', { t: now, tones: list.slice() });
+    }
   }
 
   // Room loudness: mean power 300-4000 Hz (speech and music), for metadata / "noisy room" detection.
@@ -269,7 +319,9 @@
       wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
       counts: { push: 0, pull: 0, wave: 0, left: 0, right: 0 },
       agg: { frames: 0, snrSum: 0, snrMin: Infinity, carrierSum: 0, noiseSum: 0, maxUp: -Infinity, maxDown: -Infinity },
+      foreignSeen: new Map(), foreignT: 0,
     });
+    api.foreign = [];
     const s = track.getSettings();
     api.info = {
       f0, raw, stereo, stereoFreqs: stereo ? config.stereoFreqs.slice() : null,
@@ -316,6 +368,8 @@
     st.raf = requestAnimationFrame(loop);
     if (st.busy) return;
     st.analyser.getFloatFrequencyData(st.data);
+    const tScan = performance.now();
+    if (tScan - st.foreignT > 250) { st.foreignT = tScan; scanForeign(st.data, tScan); }
     if (st.stereo) { stereoStep(performance.now()); return; }
     const m = measure(st.data, st.f0);
     const now = performance.now();
@@ -546,33 +600,47 @@
     });
   }
 
-  // Velocity burst for stereo: same structure as burstStep, deciding between sideways and forward motion.
+  // the left/right model, if one was learned for the tone pair now playing
+  function lrModelNow() {
+    const m = config.lrModel;
+    if (!m || !m.model || !Array.isArray(m.pair) || !st.sch) return null;
+    return m.pair[0] === st.sch.L.f && m.pair[1] === st.sch.R.f ? m.model : null;
+  }
+
+  // Velocity burst for stereo. Push/pull: like burstStep, by the forward speed dep. Left/right: judged once per
+  // burst by window.BatSwipe with the learned model (see config.lrModel); without a model none fire. Every burst
+  // end emits 'burst' { t, start, feat } so the left/right check can learn from cued swipes.
   function stereoBurst(now, L, R) {
-    const B = config.burst, S = config.stereoBurst;
-    const lat = (config.swapLR ? -1 : 1) * (R.v - L.v) / 2; // + = hand moving right
-    const dep = (L.v + R.v) / 2;                              // + = toward the laptop
+    const B = config.burst, SW = window.BatSwipe, model = SW ? lrModelNow() : null;
+    const lat = (R.v - L.v) / 2;  // + = hand moving right (the model learns this laptop's signs)
+    const dep = (L.v + R.v) / 2;  // + = toward the laptop
     const active = Math.max(L.dUp, L.dDown, R.dUp, R.dDown) > B.aOn;
     let ev = st.sburst;
     if (!ev) {
       if (!active || now < st.sburstLock) return null;
-      ev = st.sburst = { start: now, last: now, latMax: lat, latMin: lat, depMax: dep, depMin: dep, fired: false };
+      ev = st.sburst = { start: now, last: now, latMax: lat, latMin: lat, depMax: dep, depMin: dep, fired: false, sb: SW ? new SW.SwipeBurst() : null };
     }
     if (active) ev.last = now;
     ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
     ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
+    if (ev.sb) ev.sb.push({ t: now, vL: L.v, vR: R.v, eL: SW.excessDb(L.dUp, L.dDown), eR: SW.excessDb(R.dUp, R.dDown) });
     let kind = null;
-    if (!ev.fired) {
-      if (Math.abs(lat) > S.latFire && Math.abs(lat) > S.dom * Math.abs(dep)) kind = lat > 0 ? 'right' : 'left';
-      else if (Math.abs(dep) > B.vFire && Math.abs(dep) > S.dom * Math.abs(lat)) kind = dep > 0 ? 'push' : 'pull';
-      if (kind) ev.fired = true;
-    }
+    // early push/pull only when left/right can't happen: a swipe also moves toward then away from the mic, so with
+    // a model the whole burst has to be seen first (costs ~gapMs of latency)
+    if (!ev.fired && !model && Math.abs(dep) > B.vFire) { kind = dep > 0 ? 'push' : 'pull'; ev.fired = true; }
     const capped = now - ev.start > B.maxMs;
     if (now - ev.last > B.gapMs || capped) {
+      const feat = ev.sb ? ev.sb.features() : null;
+      emit('burst', { t: now, start: ev.start, feat, capped });
       if (!ev.fired && !(B.rejectCapped && capped)) {
-        const latPk = ev.latMax >= -ev.latMin ? ev.latMax : ev.latMin;
-        const depPk = ev.depMax >= -ev.depMin ? ev.depMax : ev.depMin;
-        if (Math.abs(latPk) >= S.latMin && Math.abs(latPk) >= Math.abs(depPk)) kind = latPk > 0 ? 'right' : 'left';
-        else if (Math.abs(depPk) >= B.vMin) kind = depPk > 0 ? 'push' : 'pull';
+        if (model && feat) {
+          const c = SW.classify(feat, model);
+          if (c.dir) kind = c.dir;
+        }
+        if (!kind) {
+          const depPk = ev.depMax >= -ev.depMin ? ev.depMax : ev.depMin;
+          if (Math.abs(depPk) >= B.vMin) kind = depPk > 0 ? 'push' : 'pull';
+        }
       }
       st.sburst = null;
       st.sburstLock = now + B.lockMs;
@@ -753,7 +821,7 @@
   });
 
   const api = {
-    config, info: null, lastBandCheck: null,
+    config, info: null, lastBandCheck: null, foreign: [],
     start, stop, bandCheck, on, off, summary, drawZoom, drawWide,
     setFreq(hz) { if (st.running && !st.busy) setTone(st.tone, Number(hz)); else st.f0 = Number(hz); },
     setVolume(v) {
@@ -775,6 +843,8 @@
     },
     get running() { return st.running; },
     get stereo() { return st.stereo; },
+    get stereoPair() { return st.stereo && st.sch ? [st.sch.L.f, st.sch.R.f] : null; }, // tones playing now
+    get hasLrModel() { return !!lrModelNow(); },     // left/right usable with the tone pair playing now
     get freq() { return st.f0; },
     get counts() { return { ...st.counts }; },
   };

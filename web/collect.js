@@ -177,6 +177,7 @@
     S = {
       opt, speed, who, dist, noise, queue, target, trials: [], win: null, aborted: false,
       typingFrom: 0, typingFalse: 0, startedAt: new Date().toISOString(), device: deviceId(),
+      foreign: new Set(BatEars.foreign || []), // other ultrasonic tones heard during the session (kHz)
     };
     show(true);
     feedback('');
@@ -184,7 +185,18 @@
     ui.head.textContent = headText();
     renderProgress();
     let result = null;
-    const off = BatEars.on('gesture', onGesture);
+    const offG = BatEars.on('gesture', onGesture);
+    const offF = BatEars.on('foreign', (e) => { if (S) e.tones.forEach((k) => S.foreign.add(k)); });
+    // stereo: keep each trial's longest motion burst (swipe.js features) for the left/right check; a swipe can
+    // end a little after its window closes, so the trial that just closed still takes it
+    const offB = BatEars.on('burst', (e) => {
+      if (!S || !e.feat) return;
+      const span = WINDOW_MS * S.speed;
+      const keep = (w) => e.t >= w.t0 && e.start <= w.t0 + span && (!w.feat || e.feat.n > w.feat.n);
+      if (S.win) { if (keep(S.win)) S.win.feat = e.feat; }
+      else if (S.lastWin && keep(S.lastWin)) { S.lastWin.feat = e.feat; S.lastWin.trial.swipe = e.feat; }
+    });
+    const off = () => { offG(); offF(); offB(); };
     try {
       say('준비', '마이크를 켜는 중이에요. 손을 치워 주세요');
       if (BatEars.running && BatEars.stereo !== !!opt.swipe) await BatEars.stop(); // switch mono <-> stereo
@@ -206,8 +218,14 @@
       BatRecorder.setLabel('idle');
       BatRecorder.start();
       S.session = BatRecorder.session;
-      say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
-      await sleep(1500 * speed);
+      if (opt.swipeOnly) {
+        say('손을 키보드 위 10~15cm에 두세요', BatEars.hasLrModel ? '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm)'
+          : '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm). 처음엔 기록만 하고, 끝나면 이 노트북에서 좌우가 되는지 알려 드려요');
+        await sleep(2500 * speed);
+      } else {
+        say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
+        await sleep(1500 * speed);
+      }
 
       S.phase = 'trials';
       while (S.queue.length && !S.aborted) {
@@ -223,7 +241,7 @@
         beep(990, 140, 0.12);
         BatRecorder.setLabel(kind);
         BatRecorder.markCue(kind);
-        S.win = { t0: performance.now(), got: null };
+        S.win = { t0: performance.now(), got: null, feat: null };
         say(`${NAMES[kind]}!`, HOW[kind]);
         ui.big.className = 'c-big go ' + kind;
         await sleep(WINDOW_MS * speed);
@@ -231,9 +249,14 @@
         ui.big.className = 'c-big';
         const got = S.win.got;
         const res = !got ? 'miss' : got.kind === kind ? 'hit' : 'wrong';
-        S.trials.push({ kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tEnd: performance.now() + 600 * speed });
+        const trial = { kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tEnd: performance.now() + 600 * speed };
+        if (S.win.feat) trial.swipe = S.win.feat;
+        S.trials.push(trial);
+        S.lastWin = { t0: S.win.t0, feat: S.win.feat, trial };
         S.win = null;
-        if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
+        const learning = (kind === 'left' || kind === 'right') && !BatEars.hasLrModel;
+        if (learning) feedback(`📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
+        else if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
         else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind}(으)로 잡혔어요 · 빠르게 치고 천천히 돌아오기`, 'bad');
         else feedback('⚪ 못 잡았어요 · 조금 더 빠르고 크게', 'miss');
         renderProgress();
@@ -242,6 +265,10 @@
       }
 
       S.phase = 'after';
+      if (opt.swipe && window.BatSwipe && !S.aborted) {
+        await sleep(400 * speed); // let the last swipe's burst end
+        S.lrCheck = runLrCheck();
+      }
       if (opt.typing && !S.aborted) {
         say('⌨️ 평소처럼 타자 치기', '손짓은 하지 말고 15초 동안 아무 글이나 쳐 주세요 (오작동 측정)');
         feedback('');
@@ -288,6 +315,22 @@
     });
   }
 
+  // The cued swipes decide whether this laptop can do left/right at all (bravo's swipe.js LRCheck: leave-one-out
+  // accuracy >= 0.8 and d' >= 1.5). A pass stores the model for this tone pair; it is used from the next swipe on.
+  const LR_REASON = { no: '좌우 신호가 없어요 (스피커 간격·소리 효과 탓일 수 있어요)', weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요', not: '쓸기가 너무 적게 잡혔어요' };
+  function runLrCheck() {
+    const chk = new BatSwipe.LRCheck({ need: 4 });
+    S.trials.forEach((t) => { if ((t.kind === 'left' || t.kind === 'right') && t.swipe) chk.add(t.kind, t.swipe); });
+    const r = chk.result(), pair = BatEars.stereoPair;
+    const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^weak/.test(r.reason) ? LR_REASON.weak : LR_REASON.not;
+    const out = { ok: r.ok, looAcc: r.looAcc, dprime: r.dprime || null, reason: r.reason, why, nL: chk.L.length, nR: chk.R.length, hadModel: BatEars.hasLrModel, pair };
+    if (r.ok && pair) {
+      BatEars.config.lrModel = { pair: pair.slice(), model: r.model, looAcc: r.looAcc, at: new Date().toISOString() };
+      store.set('batears-lr-model', BatEars.config.lrModel);
+    }
+    return out;
+  }
+
   function finish() {
     if (!S || !S.session) return null;
     const by = {};
@@ -304,7 +347,8 @@
       live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
       engine: BatEars.info, detector: BatEars.config.detector, burst: BatEars.config.burst, volume: BatEars.config.volume,
       freq: BatEars.freq, stereo: BatEars.stereo,
-      ...(BatEars.stereo ? { stereoDetector: BatEars.config.stereoDetector, stereoBurst: BatEars.config.stereoBurst, swapLR: !!BatEars.config.swapLR } : {}),
+      ...(BatEars.stereo ? { stereoDetector: BatEars.config.stereoDetector, stereoPair: BatEars.stereoPair, lrCheck: S.lrCheck || null, lrModel: BatEars.config.lrModel } : {}),
+      foreignTones: [...S.foreign].sort((a, b) => a - b),
       client: {
         ua: navigator.userAgent, platform: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform,
         lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -319,7 +363,10 @@
       BatRecorder.saveJson(`batears_${S.session}.json`, meta);
     }
     say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
-    feedback(n ? `실시간 정확도 ${Math.round((hits / n) * 100)}% (${hits}/${n})` + (S.opt.typing ? ` · 타자 중 오작동 ${S.typingFalse}번` : '') : '', 'ok');
+    const lr = S.lrCheck;
+    const lrText = !lr ? '' : lr.ok ? `↔ 좌우 쓸 수 있어요! (교차검증 ${Math.round(lr.looAcc * 100)}%) 이제부터 좌우가 잡혀요` : `↔ 이 노트북은 좌우 구분이 어려워요: ${lr.why}`;
+    if (S.opt.swipeOnly && lr && !lr.hadModel) feedback(lrText, lr.ok ? 'ok' : 'bad'); // a learning run: no live verdicts to show
+    else feedback((n ? `실시간 정확도 ${Math.round((hits / n) * 100)}% (${hits}/${n})` : '') + (S.opt.typing ? ` · 타자 중 오작동 ${S.typingFalse}번` : '') + (lrText ? ` · ${lrText}` : ''), 'ok');
     return { session: S.session, rows, ...meta.live };
   }
 

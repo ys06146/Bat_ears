@@ -43,6 +43,14 @@
   // ---- engine events
   BatEars.on('state', setStatus);
   BatEars.on('error', (e) => warn(`마이크를 열 수 없어요 (${e.name}). 주소창 왼쪽 아이콘 → 마이크 허용 → 새로고침.`));
+  // the left/right model learned by an earlier "↔ 좌우만" check on this laptop (used only with the same tone pair)
+  try { const m = JSON.parse(localStorage.getItem('batears-lr-model')); if (m && m.model && m.pair) BatEars.config.lrModel = m; } catch (_) { /* none */ }
+  // another laptop running Bat Ears (or any ultrasonic beacon) nearby spoils both devices' detection
+  const FOREIGN = '⚠️ 다른 초음파';
+  BatEars.on('foreign', (e) => {
+    if (e.tones.length) warn(`${FOREIGN} 소리가 들려요 (${e.tones.map((k) => k.toFixed(1)).join(', ')} kHz). 다른 노트북에서 Bat Ears를 켜 두었다면 꺼 주세요. 같이 켜면 서로 감지를 망쳐요.`);
+    else if ($('warn').textContent.startsWith(FOREIGN)) warn('');
+  });
   BatEars.on('gesture', (e) => {
     const c = BatEars.counts;
     $('nPush').textContent = c.push || 0;
@@ -165,7 +173,7 @@
       }
     }
     const res = await BatCollect.start({
-      who, dist: $('dist').value, noise: $('noise').value, perGesture: Number($('perGesture').value),
+      who, dist: $('dist').value, noise: $('noise').value, perGesture: lrOnly ? 5 : Number($('perGesture').value),
       wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: lrOnly ? false : $('incTyping').checked, freq: Number($('freq').value),
       swipeOnly: lrOnly,
     });
@@ -310,7 +318,10 @@
       const vli = head.indexOf('vL');
       const stereoRows = lines.slice(1).filter((l) => l.split(',')[vli] !== '').length;
       const m = BatCollect.lastMeta || {};
-      const meta = { noise: m.noise, noiseSource: m.noiseSource, room: m.room, sessionIndex: m.sessionIndex, fpsKeys: Object.keys(m.client || {}), burst: !!m.burst };
+      const meta = {
+        noise: m.noise, noiseSource: m.noiseSource, room: m.room, sessionIndex: m.sessionIndex, fpsKeys: Object.keys(m.client || {}), burst: !!m.burst,
+        stereoPair: m.stereoPair, lrCheck: m.lrCheck, swipeFeats: (m.trials || []).filter((t) => t.swipe).length, foreignTones: m.foreignTones,
+      };
       console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, meta, gameRunning: ForcePush.state.running }));
       document.title = 'DONE';
     })();
@@ -319,14 +330,20 @@
   if (params.get('auto') === '1') {
     (async () => {
       if (params.get('stereo') === '1') $('stereo').checked = true;
-      const t0 = performance.now(), events = [];
+      const t0 = performance.now(), events = [], bursts = [];
       BatEars.on('gesture', (e) => events.push(`${e.kind}@${((e.t - t0) / 1000).toFixed(2)}`));
       window.__autoEvents = events;
+      // stereo: &lrmodel=<{pair, model} JSON> injects a left/right model (otherwise none, ignoring a saved one);
+      // every burst's swipe.js features are logged so a model can be learned offline from a known schedule
+      try { BatEars.config.lrModel = params.get('lrmodel') ? JSON.parse(params.get('lrmodel')) : null; } catch (_) { BatEars.config.lrModel = null; }
+      BatEars.on('burst', (e) => { if (e.feat) bursts.push({ at: +((e.start - t0) / 1000).toFixed(2), ilat: +e.feat.ilat.toFixed(4), balSlope: +e.feat.balSlope.toFixed(1), n: e.feat.n }); });
+      window.__autoBursts = bursts;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();
       await sleep(Number(params.get('secs') || 8) * 1000);
       const summary = ok ? await BatEars.stop() : null;
-      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, events: window.__autoEvents, summary, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
+      if (BatEars.stereo || params.get('stereo') === '1') console.log('BATEARS ' + JSON.stringify({ type: 'auto-bursts', bursts: window.__autoBursts, pair: BatEars.info && BatEars.info.stereoFreqs }));
+      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, events: window.__autoEvents, summary, foreign: BatEars.foreign, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
       document.title = 'DONE';
     })();
   }
