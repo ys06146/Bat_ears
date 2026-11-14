@@ -140,20 +140,27 @@ def cue_report(paths, window_ms=1500):
         print(f'  false push/pull during idle+other: {fp} in {quiet_ms / 60000:.1f} min = {fp / (quiet_ms / 60000):.1f} per min')
 
 
-def splits(groups, seed=0):
-    sessions = sorted(set(groups))
-    if len(sessions) >= 2:
-        for s in sessions:
+def splits(groups, y, seed=0, min_samples=30, k=5):
+    """Leave-one-session-out when there are 2+ real sessions; otherwise stratified k-fold (optimistic)."""
+    counts = {s: groups.count(s) for s in set(groups)}
+    big = sorted(s for s, n in counts.items() if n >= min_samples)
+    if len(big) >= 2:
+        for s in big:
             test = [i for i, g in enumerate(groups) if g == s]
             train = [i for i, g in enumerate(groups) if g != s]
             yield f'test={s}', train, test
-    else:
-        rng = random.Random(seed)
-        idx = list(range(len(groups)))
+        return
+    print(f'fewer than 2 sessions with {min_samples}+ samples: stratified {k}-fold within the data '
+          '(optimistic; record more sessions for a fair estimate)')
+    rng = random.Random(seed)
+    fold = [0] * len(y)
+    for c in sorted(set(y)):
+        idx = [i for i, lab in enumerate(y) if lab == c]
         rng.shuffle(idx)
-        cut = int(len(idx) * 0.7)
-        print('only one session: random 70/30 split (optimistic; record more sessions)')
-        yield 'random 70/30', idx[:cut], idx[cut:]
+        for j, i in enumerate(idx):
+            fold[i] = j % k
+    for f in range(k):
+        yield f'fold {f + 1}/{k}', [i for i in range(len(y)) if fold[i] != f], [i for i in range(len(y)) if fold[i] == f]
 
 
 def main():
@@ -183,7 +190,7 @@ def main():
         have_sklearn = False
         print('(scikit-learn not installed: random forest skipped)')
 
-    for name, tr, te in splits(groups):
+    for name, tr, te in splits(groups, y):
         Xtr, ytr = [X[i] for i in tr], [y[i] for i in tr]
         Xte, yte = [X[i] for i in te], [y[i] for i in te]
         if not Xte or len(set(ytr)) < 2:

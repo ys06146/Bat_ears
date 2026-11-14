@@ -48,7 +48,8 @@
     $('nPush').textContent = c.push || 0;
     $('nPull').textContent = c.pull || 0;
     const g = $('gesture');
-    g.textContent = e.kind === 'push' ? '밀기 ⟶' : e.kind === 'pull' ? '⟵ 당기기' : '〰 흔들기';
+    const names = { push: '밀기 ⟶', pull: '⟵ 당기기', wave: '〰 흔들기', left: '◀ 왼쪽', right: '오른쪽 ▶' };
+    g.textContent = names[e.kind] || e.kind;
     g.className = e.kind;
     clearAt = performance.now() + 600;
   });
@@ -75,11 +76,16 @@
   // ---- controls
   async function startEngine() {
     warn('');
-    const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked });
+    const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked, stereo: $('stereo').checked });
     if (ok) showSettings(BatEars.info);
     else showIntro(null);
     return ok;
   }
+  $('stereo').onchange = async () => {
+    if (!BatEars.running) return;
+    await BatEars.stop();
+    await startEngine();
+  };
   $('start').onclick = startEngine;
   $('stop').onclick = () => BatEars.stop();
   $('check').onclick = async () => {
@@ -137,8 +143,28 @@
     if (ok && BatEars.info) showSettings(BatEars.info);
   };
 
-  // ---- game, scoreboard
+  // ---- game / sonar view, scoreboard
   ForcePush.init($('game'));
+  SonarView.init($('sonar'), $('cam'));
+  function setView(view) {
+    const sonar = view === 'sonar';
+    $('game').hidden = sonar;
+    $('sonar').hidden = !sonar;
+    $('camBtn').hidden = !sonar;
+    $('tabGame').classList.toggle('sel', !sonar);
+    $('tabSonar').classList.toggle('sel', sonar);
+    document.body.classList.toggle('sonar-on', sonar);
+    SonarView.setActive(sonar);
+    if (!sonar) { SonarView.stopCamera(); $('camBox').hidden = true; $('camBtn').classList.remove('sel'); }
+  }
+  $('tabGame').onclick = () => setView('game');
+  $('tabSonar').onclick = () => setView('sonar');
+  $('camBtn').onclick = async () => {
+    const on = await SonarView.toggleCamera();
+    $('camBox').hidden = !on;
+    $('camBtn').classList.toggle('sel', on);
+  };
+  if (params.get('view') === 'sonar') setView('sonar');
   setStatus({ running: false });
   showIntro(params.get('auto') === '1' ? null : 'steps');
   $('introStart').onclick = () => { showIntro('cal'); startEngine(); };
@@ -184,11 +210,15 @@
 
   if (params.get('auto') === '1') {
     (async () => {
+      if (params.get('stereo') === '1') $('stereo').checked = true;
+      const t0 = performance.now(), events = [];
+      BatEars.on('gesture', (e) => events.push(`${e.kind}@${((e.t - t0) / 1000).toFixed(2)}`));
+      window.__autoEvents = events;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();
       await sleep(Number(params.get('secs') || 8) * 1000);
       const summary = ok ? await BatEars.stop() : null;
-      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, summary, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
+      console.log('BATEARS ' + JSON.stringify({ type: 'auto-app', ok, events: window.__autoEvents, summary, game: ForcePush.state, recorderRows: BatRecorder.count, csvHead: BatRecorder.toCsv().split('\n').slice(0, 2) }));
       document.title = 'DONE';
     })();
   }

@@ -12,7 +12,7 @@ import os
 import random
 import sys
 
-FPS = 60
+FPS = int(os.environ.get('FAKE_FPS', '60'))  # rows per second (the browser logs one per screen refresh)
 BLOCK_S = 30
 LABELS = ['idle', 'push', 'pull', 'wave', 'other']
 F0, C = 20000.0, 343.0

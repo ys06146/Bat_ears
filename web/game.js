@@ -175,12 +175,26 @@
 
   function onGesture(e) {
     if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
+    if (document.body.classList.contains('sonar-on')) return; // sonar view is showing instead of the game
     if (!S.running) {
       if (e.kind === 'push' && S.ready) start();
       return;
     }
     const now = performance.now();
     const power = Math.min(2, 0.6 + (e.speed || 0.5));
+    if (e.kind === 'left' || e.kind === 'right') {
+      const side = e.kind === 'left' ? -1 : 1;
+      let n = 0;
+      for (const o of S.objs) {
+        if (!o.dead && !o.star && (o.x < 0 ? -1 : 1) === side) { o.dead = true; burst(o, '#80deea', 24, 1.0); n++; }
+      }
+      const mult = n ? hit(now) : 1;
+      S.score += n * 12 * mult;
+      S.slash = { side, t: now };
+      say(n ? `SLASH ${side < 0 ? '◀' : '▶'} ×${n} +${n * 12 * mult}` : (side < 0 ? '◀ SLASH' : 'SLASH ▶'), '#80deea');
+      if (n) sfx.push(1); else sfx.whiff();
+      return;
+    }
     if (e.kind === 'push') {
       const o = nearest(false);
       if (!o) { say('PUSH', '#4fc3f7'); sfx.whiff(); return; }
@@ -272,6 +286,16 @@
       g.globalAlpha = Math.max(0, Math.min(1, p.life));
       g.fillStyle = p.color;
       g.fillRect(p.x, p.y, 3, 3);
+    }
+    g.globalAlpha = 1;
+    if (S.slash && now - S.slash.t < 300) {
+      const k = (now - S.slash.t) / 300, x0 = S.slash.side < 0 ? 0 : W / 2;
+      g.strokeStyle = `rgba(128,222,234,${1 - k})`;
+      g.lineWidth = 8 * (1 - k) + 2;
+      g.beginPath();
+      g.moveTo(x0 + W * 0.05, H * (0.15 + 0.7 * k));
+      g.lineTo(x0 + W * 0.45, H * (0.85 - 0.7 * k));
+      g.stroke();
     }
     if (S.ring) {
       const k = (now - S.ring.t0) / 600;

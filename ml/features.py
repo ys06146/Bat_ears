@@ -13,10 +13,12 @@ import random
 import statistics
 
 ACT_DB = 4.0          # frame is active if max(dUp, dDown) exceeds this
-MERGE_GAP = 6         # merge segments separated by <= this many frames (~100 ms at 60 fps)
-MIN_LEN = 3           # drop segments shorter than this many frames
-MAX_LEN = 150         # cap segment length (~2.5 s)
-IDLE_WIN = 18         # frames per sampled idle window (~300 ms)
+# Durations are in ms and converted per session, because the browser records one row per screen
+# refresh (60, 120, 144 Hz laptops all exist).
+MERGE_GAP_MS = 100    # merge segments separated by gaps up to this long
+MIN_LEN_MS = 50       # drop shorter segments
+MAX_LEN_MS = 2500     # cap segment length
+IDLE_WIN_MS = 300     # sampled idle window length
 IDLE_PER_MIN = 40     # idle windows sampled per minute of idle recording
 BANDS = ['u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6']
 
@@ -56,8 +58,20 @@ def band_baseline(rows):
     return base
 
 
-def segments(rows):
+def session_fps(rows):
+    """Frames per second of one recording, from the median gap between rows (60 if unknown)."""
+    t = [_f(r['t_ms']) for r in rows]
+    gaps = sorted(b - a for a, b in zip(t, t[1:]) if b > a)
+    return 1000.0 / gaps[len(gaps) // 2] if gaps else 60.0
+
+
+def frames_for(ms, fps, at_least=1):
+    return max(at_least, int(round(ms * fps / 1000.0)))
+
+
+def segments(rows, fps=60.0):
     """Index ranges [i, j) of active stretches."""
+    merge_gap, min_len, max_len = frames_for(MERGE_GAP_MS, fps), frames_for(MIN_LEN_MS, fps, 2), frames_for(MAX_LEN_MS, fps)
     act = [max(_f(r['dUp_db']), _f(r['dDown_db'])) > ACT_DB for r in rows]
     segs, i, n = [], 0, len(rows)
     while i < n:
@@ -66,12 +80,12 @@ def segments(rows):
             continue
         j = i
         gap = 0
-        while j < n and (act[j] or gap < MERGE_GAP):
+        while j < n and (act[j] or gap < merge_gap):
             gap = 0 if act[j] else gap + 1
             j += 1
         j -= gap
-        if j - i >= MIN_LEN:
-            segs.append((i, min(j, i + MAX_LEN)))
+        if j - i >= min_len:
+            segs.append((i, min(j, i + max_len)))
         i = j + 1
     return segs
 
@@ -116,10 +130,11 @@ def build_dataset(paths, seed=0):
     rng = random.Random(seed)
     X, y, groups, meta = [], [], [], []
     for key, rows in load_rows(paths).items():
-        if len(rows) < MIN_LEN:
+        if len(rows) < 10:
             continue
         base = band_baseline(rows)
-        segs = segments(rows)
+        fps = session_fps(rows)
+        segs = segments(rows, fps)
         for (i, j) in segs:
             part = rows[i:j]
             feats = featurize(part, base)
@@ -129,15 +144,15 @@ def build_dataset(paths, seed=0):
             fired = [r['gesture'].replace('_sim', '') for r in part if r.get('gesture')]
             meta.append({'rule': fired[0] if fired else 'none', 'start_ms': _f(part[0]['t_ms'])})
         # quiet idle windows (outside any active segment)
-        busy = set()
+        busy, pad, idle_win = set(), frames_for(100, fps), frames_for(IDLE_WIN_MS, fps, 3)
         for (i, j) in segs:
-            busy.update(range(max(0, i - 6), j + 6))
+            busy.update(range(max(0, i - pad), j + pad))
         idle_idx = [k for k, r in enumerate(rows) if r['label'] == 'idle' and k not in busy]
         idle_set = set(idle_idx)
-        n_win = int(len(idle_idx) / 60 / 60 * IDLE_PER_MIN) + 1
-        starts = [k for k in idle_idx if all((k + d) in idle_set for d in range(IDLE_WIN))]
+        n_win = int(len(idle_idx) / fps / 60 * IDLE_PER_MIN) + 1
+        starts = [k for k in idle_idx if all((k + d) in idle_set for d in range(idle_win))]
         for k in rng.sample(starts, min(n_win, len(starts))):
-            part = rows[k:k + IDLE_WIN]
+            part = rows[k:k + idle_win]
             feats = featurize(part, base)
             X.append([feats[f] for f in FEATURES])
             y.append('idle')
