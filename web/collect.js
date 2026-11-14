@@ -205,6 +205,7 @@
       say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
       await sleep(1500 * speed);
 
+      S.phase = 'trials';
       while (S.queue.length && !S.aborted) {
         const kind = S.queue.shift();
         const tStart = performance.now();
@@ -236,6 +237,7 @@
         await sleep(900 * speed);
       }
 
+      S.phase = 'after';
       if (opt.typing && !S.aborted) {
         say('⌨️ 평소처럼 타자 치기', '손짓은 하지 말고 15초 동안 아무 글이나 쳐 주세요 (오작동 측정)');
         feedback('');
@@ -317,7 +319,7 @@
   }
 
   function undo() {
-    if (!S || !S.trials.length) return;
+    if (!S || !S.trials.length || S.phase !== 'trials') return; // only while trials are still running
     const last = S.trials.pop();
     BatRecorder.relabel(last.tStart, last.tEnd, 'skip');
     S.queue.push(last.kind);
