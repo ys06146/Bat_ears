@@ -77,6 +77,7 @@
   }
 
   function onGesture(e) {
+    if (window.BatCollect && window.BatCollect.active) return; // data collection in progress
     if (!S.running) { if (e.kind === 'push') start(); return; }
     const power = Math.min(2, 0.6 + (e.speed || 0.5));
     if (e.kind === 'push') {

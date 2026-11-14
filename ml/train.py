@@ -17,7 +17,7 @@ import os
 import random
 import sys
 
-from features import FEATURES, build_dataset, find_csvs
+from features import FEATURES, build_dataset, find_csvs, load_rows
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -104,6 +104,42 @@ def report(name, y_true, y_pred, classes):
     return acc
 
 
+def cue_report(paths, window_ms=1500):
+    """Guided-collection recordings carry a `cue` column. For each cue: did the browser's rule-based
+    detector fire the right gesture within window_ms? Also count false push/pull during idle/other."""
+    hits = {'push': [0, 0], 'pull': [0, 0]}
+    wrong, fp, quiet_ms = 0, 0, 0.0
+    for rows in load_rows(paths).values():
+        if not rows or 'cue' not in rows[0]:
+            continue
+        t = [float(r['t_ms'] or 0) for r in rows]
+        cues = [(t[i], r['cue']) for i, r in enumerate(rows) if r.get('cue') in hits]
+        events = [(t[i], r['gesture']) for i, r in enumerate(rows) if r.get('gesture') in ('push', 'pull')]
+        if not cues:
+            continue
+        for ct, kind in cues:
+            got = [k for (et, k) in events if ct <= et <= ct + window_ms]
+            hits[kind][1] += 1
+            if kind in got:
+                hits[kind][0] += 1
+            elif got:
+                wrong += 1
+        for i in range(1, len(rows)):
+            if rows[i]['label'] in ('idle', 'other'):
+                quiet_ms += max(0.0, min(100.0, t[i] - t[i - 1]))
+        fp += sum(1 for i, r in enumerate(rows) if r.get('gesture') in ('push', 'pull') and r['label'] in ('idle', 'other'))
+    total = hits['push'][1] + hits['pull'][1]
+    if not total:
+        return
+    print(f'\n== guided-collection cues (rule-based detector, within {window_ms / 1000:.1f} s)')
+    for k, (h, n) in hits.items():
+        if n:
+            print(f'  {k}: {h}/{n} = {h / n:.0%}')
+    print(f'  wrong direction: {wrong}/{total}')
+    if quiet_ms > 0:
+        print(f'  false push/pull during idle+other: {fp} in {quiet_ms / 60000:.1f} min = {fp / (quiet_ms / 60000):.1f} per min')
+
+
 def splits(groups, seed=0):
     sessions = sorted(set(groups))
     if len(sessions) >= 2:
@@ -175,6 +211,8 @@ def main():
         rule_fa = sum(all_rule[i] in ('push', 'pull') for i in fa) / len(fa)
         lr_fa = sum(all_lr[i] in ('push', 'pull') for i in fa) / len(fa)
         print(f'false push/pull on idle+other ({len(fa)} samples): rule-based {rule_fa:.3f}  vs  logistic {lr_fa:.3f}')
+
+    cue_report(paths)
 
     final = Softmax(classes).fit(X, y)
     out = os.path.join(HERE, 'model.json')

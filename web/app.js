@@ -106,11 +106,38 @@
   $('save').onclick = () => BatRecorder.download();
   $('clear').onclick = () => BatRecorder.clear();
 
+  // ---- guided data collection
+  $('collect').onclick = async () => {
+    if (BatCollect.active) return;
+    if (BatRecorder.canPickFolder && !BatRecorder.folderName) {
+      try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: the CSV is downloaded at the end instead */ }
+    }
+    const ok = await BatCollect.start({ dist: $('dist').value, who: $('who').value, freq: Number($('freq').value) });
+    if (ok && BatEars.info) showSettings(BatEars.info);
+  };
+
   // ---- game
   ForcePush.init($('game'));
   setStatus({ running: false });
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
+  // ---- self-test of the guided collection: index.html?collect=1&fast=0.15
+  if (params.get('collect') === '1') {
+    (async () => {
+      const res = await BatCollect.start({ speed: Number(params.get('fast') || 0.15), dist: '20', who: 'p0', noDownload: true });
+      const lines = res ? BatRecorder.toCsv(res.session).split('\n') : [];
+      const head = lines[0] ? lines[0].split(',') : [];
+      const li = head.indexOf('label'), ci = head.indexOf('cue'), byLabel = {}, cues = {};
+      lines.slice(1).forEach((l) => {
+        const c = l.split(',');
+        byLabel[c[li]] = (byLabel[c[li]] || 0) + 1;
+        if (c[ci]) cues[c[ci]] = (cues[c[ci]] || 0) + 1;
+      });
+      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, gameRunning: ForcePush.state.running }));
+      document.title = 'DONE';
+    })();
+  }
+
   if (params.get('auto') === '1') {
     (async () => {
       const ok = await startEngine();

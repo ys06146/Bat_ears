@@ -18,7 +18,8 @@ LABELS = ['idle', 'push', 'pull', 'wave', 'other']
 F0, C = 20000.0, 343.0
 SUB_EDGES = [25, 50, 80, 120, 170, 230, 300]
 HEAD = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db',
-        'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6']
+        'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'cue']
+REACTION_S = 0.3  # the fake "cue" appears this long before each push/pull starts
 
 
 def hann(x):
@@ -66,6 +67,13 @@ def make_session(path, seed, name):
     for i, lab in enumerate(LABELS):
         blocks.append((lab, i * BLOCK_S, events_for(lab, rng, i * BLOCK_S, BLOCK_S)))
     last_fire, cand, cand_n = -10.0, None, 0
+    # cue frames: shortly before each primary push/pull (the first bump of each pair in push/pull blocks)
+    cue_at = {}
+    for lab, _, evs in blocks:
+        if lab in ('push', 'pull'):
+            for (t0, _len, kind, _amp, _spd) in evs:
+                if kind == lab:
+                    cue_at[max(0, int(round((t0 - REACTION_S) * FPS)))] = lab
     with open(path, 'w', newline='') as f:
         w = csv.writer(f)
         w.writerow(HEAD)
@@ -99,7 +107,7 @@ def make_session(path, seed, name):
             snr = 93 + rng.gauss(0, 1.5)
             w.writerow([name, f'{t * 1000:.1f}', lab, gesture, f'{up:.2f}', f'{dn:.2f}', f'{base_up + up:.2f}',
                         f'{base_dn + dn:.2f}', f'{v:.3f}', f'{snr:.1f}', '-31.7', f'{-31.7 - snr:.1f}',
-                        *[f'{x:.2f}' for x in bu], *[f'{x:.2f}' for x in bd]])
+                        *[f'{x:.2f}' for x in bu], *[f'{x:.2f}' for x in bd], cue_at.get(i, '')])
 
 
 def main():

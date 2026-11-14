@@ -21,6 +21,15 @@
   <aside>
     <div class="card">
       <div class="row">
+        <button id="collect">🎯 데이터 수집 (2분)</button>
+        <label>거리 <select id="dist"><option>10</option><option selected>20</option><option>30</option></select>cm</label>
+        <label>참가자 <select id="who"><option>p1</option><option>p2</option><option>p3</option><option>p4</option></select></label>
+      </div>
+      <p class="hint">누르면 저장 폴더(드라이브 nhng/ml/data)를 한 번 고르고, 화면 지시대로 손만 움직이면 라벨과 저장이 자동이에요.</p>
+    </div>
+
+    <div class="card">
+      <div class="row">
         <button id="start">▶ 시작</button>
         <button id="stop" class="secondary" disabled>■ 정지</button>
         <button id="check" class="secondary" disabled>대역 점검</button>
@@ -83,6 +92,7 @@
 <script src="dsp.js"></script>
 <script src="recorder.js"></script>
 <script src="game.js"></script>
+<script src="collect.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -9,18 +9,21 @@
  *
  * Hotkeys: 1 idle, 2 push, 3 pull, 4 wave, 5 other (typing, walking by, ...)
  * Columns: session, t_ms, label, gesture, dUp_db, dDown_db, up_db, down_db, v_mps, snr_db,
- *          carrier_db, noise_db, u1..u6, d1..d6 (sub-band echo energy above / below the carrier, dB)
+ *          carrier_db, noise_db, u1..u6, d1..d6 (sub-band echo energy above / below the carrier, dB),
+ *          cue (set on the frame where the guided collection asked for a gesture)
+ *   setTag(tag)        appended to the next session id / file name (e.g. d20_p1)
+ *   markCue(kind)      mark the next frame with a cue
  */
 (function () {
   'use strict';
 
   const LABELS = ['idle', 'push', 'pull', 'wave', 'other'];
   const HEAD = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db',
-    'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6'];
+    'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'cue'];
   const AUTOSAVE_MS = 15000;
   const rows = [];
   const watchers = [];
-  let recording = false, label = 'idle', pendingGesture = '', session = '';
+  let recording = false, label = 'idle', pendingGesture = '', pendingCue = '', session = '', tag = '';
   let dir = null, timer = 0, saving = false, lastSaved = '', lastError = '';
 
   const num = (x, d) => (Number.isFinite(x) ? x.toFixed(d) : '');
@@ -37,8 +40,10 @@
       num(f.dUp, 2), num(f.dDown, 2), num(f.up, 2), num(f.down, 2), num(f.v, 3),
       num(f.snr, 1), num(f.carrier, 1), num(f.noise, 1),
       ...f.bandsUp.map((x) => num(x, 2)), ...f.bandsDown.map((x) => num(x, 2)),
+      pendingCue,
     ]);
     pendingGesture = '';
+    pendingCue = '';
     if (rows.length % 30 === 0) notify();
   });
 
@@ -83,10 +88,13 @@
     get folderName() { return dir ? dir.name : ''; },
     get lastSaved() { return lastSaved; },
     get lastError() { return lastError; },
+    get session() { return session; },
+    setTag(t) { tag = String(t || '').replace(/[^A-Za-z0-9_-]/g, ''); },
+    markCue(kind) { if (recording) pendingCue = String(kind); },
     start() {
       if (recording) return;
       recording = true;
-      session = stamp();
+      session = stamp() + (tag ? `_${tag}` : '');
       if (dir) timer = setInterval(() => saveToFolder(session), AUTOSAVE_MS);
       notify();
     },
@@ -109,11 +117,11 @@
       notify();
       return dir.name;
     },
-    download() {
-      const blob = new Blob([toCsv()], { type: 'text/csv' });
+    download(onlySession) {
+      const blob = new Blob([toCsv(onlySession)], { type: 'text/csv' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `batears_${stamp()}.csv`;
+      a.download = `batears_${onlySession || stamp()}.csv`;
       document.body.appendChild(a);
       a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
