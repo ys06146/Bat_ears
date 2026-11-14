@@ -338,7 +338,7 @@
       // stereo: &lrmodel=<{pair, model} JSON> injects a left/right model (otherwise none, ignoring a saved one);
       // every burst's swipe.js features are logged so a model can be learned offline from a known schedule
       try { BatEars.config.lrModel = params.get('lrmodel') ? JSON.parse(params.get('lrmodel')) : null; } catch (_) { BatEars.config.lrModel = null; }
-      BatEars.on('burst', (e) => { if (e.feat) bursts.push({ at: +((e.start - t0) / 1000).toFixed(2), ilat: +e.feat.ilat.toFixed(4), balSlope: +e.feat.balSlope.toFixed(1), n: e.feat.n }); });
+      BatEars.on('burst', (e) => { if (e.feat) bursts.push({ at: +((e.start - t0) / 1000).toFixed(2), ilat: +e.feat.ilat.toFixed(4), balSlope: +e.feat.balSlope.toFixed(1), balDelta: +(e.feat.balDelta || 0).toFixed(2), ms: Math.round(e.feat.ms), n: e.feat.n }); });
       window.__autoBursts = bursts;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();

@@ -22,8 +22,8 @@
     push: '손바닥을 화면 쪽으로 빠르게 ⟶ (돌아올 땐 천천히)',
     pull: '손을 내 쪽으로 빠르게 ⟵ (돌아올 땐 천천히)',
     wave: '손바닥을 앞뒤로 빠르게 〰',
-    left: '화면 앞에서 손을 왼쪽으로 쓸기 ◀ (키보드 위 10~20cm)',
-    right: '화면 앞에서 손을 오른쪽으로 쓸기 ▶ (키보드 위 10~20cm)',
+    left: '키보드 위 10~15cm에서 손을 왼쪽 끝까지 빠르게 쓸기 ◀ (돌아올 땐 천천히)',
+    right: '키보드 위 10~15cm에서 손을 오른쪽 끝까지 빠르게 쓸기 ▶ (돌아올 땐 천천히)',
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -61,6 +61,7 @@
       <div class="c-head"></div>
       <div class="c-count"></div>
       <div class="c-big"></div>
+      <div class="c-coach"></div>
       <div class="c-how"></div>
       <div class="c-feedback"></div>
       <div class="c-progress"></div>
@@ -73,7 +74,9 @@
     el.querySelector('.c-undo').onclick = () => undo();
     el.querySelector('.c-stop').onclick = () => stop();
     const q = (c) => el.querySelector(c);
-    return { el, head: q('.c-head'), count: q('.c-count'), big: q('.c-big'), how: q('.c-how'), feedback: q('.c-feedback'), progress: q('.c-progress'), bar: q('.c-bar > div') };
+    // a person seen from behind demonstrates each gesture in time with 3-2-1 (web/coach.js)
+    const coach = window.BatCoach ? window.BatCoach.create(q('.c-coach')) : null;
+    return { el, head: q('.c-head'), count: q('.c-count'), big: q('.c-big'), how: q('.c-how'), feedback: q('.c-feedback'), progress: q('.c-progress'), bar: q('.c-bar > div'), coach };
   }
 
   function show(on) {
@@ -144,6 +147,16 @@
     return quietest != null && room.ambientDb > quietest + 8 ? 'noisy' : 'quiet';
   }
 
+  // left/right check session: n swipes each way + 3 push + 3 pull (are pushes/pulls misread as swipes?)
+  const LR_PP = 3;
+  function planLr(n) {
+    const list = [];
+    for (let i = 0; i < n; i++) list.push('left', 'right');
+    for (let i = 0; i < LR_PP; i++) list.push('push', 'pull');
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    return list;
+  }
+
   function plan(perGesture, wave, swipe, pushPull = true) {
     const list = [];
     if (pushPull) for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
@@ -170,8 +183,8 @@
     const dist = Math.max(1, Math.min(150, Math.round(Number(opt.dist)))) || 20; // typed in cm
     let noise = opt.noise === 'noisy' ? 'noisy' : opt.noise === 'quiet' ? 'quiet' : 'auto';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
-    const queue = plan(perGesture, !!opt.wave, opt.swipe, !opt.swipeOnly);
-    const target = opt.swipeOnly ? {} : { push: perGesture, pull: perGesture };
+    const queue = opt.swipeOnly ? planLr(perGesture) : plan(perGesture, !!opt.wave, opt.swipe, true);
+    const target = opt.swipeOnly ? { push: LR_PP, pull: LR_PP } : { push: perGesture, pull: perGesture };
     if (opt.wave) target.wave = Math.ceil(perGesture / 2);
     if (opt.swipe) { target.left = perGesture; target.right = perGesture; }
     S = {
@@ -234,6 +247,8 @@
         for (const n of ['3', '2', '1']) {
           if (S.aborted) break;
           say(n, `다음: ${NAMES[kind]}`, `${S.trials.length + 1}번째`);
+          // 3: start pose and path, 2: slow ghost run, 1: ready again
+          if (ui.coach) { if (n === '2') ui.coach.preview(kind, 500 * speed); else ui.coach.ready(kind); }
           beep(660, 90);
           await sleep(550 * speed);
         }
@@ -243,10 +258,12 @@
         BatRecorder.markCue(kind);
         S.win = { t0: performance.now(), got: null, feat: null };
         say(`${NAMES[kind]}!`, HOW[kind]);
+        if (ui.coach) ui.coach.go(kind); // the real stroke at real speed, then a slow way back
         ui.big.className = 'c-big go ' + kind;
         await sleep(WINDOW_MS * speed);
         BatRecorder.setLabel('idle');
         ui.big.className = 'c-big';
+        if (ui.coach) ui.coach.idle();
         const got = S.win.got;
         const res = !got ? 'miss' : got.kind === kind ? 'hit' : 'wrong';
         const trial = { kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tEnd: performance.now() + 600 * speed };
@@ -317,13 +334,24 @@
 
   // The cued swipes decide whether this laptop can do left/right at all (bravo's swipe.js LRCheck: leave-one-out
   // accuracy >= 0.8 and d' >= 1.5). A pass stores the model for this tone pair; it is used from the next swipe on.
-  const LR_REASON = { no: '좌우 신호가 없어요 (스피커 간격·소리 효과 탓일 수 있어요)', weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요', not: '쓸기가 너무 적게 잡혔어요' };
+  const LR_REASON = {
+    no: '좌우 신호가 없어요 (스피커 간격·소리 효과 탓일 수 있어요)',
+    pp: '밀기·당기기가 좌우로 잘못 읽혀요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
+    rev: '좌우가 자주 반대로 나와요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
+    weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
+    not: '쓸기가 너무 적게 잡혔어요',
+  };
   function runLrCheck() {
     const chk = new BatSwipe.LRCheck({ need: 4 });
-    S.trials.forEach((t) => { if ((t.kind === 'left' || t.kind === 'right') && t.swipe) chk.add(t.kind, t.swipe); });
+    S.trials.forEach((t) => { if (t.swipe) chk.add(t.kind, t.swipe); }); // left/right + push/pull (false-swipe rate)
     const r = chk.result(), pair = BatEars.stereoPair;
-    const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^weak/.test(r.reason) ? LR_REASON.weak : LR_REASON.not;
-    const out = { ok: r.ok, looAcc: r.looAcc, dprime: r.dprime || null, reason: r.reason, why, nL: chk.L.length, nR: chk.R.length, hadModel: BatEars.hasLrModel, pair };
+    const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
+      : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak : LR_REASON.not;
+    const out = {
+      ok: r.ok, looAcc: r.looAcc, looWrong: r.looWrong, looUndecided: r.looUndecided, fpRate: r.fpRate, dComb: r.dComb,
+      dprime: r.dprime || null, reason: r.reason, why, nL: chk.L.length, nR: chk.R.length, nPushPull: chk.N.length,
+      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION,
+    };
     if (r.ok && pair) {
       BatEars.config.lrModel = { pair: pair.slice(), model: r.model, looAcc: r.looAcc, at: new Date().toISOString() };
       store.set('batears-lr-model', BatEars.config.lrModel);
@@ -364,7 +392,10 @@
     }
     say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
     const lr = S.lrCheck;
-    const lrText = !lr ? '' : lr.ok ? `↔ 좌우 쓸 수 있어요! (교차검증 ${Math.round(lr.looAcc * 100)}%) 이제부터 좌우가 잡혀요` : `↔ 이 노트북은 좌우 구분이 어려워요: ${lr.why}`;
+    const pc = (x) => (x == null ? '–' : `${Math.round(x * 100)}%`);
+    const lrText = !lr ? '' : lr.ok
+      ? `↔ 좌우 쓸 수 있어요! (점검: 맞음 ${pc(lr.looAcc)} · 반대 ${pc(lr.looWrong)} · 밀기·당기기 오인 ${pc(lr.fpRate)}) 이제부터 좌우가 잡혀요`
+      : `↔ 이 노트북은 좌우 구분이 어려워요: ${lr.why} (맞음 ${pc(lr.looAcc)} · 반대 ${pc(lr.looWrong)} · 밀기·당기기 오인 ${pc(lr.fpRate)})`;
     if (S.opt.swipeOnly && lr && !lr.hadModel) feedback(lrText, lr.ok ? 'ok' : 'bad'); // a learning run: no live verdicts to show
     else feedback((n ? `실시간 정확도 ${Math.round((hits / n) * 100)}% (${hits}/${n})` : '') + (S.opt.typing ? ` · 타자 중 오작동 ${S.typingFalse}번` : '') + (lrText ? ` · ${lrText}` : ''), 'ok');
     return { session: S.session, rows, ...meta.live };

@@ -100,7 +100,9 @@ select { font: inherit; color: var(--text); background: var(--bg); border: 1px s
 body.collecting #gesture { display: none; }
 .collect .c-head { color: var(--muted); font-size: 13px; }
 .collect .c-count { color: var(--muted); font-size: 16px; min-height: 1.2em; }
-.collect .c-big { font-size: 84px; font-weight: 900; min-height: 100px; line-height: 1.1; }
+.collect .c-big { font-size: 64px; font-weight: 900; min-height: 76px; line-height: 1.1; }
+.collect .c-coach { width: min(440px, 86%); }
+.collect .c-coach svg { width: 100%; height: auto; max-height: 200px; display: block; margin: 0 auto; }
 .collect .c-big.go.push { color: var(--push); }
 .collect .c-big.go.pull { color: var(--pull); }
 .collect .c-big.go.wave { color: #b388ff; }
@@ -202,7 +204,10 @@ body.speed-on #gesture { display: none; }
 .lrtest[hidden] { display: none; }
 .lr-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .lr-controls select { font: inherit; }
+.lr-stage { position: relative; flex: 1; display: flex; min-height: 260px; }
 .lr-canvas { flex: 1; width: 100%; min-height: 260px; display: block; border-radius: 8px; }
+.lr-coach { position: absolute; left: 8px; bottom: 8px; width: min(250px, 34%); pointer-events: none; opacity: 0.95; }
+.lr-coach svg { width: 100%; height: auto; display: block; }
 .lr-hint { margin: 0; }
 body.lr-on #gesture { display: none; }
 body.present .lrtest { border-radius: 0; border: 0; padding-top: 72px; }

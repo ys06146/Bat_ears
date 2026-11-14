@@ -98,13 +98,14 @@ const GEOS = [
   ['speakers 8 cm apart, hand 15 cm away', { spkX: 0.04, dist: 0.15 }],
   ['mono downmix (both tones both speakers)', { spkX: 0.0, dist: 0.15, mono: true }],
 ];
-console.log('synthetic: 4+4 cued check swipes, then 200 test swipes + 100 centred push/pull per geometry (x 10 laptops)');
+console.log('synthetic: 4+4 cued check swipes + 2+2 push/pull, then 200 test swipes + 100 centred push/pull per geometry (x 10 laptops)');
 console.log('geometry                                  old L/R ok   check ok  LOO   new L/R ok  (when enabled)  push/pull -> L/R');
 for (const [name, geo] of GEOS) {
   let oldOk = 0, oldN = 0, enabled = 0, newOk = 0, newN = 0, fpLR = 0, fpN = 0, looSum = 0;
   for (let lap = 0; lap < 10; lap++) {
     const tr = [];
     for (let i = 0; i < 4; i++) for (const k of ['left', 'right']) { const b = mainBurst(gesture(k, geo, NOISE)); if (b) tr.push({ kind: k, frames: b.fr }); }
+    for (const k of ['push', 'pull', 'push', 'pull']) { const b = mainBurst(gesture(k, geo, NOISE)); if (b) tr.push({ kind: k, frames: b.fr }); } // v2 check also cues push/pull
     const model = S.learn(tr), r = { ok: !!model, model };
     looSum += S.learn.last.looAcc;
     if (r.ok) enabled++;

@@ -604,6 +604,7 @@
   function lrModelNow() {
     const m = config.lrModel;
     if (!m || !m.model || !Array.isArray(m.pair) || !st.sch) return null;
+    if (!window.BatSwipe || m.model.v !== window.BatSwipe.VERSION) return null; // learned by an older swipe.js
     return m.pair[0] === st.sch.L.f && m.pair[1] === st.sch.R.f ? m.model : null;
   }
 
