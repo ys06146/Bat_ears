@@ -1,0 +1,290 @@
+{
+ "session": "20261114_171130_anon_d30_quiet_lr_61f5",
+ "who": "anon",
+ "dist": 30,
+ "noise": "quiet",
+ "noiseSource": "manual",
+ "device": "61f5",
+ "sessionIndex": 7,
+ "room": {
+  "ambientDb": -93.11513497631417,
+  "noiseDb": -123.81733703613281,
+  "snrDb": 58.71826171875,
+  "fps": 60
+ },
+ "perGesture": 5,
+ "wave": false,
+ "swipe": true,
+ "swipeOnly": true,
+ "typing": false,
+ "startedAt": "2026-11-14T23:11:26.503Z",
+ "finishedAt": "2026-11-14T23:12:18.931Z",
+ "aborted": false,
+ "live": {
+  "trials": 10,
+  "hits": 0,
+  "accuracy": 0,
+  "byGesture": {
+   "left": {
+    "n": 5,
+    "hit": 0,
+    "wrong": 4,
+    "miss": 1
+   },
+   "right": {
+    "n": 5,
+    "hit": 0,
+    "wrong": 5,
+    "miss": 0
+   }
+  },
+  "typingFalseTriggers": null
+ },
+ "engine": {
+  "f0": 20000,
+  "raw": true,
+  "stereo": true,
+  "stereoFreqs": [
+   18000,
+   19500
+  ],
+  "ctxRate": 48000,
+  "micRate": 48000,
+  "ec": false,
+  "ns": false,
+  "agc": false,
+  "ch": 2,
+  "fft": 8192,
+  "binHz": 5.86,
+  "mic": "마이크 배열(디지털 마이크용 인텔® 스마트 사운드 기술)"
+ },
+ "detector": "burst",
+ "burst": {
+  "aOn": 12,
+  "vFire": 1.3,
+  "vMin": 0.9,
+  "gapMs": 120,
+  "maxMs": 900,
+  "waveFlips": 3,
+  "lockMs": 150,
+  "rejectCapped": true,
+  "vetoSnrDb": 50
+ },
+ "volume": 0.6,
+ "freq": 20000,
+ "stereo": true,
+ "stereoDetector": "velocity",
+ "stereoPair": [
+  18000,
+  19500
+ ],
+ "lrCheck": {
+  "ok": true,
+  "looAcc": 0.8,
+  "dprime": {
+   "ilat": 1.62,
+   "balSlope": 1.16
+  },
+  "reason": "left/right usable",
+  "why": "",
+  "nL": 5,
+  "nR": 5,
+  "hadModel": false,
+  "pair": [
+   18000,
+   19500
+  ]
+ },
+ "lrModel": {
+  "pair": [
+   18000,
+   19500
+  ],
+  "model": {
+   "ilat": {
+    "mid": -0.0003741794376204803,
+    "half": 0.029420611778519668,
+    "sd": 0.03627866210194222,
+    "d": 1.6219237465730358
+   },
+   "balSlope": {
+    "mid": 3.8133154046035695,
+    "half": 13.679002175962333,
+    "sd": 23.60176216916059,
+    "d": 1.159150920844046
+   }
+  },
+  "looAcc": 0.8,
+  "at": "2026-11-14T23:12:17.419Z"
+ },
+ "foreignTones": [],
+ "client": {
+  "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "platform": "Windows",
+  "lang": "ko-KR",
+  "tz": "America/Chicago",
+  "screen": "1440x900@2"
+ },
+ "trials": [
+  {
+   "kind": "left",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 32395.5,
+   "tEnd": 36487.19999999972,
+   "swipe": {
+    "ilat": -0.013341852374981887,
+    "balSlope": -0.6506991410461015,
+    "latPk": -0.5090884171293233,
+    "depPk": -0.9561030610900754,
+    "n": 55,
+    "ms": 900.3999999999069
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.25,
+   "tStart": 36792.799999999814,
+   "tEnd": 40866.39999999991,
+   "swipe": {
+    "ilat": -0.02015646960544603,
+    "balSlope": 4.606565406913935,
+    "latPk": -0.28359752851444325,
+    "depPk": 1.849408662864346,
+    "n": 26,
+    "ms": 600.8000000002794
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.31,
+   "tStart": 41172.09999999963,
+   "tEnd": 45237.19999999972,
+   "swipe": {
+    "ilat": 0.0006517300337292096,
+    "balSlope": 35.03617586586389,
+    "latPk": 0.33108003929980284,
+    "depPk": 1.1931324258923657,
+    "n": 42,
+    "ms": 683.5
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.37,
+   "tStart": 45546.09999999963,
+   "tEnd": 49613.799999999814,
+   "swipe": {
+    "ilat": -0.0063486281617660435,
+    "balSlope": 15.61572625128912,
+    "latPk": -0.3179540526388869,
+    "depPk": 1.353966863883658,
+    "n": 48,
+    "ms": 783.5
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.41,
+   "tStart": 49918.89999999991,
+   "tEnd": 53999,
+   "swipe": {
+    "ilat": -0.014965013994052284,
+    "balSlope": -32.25620972439237,
+    "latPk": -0.3810815236124354,
+    "depPk": 1.7191781677525517,
+    "n": 35,
+    "ms": 762.8999999999069
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.37,
+   "tStart": 54301.19999999972,
+   "tEnd": 58368.39999999991,
+   "swipe": {
+    "ilat": -0.05339663939309289,
+    "balSlope": 17.568452723349413,
+    "latPk": -0.5698634282733296,
+    "depPk": -1.5382745007616658,
+    "n": 34,
+    "ms": 551.1000000000931
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.4,
+   "tStart": 58668.89999999991,
+   "tEnd": 62736.799999999814,
+   "swipe": {
+    "ilat": -0.008048245076276689,
+    "balSlope": 43.48091433875963,
+    "latPk": -0.2784404754585449,
+    "depPk": 1.4486910817564302,
+    "n": 43,
+    "ms": 699.6999999997206
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.45,
+   "tStart": 63046.299999999814,
+   "tEnd": 67120,
+   "swipe": {
+    "ilat": 0.09629178663932271,
+    "balSlope": -14.018134913862262,
+    "latPk": 0.8855939116053415,
+    "depPk": -1.6388961150566284,
+    "n": 29,
+    "ms": 465.8000000002794
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.55,
+   "tStart": 67430.3999999999,
+   "tEnd": 71508.59999999963,
+   "swipe": {
+    "ilat": 0.06268551826948673,
+    "balSlope": 7.346906360779138,
+    "latPk": 0.6860764041978713,
+    "depPk": -1.952144796749568,
+    "n": 33,
+    "ms": 937.3000000002794
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.16,
+   "tStart": 71813.5,
+   "tEnd": 75894.19999999972,
+   "swipe": {
+    "ilat": -0.047113980713127654,
+    "balSlope": -38.596543121618694,
+    "latPk": -0.41445922744503616,
+    "depPk": 1.7905784400576006,
+    "n": 17,
+    "ms": 473.20000000018626
+   }
+  }
+ ]
+}

@@ -179,13 +179,15 @@
     });
     if (res && BatEars.info) showSettings(BatEars.info);
     $('stereo').checked = BatEars.stereo;
+    try { if (res && BatCollect.lastMeta) ExpLog.addFromMeta(BatCollect.lastMeta); } catch (e) { console.error('[explog]', e); }
   }
+  try { ExpLog.init($('explog')); } catch (e) { console.error('[explog]', e); } // a broken log card must not stop the app
   window.startCollect = startCollect; // the left/right test view has a shortcut button too
   $('collect').onclick = () => startCollect(false);
   $('collectLR').onclick = () => startCollect(true);
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
-    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && !document.body.classList.contains('speed-on') && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
       e.preventDefault();
       startCollect();
     }
