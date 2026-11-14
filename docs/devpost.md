@@ -37,7 +37,8 @@ The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Micr
 ## Challenges we ran into
 - **Disappearing ultrasound:** Chrome's built-in voice processing removed the 20 kHz tone entirely until we disabled all three filters.
 - **Microphone formats:** one webcam microphone ran at 16 kHz, so anything above 8 kHz simply didn't exist. We added a sample-rate check and a band check that measures which frequencies each speaker and mic pair can carry.
-- **Telling gestures from everything else:** typing, leaning and people walking by also create Doppler shifts. [TBD: what helped most, e.g. asymmetry and segment duration.]
+- **People don't move the way you'd expect:** our first real recording showed that people wind up before a pull (the hand drifts forward first) and swing back after a push. A detector that trusts whichever direction crosses its threshold first caught only 3 of 20 prompted gestures. We switched to judging each motion burst by the direction of its **largest** hand speed, and the same recording went to 17 of 20 (85%), with false triggers while typing falling from 12 to 4.5 per minute. [TBD: confirm across more sessions.]
+- **Telling gestures from everything else:** typing, leaning and people walking by also create Doppler shifts. A classifier trained on our labelled recordings recognizes 85% of these "other" motions. Bravo's impulse veto drops bursts that coincide with claps or loud sounds.
 - **A loud hackathon venue:** [TBD: how the noise affected us and what we changed.]
 
 ## Accomplishments that we're proud of
