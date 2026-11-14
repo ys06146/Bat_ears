@@ -8,7 +8,23 @@
 
   function warn(msg, auto) { const w = $('warn'); w.textContent = msg; w.dataset.auto = auto ? '1' : ''; }
 
+  // ---- start screen: covered webcam + calibration guide
+  let calStart = 0, newScoreAt = 0;
+  function showIntro(which) { // 'steps' | 'cal' | null
+    $('intro').hidden = !which;
+    $('introSteps').hidden = which !== 'steps';
+    $('introCal').hidden = which !== 'cal';
+  }
+
   function setStatus(s) {
+    if (s.running && s.calibrating) {
+      if (!calStart) calStart = performance.now();
+      showIntro('cal');
+    } else {
+      calStart = 0;
+      if (s.running) showIntro(null);
+    }
+    ForcePush.setReady(!(s.running && (s.calibrating || s.busy)));
     const chip = $('status');
     chip.className = 'chip' + (s.running ? (s.calibrating ? ' cal' : ' on') : '');
     chip.textContent = !s.running ? '정지' : s.busy ? '대역 점검 중' : s.calibrating ? '기준값 잡는 중 · 손 치우기' : '듣는 중';
@@ -48,6 +64,10 @@
     if (f.tone && !f.calibrating && !(f.snr >= BatEars.config.minSnr)) {
       warn('반사 신호가 약해요 (SNR 15dB 미만). 음량을 올리거나, 헤드폰을 빼거나, 주파수를 낮춰 보세요.', true);
     } else if ($('warn').dataset.auto === '1') warn('');
+    if (calStart) {
+      const total = (BatEars.config.settleMs || 0) + (BatEars.config.calibMs || 1500);
+      $('calBar').style.width = Math.min(98, (performance.now() - calStart) / total * 100) + '%';
+    }
     if (clearAt && performance.now() > clearAt) { $('gesture').textContent = '–'; $('gesture').className = ''; clearAt = 0; }
     BatEars.drawZoom($('zoom'));
     BatEars.drawWide($('wide'));
@@ -58,6 +78,7 @@
     warn('');
     const ok = await BatEars.start({ freq: Number($('freq').value), raw: $('raw').checked, stereo: $('stereo').checked });
     if (ok) showSettings(BatEars.info);
+    else showIntro(null);
     return ok;
   }
   $('stereo').onchange = async () => {
@@ -157,29 +178,104 @@
     }
   });
 
-  // ---- game / sonar view
+  // ---- game / sonar view, scoreboard
   ForcePush.init($('game'));
   SonarView.init($('sonar'), $('cam'));
+  SpeedGun.init($('speed'));
   function setView(view) {
-    const sonar = view === 'sonar';
-    $('game').hidden = sonar;
+    const sonar = view === 'sonar', speed = view === 'speed';
+    $('game').hidden = view !== 'game';
     $('sonar').hidden = !sonar;
+    $('speed').hidden = !speed;
     $('camBtn').hidden = !sonar;
-    $('tabGame').classList.toggle('sel', !sonar);
+    $('tabGame').classList.toggle('sel', view === 'game');
     $('tabSonar').classList.toggle('sel', sonar);
+    $('tabSpeed').classList.toggle('sel', speed);
     document.body.classList.toggle('sonar-on', sonar);
+    document.body.classList.toggle('speed-on', speed);
+    $('intro').hidden = view !== 'game' || $('intro').hidden;
     SonarView.setActive(sonar);
+    SpeedGun.setActive(speed);
     if (!sonar) { SonarView.stopCamera(); $('camBox').hidden = true; $('camBtn').classList.remove('sel'); }
   }
   $('tabGame').onclick = () => setView('game');
   $('tabSonar').onclick = () => setView('sonar');
+  $('tabSpeed').onclick = () => { setView('speed'); $('tabSpeed').blur(); };
   $('camBtn').onclick = async () => {
     const on = await SonarView.toggleCamera();
     $('camBox').hidden = !on;
     $('camBtn').classList.toggle('sel', on);
   };
-  if (params.get('view') === 'sonar') setView('sonar');
+  if (params.get('view') === 'sonar' || params.get('view') === 'speed') setView(params.get('view'));
   setStatus({ running: false });
+  showIntro(params.get('auto') === '1' ? null : 'steps');
+  $('introStart').onclick = () => { showIntro('cal'); startEngine(); };
+  $('introKeys').onclick = () => { showIntro(null); document.activeElement.blur(); };
+
+  function renderScores() {
+    const list = ForcePush.scores();
+    const ol = $('scores');
+    ol.innerHTML = '';
+    if (!list.length) { ol.innerHTML = '<li>아직 기록이 없어요</li>'; return; }
+    list.forEach((e) => {
+      const li = document.createElement('li');
+      if (e.t === newScoreAt) li.className = 'new';
+      const d = new Date(e.t);
+      li.innerHTML = `<b></b><span>콤보 ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
+      li.querySelector('b').textContent = `${e.name || '익명'} · ${e.score}점`;
+      ol.appendChild(li);
+    });
+  }
+  // name entry after a game that made the top 10
+  let nameFor = 0;
+  ForcePush.onEnd((r) => {
+    newScoreAt = r.t;
+    renderScores();
+    if (r.rank < 0) return;
+    nameFor = r.t;
+    $('nameTitle').textContent = r.record ? `🏆 신기록! ${r.score}점 · 이름을 남겨 주세요` : `🏆 ${r.rank + 1}등! ${r.score}점 · 이름을 남겨 주세요`;
+    $('nameInput').value = '';
+    $('nameBox').hidden = false;
+    setTimeout(() => $('nameInput').focus(), 50);
+  });
+  function closeName(save) {
+    if (save && nameFor) ForcePush.setName(nameFor, $('nameInput').value);
+    nameFor = 0;
+    $('nameBox').hidden = true;
+    $('nameInput').blur();
+    renderScores();
+  }
+  $('nameBox').onsubmit = (e) => { e.preventDefault(); closeName(true); };
+  $('nameSkip').onclick = () => closeName(false);
+  BatEars.on('gesture', () => { if (!$('nameBox').hidden && ForcePush.state.running) closeName(false); });
+
+  // presentation mode: fullscreen, no side panel, bigger text
+  function setPresent(on) {
+    document.body.classList.toggle('present', on);
+    $('presentBtn').textContent = on ? '✕ 발표 모드 끄기' : '⛶ 발표 모드';
+    $('presentBtn').blur();
+  }
+  $('presentBtn').onclick = async () => {
+    const on = !document.body.classList.contains('present');
+    try {
+      if (on && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      if (!on && document.fullscreenElement) await document.exitFullscreen();
+    } catch (_) { /* fullscreen not allowed: still switch the layout */ }
+    setPresent(on);
+  };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) setPresent(false); });
+  if (params.get('present') === '1') setPresent(true);
+  renderScores();
+  const renderMute = () => { $('mute').textContent = ForcePush.muted ? '🔇 효과음' : '🔊 효과음'; };
+  $('mute').onclick = () => { ForcePush.setMuted(!ForcePush.muted); renderMute(); $('mute').blur(); };
+  window.addEventListener('keydown', (e) => { if (e.key === 'm' || e.key === 'M') setTimeout(renderMute, 0); });
+  $('resetScores').onclick = () => {
+    const b = $('resetScores');
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = '정말 지울까요?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '지우기'; }, 3000); return; }
+    try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ }
+    b.dataset.armed = ''; b.textContent = '지우기';
+    renderScores();
+  };
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
   // ---- self-test of the guided collection: index.html?collect=1&fast=0.15[&undo=1]
