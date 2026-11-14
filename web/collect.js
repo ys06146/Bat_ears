@@ -1,42 +1,78 @@
-/* Guided data collection: one click, about 2 minutes. The page says what to do and labels everything.
+/* Guided trials: "3, 2, 1, 밀기!" with a beep. Every trial is labelled, scored live and saved automatically.
  *
  * window.BatCollect
- *   start({ dist, who, freq, speed, noDownload })   speed < 1 shortens every step (self-tests)
- *   stop()
+ *   start(settings)  { who, dist, noise, perGesture, wave, swipe, typing, freq, speed, noDownload }
+ *                    swipe: add left/right trials (switches the engine to stereo mode)
+ *                    who: short code (letters/numbers, e.g. seojin or p1); dist: 10/20/30 cm; noise: quiet/noisy;
+ *                    perGesture: trials per gesture; wave: add wave trials; typing: 15 s typing block (false triggers)
+ *                    speed < 1 shortens everything (self-tests)
+ *   stop()           end early (what was recorded is still saved)
+ *   undo()           drop the last trial (its rows become label 'skip') and do it again later
  *   active
  *
- * In "cue" steps a prompt ("밀어!") flashes every 2 s and the recorder logs it in the `cue` column,
- * so experiments can score each detection against the moment the gesture was asked for.
- * The game ignores gestures while this runs.
+ * Files: batears_<time>_<who>_d<dist>_<noise>_<device>.csv + .json (settings and live scores), so four laptops
+ * never overwrite each other. Shortcuts while running: U = undo, Esc = stop.
  */
 (function () {
   'use strict';
 
-  const STEPS = [
-    { label: 'idle', secs: 12, text: '손을 치우고 가만히 있어 주세요' },
-    { label: 'push', secs: 20, text: '"밀어!"가 뜰 때마다 손바닥을 화면 쪽으로 밀기', cue: 'push', cueText: '밀어!', every: 2 },
-    { label: 'idle', secs: 5, text: '잠깐 쉬어요. 손을 내려 주세요' },
-    { label: 'pull', secs: 20, text: '"당겨!"가 뜰 때마다 손을 화면에서 멀리 당기기', cue: 'pull', cueText: '당겨!', every: 2 },
-    { label: 'idle', secs: 5, text: '잠깐 쉬어요. 손을 내려 주세요' },
-    { label: 'wave', secs: 15, text: '손바닥을 앞뒤로 빠르게 흔들기' },
-    { label: 'other', secs: 20, text: '평소처럼 타자 치기·몸 움직이기 (손짓은 하지 않기)' },
-    { label: 'idle', secs: 10, text: '손을 치우고 가만히. 거의 끝났어요!' },
-  ];
-  const LABEL_KO = { idle: '가만히', push: '밀기', pull: '당기기', wave: '흔들기', other: '기타' };
+  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽' };
+  const HOW = {
+    push: '손바닥을 화면 쪽으로 빠르게 ⟶ (돌아올 땐 천천히)',
+    pull: '손을 내 쪽으로 빠르게 ⟵ (돌아올 땐 천천히)',
+    wave: '손바닥을 앞뒤로 빠르게 〰',
+    left: '화면 앞에서 손을 왼쪽으로 쓸기 ◀ (키보드 위 10~20cm)',
+    right: '화면 앞에서 손을 오른쪽으로 쓸기 ▶ (키보드 위 10~20cm)',
+  };
+  const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  let active = false, abort = false, ui = null, cueUntil = 0;
+  let S = null, ui = null, beepCtx = null;
+
+  function deviceId() {
+    try {
+      let id = localStorage.getItem('batears-dev');
+      if (!id) { id = Math.random().toString(36).slice(2, 6); localStorage.setItem('batears-dev', id); }
+      return id;
+    } catch (_) {
+      return Math.random().toString(36).slice(2, 6);
+    }
+  }
+
+  // Short audible beeps (well below the 20 kHz tone, quiet, before the motion) for the countdown.
+  function beep(freq, ms, vol = 0.1) {
+    try {
+      beepCtx = beepCtx || new AudioContext();
+      const t = beepCtx.currentTime, o = beepCtx.createOscillator(), g = beepCtx.createGain();
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.01);
+      g.gain.linearRampToValueAtTime(0, t + ms / 1000);
+      o.connect(g).connect(beepCtx.destination);
+      o.start(t);
+      o.stop(t + ms / 1000 + 0.02);
+    } catch (_) { /* no sound is fine */ }
+  }
 
   function buildUi() {
     const el = document.createElement('div');
     el.className = 'collect';
-    el.innerHTML = '<div class="c-step"></div><div class="c-text"></div><div class="c-cue"></div>' +
-      '<div class="c-count"></div><div class="c-bar"><div></div></div><button class="secondary c-stop">그만하기</button>';
+    el.innerHTML = `
+      <div class="c-head"></div>
+      <div class="c-count"></div>
+      <div class="c-big"></div>
+      <div class="c-how"></div>
+      <div class="c-feedback"></div>
+      <div class="c-progress"></div>
+      <div class="c-bar"><div></div></div>
+      <div class="row c-buttons">
+        <button class="secondary c-undo">↩ 방금 거 취소 (U)</button>
+        <button class="secondary c-stop">■ 그만 (Esc)</button>
+      </div>`;
     document.querySelector('.stage').appendChild(el);
-    el.querySelector('.c-stop').onclick = () => { abort = true; };
-    return {
-      el, step: el.querySelector('.c-step'), text: el.querySelector('.c-text'), cue: el.querySelector('.c-cue'),
-      count: el.querySelector('.c-count'), bar: el.querySelector('.c-bar > div'),
-    };
+    el.querySelector('.c-undo').onclick = () => undo();
+    el.querySelector('.c-stop').onclick = () => stop();
+    const q = (c) => el.querySelector(c);
+    return { el, head: q('.c-head'), count: q('.c-count'), big: q('.c-big'), how: q('.c-how'), feedback: q('.c-feedback'), progress: q('.c-progress'), bar: q('.c-bar > div') };
   }
 
   function show(on) {
@@ -45,9 +81,27 @@
     document.body.classList.toggle('collecting', on);
   }
 
-  function say(step, text) {
-    ui.step.textContent = step;
-    ui.text.textContent = text;
+  function say(big, how = '', count = '') {
+    ui.big.textContent = big;
+    ui.how.textContent = how;
+    ui.count.textContent = count;
+  }
+
+  function feedback(text, cls) {
+    ui.feedback.textContent = text;
+    ui.feedback.className = 'c-feedback ' + (cls || '');
+  }
+
+  function renderProgress() {
+    const parts = Object.keys(S.target).map((k) => {
+      const done = S.trials.filter((t) => t.kind === k);
+      const hit = done.filter((t) => t.result === 'hit').length;
+      return `${NAMES[k]} ${done.length}/${S.target[k]} (맞힘 ${hit})`;
+    });
+    const all = S.trials.length, hits = S.trials.filter((t) => t.result === 'hit').length;
+    ui.progress.textContent = parts.join(' · ') + (all ? ` · 실시간 정확도 ${Math.round((hits / all) * 100)}%` : '');
+    const total = Object.values(S.target).reduce((a, b) => a + b, 0);
+    ui.bar.style.width = `${Math.round((all / total) * 100)}%`;
   }
 
   // Resolves once the engine has finished calibrating (or after timeoutMs).
@@ -61,77 +115,177 @@
     });
   }
 
+  function plan(perGesture, wave, swipe) {
+    const list = [];
+    for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
+    if (wave) for (let i = 0; i < Math.ceil(perGesture / 2); i++) list.push('wave');
+    if (swipe) for (let i = 0; i < perGesture; i++) list.push('left', 'right');
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    return list;
+  }
+
+  // the first gesture inside the current trial window decides the result
+  function onGesture(e) {
+    if (!S) return;
+    if (S.win && e.t >= S.win.t0 && e.t <= S.win.t0 + WINDOW_MS && !S.win.got) S.win.got = { kind: e.kind, speed: e.speed || 0 };
+    if (S.typingFrom && e.t >= S.typingFrom && !e.simulated) S.typingFalse++;
+  }
+
   async function start(opt = {}) {
-    if (active) return null;
-    active = true;
-    abort = false;
+    if (S) return null;
     const speed = opt.speed || 1;
+    const who = String(opt.who || 'anon').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
+    const dist = Number(opt.dist) || 20;
+    const noise = opt.noise === 'noisy' ? 'noisy' : 'quiet';
+    const perGesture = Math.max(1, Number(opt.perGesture) || 10);
+    const queue = plan(perGesture, !!opt.wave, !!opt.swipe);
+    const target = { push: perGesture, pull: perGesture };
+    if (opt.wave) target.wave = Math.ceil(perGesture / 2);
+    if (opt.swipe) { target.left = perGesture; target.right = perGesture; }
+    S = {
+      opt, speed, who, dist, noise, queue, target, trials: [], win: null, aborted: false,
+      typingFrom: 0, typingFalse: 0, startedAt: new Date().toISOString(), device: deviceId(),
+    };
     show(true);
-    ui.cue.textContent = '';
-    ui.count.textContent = '';
-    ui.bar.style.width = '0%';
+    feedback('');
+    ui.head.textContent = `${who} · ${dist}cm · ${noise === 'noisy' ? '시끄러움' : '조용함'}${opt.swipe ? ' · 스테레오' : ''} · 기기 ${S.device}`;
+    renderProgress();
     let result = null;
+    const off = BatEars.on('gesture', onGesture);
     try {
       say('준비', '마이크를 켜는 중이에요. 손을 치워 주세요');
+      if (BatEars.running && BatEars.stereo !== !!opt.swipe) await BatEars.stop(); // switch mono <-> stereo
       if (!BatEars.running) {
-        const ok = await BatEars.start({ freq: opt.freq, raw: true });
-        if (!ok) {
-          say('준비', '마이크를 열 수 없어요. 주소창 왼쪽에서 마이크를 허용하고 다시 눌러 주세요.');
-          await sleep(3000);
-          return null;
-        }
+        const ok = await BatEars.start({ freq: opt.freq, raw: true, stereo: !!opt.swipe });
+        if (!ok) { say('마이크를 열 수 없어요', '주소창 왼쪽에서 마이크를 허용하고 다시 눌러 주세요'); await sleep(3000); return null; }
       }
       say('준비', '기준값을 잡는 중이에요. 손을 치우고 가만히');
       await waitReady(5000);
-      BatRecorder.setTag(`d${opt.dist || 'x'}_${opt.who || 'p0'}`);
-      BatRecorder.start();
-      const totalMs = STEPS.reduce((s, x) => s + x.secs, 0) * speed * 1000;
-      let doneMs = 0;
-      for (let i = 0; i < STEPS.length && !abort; i++) {
-        const s = STEPS[i], dur = s.secs * speed * 1000;
-        BatRecorder.setLabel(s.label);
-        say(`${i + 1} / ${STEPS.length} · ${LABEL_KO[s.label]}`, s.text);
-        const t0 = performance.now();
-        let nextCue = s.cue ? t0 + 1000 * speed : Infinity;
-        for (;;) {
-          const now = performance.now(), el = now - t0;
-          if (abort || el >= dur) break;
-          if (now >= nextCue) {
-            BatRecorder.markCue(s.cue);
-            ui.cue.textContent = s.cueText;
-            cueUntil = now + 600 * Math.min(1, speed * 2);
-            nextCue += s.every * 1000 * speed;
-          }
-          if (cueUntil && now > cueUntil) { ui.cue.textContent = ''; cueUntil = 0; }
-          ui.count.textContent = `${Math.ceil((dur - el) / 1000)}초`;
-          ui.bar.style.width = `${(((doneMs + el) / totalMs) * 100).toFixed(1)}%`;
-          await sleep(40);
-        }
-        doneMs += dur;
-      }
-      ui.cue.textContent = '';
-      const session = BatRecorder.session;
-      BatRecorder.stop();
+      BatRecorder.setTag(`${who}_d${dist}_${noise}_${S.device}`);
       BatRecorder.setLabel('idle');
-      if (!BatRecorder.folderName && !opt.noDownload) BatRecorder.download(session);
-      result = { session, aborted: abort, rows: BatRecorder.toCsv(session).split('\n').length - 1 };
-      say(abort ? '중단됨' : '완료 🎉', BatRecorder.folderName
-        ? `드라이브 폴더 "${BatRecorder.folderName}"에 자동 저장됐어요. 고마워요!`
-        : 'CSV를 내려받았어요. 내 드라이브 > nhng > ml > data에 넣어 주세요.');
-      ui.count.textContent = `${result.rows}줄 기록`;
-      await sleep(opt.speed && opt.speed < 1 ? 300 : 3500);
-      return result;
+      BatRecorder.start();
+      S.session = BatRecorder.session;
+      say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
+      await sleep(2500 * speed);
+
+      while (S.queue.length && !S.aborted) {
+        const kind = S.queue.shift();
+        const tStart = performance.now();
+        for (const n of ['3', '2', '1']) {
+          if (S.aborted) break;
+          say(n, `다음: ${NAMES[kind]}`, `${S.trials.length + 1}번째`);
+          beep(660, 90);
+          await sleep(550 * speed);
+        }
+        if (S.aborted) break;
+        beep(990, 140, 0.12);
+        BatRecorder.setLabel(kind);
+        BatRecorder.markCue(kind);
+        S.win = { t0: performance.now(), got: null };
+        say(`${NAMES[kind]}!`, HOW[kind]);
+        ui.big.className = 'c-big go ' + kind;
+        await sleep(WINDOW_MS * speed);
+        BatRecorder.setLabel('idle');
+        ui.big.className = 'c-big';
+        const got = S.win.got;
+        const res = !got ? 'miss' : got.kind === kind ? 'hit' : 'wrong';
+        S.trials.push({ kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tEnd: performance.now() + 600 * speed });
+        S.win = null;
+        if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
+        else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind}(으)로 잡혔어요 · 빠르게 치고 천천히 돌아오기`, 'bad');
+        else feedback('⚪ 못 잡았어요 · 조금 더 빠르고 크게', 'miss');
+        renderProgress();
+        say('', '쉬는 중…');
+        await sleep(900 * speed);
+      }
+
+      if (opt.typing && !S.aborted) {
+        say('⌨️ 평소처럼 타자 치기', '손짓은 하지 말고 15초 동안 아무 글이나 쳐 주세요 (오작동 측정)');
+        feedback('');
+        BatRecorder.setLabel('other');
+        S.typingFrom = performance.now();
+        for (let i = 15; i > 0 && !S.aborted; i--) { ui.count.textContent = `${i}초`; await sleep(1000 * speed); }
+        S.typingTo = performance.now();
+        S.typingFrom = 0;
+        BatRecorder.setLabel('idle');
+      }
+      say('끝! 손을 치우고 가만히', '', '');
+      await sleep(1500 * speed);
     } finally {
+      off();
       if (BatRecorder.recording) BatRecorder.stop();
-      active = false;
+      BatRecorder.setLabel('idle');
+      result = finish();
+      if (opt.speed && opt.speed < 1) await sleep(300);
+      else await waitClose(120000); // keep the summary up until closed (button, Esc or Enter)
       show(false);
+      S = null;
     }
+    return result;
   }
 
-  window.BatCollect = {
-    start,
-    stop() { abort = true; },
-    get active() { return active; },
-    steps: STEPS,
-  };
+  function waitClose(timeoutMs) {
+    S.closing = true;
+    ui.el.querySelector('.c-undo').style.display = 'none';
+    const btn = ui.el.querySelector('.c-stop');
+    btn.textContent = '✓ 닫기 (Enter)';
+    return new Promise((resolve) => {
+      const done = () => {
+        clearTimeout(timer);
+        window.removeEventListener('keydown', onKey);
+        btn.onclick = () => stop();
+        btn.textContent = '■ 그만 (Esc)';
+        ui.el.querySelector('.c-undo').style.display = '';
+        resolve();
+      };
+      const onKey = (e) => { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); done(); } };
+      const timer = setTimeout(done, timeoutMs);
+      btn.onclick = done;
+      window.addEventListener('keydown', onKey);
+    });
+  }
+
+  function finish() {
+    if (!S || !S.session) return null;
+    const by = {};
+    for (const k of Object.keys(S.target)) {
+      const ts = S.trials.filter((t) => t.kind === k);
+      by[k] = { n: ts.length, hit: ts.filter((t) => t.result === 'hit').length, wrong: ts.filter((t) => t.result === 'wrong').length, miss: ts.filter((t) => t.result === 'miss').length };
+    }
+    const n = S.trials.length, hits = S.trials.filter((t) => t.result === 'hit').length;
+    const meta = {
+      session: S.session, who: S.who, dist: S.dist, noise: S.noise, device: S.device,
+      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, typing: !!S.opt.typing,
+      startedAt: S.startedAt, finishedAt: new Date().toISOString(), aborted: S.aborted,
+      live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
+      engine: BatEars.info, detector: BatEars.config.detector, trials: S.trials,
+    };
+    const rows = BatRecorder.toCsv(S.session).split('\n').length - 1;
+    if (!S.opt.noDownload || BatRecorder.folderName) {
+      if (!BatRecorder.folderName) BatRecorder.download(S.session);
+      BatRecorder.saveJson(`batears_${S.session}.json`, meta);
+    }
+    say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
+    feedback(n ? `실시간 정확도 ${Math.round((hits / n) * 100)}% (${hits}/${n})` + (S.opt.typing ? ` · 타자 중 오작동 ${S.typingFalse}번` : '') : '', 'ok');
+    return { session: S.session, rows, ...meta.live };
+  }
+
+  function undo() {
+    if (!S || !S.trials.length) return;
+    const last = S.trials.pop();
+    BatRecorder.relabel(last.tStart, last.tEnd, 'skip');
+    S.queue.push(last.kind);
+    feedback(`↩ 방금 ${NAMES[last.kind]} 취소. 나중에 다시 할게요`, 'miss');
+    renderProgress();
+  }
+
+  function stop() { if (S) S.aborted = true; }
+
+  window.addEventListener('keydown', (e) => {
+    if (!S || S.closing) return;
+    if (e.key === 'Escape') { e.preventDefault(); stop(); }
+    else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undo(); }
+  });
+
+  window.BatCollect = { start, stop, undo, get active() { return !!S; } };
 })();

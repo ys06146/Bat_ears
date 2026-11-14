@@ -96,13 +96,25 @@ button.small { height: 30px; padding: 0 10px; font-size: 13px; }
 canvas.spec { width: 100%; height: 120px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); display: block; margin-top: 8px; }
 summary { cursor: pointer; font-weight: 600; }
 select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--input); border-radius: calc(var(--radius) - 2px); padding: 4px 6px; }
-.collect { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; background: #09090bf2; border-radius: calc(var(--radius) + 4px); }
-.collect .c-step { color: var(--muted); font-size: 14px; }
-.collect .c-text { font-size: 26px; font-weight: 700; max-width: 640px; }
-.collect .c-cue { font-size: 72px; font-weight: 900; color: var(--ring); min-height: 90px; }
-.collect .c-count { font-size: 18px; color: var(--muted); }
+.collect { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); z-index: 3; }
+body.collecting #gesture { display: none; }
+.collect .c-head { color: var(--muted); font-size: 13px; }
+.collect .c-count { color: var(--muted); font-size: 16px; min-height: 1.2em; }
+.collect .c-big { font-size: 84px; font-weight: 900; min-height: 100px; line-height: 1.1; }
+.collect .c-big.go.push { color: var(--push); }
+.collect .c-big.go.pull { color: var(--pull); }
+.collect .c-big.go.wave { color: #b388ff; }
+.collect .c-big.go.left, .collect .c-big.go.right { color: #80deea; }
+.collect .c-how { font-size: 20px; font-weight: 600; max-width: 680px; min-height: 1.4em; }
+.collect .c-feedback { font-size: 22px; font-weight: 700; min-height: 1.4em; }
+.collect .c-feedback.ok { color: #7fe0c8; }
+.collect .c-feedback.bad { color: #ff8a80; }
+.collect .c-feedback.miss { color: #ffe082; }
+.collect .c-progress { font-size: 14px; color: #c8cdd6; }
 .collect .c-bar { width: 60%; height: 8px; background: var(--muted-bg); border-radius: 999px; overflow: hidden; }
 .collect .c-bar > div { height: 100%; width: 0; background: var(--primary); }
+.collect .c-buttons { justify-content: center; }
+input[type=text] { font: inherit; color: var(--text); background: transparent; border: 1px solid var(--input); border-radius: calc(var(--radius) - 2px); padding: 4px 8px; }
 ol { padding-left: 18px; margin: 6px 0; }
 
 /* ---- start screen */

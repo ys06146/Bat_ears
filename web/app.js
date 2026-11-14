@@ -133,15 +133,50 @@
   $('save').onclick = () => BatRecorder.download();
   $('clear').onclick = () => BatRecorder.clear();
 
-  // ---- guided data collection
-  $('collect').onclick = async () => {
+  // ---- guided data collection (settings remembered on this laptop)
+  const SETTINGS = ['who', 'dist', 'noise', 'perGesture', 'incWave', 'incSwipe', 'incTyping'];
+  try {
+    const saved = JSON.parse(localStorage.getItem('batears-settings') || '{}');
+    SETTINGS.forEach((id) => {
+      if (saved[id] === undefined) return;
+      if ($(id).type === 'checkbox') $(id).checked = !!saved[id]; else $(id).value = saved[id];
+    });
+  } catch (_) { /* first visit or storage blocked */ }
+  function saveSettings() {
+    try {
+      const o = {};
+      SETTINGS.forEach((id) => { o[id] = $(id).type === 'checkbox' ? $(id).checked : $(id).value; });
+      localStorage.setItem('batears-settings', JSON.stringify(o));
+    } catch (_) { /* ignore */ }
+  }
+  SETTINGS.forEach((id) => { $(id).onchange = saveSettings; });
+  async function startCollect() {
     if (BatCollect.active) return;
-    if (BatRecorder.canPickFolder && !BatRecorder.folderName) {
-      try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: the CSV is downloaded at the end instead */ }
+    const who = $('who').value.trim();
+    if (!who || /[^A-Za-z0-9_-]/.test(who)) {
+      $('saveStatus').textContent = '⚠️ 이름은 영문·숫자로 적어 주세요 (예: seojin, p1)';
+      $('who').focus();
+      return;
     }
-    const ok = await BatCollect.start({ dist: $('dist').value, who: $('who').value, freq: Number($('freq').value) });
-    if (ok && BatEars.info) showSettings(BatEars.info);
-  };
+    saveSettings();
+    if (BatRecorder.canPickFolder && !BatRecorder.folderName) {
+      try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: files are downloaded at the end instead */ }
+    }
+    const res = await BatCollect.start({
+      who, dist: $('dist').value, noise: $('noise').value, perGesture: Number($('perGesture').value),
+      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: $('incTyping').checked, freq: Number($('freq').value),
+    });
+    if (res && BatEars.info) showSettings(BatEars.info);
+    $('stereo').checked = BatEars.stereo;
+  }
+  $('collect').onclick = startCollect;
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) || '';
+    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+      e.preventDefault();
+      startCollect();
+    }
+  });
 
   // ---- game / sonar view, scoreboard
   ForcePush.init($('game'));
@@ -243,11 +278,16 @@
   };
 
   // ---- unattended self-test: index.html?auto=1&secs=8 (headless Chrome + fake mic)
-  // ---- self-test of the guided collection: index.html?collect=1&fast=0.15
+  // ---- self-test of the guided collection: index.html?collect=1&fast=0.15[&undo=1]
   if (params.get('collect') === '1') {
     (async () => {
-      const res = await BatCollect.start({ speed: Number(params.get('fast') || 0.15), dist: '20', who: 'p0', noDownload: true });
-      const lines = res ? BatRecorder.toCsv(res.session).split('\n') : [];
+      if (params.get('undo') === '1') setTimeout(() => BatCollect.undo(), 6000); // exercise undo mid-session
+      const res = await BatCollect.start({
+        speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: 'quiet',
+        perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: true, noDownload: true,
+      });
+      const session = res && res.session;
+      const lines = session ? BatRecorder.toCsv(session).split('\n') : [];
       const head = lines[0] ? lines[0].split(',') : [];
       const li = head.indexOf('label'), ci = head.indexOf('cue'), byLabel = {}, cues = {};
       lines.slice(1).forEach((l) => {
@@ -255,7 +295,9 @@
         byLabel[c[li]] = (byLabel[c[li]] || 0) + 1;
         if (c[ci]) cues[c[ci]] = (cues[c[ci]] || 0) + 1;
       });
-      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, gameRunning: ForcePush.state.running }));
+      const vli = head.indexOf('vL');
+      const stereoRows = lines.slice(1).filter((l) => l.split(',')[vli] !== '').length;
+      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, gameRunning: ForcePush.state.running }));
       document.title = 'DONE';
     })();
   }

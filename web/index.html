@@ -64,12 +64,24 @@
 
   <aside>
     <div class="card">
+      <div class="row"><b>🎯 데이터 수집</b><span class="hint">3·2·1 신호에 손짓 → 바로 ✅/❌ 표시 → 자동 저장</span></div>
       <div class="row">
-        <button id="collect">🎯 데이터 수집 (2분)</button>
+        <label>이름 <input id="who" type="text" maxlength="16" size="8" placeholder="seojin"></label>
         <label>거리 <select id="dist"><option>10</option><option selected>20</option><option>30</option></select>cm</label>
-        <label>참가자 <select id="who"><option>p1</option><option>p2</option><option>p3</option><option>p4</option></select></label>
+        <label>소음 <select id="noise"><option value="quiet">조용</option><option value="noisy">시끄러움</option></select></label>
       </div>
-      <p class="hint">누르면 저장 폴더(드라이브 nhng/ml/data)를 한 번 고르고, 화면 지시대로 손만 움직이면 라벨과 저장이 자동이에요.</p>
+      <div class="row">
+        <label>횟수 <select id="perGesture"><option>5</option><option selected>10</option><option>20</option></select>번씩</label>
+        <label><input id="incWave" type="checkbox"> 흔들기</label>
+        <label><input id="incSwipe" type="checkbox"> 좌우 스와이프</label>
+        <label><input id="incTyping" type="checkbox" checked> 타자 15초(오작동 측정)</label>
+      </div>
+      <div class="row">
+        <button id="collect">🎯 시작 (S)</button>
+        <button id="pickDir" class="secondary">📁 저장 폴더</button>
+      </div>
+      <div id="saveStatus" class="hint">저장 폴더(드라이브 nhng/ml/data)를 고르면 자동 저장, 안 고르면 끝날 때 다운로드돼요.</div>
+      <p class="hint">이름은 영문·숫자로 (공개 레포에 파일명으로 올라가요). 진행 중 U = 방금 거 취소, Esc = 그만.</p>
     </div>
 
     <div class="card">
@@ -120,10 +132,6 @@
     <details class="card" id="recBox">
       <summary>데이터 기록 (분류·실험용)</summary>
       <div class="row" id="labels"></div>
-      <div class="row">
-        <button id="pickDir" class="secondary">📁 자동 저장 폴더</button>
-        <span id="saveStatus" class="hint">폴더를 고르면 기록이 자동 저장돼요 (드라이브 nhng/ml/data 추천)</span>
-      </div>
       <div class="row">
         <button id="rec" class="secondary">● 기록 시작</button>
         <button id="save" class="secondary">CSV 저장</button>

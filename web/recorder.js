@@ -17,9 +17,12 @@
 (function () {
   'use strict';
 
-  const LABELS = ['idle', 'push', 'pull', 'wave', 'other'];
+  const LABELS = ['idle', 'push', 'pull', 'wave', 'other', 'left', 'right'];
+  // stereo columns (vL, vR, dUpL, dDownL, dUpR, dDownR) are empty unless stereo mode is on
   const HEAD = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db',
-    'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'cue'];
+    'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'cue',
+    'vL', 'vR', 'dUpL', 'dDownL', 'dUpR', 'dDownR'];
+  const CUE = HEAD.indexOf('cue');
   const AUTOSAVE_MS = 15000;
   const rows = [];
   const watchers = [];
@@ -35,12 +38,14 @@
 
   BatEars.on('frame', (f) => {
     if (!recording || !f.tone || f.calibrating) return;
+    const s = f.stereo || {};
     rows.push([
       session, num(f.t, 1), label, pendingGesture,
       num(f.dUp, 2), num(f.dDown, 2), num(f.up, 2), num(f.down, 2), num(f.v, 3),
       num(f.snr, 1), num(f.carrier, 1), num(f.noise, 1),
       ...f.bandsUp.map((x) => num(x, 2)), ...f.bandsDown.map((x) => num(x, 2)),
       pendingCue,
+      num(s.vL, 3), num(s.vR, 3), num(s.dUpL, 2), num(s.dDownL, 2), num(s.dUpR, 2), num(s.dDownR, 2),
     ]);
     pendingGesture = '';
     pendingCue = '';
@@ -107,7 +112,7 @@
       notify();
     },
     toggle() { if (recording) api.stop(); else api.start(); },
-    setLabel(name) { if (LABELS.includes(name)) { label = name; notify(); } },
+    setLabel(name) { if (LABELS.includes(name) || name === 'skip') { label = name; notify(); } },
     clear() { rows.length = 0; notify(); },
     onChange(fn) { watchers.push(fn); },
     async pickFolder() {
@@ -118,18 +123,49 @@
       return dir.name;
     },
     download(onlySession) {
-      const blob = new Blob([toCsv(onlySession)], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `batears_${onlySession || stamp()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      downloadBlob(new Blob([toCsv(onlySession)], { type: 'text/csv' }), `batears_${onlySession || stamp()}.csv`);
+    },
+    // Rows of the current session between fromT and toT (performance.now() ms) get a new label;
+    // 'skip' also clears their cue so the trial is ignored by training and scoring.
+    relabel(fromT, toT, newLabel) {
+      for (const r of rows) {
+        const t = Number(r[1]);
+        if (r[0] === session && t >= fromT && t <= toT) {
+          r[2] = newLabel;
+          if (newLabel === 'skip') r[CUE] = '';
+        }
+      }
+      notify();
+    },
+    // Session metadata next to the CSV: into the chosen folder, otherwise downloaded.
+    async saveJson(name, obj) {
+      const text = JSON.stringify(obj, null, 1);
+      if (dir) {
+        try {
+          const fh = await dir.getFileHandle(name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(text);
+          await w.close();
+          return true;
+        } catch (e) { lastError = e.message || String(e); notify(); }
+      }
+      downloadBlob(new Blob([text], { type: 'application/json' }), name);
+      return false;
     },
     toCsv,
   };
 
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
   window.addEventListener('keydown', (e) => {
+    if (window.BatCollect && window.BatCollect.active) return; // guided trials set labels themselves
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     const i = '12345'.indexOf(e.key);
