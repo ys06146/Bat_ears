@@ -118,9 +118,26 @@
     async pickFolder() {
       if (!api.canPickFolder) throw new Error('이 브라우저는 폴더 저장을 지원하지 않아요. 크롬으로 열어 주세요.');
       dir = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' });
+      idbSet('dataDir', dir).catch(() => {}); // remember it so next time needs no picking
       if (recording && !timer) timer = setInterval(() => saveToFolder(session), AUTOSAVE_MS);
       notify();
       return dir.name;
+    },
+    // Reuse the folder chosen on an earlier visit. Call from a click (Chrome may show a one-tap "allow").
+    async restoreFolder() {
+      if (dir) return dir.name;
+      try {
+        const h = await idbGet('dataDir');
+        if (!h) return '';
+        let p = await h.queryPermission({ mode: 'readwrite' });
+        if (p !== 'granted') p = await h.requestPermission({ mode: 'readwrite' });
+        if (p !== 'granted') return '';
+        dir = h;
+        notify();
+        return dir.name;
+      } catch (_) {
+        return '';
+      }
     },
     download(onlySession) {
       downloadBlob(new Blob([toCsv(onlySession)], { type: 'text/csv' }), `batears_${onlySession || stamp()}.csv`);
@@ -154,6 +171,33 @@
     },
     toCsv,
   };
+
+  // tiny IndexedDB key-value store (folder handles can't go in localStorage)
+  function idb() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('batears', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('kv');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function idbSet(key, value) {
+    const db = await idb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function idbGet(key) {
+    const db = await idb();
+    return new Promise((resolve, reject) => {
+      const req = db.transaction('kv').objectStore('kv').get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
 
   function downloadBlob(blob, name) {
     const a = document.createElement('a');

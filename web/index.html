@@ -31,7 +31,7 @@
       <div class="row">
         <label>이름 <input id="who" type="text" maxlength="16" size="8" placeholder="seojin"></label>
         <label>거리 <select id="dist"><option>10</option><option selected>20</option><option>30</option></select>cm</label>
-        <label>소음 <select id="noise"><option value="quiet">조용</option><option value="noisy">시끄러움</option></select></label>
+        <label>소음 <select id="noise"><option value="auto" selected>자동 측정</option><option value="quiet">조용</option><option value="noisy">시끄러움</option></select></label>
       </div>
       <div class="row">
         <label>횟수 <select id="perGesture"><option>5</option><option selected>10</option><option>20</option></select>번씩</label>
@@ -43,8 +43,8 @@
         <button id="collect">🎯 시작 (S)</button>
         <button id="pickDir" class="secondary">📁 저장 폴더</button>
       </div>
-      <div id="saveStatus" class="hint">저장 폴더(드라이브 nhng/ml/data)를 고르면 자동 저장, 안 고르면 끝날 때 다운로드돼요.</div>
-      <p class="hint">이름은 영문·숫자로 (공개 레포에 파일명으로 올라가요). 진행 중 U = 방금 거 취소, Esc = 그만.</p>
+      <div id="saveStatus" class="hint">저장 폴더(드라이브 nhng/ml/data)는 처음 한 번만 고르면 다음부턴 자동이에요. 안 고르면 끝날 때 다운로드돼요.</div>
+      <p class="hint">이름은 선택 (영문·숫자, 비우면 anon). 소음·기기·마이크·화면 주사율·판정 설정은 자동으로 기록돼요. 진행 중 U = 방금 거 취소, Esc = 그만.</p>
     </div>
 
     <div class="card">

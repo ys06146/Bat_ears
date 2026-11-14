@@ -26,7 +26,7 @@
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  let S = null, ui = null, beepCtx = null;
+  let S = null, ui = null, beepCtx = null, lastMeta = null;
 
   function deviceId() {
     try {
@@ -115,6 +115,34 @@
     });
   }
 
+  const med = (xs) => { const s = xs.filter(Number.isFinite).sort((a, b) => a - b); return s.length ? s[s.length >> 1] : null; };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (_) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* ignore */ } },
+  };
+
+  // ~2 s of the room before recording: loudness (speech/music band), far-band noise, SNR and frame rate.
+  function measureRoom(ms) {
+    return new Promise((resolve) => {
+      const amb = [], noise = [], snr = [], ts = [];
+      const off = BatEars.on('frame', (f) => { amb.push(f.ambient); noise.push(f.noise); snr.push(f.snr); ts.push(f.t); });
+      setTimeout(() => {
+        off();
+        const gaps = ts.slice(1).map((t, i) => t - ts[i]);
+        const g = med(gaps);
+        resolve({ ambientDb: med(amb), noiseDb: med(noise), snrDb: med(snr), fps: g ? Math.round(1000 / g) : null });
+      }, ms);
+    });
+  }
+
+  // Auto noise class: compared with the quietest room this laptop has measured (+8 dB = noisy).
+  function classifyNoise(room) {
+    const quietest = store.get('batears-quietest-ambient', null);
+    if (room.ambientDb == null) return 'quiet';
+    if (quietest == null || room.ambientDb < quietest) store.set('batears-quietest-ambient', room.ambientDb);
+    return quietest != null && room.ambientDb > quietest + 8 ? 'noisy' : 'quiet';
+  }
+
   function plan(perGesture, wave, swipe) {
     const list = [];
     for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
@@ -136,7 +164,7 @@
     const speed = opt.speed || 1;
     const who = String(opt.who || 'anon').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
     const dist = Number(opt.dist) || 20;
-    const noise = opt.noise === 'noisy' ? 'noisy' : 'quiet';
+    let noise = opt.noise === 'noisy' ? 'noisy' : opt.noise === 'quiet' ? 'quiet' : 'auto';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
     const queue = plan(perGesture, !!opt.wave, !!opt.swipe);
     const target = { push: perGesture, pull: perGesture };
@@ -148,7 +176,8 @@
     };
     show(true);
     feedback('');
-    ui.head.textContent = `${who} · ${dist}cm · ${noise === 'noisy' ? '시끄러움' : '조용함'}${opt.swipe ? ' · 스테레오' : ''} · 기기 ${S.device}`;
+    const headText = () => `${who} · ${dist}cm · ${{ noisy: '시끄러움', quiet: '조용함', auto: '소음 재는 중' }[noise]}${opt.swipe ? ' · 스테레오' : ''} · 기기 ${S.device}`;
+    ui.head.textContent = headText();
     renderProgress();
     let result = null;
     const off = BatEars.on('gesture', onGesture);
@@ -161,12 +190,20 @@
       }
       say('준비', '기준값을 잡는 중이에요. 손을 치우고 가만히');
       await waitReady(5000);
+      say('준비', '주변 소리를 재는 중이에요 (2초)');
+      S.room = await measureRoom(2000 * speed);
+      S.noiseSource = noise === 'auto' ? 'auto' : 'manual';
+      if (noise === 'auto') noise = classifyNoise(S.room);
+      S.noise = noise;
+      ui.head.textContent = headText();
+      S.sessionIndex = store.get('batears-session-n', 0) + 1;
+      store.set('batears-session-n', S.sessionIndex);
       BatRecorder.setTag(`${who}_d${dist}_${noise}_${S.device}`);
       BatRecorder.setLabel('idle');
       BatRecorder.start();
       S.session = BatRecorder.session;
       say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
-      await sleep(2500 * speed);
+      await sleep(1500 * speed);
 
       while (S.queue.length && !S.aborted) {
         const kind = S.queue.shift();
@@ -254,12 +291,21 @@
     }
     const n = S.trials.length, hits = S.trials.filter((t) => t.result === 'hit').length;
     const meta = {
-      session: S.session, who: S.who, dist: S.dist, noise: S.noise, device: S.device,
+      session: S.session, who: S.who, dist: S.dist, noise: S.noise, noiseSource: S.noiseSource, device: S.device,
+      sessionIndex: S.sessionIndex, room: S.room,
       perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, typing: !!S.opt.typing,
       startedAt: S.startedAt, finishedAt: new Date().toISOString(), aborted: S.aborted,
       live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
-      engine: BatEars.info, detector: BatEars.config.detector, trials: S.trials,
+      engine: BatEars.info, detector: BatEars.config.detector, burst: BatEars.config.burst, volume: BatEars.config.volume,
+      freq: BatEars.freq, stereo: BatEars.stereo,
+      client: {
+        ua: navigator.userAgent, platform: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform,
+        lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        screen: `${screen.width}x${screen.height}@${window.devicePixelRatio || 1}`,
+      },
+      trials: S.trials,
     };
+    lastMeta = meta;
     const rows = BatRecorder.toCsv(S.session).split('\n').length - 1;
     if (!S.opt.noDownload || BatRecorder.folderName) {
       if (!BatRecorder.folderName) BatRecorder.download(S.session);
@@ -287,5 +333,5 @@
     else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undo(); }
   });
 
-  window.BatCollect = { start, stop, undo, get active() { return !!S; } };
+  window.BatCollect = { start, stop, undo, get active() { return !!S; }, get lastMeta() { return lastMeta; } };
 })();

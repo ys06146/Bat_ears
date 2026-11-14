@@ -137,6 +137,14 @@
     return median(vals);
   }
 
+  // Room loudness: mean power 300-4000 Hz (speech and music), for metadata / "noisy room" detection.
+  function ambientLevel(a) {
+    const k1 = Math.round(300 / st.binHz), k2 = Math.round(4000 / st.binHz);
+    let p = 0;
+    for (let k = k1; k <= k2; k++) p += lin(dbv(a, k));
+    return toDb(p / Math.max(1, k2 - k1 + 1));
+  }
+
   // Carrier level, noise floor, and echo energy just above / below the carrier (dB relative to the carrier).
   function measure(a, f0) {
     const { binHz, G, W } = st;
@@ -358,7 +366,7 @@
     emit('frame', {
       t: now, tone: st.tone, calibrating, dUp, dDown, up: m.up, down: m.down, v,
       snr: m.snr, carrier: m.carrier, noise: m.noise, bandsUp: m.bandsUp, bandsDown: m.bandsDown,
-      thUp: th.up, thDown: th.down,
+      thUp: th.up, thDown: th.down, ambient: ambientLevel(st.data),
     });
   }
 
@@ -507,7 +515,7 @@
       t: now, tone: st.tone, calibrating, dUp: Math.max(L.dUp, R.dUp), dDown: Math.max(L.dDown, R.dDown),
       up: L.m.up, down: L.m.down, v: (L.v + R.v) / 2, snr: Math.min(L.m.snr, R.m.snr),
       carrier: L.m.carrier, noise: L.m.noise, bandsUp: L.m.bandsUp, bandsDown: L.m.bandsDown,
-      thUp: thL.up, thDown: thL.down,
+      thUp: thL.up, thDown: thL.down, ambient: ambientLevel(st.data),
       stereo: { dUpL: L.dUp, dDownL: L.dDown, dUpR: R.dUp, dDownR: R.dDown, vL: L.v, vR: R.v },
     });
   }

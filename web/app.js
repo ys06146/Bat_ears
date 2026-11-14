@@ -131,15 +131,15 @@
   SETTINGS.forEach((id) => { $(id).onchange = saveSettings; });
   async function startCollect() {
     if (BatCollect.active) return;
-    const who = $('who').value.trim();
-    if (!who || /[^A-Za-z0-9_-]/.test(who)) {
-      $('saveStatus').textContent = '⚠️ 이름은 영문·숫자로 적어 주세요 (예: seojin, p1)';
-      $('who').focus();
-      return;
-    }
+    // name is optional: letters/numbers only (it ends up in public file names); empty = 'anon'
+    const who = $('who').value.trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
     saveSettings();
+    // the folder is remembered: reuse it without a picker; only the very first time asks to pick
     if (BatRecorder.canPickFolder && !BatRecorder.folderName) {
-      try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: files are downloaded at the end instead */ }
+      const name = await BatRecorder.restoreFolder();
+      if (!name) {
+        try { await BatRecorder.pickFolder(); } catch (_) { /* cancelled: files are downloaded at the end instead */ }
+      }
     }
     const res = await BatCollect.start({
       who, dist: $('dist').value, noise: $('noise').value, perGesture: Number($('perGesture').value),
@@ -187,7 +187,7 @@
     (async () => {
       if (params.get('undo') === '1') setTimeout(() => BatCollect.undo(), 6000); // exercise undo mid-session
       const res = await BatCollect.start({
-        speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: 'quiet',
+        speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: params.get('noise') || 'auto',
         perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: true, noDownload: true,
       });
       const session = res && res.session;
@@ -201,7 +201,9 @@
       });
       const vli = head.indexOf('vL');
       const stereoRows = lines.slice(1).filter((l) => l.split(',')[vli] !== '').length;
-      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, gameRunning: ForcePush.state.running }));
+      const m = BatCollect.lastMeta || {};
+      const meta = { noise: m.noise, noiseSource: m.noiseSource, room: m.room, sessionIndex: m.sessionIndex, fpsKeys: Object.keys(m.client || {}), burst: !!m.burst };
+      console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, meta, gameRunning: ForcePush.state.running }));
       document.title = 'DONE';
     })();
   }
