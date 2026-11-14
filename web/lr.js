@@ -24,6 +24,7 @@
         <label><input type="checkbox" class="lr-swap"> 좌우 바꾸기</label>
         <button class="lr-start">▶ 스테레오로 시작</button>
         <button class="secondary lr-reset">숫자 지우기</button>
+        <button class="secondary lr-collect">🎯 좌우만 수집 (✅/❌ 기록)</button>
       </div>
       <canvas class="lr-canvas"></canvas>
       <p class="hint lr-hint">키보드 위 10~20cm에서 손바닥을 세우고 왼쪽 ↔ 오른쪽으로 빠르게 쓸어 보세요. 두 톤의 SNR이 모두 20dB 이상이어야 해요. 낮은 쪽이 있으면 다른 톤 쌍을 고르세요. 방향이 반대로 나오면 '좌우 바꾸기'를 켜세요.</p>`;
@@ -44,6 +45,13 @@
       if (box) box.checked = true;
     };
     root.querySelector('.lr-reset').onclick = (e) => { e.target.blur(); S.counts = {}; };
+    // guided left/right-only session with the tone pair chosen above (saved like any other session)
+    root.querySelector('.lr-collect').onclick = (e) => {
+      e.target.blur();
+      const p = PAIRS[Number(root.querySelector('.lr-pair').value)];
+      if (!BatEars.running || !BatEars.stereo) BatEars.config.stereoFreqs = p.slice();
+      if (window.startCollect) window.startCollect(true);
+    };
     BatEars.on('frame', onFrame);
     BatEars.on('gesture', (e) => {
       if (!S.active) return;

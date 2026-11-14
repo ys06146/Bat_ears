@@ -1,0 +1,303 @@
+{
+ "session": "20261114_164738_anon_d30_quiet_61f5",
+ "who": "anon",
+ "dist": 30,
+ "noise": "quiet",
+ "noiseSource": "manual",
+ "device": "61f5",
+ "sessionIndex": 6,
+ "room": {
+  "ambientDb": -99.43155880273193,
+  "noiseDb": -124.66824340820312,
+  "snrDb": 71.54181289672852,
+  "fps": 30
+ },
+ "perGesture": 10,
+ "wave": false,
+ "swipe": true,
+ "typing": true,
+ "startedAt": "2026-11-14T22:47:33.895Z",
+ "finishedAt": "2026-11-14T22:49:36.653Z",
+ "aborted": true,
+ "live": {
+  "trials": 26,
+  "hits": 6,
+  "accuracy": 0.231,
+  "byGesture": {
+   "push": {
+    "n": 8,
+    "hit": 4,
+    "wrong": 1,
+    "miss": 3
+   },
+   "pull": {
+    "n": 4,
+    "hit": 2,
+    "wrong": 0,
+    "miss": 2
+   },
+   "left": {
+    "n": 8,
+    "hit": 0,
+    "wrong": 4,
+    "miss": 4
+   },
+   "right": {
+    "n": 6,
+    "hit": 0,
+    "wrong": 0,
+    "miss": 6
+   }
+  },
+  "typingFalseTriggers": 0
+ },
+ "engine": {
+  "f0": 20000,
+  "raw": true,
+  "stereo": true,
+  "stereoFreqs": [
+   19000,
+   20500
+  ],
+  "ctxRate": 48000,
+  "micRate": 48000,
+  "ec": false,
+  "ns": false,
+  "agc": false,
+  "ch": 2,
+  "fft": 8192,
+  "binHz": 5.86,
+  "mic": "마이크 배열(디지털 마이크용 인텔® 스마트 사운드 기술)"
+ },
+ "detector": "burst",
+ "burst": {
+  "aOn": 12,
+  "vFire": 1.3,
+  "vMin": 0.9,
+  "gapMs": 120,
+  "maxMs": 900,
+  "waveFlips": 3,
+  "lockMs": 150,
+  "rejectCapped": true
+ },
+ "volume": 0.6,
+ "freq": 20000,
+ "stereo": true,
+ "client": {
+  "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "platform": "Windows",
+  "lang": "ko-KR",
+  "tz": "America/Chicago",
+  "screen": "1440x900@2"
+ },
+ "trials": [
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 0.93,
+   "tStart": 12248.59999999986,
+   "tEnd": 16563.59999999986
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 16864.899999999907,
+   "tEnd": 20954.399999999907
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.14,
+   "tStart": 21263.199999999953,
+   "tEnd": 25335.5
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.22,
+   "tStart": 25647.300000000047,
+   "tEnd": 29718.5
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 30022.800000000047,
+   "tEnd": 34116.69999999995
+  },
+  {
+   "kind": "push",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 34424.69999999995,
+   "tEnd": 38504.09999999986
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 0.97,
+   "tStart": 38806.19999999995,
+   "tEnd": 42892.39999999991
+  },
+  {
+   "kind": "left",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 43192.89999999991,
+   "tEnd": 47289.19999999995
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 0.94,
+   "tStart": 47590.39999999991,
+   "tEnd": 51667.30000000005
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 0.94,
+   "tStart": 51980.39999999991,
+   "tEnd": 56048
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 56353.69999999995,
+   "tEnd": 60435.80000000005
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 60741.19999999995,
+   "tEnd": 64826.39999999991
+  },
+  {
+   "kind": "left",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 65140.5,
+   "tEnd": 69216.30000000005
+  },
+  {
+   "kind": "left",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 69526.09999999986,
+   "tEnd": 73603.3999999999
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 73943.5,
+   "tEnd": 78048.69999999995
+  },
+  {
+   "kind": "push",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 78353.5,
+   "tEnd": 82427.09999999986
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 0.96,
+   "tStart": 82736.80000000005,
+   "tEnd": 86800.80000000005
+  },
+  {
+   "kind": "pull",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 87103.80000000005,
+   "tEnd": 91171.09999999986
+  },
+  {
+   "kind": "pull",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 91473.09999999986,
+   "tEnd": 95583
+  },
+  {
+   "kind": "push",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.35,
+   "tStart": 95887.59999999986,
+   "tEnd": 99966
+  },
+  {
+   "kind": "right",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 100272.3999999999,
+   "tEnd": 104346.30000000005
+  },
+  {
+   "kind": "left",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 104651.59999999986,
+   "tEnd": 108734.19999999995
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.39,
+   "tStart": 109046.69999999995,
+   "tEnd": 113117.5
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.37,
+   "tStart": 113428.09999999986,
+   "tEnd": 117508.19999999995
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.34,
+   "tStart": 117818.30000000005,
+   "tEnd": 121897.30000000005
+  },
+  {
+   "kind": "push",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 122202.19999999995,
+   "tEnd": 126279.19999999995
+  }
+ ]
+}

@@ -35,7 +35,10 @@
     detector: 'burst',
     // rejectCapped: a burst that runs into maxMs without an early fire is body motion, not a gesture
     //   (robust.js's long-event idea; on real data it cut false triggers 4.5 -> 3.0 per minute, hits unchanged)
-    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150, rejectCapped: true },
+    // vetoSnrDb: robust.js's impulse veto only counts while the far band is within this many dB of the tone. In a
+    //   very quiet room the far band sits 60-80 dB under the tone and a fast hand's own spill "lifts" it 6 dB, which
+    //   vetoed real gestures (a 35 cm session: 0/20 -> 17/20 without it; all sessions 52% -> 73%, ml/replay_burst.py)
+    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150, rejectCapped: true, vetoSnrDb: 50 },
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -200,6 +203,8 @@
       st.robust = makeRobust(); // fresh floors for every new calibration
       st.burst = null;
       st.burstLock = 0;
+      st.burstVetoUntil = 0;
+      st.vetoSeen = null;
       st.sburst = null;
       st.sburstLock = 0;
       st.wasCalibrating = true;
@@ -340,8 +345,13 @@
           dDown = ex.dn;
           const g = st.robust.update({ t: now, up: m.up, down: m.down, noise: m.noise, snr: m.snr, v }); // keeps the floors learning
           if (config.detector === 'burst') {
-            // claps, speech or music hits lift the far band too (robust.js impulse veto): drop the burst
-            const vetoed = now < st.robust.vetoUntil;
+            // claps, speech or music hits lift the far band too (robust.js impulse veto): drop the burst.
+            // Only trust a veto raised while the far band was loud next to the tone (see config.burst.vetoSnrDb).
+            if (st.robust.vetoUntil !== st.vetoSeen) {
+              st.vetoSeen = st.robust.vetoUntil;
+              if (!(m.snr >= config.burst.vetoSnrDb)) st.burstVetoUntil = st.robust.vetoUntil;
+            }
+            const vetoed = now < st.burstVetoUntil;
             if (vetoed && st.burst) { st.burst = null; st.burstLock = now + config.burst.lockMs; }
             const b = !vetoed && m.snr >= config.minSnr ? burstStep(now, dUp, dDown, v) : null;
             if (b) b.kinds.forEach((k) => fire(k, { speed: b.speed, strength: Math.max(dUp, dDown), simulated: false }));

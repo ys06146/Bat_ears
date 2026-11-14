@@ -19,11 +19,15 @@ def load(path):
     rows = list(csv.DictReader(open(path, newline='', encoding='utf-8-sig')))
     f = lambda x: float(x) if x not in ('', None) else 0.0
     return [{'t': f(r['t_ms']), 'up': f(r['dUp_db']), 'dn': f(r['dDown_db']), 'v': f(r['v_mps']), 'noise': f(r['noise_db']),
+             'snr': f(r['snr_db']) if r.get('snr_db') not in ('', None) else f(r.get('carrier_db')) - f(r['noise_db']),
              'label': r['label'], 'cue': r.get('cue', ''), 'g': r.get('gesture', '')} for r in rows]
 
 
-def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250):
-    """Approximation of robust.js's impulse veto: far-band noise jumping above its rolling median."""
+def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250, snr_max=50.0):
+    """Approximation of robust.js's impulse veto: far-band noise jumping above its rolling median.
+    snr_max mirrors dsp.js config.burst.vetoSnrDb: a rise only vetoes while the far band is within snr_max dB of the
+    tone (in a very quiet room a fast hand's own spill lifts a -130 dB far band by 6 dB; that is not a clap).
+    snr_max=None = the old behaviour."""
     out, hist, veto_until = [], [], -1e9
     for x in fr:
         t = x['t']
@@ -32,7 +36,8 @@ def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250):
             ns = sorted(hn for _, hn in hist)
             med = ns[len(ns) // 2]
             mad = sorted(abs(n - med) for n in ns)[len(ns) // 2] * 1.4826
-            if x['noise'] - med > max(rise_db, k * max(0.4, mad)):
+            loud = snr_max is None or not (x.get('snr', 0.0) >= snr_max)
+            if x['noise'] - med > max(rise_db, k * max(0.4, mad)) and loud:
                 veto_until = t + hold_ms
         hist.append((t, x['noise']))
         out.append(t < veto_until)
@@ -41,13 +46,13 @@ def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250):
 
 def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, wave_flips=3, lock_ms=150,
                  onset_db=0.0, onset_ms=150, peak_min=0.0, reject_capped=True, wave_vmin=None,
-                 asym_db=None, cap_lock=True):
+                 asym_db=None, cap_lock=True, veto_snr=50.0):
     """Return [(t, kind)] fired by the burst rule.
     Optional robust.js-style filters: onset_db (energy must have risen this much within onset_ms before the
     burst: slow body sway fails), peak_min (minimum peak energy before firing), reject_capped (a push/pull
     decided only because the burst hit max_ms is dropped: long = body motion)."""
     out, ev, lock_until, hist = [], None, -1e9, []
-    vetoed = impulse_vetoes(fr)
+    vetoed = impulse_vetoes(fr, snr_max=veto_snr)
     for x, vet in zip(fr, vetoed):
         t, a = x['t'], max(x['up'], x['dn'])
         active = a > a_on
@@ -191,6 +196,8 @@ def main():
 
     show('browser (as recorded)', total(lambda fr: [(x['t'], x['g'].replace('_sim', '')) for x in fr if x['g'] in ('push', 'pull', 'wave')]))
     show('burst default', total(lambda fr: burst_detect(fr)))
+    show('burst, old veto (any far-band rise)', total(lambda fr: burst_detect(fr, veto_snr=None)))
+    show('burst, no impulse veto', total(lambda fr: burst_detect(fr, veto_snr=-1e9)))
     print('\nrobust.js-style filters on top of the burst rule:')
     for name, kw in [('+ onset 4 dB / 150 ms', {'onset_db': 4}), ('+ onset 2 dB / 150 ms', {'onset_db': 2}),
                      ('+ peak >= 15 dB', {'peak_min': 15}), ('+ reject capped (long) bursts', {'reject_capped': True}),

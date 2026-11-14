@@ -150,8 +150,10 @@
     } catch (_) { /* ignore */ }
   }
   SETTINGS.forEach((id) => { $(id).onchange = saveSettings; });
-  async function startCollect() {
+  // lrOnly: the "↔ 좌우만" button = a short left/right-only stereo session (no push/pull, no typing block)
+  async function startCollect(lrOnly = false) {
     if (BatCollect.active) return;
+    lrOnly = lrOnly === true;
     // name is optional: letters/numbers only (it ends up in public file names); empty = 'anon'
     const who = $('who').value.trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
     saveSettings();
@@ -164,12 +166,15 @@
     }
     const res = await BatCollect.start({
       who, dist: $('dist').value, noise: $('noise').value, perGesture: Number($('perGesture').value),
-      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: $('incTyping').checked, freq: Number($('freq').value),
+      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: lrOnly ? false : $('incTyping').checked, freq: Number($('freq').value),
+      swipeOnly: lrOnly,
     });
     if (res && BatEars.info) showSettings(BatEars.info);
     $('stereo').checked = BatEars.stereo;
   }
-  $('collect').onclick = startCollect;
+  window.startCollect = startCollect; // the left/right test view has a shortcut button too
+  $('collect').onclick = () => startCollect(false);
+  $('collectLR').onclick = () => startCollect(true);
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
     if ((e.key === 's' || e.key === 'S') && !BatCollect.active && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
@@ -290,7 +295,8 @@
       if (params.get('undo') === '1') setTimeout(() => BatCollect.undo(), 6000); // exercise undo mid-session
       const res = await BatCollect.start({
         speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: params.get('noise') || 'auto',
-        perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: true, noDownload: true,
+        perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: params.get('lr') !== '1', noDownload: true,
+        swipeOnly: params.get('lr') === '1', // &lr=1: the "↔ 좌우만" session
       });
       const session = res && res.session;
       const lines = session ? BatRecorder.toCsv(session).split('\n') : [];

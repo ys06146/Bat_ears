@@ -3,6 +3,7 @@
  * window.BatCollect
  *   start(settings)  { who, dist, noise, perGesture, wave, swipe, typing, freq, speed, noDownload }
  *                    swipe: add left/right trials (switches the engine to stereo mode)
+ *                    swipeOnly: left/right trials only (a short stereo session; files get an _lr tag)
  *                    who: short code (letters/numbers, e.g. seojin or p1); dist: 10/20/30 cm; noise: quiet/noisy;
  *                    perGesture: trials per gesture; wave: add wave trials; typing: 15 s typing block (false triggers)
  *                    speed < 1 shortens everything (self-tests)
@@ -143,9 +144,9 @@
     return quietest != null && room.ambientDb > quietest + 8 ? 'noisy' : 'quiet';
   }
 
-  function plan(perGesture, wave, swipe) {
+  function plan(perGesture, wave, swipe, pushPull = true) {
     const list = [];
-    for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
+    if (pushPull) for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
     if (wave) for (let i = 0; i < Math.ceil(perGesture / 2); i++) list.push('wave');
     if (swipe) for (let i = 0; i < perGesture; i++) list.push('left', 'right');
     for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
@@ -161,13 +162,16 @@
 
   async function start(opt = {}) {
     if (S) return null;
+    // swipeOnly: a short left/right-only session (stereo) for tuning swipes; it implies swipe
+    opt = { ...opt, swipe: !!(opt.swipe || opt.swipeOnly), swipeOnly: !!opt.swipeOnly };
+    if (opt.swipeOnly) opt.wave = false;
     const speed = opt.speed || 1;
     const who = String(opt.who || 'anon').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
     const dist = Math.max(1, Math.min(150, Math.round(Number(opt.dist)))) || 20; // typed in cm
     let noise = opt.noise === 'noisy' ? 'noisy' : opt.noise === 'quiet' ? 'quiet' : 'auto';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
-    const queue = plan(perGesture, !!opt.wave, !!opt.swipe);
-    const target = { push: perGesture, pull: perGesture };
+    const queue = plan(perGesture, !!opt.wave, opt.swipe, !opt.swipeOnly);
+    const target = opt.swipeOnly ? {} : { push: perGesture, pull: perGesture };
     if (opt.wave) target.wave = Math.ceil(perGesture / 2);
     if (opt.swipe) { target.left = perGesture; target.right = perGesture; }
     S = {
@@ -198,7 +202,7 @@
       ui.head.textContent = headText();
       S.sessionIndex = store.get('batears-session-n', 0) + 1;
       store.set('batears-session-n', S.sessionIndex);
-      BatRecorder.setTag(`${who}_d${dist}_${noise}_${S.device}`);
+      BatRecorder.setTag(`${who}_d${dist}_${noise}${opt.swipeOnly ? '_lr' : ''}_${S.device}`);
       BatRecorder.setLabel('idle');
       BatRecorder.start();
       S.session = BatRecorder.session;
@@ -295,11 +299,12 @@
     const meta = {
       session: S.session, who: S.who, dist: S.dist, noise: S.noise, noiseSource: S.noiseSource, device: S.device,
       sessionIndex: S.sessionIndex, room: S.room,
-      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, typing: !!S.opt.typing,
+      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, swipeOnly: !!S.opt.swipeOnly, typing: !!S.opt.typing,
       startedAt: S.startedAt, finishedAt: new Date().toISOString(), aborted: S.aborted,
       live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
       engine: BatEars.info, detector: BatEars.config.detector, burst: BatEars.config.burst, volume: BatEars.config.volume,
       freq: BatEars.freq, stereo: BatEars.stereo,
+      ...(BatEars.stereo ? { stereoDetector: BatEars.config.stereoDetector, stereoBurst: BatEars.config.stereoBurst, swapLR: !!BatEars.config.swapLR } : {}),
       client: {
         ua: navigator.userAgent, platform: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform,
         lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
