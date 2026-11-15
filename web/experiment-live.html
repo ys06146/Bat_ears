@@ -39,54 +39,54 @@ td,th{padding:8px;border-bottom:1px solid #273448;text-align:left}
 @media(max-width:950px){main{grid-template-columns:1fr}.stage{min-height:0}}
 @media(max-width:600px){header{flex-wrap:wrap;gap:6px;padding:10px 12px}header h1{font-size:16px}header h1 span{display:block}main{padding:10px}.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.tabs a{flex:0 0 auto}}
 </style></head><body>
-<header><h1>🦇 Bat Ears <span>손짓으로 쓰는 포스 · 카메라 안 씀</span></h1><span id="status" class="chip">대기 중</span></header>
+<header><h1>🦇 Bat Ears <span>Force with hand gestures · no camera</span></h1><span id="status" class="chip">Waiting</span></header>
 <main>
 <section class="stage">
 <div class="tabs">
-<a href="index.html">🎮 게임</a><a class="sel" href="experiment-live.html">🧪 자유 실험 모드</a><a href="key.html">🔐 제스처 키</a><a href="tone.html">📢 톤 재생기</a><a href="index.html">🛰️ 소나 뷰</a><a href="index.html">🎯 스피드건</a><a href="index.html">↔ 좌우 테스트</a>
+<a href="index.html">🎮 Game</a><a class="sel" href="experiment-live.html">🧪 Free experiment mode</a><a href="key.html">🔐 Gesture key</a><a href="tone.html">📢 Tone player</a><a href="index.html">🛰️ Sonar view</a><a href="index.html">🎯 Speed gun</a><a href="index.html">↔ Left/right test</a>
 </div>
-<div class="card"><h3>🧪 실시간 동작 인식</h3><p>카운트다운 없이 바로 손동작을 감지합니다. 인식된 모든 동작은 실험 기록에 저장됩니다.</p>
-<div id="last">–</div><div class="kpi"><div>인식 이벤트<b id="count">0</b></div><div>완료 세트<b id="pairs">0</b></div><div>외부 초음파<b id="foreign">–</b></div></div>
-<div class="row" style="margin-top:14px"><button class="secondary" data-mark="push">1 밀기</button><button class="secondary" data-mark="pull">2 당기기</button><button class="secondary" data-mark="left">3 왼쪽</button><button class="secondary" data-mark="right">4 오른쪽</button><button class="secondary" data-mark="wave">5 흔들기</button></div>
-<p>숫자키는 실제 수행한 동작을 표시합니다. 시스템이 감지한 이벤트와 별도로 저장됩니다.</p>
-<div class="row"><button id="pairStart" class="secondary">세트 시작 (Q)</button><button id="pairEnd" class="secondary" disabled>세트 종료 (E)</button></div>
+<div class="card"><h3>🧪 Live gesture recognition</h3><p>Detects hand gestures right away, with no countdown. Every recognized gesture is saved to the experiment log.</p>
+<div id="last">–</div><div class="kpi"><div>Recognition events<b id="count">0</b></div><div>Completed sets<b id="pairs">0</b></div><div>Foreign ultrasound<b id="foreign">–</b></div></div>
+<div class="row" style="margin-top:14px"><button class="secondary" data-mark="push">1 Push</button><button class="secondary" data-mark="pull">2 Pull</button><button class="secondary" data-mark="left">3 Left</button><button class="secondary" data-mark="right">4 Right</button><button class="secondary" data-mark="wave">5 Wave</button></div>
+<p>Number keys mark the gesture you actually performed. They’re saved separately from the events the system detected.</p>
+<div class="row"><button id="pairStart" class="secondary">Start set (Q)</button><button id="pairEnd" class="secondary" disabled>End set (E)</button></div>
 </div>
-<div class="card"><h3>📊 실시간 신호</h3>
-<div class="row"><span>밀기 신호</span><div class="bar"><div id="barUp"></div></div><b id="vUp">–</b></div>
-<div class="row"><span>당기기 신호</span><div class="bar"><div id="barDown"></div></div><b id="vDown">–</b></div>
-<div class="row"><span>SNR <b id="snr">–</b></span><span>손 속도 <b id="vel">–</b></span></div>
-<div id="plotArea"><div><canvas id="zoom" class="spec"></canvas><p>주파수 주변 ±600Hz</p></div><div><canvas id="wide" class="spec"></canvas><p>10kHz 이상 전체</p></div></div></div>
-<div class="card" id="review" hidden><h3>📊 실험 종료 결과</h3><div id="stats"></div><div id="actualBox" hidden><p>실제로 수행한 동작 횟수를 입력하고 완료를 누르세요.</p><div id="actualInputs"></div><button id="finish">완료 · 통계 계산</button></div><p id="comparison"></p></div>
-<div class="card"><h3>실시간 이벤트 기록</h3><div id="feed"><table><thead><tr><th>시간(s)</th><th>구분</th><th>동작</th><th>속도(m/s)</th><th>세트</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+<div class="card"><h3>📊 Live signal</h3>
+<div class="row"><span>Push signal</span><div class="bar"><div id="barUp"></div></div><b id="vUp">–</b></div>
+<div class="row"><span>Pull signal</span><div class="bar"><div id="barDown"></div></div><b id="vDown">–</b></div>
+<div class="row"><span>SNR <b id="snr">–</b></span><span>Hand speed <b id="vel">–</b></span></div>
+<div id="plotArea"><div><canvas id="zoom" class="spec"></canvas><p>±600 Hz around the frequency</p></div><div><canvas id="wide" class="spec"></canvas><p>Everything above 10 kHz</p></div></div></div>
+<div class="card" id="review" hidden><h3>📊 Experiment results</h3><div id="stats"></div><div id="actualBox" hidden><p>Enter how many times you actually performed each gesture and press Done.</p><div id="actualInputs"></div><button id="finish">Done · compute statistics</button></div><p id="comparison"></p></div>
+<div class="card"><h3>Live event log</h3><div id="feed"><table><thead><tr><th>Time (s)</th><th>Kind</th><th>Gesture</th><th>Speed (m/s)</th><th>Set</th></tr></thead><tbody id="rows"></tbody></table></div></div>
 </section>
 <aside>
-<div class="card" id="itestCard"><h3>📢 간섭 시험</h3>
-<p>방해할 노트북 B는 <b>방해 모드</b>, 시험할 노트북 A는 <b>간섭 테스트</b>를 눌러요. 한 노트북에서 둘을 같이 쓰지 마세요.</p>
-<div class="row"><label>방해 톤 <input id="jamFreq" type="number" min="15000" max="23000" step="100" value="20000">Hz</label><label>음량 <input id="jamVol" type="range" min="0.05" max="1" step="0.05" value="0.6"><b id="jamVolLabel">60%</b></label></div>
-<div class="row"><button id="jam">📢 방해 모드 시작</button></div>
+<div class="card" id="itestCard"><h3>📢 Interference test</h3>
+<p>On laptop B (the jammer) press <b>Jamming mode</b>; on laptop A (under test) press <b>Interference test</b>. Don’t use both on one laptop.</p>
+<div class="row"><label>Jamming tone <input id="jamFreq" type="number" min="15000" max="23000" step="100" value="20000">Hz</label><label>Volume <input id="jamVol" type="range" min="0.05" max="1" step="0.05" value="0.6"><b id="jamVolLabel">60%</b></label></div>
+<div class="row"><button id="jam">📢 Start jamming mode</button></div>
 <div id="jamStatus" class="jam" hidden></div>
-<div class="row"><button id="itest">🧪 간섭 테스트 (자동 회피 끄기 → 켜기, 10세트씩)</button></div>
-<p id="itestStatus" class="warn">스테레오 끔 · 20.0kHz · 연속 Push→Pull 10세트를 자동 회피 끄고 한 번, 켜고 한 번 해요. 세트마다 Q 누르고 밀기→당기기, E 누르기. 끝날 때마다 메인 페이지에서 고른 데이터 폴더에 자동 저장돼요.</p>
+<div class="row"><button id="itest">🧪 Interference test (auto-avoid off → on, 10 sets each)</button></div>
+<p id="itestStatus" class="warn">Stereo off · 20.0 kHz · 10 continuous Push→Pull sets once with auto-avoid off and once with it on. For each set, press Q, push→pull, then press E. After each run it saves automatically to the data folder picked on the main page.</p>
 </div>
-<div class="card"><h3>🎯 데이터 수집 설정</h3>
-<div class="row"><label>참가자 <input id="who" type="text" value="p1" maxlength="24"></label><label>거리 <input id="dist" type="number" min="1" max="150" value="20">cm</label></div>
-<div class="row"><label>실험 유형 <select id="mode"><option value="free">자유 모드 (전체 동작)</option><option value="sequence">연속 Push→Pull</option><option value="swipe">자유 모드 (좌우 포함)</option></select></label><label id="setLabel" hidden>목표 세트 <input id="targetSets" type="number" min="1" max="1000" value="10"></label></div>
-<div class="row"><label>환경 <select id="condition"><option value="quiet">조용함</option><option value="music">음악/대화</option><option value="phone11400">휴대폰 11.4kHz</option><option value="phone20000">휴대폰 20kHz</option><option value="other_batears">다른 Bat Ears 실행</option><option value="other">기타</option></select></label></div>
-<div class="row"><label>메모 <input id="note" type="text" placeholder="기기, 음량, 간격 등"></label></div>
-<p>연속 모드에서는 Push 1회 + Pull 1회가 1세트입니다. 자유 모드는 종료 후 실제 수행 횟수를 입력할 수 있습니다.</p>
+<div class="card"><h3>🎯 Data collection settings</h3>
+<div class="row"><label>Participant <input id="who" type="text" value="p1" maxlength="24"></label><label>Distance <input id="dist" type="number" min="1" max="150" value="20">cm</label></div>
+<div class="row"><label>Experiment type <select id="mode"><option value="free">Free mode (all gestures)</option><option value="sequence">Continuous Push→Pull</option><option value="swipe">Free mode (with left/right)</option></select></label><label id="setLabel" hidden>Target sets <input id="targetSets" type="number" min="1" max="1000" value="10"></label></div>
+<div class="row"><label>Environment <select id="condition"><option value="quiet">Quiet</option><option value="music">Music/talking</option><option value="phone11400">Phone 11.4 kHz</option><option value="phone20000">Phone 20 kHz</option><option value="other_batears">Another Bat Ears running</option><option value="other">Other</option></select></label></div>
+<div class="row"><label>Memo <input id="note" type="text" placeholder="Device, volume, spacing, etc."></label></div>
+<p>In continuous mode, 1 Push + 1 Pull is one set. In free mode you can enter the actual counts after it ends.</p>
 </div>
-<div class="card"><h3>🔊 신호 설정</h3>
-<div class="row"><button id="start">▶ 시작</button><button id="stop" class="secondary" disabled>■ 종료</button><button id="check" class="secondary" disabled>대역 점검</button></div>
-<label class="wide">주파수 <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"><b id="freqLabel">20.0 kHz</b></label>
-<label class="wide">음량 <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"><b id="volLabel">60%</b></label>
-<div class="row"><label>민감도 <input id="th" type="number" value="6" min="2" max="20" step="0.5">dB</label><label><input id="raw" type="checkbox" checked> 마이크 보정 3종 끄기</label></div>
-<label><input id="stereo" type="checkbox" checked> 좌우 스와이프 (스테레오 · 실험 중)</label>
-<label><input id="autoTone" type="checkbox" checked> 단일 톤 간섭 자동 회피</label>
-<label><input id="followPull" type="checkbox" checked> 연속 실험에서 Pull 보정 사용</label>
+<div class="card"><h3>🔊 Signal settings</h3>
+<div class="row"><button id="start">▶ Start</button><button id="stop" class="secondary" disabled>■ End</button><button id="check" class="secondary" disabled>Band check</button></div>
+<label class="wide">Frequency <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"><b id="freqLabel">20.0 kHz</b></label>
+<label class="wide">Volume <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"><b id="volLabel">60%</b></label>
+<div class="row"><label>Sensitivity <input id="th" type="number" value="6" min="2" max="20" step="0.5">dB</label><label><input id="raw" type="checkbox" checked> Turn off the 3 mic processing filters</label></div>
+<label><input id="stereo" type="checkbox" checked> Left/right swipe (stereo · experimental)</label>
+<label><input id="autoTone" type="checkbox" checked> Single-tone interference auto-avoid</label>
+<label><input id="followPull" type="checkbox" checked> Use Pull correction in continuous experiments</label>
 <p id="settings"></p><p id="warn" class="warn"></p></div>
-<div class="card"><h3>📁 데이터 내보내기</h3><p>실험 종료 후 통계를 확인하고 마음에 드는 결과만 저장하세요.</p>
-<div class="row"><button id="drive">📁 Google Drive 폴더에 저장</button><button id="csv" class="secondary">이벤트 CSV</button><button id="json" class="secondary">전체 JSON</button></div>
-<button id="clear" class="secondary">기록 초기화</button><p id="saveStatus">Drive 동기화 폴더를 선택하면 CSV와 JSON을 함께 저장합니다.</p></div>
+<div class="card"><h3>📁 Export data</h3><p>Check the statistics after the experiment, and save only the results you want.</p>
+<div class="row"><button id="drive">📁 Save to Google Drive folder</button><button id="csv" class="secondary">Event CSV</button><button id="json" class="secondary">Full JSON</button></div>
+<button id="clear" class="secondary">Reset log</button><p id="saveStatus">Choosing the Drive sync folder saves the CSV and JSON together.</p></div>
 </aside></main>
 <script src="robust.js?v=20261115101840"></script><script src="swipe.js?v=20261115101840"></script><script src="wave.js?v=20261115101840"></script><script src="iq.js?v=20261115101840"></script><script src="dsp.js?v=20261115101840"></script>
 <script>
@@ -108,23 +108,23 @@ function mark(kind){if(running)log('intended',kind)}
 function pairStart(){if(!running||current)return;current={id:++seq,start_ms:performance.now(),events_start:events.length};$('pairStart').disabled=true;$('pairEnd').disabled=false;log('pair_start','push_pull')}
 function pairEnd(){if(!current)return;const p=current,t=performance.now();p.end_ms=t;p.detected=events.slice(p.events_start).filter(e=>e.type==='detected'&&e.t_ms<=t);p.push=p.detected.some(e=>e.kind==='push');p.pull=p.detected.some(e=>e.kind==='pull');p.correct_order=p.detected.some((e,i)=>e.kind==='push'&&p.detected.slice(i+1).some(f=>f.kind==='pull'));pairs.push(p);log('pair_end','push_pull',{push:p.push,pull:p.pull,correct_order:p.correct_order});current=null;$('pairStart').disabled=!running;$('pairEnd').disabled=true;$('pairs').textContent=pairs.length;itestAfterSet()}
 function estimate(){let waiting=false,completed=0;for(const e of detected()){if(e.kind==='push')waiting=true;else if(e.kind==='pull'&&waiting){completed++;waiting=false}}return completed}
-function summary(){const c=counts(),n=Number(session?.target_sets)||0,seqs=estimate();const lines=kinds.map(k=>labels[k]+': '+c[k]);let out='<p><b>인식된 횟수</b> — '+lines.join(' · ')+'</p>';if(session?.mode==='sequence')out+='<p><b>목표 '+n+'세트</b> (Push '+n+'회 + Pull '+n+'회) · 감지된 Push '+c.push+'/'+n+' ('+pct(c.push,n)+') · Pull '+c.pull+'/'+n+' ('+pct(c.pull,n)+') · 순서상 완성된 쌍 '+seqs+'/'+n+' ('+pct(seqs,n)+')</p><p class="warn">중복 감지로 횟수가 목표를 넘을 수 있습니다. 실제 세트별 성공률이 아닌 이벤트 기반 추정치입니다.</p>';return out}
-function showReview(){if(!session)return;$('review').hidden=false;$('stats').innerHTML=summary();$('actualBox').hidden=session.mode==='sequence';$('comparison').textContent='';if(session.mode!=='sequence'){$('actualInputs').replaceChildren();for(const k of kinds){const label=document.createElement('label');label.textContent=labels[k]+' 실제 횟수';const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';input.value='0';input.id='actual_'+k;label.append(input);$('actualInputs').append(label)}}}
-function finish(){actual={};for(const k of kinds){const v=Number($('actual_'+k).value);if(!Number.isSafeInteger(v)||v<0){alert('실제 횟수를 0 이상의 정수로 입력하세요.');return}actual[k]=v}const c=counts();const lines=kinds.map(k=>{const a=actual[k],d=c[k];return labels[k]+': 실제 '+a+'회 / 감지 '+d+'회 / 감지 수÷실제 수 '+pct(d,a)+(d>a?' (중복·오인식 가능)':'')});$('comparison').textContent=lines.join(' | ')+' — 개별 동작의 정답 여부를 확인한 정확도는 아닙니다.';$('saveStatus').textContent='검토 완료. 원하는 경우 Drive 저장 또는 다운로드하세요.'}
+function summary(){const c=counts(),n=Number(session?.target_sets)||0,seqs=estimate();const lines=kinds.map(k=>labels[k]+': '+c[k]);let out='<p><b>Recognized counts</b> — '+lines.join(' · ')+'</p>';if(session?.mode==='sequence')out+='<p><b>Target '+n+' sets</b> (Push '+n+' times + Pull '+n+' times) · detected Push '+c.push+'/'+n+' ('+pct(c.push,n)+') · Pull '+c.pull+'/'+n+' ('+pct(c.pull,n)+') · pairs completed in order '+seqs+'/'+n+' ('+pct(seqs,n)+')</p><p class="warn">Duplicate detections can push counts past the target. This is an event-based estimate, not the true per-set success rate.</p>';return out}
+function showReview(){if(!session)return;$('review').hidden=false;$('stats').innerHTML=summary();$('actualBox').hidden=session.mode==='sequence';$('comparison').textContent='';if(session.mode!=='sequence'){$('actualInputs').replaceChildren();for(const k of kinds){const label=document.createElement('label');label.textContent=labels[k]+' Actual counts';const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';input.value='0';input.id='actual_'+k;label.append(input);$('actualInputs').append(label)}}}
+function finish(){actual={};for(const k of kinds){const v=Number($('actual_'+k).value);if(!Number.isSafeInteger(v)||v<0){alert('Enter each actual count as a whole number, 0 or more.');return}actual[k]=v}const c=counts();const lines=kinds.map(k=>{const a=actual[k],d=c[k];return labels[k]+': actual '+a+' / detected '+d+' / detected÷actual '+pct(d,a)+(d>a?' (duplicates and misreads possible)':'')});$('comparison').textContent=lines.join(' | ')+' — this is not an accuracy checked against the truth of each gesture.';$('saveStatus').textContent='Review done. Save to Drive or download if you want.'}
 function off(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
 function lock(v){['who','dist','condition','mode','targetSets','note','raw','stereo','autoTone','followPull'].forEach(id=>$(id).disabled=v)}
-async function start(){if(running)return;if(ended&&events.length){if(!confirm('이전 기록을 지우고 새 실험을 시작할까요? 저장하지 않은 데이터는 사라집니다.'))return;clear(true)}const mode=$('mode').value,n=Number($('targetSets').value);if(mode==='sequence'&&(!Number.isSafeInteger(n)||n<1||n>1000)){alert('목표 세트는 1~1000 사이의 정수로 입력하세요.');return}try{$('start').disabled=true;$('status').textContent='마이크 시작 중 / 초기 보정';const stereo=$('stereo').checked;const continuousPull=mode==='sequence'&&$('followPull').checked;const autoTune=!stereo&&$('autoTone').checked?'interference':false;engine.config.threshold=Number($('th').value)||6;engine.config.maskForeignTones=true;engine.setVolume(Number($('vol').value));const ok=await engine.start({freq:Number($('freq').value),raw:$('raw').checked,stereo,continuousPull,autoTune});if(!ok)throw Error('마이크/오디오 시작 실패');running=true;ended=false;t0=performance.now();session={started_at:new Date().toISOString(),who:$('who').value,dist_cm:Number($('dist').value),condition:$('condition').value,mode,note:$('note').value,target_sets:mode==='sequence'?n:null,stereo,continuous_pull:continuousPull,auto_tune:autoTune,freq_hz:engine.freq,volume:Number($('vol').value),threshold_db:Number($('th').value),raw:$('raw').checked,engine_info:engine.info};unsubs.push(engine.on('gesture',g=>{if(!running||g.simulated)return;log('detected',g.kind,{speed:g.speed??null,strength:g.strength??null,source:g.source,distance:g.distance,phasePath:g.phasePath})}));unsubs.push(engine.on('foreign',g=>{if(!running)return;$('foreign').textContent=g.tones?.join(', ')||'감지';log('foreign','tone',{tones:g.tones||[]})}));$('stop').disabled=false;$('check').disabled=false;const tone=stereo?(engine.stereoPair||[]).join(' / '):engine.freq,occupied=engine.info&&engine.info.autoTune&&engine.info.autoTune.occupied;if(!stereo&&engine.freq!==Number($('freq').value)){$('freq').value=engine.freq;$('freqLabel').textContent=(engine.freq/1000).toFixed(1)+' kHz'}$('status').textContent='기록 중 · '+tone+' Hz'+(occupied?' · 대체 대역을 찾지 못함':'')+' · 자유롭게 움직이세요';$('pairStart').disabled=mode!=='sequence';lock(true);$('review').hidden=true}catch(e){$('start').disabled=false;$('status').textContent='오류: '+e.message}}
-async function stop(){if(!running)return;if(current)pairEnd();running=false;ended=true;off();try{await engine.stop()}catch(e){}session.finished_at=new Date().toISOString();$('stop').disabled=true;$('check').disabled=true;$('start').disabled=false;$('pairStart').disabled=true;$('pairEnd').disabled=true;lock(false);$('status').textContent='종료 · 결과 검토 후 선택적으로 저장';showReview()}
-function clear(force=false){if(running){alert('먼저 종료해 주세요.');return}if(!force&&events.length&&!confirm('기존 기록을 지울까요?'))return;events=[];pairs=[];current=null;seq=0;session=null;actual=null;ended=false;$('rows').replaceChildren();$('last').textContent='–';$('count').textContent='0';$('pairs').textContent='0';$('foreign').textContent='–';$('review').hidden=true;$('saveStatus').textContent='기록을 검토한 후 원하는 경우에만 내보내세요.'}
-function exportJson(){if(!session){alert('먼저 실험을 진행해 주세요.');return}download('batears_experiment_'+Date.now()+'.json',JSON.stringify(report(),null,2),'application/json')}
-function exportCsv(){if(!session){alert('먼저 실험을 진행해 주세요.');return}download('batears_events_'+Date.now()+'.csv',eventCsv(),'text/csv')}
-async function saveDrive(){if(!session||running){alert('실험 종료 후 저장해 주세요.');return}if(!window.showDirectoryPicker){$('saveStatus').textContent='이 브라우저에서는 폴더 직접 저장이 지원되지 않습니다. CSV/JSON을 다운로드한 후 Google Drive에 업로드하세요.';return}try{const dir=await window.showDirectoryPicker({mode:'readwrite'});const base='batears_'+new Date(session.started_at).toISOString().replace(/[:.]/g,'-')+'_'+(session.who||'anon').replace(/[^a-zA-Z0-9_-]/g,'_');for(const [name,data] of [[base+'.json',JSON.stringify(report(),null,2)],[base+'.csv',eventCsv()]]){const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(data);await w.close()}$('saveStatus').textContent='선택한 폴더에 CSV와 JSON을 저장했습니다. Google Drive 동기화 폴더를 선택한 경우 Drive 앱이 동기화합니다.'}catch(e){$('saveStatus').textContent=e.name==='AbortError'?'폴더 선택을 취소했습니다.':'저장 실패: '+e.message}}
+async function start(){if(running)return;if(ended&&events.length){if(!confirm('Clear the previous log and start a new experiment? Unsaved data will be lost.'))return;clear(true)}const mode=$('mode').value,n=Number($('targetSets').value);if(mode==='sequence'&&(!Number.isSafeInteger(n)||n<1||n>1000)){alert('Enter the target sets as a whole number from 1 to 1000.');return}try{$('start').disabled=true;$('status').textContent='Starting mic / initial calibration';const stereo=$('stereo').checked;const continuousPull=mode==='sequence'&&$('followPull').checked;const autoTune=!stereo&&$('autoTone').checked?'interference':false;engine.config.threshold=Number($('th').value)||6;engine.config.maskForeignTones=true;engine.setVolume(Number($('vol').value));const ok=await engine.start({freq:Number($('freq').value),raw:$('raw').checked,stereo,continuousPull,autoTune});if(!ok)throw Error('Mic/audio failed to start');running=true;ended=false;t0=performance.now();session={started_at:new Date().toISOString(),who:$('who').value,dist_cm:Number($('dist').value),condition:$('condition').value,mode,note:$('note').value,target_sets:mode==='sequence'?n:null,stereo,continuous_pull:continuousPull,auto_tune:autoTune,freq_hz:engine.freq,volume:Number($('vol').value),threshold_db:Number($('th').value),raw:$('raw').checked,engine_info:engine.info};unsubs.push(engine.on('gesture',g=>{if(!running||g.simulated)return;log('detected',g.kind,{speed:g.speed??null,strength:g.strength??null,source:g.source,distance:g.distance,phasePath:g.phasePath})}));unsubs.push(engine.on('foreign',g=>{if(!running)return;$('foreign').textContent=g.tones?.join(', ')||'Detected';log('foreign','tone',{tones:g.tones||[]})}));$('stop').disabled=false;$('check').disabled=false;const tone=stereo?(engine.stereoPair||[]).join(' / '):engine.freq,occupied=engine.info&&engine.info.autoTune&&engine.info.autoTune.occupied;if(!stereo&&engine.freq!==Number($('freq').value)){$('freq').value=engine.freq;$('freqLabel').textContent=(engine.freq/1000).toFixed(1)+' kHz'}$('status').textContent='Recording · '+tone+' Hz'+(occupied?' · no substitute band found':'')+' · move freely';$('pairStart').disabled=mode!=='sequence';lock(true);$('review').hidden=true}catch(e){$('start').disabled=false;$('status').textContent='Error: '+e.message}}
+async function stop(){if(!running)return;if(current)pairEnd();running=false;ended=true;off();try{await engine.stop()}catch(e){}session.finished_at=new Date().toISOString();$('stop').disabled=true;$('check').disabled=true;$('start').disabled=false;$('pairStart').disabled=true;$('pairEnd').disabled=true;lock(false);$('status').textContent='Ended · review the results, then save if you like';showReview()}
+function clear(force=false){if(running){alert('Please end it first.');return}if(!force&&events.length&&!confirm('Clear the existing log?'))return;events=[];pairs=[];current=null;seq=0;session=null;actual=null;ended=false;$('rows').replaceChildren();$('last').textContent='–';$('count').textContent='0';$('pairs').textContent='0';$('foreign').textContent='–';$('review').hidden=true;$('saveStatus').textContent='Review the log and export only if you want.'}
+function exportJson(){if(!session){alert('Please run an experiment first.');return}download('batears_experiment_'+Date.now()+'.json',JSON.stringify(report(),null,2),'application/json')}
+function exportCsv(){if(!session){alert('Please run an experiment first.');return}download('batears_events_'+Date.now()+'.csv',eventCsv(),'text/csv')}
+async function saveDrive(){if(!session||running){alert('Please save after the experiment ends.');return}if(!window.showDirectoryPicker){$('saveStatus').textContent='This browser can’t save straight to a folder. Download the CSV/JSON and upload them to Google Drive.';return}try{const dir=await window.showDirectoryPicker({mode:'readwrite'});const base='batears_'+new Date(session.started_at).toISOString().replace(/[:.]/g,'-')+'_'+(session.who||'anon').replace(/[^a-zA-Z0-9_-]/g,'_');for(const [name,data] of [[base+'.json',JSON.stringify(report(),null,2)],[base+'.csv',eventCsv()]]){const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(data);await w.close()}$('saveStatus').textContent='Saved the CSV and JSON to the chosen folder. If you chose the Google Drive sync folder, the Drive app will sync it.'}catch(e){$('saveStatus').textContent=e.name==='AbortError'?'Folder selection cancelled.':'Save failed: '+e.message}}
 $('start').onclick=start;$('stop').onclick=stop;$('pairStart').onclick=pairStart;$('pairEnd').onclick=pairEnd;$('clear').onclick=()=>clear();$('csv').onclick=exportCsv;$('json').onclick=exportJson;$('drive').onclick=saveDrive;$('finish').onclick=finish;
 $('mode').onchange=()=>{$('setLabel').hidden=$('mode').value!=='sequence';$('pairStart').hidden=$('mode').value!=='sequence';$('pairEnd').hidden=$('mode').value!=='sequence'};
 $('freq').oninput=()=>{$('freqLabel').textContent=(Number($('freq').value)/1000).toFixed(1)+' kHz';engine.setFreq(Number($('freq').value))};
 $('vol').oninput=()=>{$('volLabel').textContent=Math.round(Number($('vol').value)*100)+'%';engine.setVolume(Number($('vol').value))};
 $('th').onchange=()=>{engine.config.threshold=Number($('th').value)||6};
-$('check').onclick=async()=>{try{const result=await engine.bandCheck();$('settings').textContent=result?result.map(x=>(x.f/1000).toFixed(1)+'kHz '+x.snr.toFixed(0)+'dB').join(' · '):'점검 실패'}catch(e){$('warn').textContent=e.message}};
+$('check').onclick=async()=>{try{const result=await engine.bandCheck();$('settings').textContent=result?result.map(x=>(x.f/1000).toFixed(1)+'kHz '+x.snr.toFixed(0)+'dB').join(' · '):'Check failed'}catch(e){$('warn').textContent=e.message}};
 engine.on('frame',f=>{if(!running)return;$('snr').textContent=Number.isFinite(f.snr)?f.snr.toFixed(0)+' dB':'–';$('vel').textContent=Number.isFinite(f.v)?f.v.toFixed(2)+' m/s':'–';const width=x=>Math.max(0,Math.min(100,x*5))+'%';$('barUp').style.width=width(f.dUp||0);$('barDown').style.width=width(f.dDown||0);$('vUp').textContent=Number.isFinite(f.dUp)?f.dUp.toFixed(1):'–';$('vDown').textContent=Number.isFinite(f.dDown)?f.dDown.toFixed(1):'–';engine.drawZoom($('zoom'));engine.drawWide($('wide'))});
 $('mode').dispatchEvent(new Event('change'));
 
@@ -132,17 +132,17 @@ $('mode').dispatchEvent(new Event('change'));
 let jam=null;
 async function jamToggle(){
   if(jam){const j=jam;jam=null;try{j.g.gain.setTargetAtTime(0,j.ctx.currentTime,0.03);await new Promise(r=>setTimeout(r,120));j.osc.stop();await j.ctx.close()}catch(e){}
-    $('jam').textContent='📢 방해 모드 시작';$('jamStatus').hidden=true;$('status').textContent='대기 중';$('start').disabled=false;$('itest').disabled=false;return}
-  if(running||itest){alert('이 노트북은 실험 중이에요. 방해 모드는 다른 노트북에서 켜 주세요.');return}
+    $('jam').textContent='📢 Start jamming mode';$('jamStatus').hidden=true;$('status').textContent='Waiting';$('start').disabled=false;$('itest').disabled=false;return}
+  if(running||itest){alert('This laptop is running an experiment. Turn on jamming mode on another laptop.');return}
   const f=Math.max(15000,Math.min(23000,Math.round(Number($('jamFreq').value)||20000))),v=Number($('jamVol').value)||0.6;
   const ctx=new AudioContext();try{await ctx.resume()}catch(e){}
-  if(f>ctx.sampleRate/2-500){alert('이 기기는 '+f+'Hz를 낼 수 없어요');await ctx.close();return}
+  if(f>ctx.sampleRate/2-500){alert('This device can’t play '+f+'Hz');await ctx.close();return}
   const osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.value=f;g.gain.value=0;osc.connect(g).connect(ctx.destination);osc.start();g.gain.setTargetAtTime(v,ctx.currentTime,0.05);
   jam={ctx,osc,g,f};
-  $('jam').textContent='■ 방해 모드 끄기';$('jamStatus').textContent='📢 방해 중 '+f+'Hz';$('jamStatus').hidden=false;$('status').textContent='📢 방해 중 '+f+'Hz';$('start').disabled=true;$('itest').disabled=true}
+  $('jam').textContent='■ Turn off jamming mode';$('jamStatus').textContent='📢 Jamming '+f+'Hz';$('jamStatus').hidden=false;$('status').textContent='📢 Jamming '+f+'Hz';$('start').disabled=true;$('itest').disabled=true}
 $('jam').onclick=jamToggle;
 $('jamVol').oninput=()=>{const v=Number($('jamVol').value);$('jamVolLabel').textContent=Math.round(v*100)+'%';if(jam)jam.g.gain.setTargetAtTime(v,jam.ctx.currentTime,0.05)};
-$('jamFreq').onchange=()=>{if(!jam)return;const f=Math.max(15000,Math.min(23000,Math.round(Number($('jamFreq').value)||20000)));jam.osc.frequency.setValueAtTime(f,jam.ctx.currentTime);jam.f=f;$('jamStatus').textContent='📢 방해 중 '+f+'Hz';$('status').textContent='📢 방해 중 '+f+'Hz'};
+$('jamFreq').onchange=()=>{if(!jam)return;const f=Math.max(15000,Math.min(23000,Math.round(Number($('jamFreq').value)||20000)));jam.osc.frequency.setValueAtTime(f,jam.ctx.currentTime);jam.f=f;$('jamStatus').textContent='📢 Jamming '+f+'Hz';$('status').textContent='📢 Jamming '+f+'Hz'};
 
 // ---- 🧪 interference test (laptop A): auto-avoid off, then on, 10 push->pull sets each, saved as _interference_off / _on
 let itest=null;
@@ -156,33 +156,33 @@ async function dataDir(){
   try{const h=await window.showDirectoryPicker({id:'batears-data',mode:'readwrite'});idbPut('dataDir',h).catch(()=>{});return h}catch(e){return null}}
 async function itestClick(){
   if(running)return;
-  if(jam){alert('이 노트북은 방해 모드 중이에요. 간섭 테스트는 다른 노트북에서 해 주세요.');return}
-  if(!itest){const dir=await dataDir();itest={phase:'off',dir};$('saveStatus').textContent=dir?'저장 폴더: '+dir.name:'저장 폴더가 없어서 끝날 때마다 다운로드돼요'}
+  if(jam){alert('This laptop is in jamming mode. Run the interference test on another laptop.');return}
+  if(!itest){const dir=await dataDir();itest={phase:'off',dir};$('saveStatus').textContent=dir?'Save folder: '+dir.name:'No save folder, so it downloads after each run'}
   await itestPhase()}
 async function itestPhase(){
   const on=itest.phase==='on';
   if(ended||events.length)clear(true);
   $('stereo').checked=false;$('freq').value=20000;$('freqLabel').textContent='20.0 kHz';$('mode').value='sequence';$('mode').dispatchEvent(new Event('change'));
-  $('targetSets').value=10;$('autoTone').checked=on;$('condition').value='other_batears';$('note').value='간섭 테스트 · 자동 회피 '+(on?'켜기':'끄기');
-  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · 시작 중…';
+  $('targetSets').value=10;$('autoTone').checked=on;$('condition').value='other_batears';$('note').value='Interference test · auto-avoid '+(on?'on':'off');
+  $('itestStatus').textContent=(on?'2/2 auto-avoid on':'1/2 auto-avoid off')+' · starting…';
   await start();
-  if(!running){$('itest').textContent='▶ 간섭 테스트 '+(on?'2/2 (자동 회피 켜기)':'1/2 (자동 회피 끄기)')+' 다시 시작';$('itestStatus').textContent='시작하지 못했어요. 버튼을 다시 눌러 주세요';return}
+  if(!running){$('itest').textContent='▶ Interference test '+(on?'2/2 (auto-avoid on)':'1/2 (auto-avoid off)')+' Start again';$('itestStatus').textContent='Couldn’t start. Please press the button again';return}
   session.itest_phase=itest.phase;session.label='interference_'+itest.phase;
-  $('itest').textContent='🧪 간섭 테스트 진행 중';$('itest').disabled=true;
-  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · 0/10세트 · Q 누르고 밀기→당기기, E'}
+  $('itest').textContent='🧪 Interference test running';$('itest').disabled=true;
+  $('itestStatus').textContent=(on?'2/2 auto-avoid on':'1/2 auto-avoid off')+' · 0/10 sets · press Q, push→pull, E'}
 async function itestAfterSet(){
   if(!itest||!running||!session)return;
   const n=Number(session.target_sets)||10,on=itest.phase==='on';
-  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · '+pairs.length+'/'+n+'세트';
+  $('itestStatus').textContent=(on?'2/2 auto-avoid on':'1/2 auto-avoid off')+' · '+pairs.length+'/'+n+'Set';
   if(pairs.length<n)return;
   await stop();
   await itestSave();
-  if(!on){itest.phase='on';$('itestStatus').textContent='1/2 저장 완료 → 3초 뒤 자동 회피를 켜고 2/2를 시작해요. 손을 치워 주세요';await new Promise(r=>setTimeout(r,3000));await itestPhase()}
-  else{$('itestStatus').textContent='✅ 간섭 테스트 끝 · 끄기(off)·켜기(on) 결과가 저장됐어요';$('itest').textContent='🧪 간섭 테스트 (자동 회피 끄기 → 켜기, 10세트씩)';$('itest').disabled=false;itest=null}}
+  if(!on){itest.phase='on';$('itestStatus').textContent='1/2 saved → in 3 s auto-avoid turns on and 2/2 starts. Please keep your hand away';await new Promise(r=>setTimeout(r,3000));await itestPhase()}
+  else{$('itestStatus').textContent='✅ Interference test done · off and on results are saved';$('itest').textContent='🧪 Interference test (auto-avoid off → on, 10 sets each)';$('itest').disabled=false;itest=null}}
 async function itestSave(){
   const base='batears_'+new Date(session.started_at).toISOString().replace(/[:.]/g,'-')+'_'+(session.who||'anon').replace(/[^a-zA-Z0-9_-]/g,'_')+'_'+session.label;
   const files=[[base+'.json',JSON.stringify(report(),null,2),'application/json'],[base+'.csv',eventCsv(),'text/csv']];
-  if(itest.dir){try{for(const [name,data] of files){const h=await itest.dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(data);await w.close()}$('saveStatus').textContent='저장됨: '+base;return}catch(e){$('saveStatus').textContent='폴더 저장 실패, 다운로드해요: '+e.message}}
+  if(itest.dir){try{for(const [name,data] of files){const h=await itest.dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(data);await w.close()}$('saveStatus').textContent='Saved: '+base;return}catch(e){$('saveStatus').textContent='Folder save failed, downloading: '+e.message}}
   for(const [name,data,type] of files)download(name,data,type)}
 $('itest').onclick=itestClick;
 document.querySelectorAll('[data-mark]').forEach(b=>b.onclick=()=>mark(b.dataset.mark));
