@@ -1094,7 +1094,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       wav: wav ? { file: `${base}.wav`, rate: wav.rate, channels: wav.channels, seconds: wav.seconds, t0: wav.t0, capped: wav.capped, via: wav.via } : null,
       video: vblob ? { file: `${base}.webm`, frames_file: `${base}_frames.csv`, mime: vrec.mime, bitrate: VIDEO_BPS, bytes: vblob.size, startPerf: rd(vrec.startPerf, 2), stopPerf: rd(vrec.stopPerf, 2),
         frames_logged: vrec.frames.length, err: vrec.err || null, local_only: true,
-        note: 'raw webcam (not mirrored), MediaRecorder; video t=0 is about startPerf (performance.now, same clock as wav.t0 and t_cap). _frames.csv has every requestVideoFrameCallback: perf_now, captureTime, expectedDisplayTime, mediaTime, presentedFrames, width, height. Never committed (.gitignore *.webm).' }
+        note: 'raw webcam (not mirrored), MediaRecorder. The webm timestamps follow the camera capture time: capture_time = pts + one constant, found by matching _frames.csv (every requestVideoFrameCallback: perf_now, captureTime, expectedDisplayTime, mediaTime, presentedFrames, width, height; performance.now clock like wav.t0 and t_cap). startPerf (recorder onstart) is only approximate: the first frame was 76 ms earlier in one sitting. Never committed (.gitignore *.webm).' }
         : ($('saveVideo').checked ? { err: vrec.err || 'not recorded' } : null),
       iq: { file: `${base}_iq.csv`, bins: sess.iq.length, live: sess.iqLive, binMs: 10, units: 'm', u: 'sideways (dR - dL) / 2', w: 'depth -(dL + dR) / 2', t: 'bin start; du / dw = change in [t, t + 10 ms)' },
       schedule: { quick: QUICK, restMs: REST_MS, leadMs: LEAD_MS, steps: STEPS.map((s) => s.kind) },
