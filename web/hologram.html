@@ -40,6 +40,12 @@
   #intro .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   #introErr { color: var(--bad); font-weight: 700; margin-top: 10px; }
   #introErr:empty { display: none; }
+  #hgauge { position: absolute; left: -46px; bottom: 0; width: 38px; text-align: center; font-size: 11px; color: var(--dim); }
+  .hgTrack { position: relative; height: 120px; width: 10px; margin: 0 auto 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--glass); }
+  .hgMid { position: absolute; left: -5px; right: -5px; top: 50%; height: 1px; background: var(--line); }
+  #hgDot { position: absolute; left: -4px; width: 16px; height: 16px; margin-top: -8px; top: 50%; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); transition: top .08s linear; }
+  #hgDot.out { background: var(--warn); box-shadow: 0 0 10px var(--warn); }
+  @media (max-width: 760px) { #hgauge { display: none; } }
   #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
   #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
@@ -114,6 +120,7 @@
   <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
   <label><input type="checkbox" id="showRaw"> 필터 전 원값 점</label>
   <label><input type="checkbox" id="showCircle"> ↻ 원 동작 알림 (엔진의 원 판정, 실험)</label>
+  <label><input type="checkbox" id="yReal" checked> 높이는 실제 크기로 그리기 (높이 오차 2.5 → 2.7cm)</label>
   <label>톤 볼륨 <input type="range" id="vol" min="0.2" max="1.6" step="0.05" value="1.2"> <span id="volV" class="note">1.20 (teach와 같은 크기)</span></label>
   <p class="note">손가락 모양은 서진 님 오른손(teach 세션 웹캠에서 본 모양)으로 고정이에요. 소리는 손의 위치만 재요.</p>
 </div>
@@ -152,6 +159,7 @@
   <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
+  <div id="hgauge" title="높이: 테이프 자리 기준 ±12cm"><div class="hgTrack"><div class="hgMid"></div><div id="hgDot"></div></div><span>높이</span></div>
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
@@ -368,6 +376,7 @@ function onFrame(f) {
   let cont = vadd(f.raw, disp.off);
   if (f.reset && disp.cont) { disp.off = vsub(disp.cont, f.raw); cont = disp.cont.slice(); }
   const step = disp.cont ? vsub(cont, disp.cont) : [0, 0, 0];
+  step[1] *= yGain;
   disp.cont = cont;
   // spring back to the centre: sound measures movement, so the absolute place slowly returns. Default 2 s (11/15 10:00): replaying
   // 043301 through the 8-sitting engine, 2 s vs 6 s keeps the drawn hand 44 % closer to the webcam (x drift 8.8 vs 15.7 cm),
@@ -453,6 +462,7 @@ async function start(m, file) {
   running = true;
   $('intro').style.display = 'none'; $('introErr').textContent = '';
   startT = performance.now();
+  yGain = yBoost(); renderAcc(engine.info());
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
@@ -525,26 +535,47 @@ function filmCaption(s) {
   const e = s && s.err, el = $('filmAcc');
   if (!el) return;
   if (!e || !e.rms) { el.textContent = s && s.sim ? '가상 움직임 (시험)' : '정확도 미확인 (보정 없음)'; return; }
-  const r = e.rms, scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
+  const r = yAdj(e.rms, 'rms'), scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
   el.textContent = `${scope} 기준 250ms 이동 오차: 좌우 ±${f1(r[0])} · 앞뒤 ±${f1(r[2])} · 높이 ±${f1(r[1])}cm (높이는 약해요)`;
+}
+// height at its true size: the engine runs the 'half' size, so y gets matched k / half k more (1.77 / 1.33 on the 8-sitting calib)
+function ampTable() {
+  const B = window.Bat3D || {}, cn = $('calibSel').value;
+  const c = calib || (cn && B.CALIBS && B.CALIBS[cn] && B.CALIBS[cn].calib) || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB));
+  return c && c.amp && c.amp.modes ? c.amp : null;
+}
+function yBoost() {
+  const A = ampTable(), m = $('ampMode').value;
+  if (!$('yReal').checked || !A || !A.modes.matched || !A.modes[m] || m === 'matched') return 1;
+  return A.modes.matched.k[1] / A.modes[m].k[1];
+}
+let yGain = 1;
+const yMatched = () => (yBoost() > 1 && ampTable() ? ampTable().modes.matched : null);
+const yAdj = (v, k) => { const M = yMatched(); return v && M ? [v[0], M[k][1], v[2]] : v; };
+function refreshAcc() {
+  if (SIM) return;
+  if (engine && running) renderAcc(engine.info());
+  else if (window.Bat3D) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: $('calibSel').value, autoReset: false, amp: $('ampMode').value }).info());
 }
 function renderAcc(s) {
   filmCaption(s);
   const e = s && s.err;
   if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? '가상 움직임이라 정확도가 없어요' : '정확도: 미확인 (보정 없음, 물리 풀이)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
-  const r = e.rms, c = e.corr || [], mo = e.motion || [];
+  const r = yAdj(e.rms, 'rms'), c = e.corr || [], mo = e.motion || [];
   errEl.userData.r = r.map((v) => v / 100);
-  const sz = e.size, AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
+  const sz = yAdj(e.size, 'size'), AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
   $('accNums').innerHTML = `정확도 (${scope}, 250ms 이동의 RMS 오차):<br><b>좌우 ±${f1(r[0])}cm</b> · <b>앞뒤 ±${f1(r[2])}cm</b> · 높이 ±${f1(r[1])}cm<br>`
     + (sz ? `그리는 크기: 실제 움직임의 좌우 ${Math.round(100 * sz[0])}% · 앞뒤 ${Math.round(100 * sz[2])}% · 높이 ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">실제 움직임 좌우 ${mo.length ? f1(mo[0]) : '–'} · 앞뒤 ${mo.length ? f1(mo[2]) : '–'} · 높이 ${mo.length ? f1(mo[1]) : '–'}cm, 상관 ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
+    + `<span class="note">실제 움직임 좌우 ${mo.length ? f1(mo[0]) : '–'} · 앞뒤 ${mo.length ? f1(mo[2]) : '–'} · 높이 ${mo.length ? f1(mo[1]) : '–'}cm, 상관 ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? '높이는 실제 크기로 그려요. 높이는 상관 ' + (c[1] != null ? c[1].toFixed(2) : '–') + '로 약해요: 위아래 움직임의 약 ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '%만 설명돼요' : '높이는 아직 약해요'}${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
 function showToast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(showToast.h); showToast.h = setTimeout(() => { t.style.display = 'none'; }, 1800); }
 let hudT = 0;
 function renderHud(now) {
+  { const hy = 100 * (disp.pos[1] - HOME[1]), g = $('hgDot');   // every frame: the gauge must not lag the hand
+    if (g) { g.style.top = `${50 - 50 * Math.max(-1, Math.min(1, hy / 12))}%`; g.classList.toggle('out', !!disp.out); } }
   if (now - hudT < 150) return;
   hudT = now;
   const d = disp.pos.map((v, i) => 100 * (v - HOME[i]));
@@ -763,9 +794,10 @@ $('calibSel').onchange = () => {
   if (engine && engine.setOptions && running && !SIM) { engine.setOptions({ calibName: cn }); recenter(); const info = engine.info(); drawSources(info.G, info.phones); renderAcc(info); }
   else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: cn, autoReset: false, amp: $('ampMode').value }).info());
 };
+$('yReal').onchange = () => { if (running) { yGain = yBoost(); recenter(); } refreshAcc(); };
 $('ampMode').onchange = () => {
   const a = $('ampMode').value;
-  if (engine && engine.setOptions && !SIM) { engine.setOptions({ amp: a }); recenter(); renderAcc(engine.info()); }
+  if (engine && engine.setOptions && !SIM) { engine.setOptions({ amp: a }); recenter(); yGain = yBoost(); renderAcc(engine.info()); }
   else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: $('calibSel').value, autoReset: false, amp: a }).info());
 };
 $('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (teach와 같은 크기)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
