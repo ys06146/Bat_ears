@@ -394,7 +394,7 @@ function onFrame(f) {
   disp.q = f.q; disp.moving = f.moving; disp.frames++; disp.t = t;
   if (disp.frames % 3 === 0) { hist.push([t, ...vsub(disp.cont, H0), ...vsub(disp.pos, HOME)]); while (hist.length && hist[0][0] < t - 6000) hist.shift(); }
   if (rec.on) rec.log.push([+(t / 1000).toFixed(3), ...f.raw.map((v) => +v.toFixed(5)), ...disp.pos.map((v) => +v.toFixed(5)), f.moving ? 1 : 0, f.levelDb != null ? +f.levelDb.toFixed(1) : null,
-    ...(f.amp || []).map((v) => +v.toExponential(3)), ...(f.q || []).map((v) => +v.toFixed(2)), ...(f.act || []).map((v) => +v.toFixed(3))]);
+    ...(f.amp || []).map((v) => +v.toExponential(3)), ...(f.q || []).map((v) => +v.toFixed(2)), ...(f.act || []).map((v) => +v.toFixed(3)), +performance.now().toFixed(1)]);
   disp.s = f.s;
   disp.eng = f.raw;
   if (REC) REC.push([f.s, f.raw[0], f.raw[1], f.raw[2], f.moving ? 1 : 0]);   // ?rec=1: the engine stream, for tuning offline
@@ -484,7 +484,10 @@ try {
   setInterval(() => { if (running && mode === 'mic') tabs.bc.postMessage({ q: 'who-plays' }); }, 3000);
 } catch (e) { /* no BroadcastChannel */ }
 // foreign ultrasound: a stray 20 kHz tone (Force Push, an old tab, another device) or the 375 Hz sidebands a nearby phone puts
-// on our tones. Peaks 30 dB over the 15-22 kHz floor that are more than 300 Hz from our own carriers
+// on our tones. Peaks more than 300 Hz from our own carriers, 30 dB over the 15-22 kHz floor AND within 15 dB of our weakest
+// carrier in this 5.9 Hz-bin analyser (spread noise reads ~20 dB higher here than in a long offline FFT). Same idea as below:
+// carrier: 11/15 10:40, today's spread ~20 kHz energy sat 39-44 dB under our 19.5 kHz tone (harmless after the engine's I/Q
+// filter), while the forgotten tab of the early teach sittings was an exact 20000.08 Hz tone only 2-5 dB under it
 const fx = { an: null, buf: null, peak: null, t: 0 };
 function foreignStart() {
   fx.an = null; fx.peak = null;
@@ -500,11 +503,13 @@ function foreignCheck() {
   if (band.length < 10) { fx.peak = null; return; }
   const floor = band[band.length >> 1], fr = engine && engine.info ? engine.info().freqs : null;
   const carriers = Array.isArray(fr) && fr.length && fr.every(Number.isFinite) ? fr : [18000, 19500];
+  const lev = carriers.map((c) => { let m = -Infinity; for (let i = Math.floor((c - 30) / hz); i <= Math.ceil((c + 30) / hz); i++) if (fx.buf[i] > m) m = fx.buf[i]; return m; });
+  const cmin = Math.min(...lev.filter(Number.isFinite));
   let best = null;
   for (let i = lo; i <= hi; i++) {
     const v = fx.buf[i], f = i * hz;
-    if (!(v > floor + 30) || carriers.some((c) => Math.abs(f - c) < 300)) continue;
-    if (!best || v > best.v) best = { f, v, over: v - floor };
+    if (!(v > floor + 30) || !(v > cmin - 15) || carriers.some((c) => Math.abs(f - c) < 300)) continue;
+    if (!best || v > best.v) best = { f, v, over: v - floor, rel: v - cmin };
   }
   fx.peak = best;
 }
@@ -632,7 +637,7 @@ function renderDebug() {
   if (performance.now() - fx.t > 1000) { fx.t = performance.now(); foreignCheck(); }
   const alerts = [];
   if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) alerts.push(`🔊 다른 Bat Ears 탭(${tabs.other})이 초음파를 내고 있어요 → 그 탭을 닫아요`);
-  if (fx.peak && running) alerts.push(`📡 다른 초음파가 들려요 (${(fx.peak.f / 1000).toFixed(2)}kHz, +${fx.peak.over.toFixed(0)}dB) → 다른 Bat Ears 탭·기기를 끄고 폰을 노트북에서 치워요`);
+  if (fx.peak && running) alerts.push(`📡 다른 초음파가 크게 들려요 (${(fx.peak.f / 1000).toFixed(2)}kHz, 우리 톤보다 ${fx.peak.rel >= 0 ? '+' : ''}${fx.peak.rel.toFixed(0)}dB) → 다른 Bat Ears 탭·기기를 끄고 폰을 노트북에서 치워요`);
   if (lv != null && running && mode === 'mic' && lv < -12) alerts.push(`🔈 톤이 가장 조용했던 teach보다도 작아요 (기준보다 ${(-lv).toFixed(0)}dB) → 윈도우 볼륨을 올려요 (작으면 움직임을 작게 그려요)`);
   $('alert').textContent = alerts[0] || ''; $('alert').style.display = alerts.length ? 'block' : 'none';
   const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ 톤이 잘 들려요 (teach 때와 ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
@@ -692,7 +697,7 @@ async function recStop() {
     volume: Number($('vol').value), amp: $('ampMode').value, calibName: $('calibSel').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
     build: ((document.querySelector('script[src^="bat3d.js"]') || {}).getAttribute ? document.querySelector('script[src^="bat3d.js"]').getAttribute('src') : ''), yReal: $('yReal').checked, yGain: +yGain.toFixed(3), zone: ZONE,
     engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
-    log_columns: 't_s, raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams]', log: rec.log };
+    log_columns: 't_s (engine clock), raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams], t_ms (performance.now, same clock as t_cap and wav.t0)', log: rec.log };
   const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
   rec.chunks = [];
   const where = await saveFiles(files);
