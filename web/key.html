@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115021917">
+<link rel="stylesheet" href="style.css?v=20261115022704">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
@@ -79,7 +79,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115021917"></script><script src="swipe.js?v=20261115021917"></script><script src="wave.js?v=20261115021917"></script><script src="iq.js?v=20261115021917"></script><script src="dsp.js?v=20261115021917"></script><script src="auth.js?v=20261115021917"></script>
+<script src="robust.js?v=20261115022704"></script><script src="swipe.js?v=20261115022704"></script><script src="wave.js?v=20261115022704"></script><script src="iq.js?v=20261115022704"></script><script src="dsp.js?v=20261115022704"></script><script src="auth.js?v=20261115022704"></script>
 <script>
 (() => {
 'use strict';
@@ -108,6 +108,9 @@ const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? 
 const clean = (s) => String(s || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16);
 const device = (() => { try { let id = localStorage.getItem('batears-dev'); if (!id) { id = Math.random().toString(36).slice(2, 6); localStorage.setItem('batears-dev', id); } return id; } catch (e) { return 'anon'; } })();
 let templates = store.get('batears-auth-templates', {});
+// every attempt also goes into this browser's log, so closing the tab or a refused folder permission loses nothing
+let log = store.get('batears-auth-log', []);
+const savedN = () => store.get('batears-auth-saved', 0);
 let pick = [], buf = [], cap = null, busy = false, dir = null;
 const session = { started_at: new Date().toISOString(), device, ua: navigator.userAgent, matcher: 'BatAuth v' + A.VERSION, weights: A.WEIGHTS, attempts: [] };
 
@@ -219,14 +222,22 @@ const csvOf = (rows) => {
   return [keys.join(','), ...rows.map((r) => keys.map((k) => esc(k in r ? r[k] : (r.parts || {})[k])).join(','))].join('\n');
 };
 async function save(ask) {
-  if (!session.attempts.length) { $('saveStatus').textContent = '아직 저장할 시도가 없어요'; return; }
-  const base = 'batears_auth_' + session.started_at.replace(/[:.]/g, '-') + '_' + device;
+  if (!log.length) { $('saveStatus').textContent = '아직 저장할 시도가 없어요'; return false; }
+  const base = 'batears_auth_' + device;   // one file per browser with its whole log (re-written each time)
   const tpls = Object.fromEntries(Object.entries(templates).map(([n, t]) => [n, { kinds: t.kinds, n: t.n, threshold: t.threshold, loo: t.loo, created: t.created, device: t.device }]));
-  const files = [[base + '.json', JSON.stringify({ session, templates: tpls, attempts: session.attempts }, null, 1)], [base + '.csv', csvOf(session.attempts)]];
+  const files = [[base + '.json', JSON.stringify({ session, templates: tpls, attempts: log }, null, 1)], [base + '.csv', csvOf(log)]];
   const d = await dataDir(ask);
-  if (!d) { if (ask) { for (const [n, data] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = n; a.click(); } $('saveStatus').textContent = '폴더가 없어서 다운로드했어요'; } return; }
-  try { for (const [n, data] of files) { const h = await d.getFileHandle(n, { create: true }), w = await h.createWritable(); await w.write(data); await w.close(); } $('saveStatus').textContent = `저장됨: ${base} (시도 ${session.attempts.length}개)`; }
-  catch (e) { $('saveStatus').textContent = '저장 실패: ' + e.message; }
+  if (!d) {
+    if (ask) { for (const [n, data] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = n; a.click(); } $('saveStatus').textContent = '폴더가 없어서 다운로드했어요. ml/data로 옮겨 주세요'; return true; }
+    $('saveStatus').textContent = `⚠️ 폴더에 저장되지 않았어요 (권한 없음). '📁 데이터 폴더에 저장'을 눌러 주세요 · 시도 ${log.length - savedN()}개는 이 브라우저에 남아 있어요`;
+    return false;
+  }
+  try {
+    for (const [n, data] of files) { const h = await d.getFileHandle(n, { create: true }), w = await h.createWritable(); await w.write(data); await w.close(); }
+    store.set('batears-auth-saved', log.length);
+    $('saveStatus').textContent = `✅ 저장됨: ${base}.json (시도 ${log.length}개)`;
+    return true;
+  } catch (e) { $('saveStatus').textContent = '⚠️ 저장 실패: ' + e.message + ' · 📁 버튼을 다시 눌러 주세요'; return false; }
 }
 
 // ---- flows
@@ -290,6 +301,8 @@ async function unlock() {
     intervals: r.att.intervals.map((x) => +x.toFixed(3)), g: r.att.g.map((g) => g && { peak: +g.peak.toFixed(3), dur: Math.round(g.dur), tPeak: +g.tPeak.toFixed(3) }),
     end: r.why, simulated: r.gestures.some((x) => !x.seg), device, freq: E.freq };
   session.attempts.push(a);
+  log.push(a);
+  store.set('batears-auth-log', log);
   addRow(a); stats();
   if ($('autoSave').checked) save(false);
   busy = false; lock(false);
@@ -310,6 +323,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && !['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(tag)) { e.preventDefault(); unlock(); }
 });
 refreshTpl(); renderPick(); stats();
+if (log.length > savedN()) $('saveStatus').textContent = `⚠️ 저장 안 된 시도 ${log.length - savedN()}개가 이 브라우저에 있어요 → '📁 데이터 폴더에 저장'`;
 window.BatKey = { session, get templates() { return templates; } }; // for tests
 })();
 </script></body></html>
