@@ -34,6 +34,9 @@
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
   #about { left: 12px; top: 74px; width: 520px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #about ul { margin: 0; padding-left: 18px; }
+  #debug { left: 12px; top: 74px; width: 520px; display: none; font-size: 13px; }
+  #debug h3 { margin: 0 0 6px; font-size: 13px; color: var(--acc); }
+  button.recOn { background: #7a1f1f; border-color: #ef5350; }
   #settings label { display: block; margin: 4px 0; }
   #settings input[type=number] { width: 64px; background: #0c1722; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; }
   #settings input[type=range] { width: 130px; vertical-align: middle; }
@@ -58,6 +61,8 @@
   <label class="file" title="teach 세션 WAV를 소리 대신 재생해요. 같은 세션의 _vision.csv, .json, .calib.json을 함께 고르면 웹캠 정답(초록 손)을 겹쳐요">📂 녹음 재생<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
   <button id="btnSettings">⚙ 설정</button>
   <button id="btnAbout">ⓘ 출처</button>
+  <button id="btnDebug">🔍 진단</button>
+  <button id="btnRec" title="마이크 원음과 엔진 값을 저장해요 (브라보 분석용)">⏺ 녹화</button>
   <span id="status" class="grow">대기 중 · ▶ 시작을 누르고 마이크를 허용하세요</span>
 </div>
 <div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
@@ -68,17 +73,17 @@
   <label class="note">위치 cm (경첩 기준): 오른쪽 <input type="number" id="px" value="0"> 높이 <input type="number" id="py" value="45"> 앞 <input type="number" id="pz" value="30"></label>
   <label><input type="checkbox" id="phone2On"> 📱 폰 B · Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
   <label class="note">위치 cm: 오른쪽 <input type="number" id="p2x" value="-25"> 높이 <input type="number" id="p2y" value="40"> 앞 <input type="number" id="p2z" value="-2"></label>
-  <label class="note">폰을 켜면 그 배치로 학습한 보정 파일이 있어야 학습 지도로 풀어요. 없으면 물리 풀이예요</label>
+  <label class="note">📱 지금은 폰을 켜지 마세요. 기본 보정은 노트북 스피커만으로 학습해서 폰 소리를 안 써요. 높이를 쓰려면 폰 A(17000)를 손 자리 바로 위 45cm에 아래를 향하게 두고 teach.html 세션을 한 번 녹화해요. 브라보가 그 배치로 보정을 만들면 📥로 불러오고 폰 A를 켜요. 보정 없이 폰을 켜면 물리 풀이로 돌아가서 더 나빠질 수 있어요</label>
   <label class="file" style="display:inline-block">📥 보정 불러오기<input id="calibFile" type="file" accept=".json,application/json"></label>
   <span id="calibName" class="note"></span>
   <h3>필터 (One Euro, Casiez 2012)</h3>
   <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
-  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="3"> <span id="tauV" class="note">3초 (멈추면 1초)</span></label>
+  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="4"> <span id="tauV" class="note">4초 (멈추면 2초)</span></label>
   <h3>보기</h3>
   <label><input type="checkbox" id="showTrail" checked> 궤적</label>
   <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
   <label><input type="checkbox" id="showRaw"> 필터 전 원값 점</label>
-  <label>볼륨 <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5"></label>
+  <label>톤 볼륨 <input type="range" id="vol" min="0.2" max="1.6" step="0.05" value="1.2"> <span id="volV" class="note">1.20 (teach와 같은 크기)</span></label>
   <p class="note">손가락 모양은 서진 님 오른손(teach 세션 웹캠에서 본 모양)으로 고정이에요. 소리는 손의 위치만 재요.</p>
 </div>
 <div class="hud" id="about">
@@ -102,17 +107,25 @@
     <li>F. Zhang et al. MediaPipe Hands: On-device real-time hand tracking. arXiv:2006.10214, 2020</li>
   </ul>
 </div>
+<div class="hud" id="debug">
+  <h3>🔍 진단</h3>
+  <div id="dbgTone" class="note"></div>
+  <canvas id="dbgPlot" width="480" height="150" style="width:100%;background:rgba(0,0,0,.35);border-radius:8px;margin-top:6px"></canvas>
+  <div class="note">최근 6초, ±15cm: 좌우(빨강 원값 · 하늘 표시), 앞뒤(주황 원값 · 파랑 표시), 높이(회색 표시)</div>
+  <div id="recInfo" class="note" style="margin-top:6px"></div>
+</div>
 <div class="hud" id="acc">
   <div class="big">🔊 <b>소리만으로</b> · 📷 웹캠 꺼짐</div>
   <div id="accNums">정확도: 미확인</div>
-  <div class="note" style="margin-top:4px">소리는 움직임만 재서 절대 위치는 몰라요. 손을 멈추면 천천히 가운데로 돌아와요. 손은 노트북 앞 모서리 위, 책상에서 18~25cm(웹캠에서 25~45cm)에 두세요.</div>
+  <div class="note" style="margin-top:4px">손은 노트북 앞 모서리 위, 책상에서 18~25cm(웹캠에서 25~45cm)에 두고, teach 때처럼 또렷하게(1초에 20cm쯤) 움직여요. 아주 천천히 움직이면(초속 5~8cm 아래) 소리가 잘 못 잡아요. 소리는 움직임만 재서 절대 위치는 모르고, 손을 멈추면 천천히 가운데로 돌아와요. 높이는 노트북 스피커만으로는 거의 안 잡혀요.</div>
+  <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115051954" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
-<script src="vision3d.browser.js?v=20261115051954"></script>
+<script src="bat3d.js?v=20261115061308" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115061308"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -134,6 +147,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 const $ = (id) => document.getElementById(id);
 const Q = new URLSearchParams(location.search);
 const SIM = Q.get('sim') === '1';
+const NOFOLDER = Q.get('nofolder') === '1';   // tests: never ask for a folder
 const REC = Q.get('rec') === '1' ? [] : null;
 
 // ------------------------------------------------------------------ One Euro filter (Casiez, Roussel, Vogel, CHI 2012)
@@ -157,7 +171,8 @@ class OneEuro {
 // raw corr x/y/z 0.27/0.61/0.80, jitter at rest 2.9 mm per 50 ms; bravo's start (0.8/8, y 0.4/4) 0.23/0.29/0.72, 1.8 mm;
 // 0.8 Hz / beta 40 on all axes 0.28/0.53/0.79, 2.0 mm (a high beta keeps the moves, a low cutoff calms the rest).
 // The spring helps too: without it x drops to 0.20 (drift)
-const euro = [new OneEuro(0.8, 40, 1), new OneEuro(0.8, 40, 1), new OneEuro(0.8, 40, 1)];
+// live (서진, 05:30): 'follows slowly' -> more responsive: 1.5 Hz / beta 60 (044652 sweep: about the raw correlation, rest jitter ~2.3 mm)
+const euro = [new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1)];
 
 // ------------------------------------------------------------------ 서진's right hand (MediaPipe world landmarks, median of
 // the 'hold still' step of teach session 043301; palm facing the laptop, fingers up). three.js frame: x right, y up,
@@ -299,6 +314,7 @@ function ghostAt(t) {   // the webcam frame nearest to WAV time t (s); null when
 const palmOf = (pts) => [0, 1, 2].map((k) => [0, 5, 9, 13, 17].reduce((a, i) => a + pts[i][k], 0) / 5);
 
 // ------------------------------------------------------------------ display chain (per engine frame, ~100 Hz)
+const hist = [];
 const disp = { pos: HOME.slice(), raw: HOME.slice(), cont: null, off: [0, 0, 0], spring: [0, 0, 0], last: null, still: 0, frames: 0, t: 0 };
 const vsub = (a, b) => a.map((v, i) => v - b[i]), vadd = (a, b) => a.map((v, i) => v + b[i]);
 function resetDisplay() {
@@ -321,16 +337,20 @@ function onFrame(f) {
   // spring back to the centre: sound measures movement, so the absolute place slowly returns. tau 3 s moving, 1 s still:
   // on 044652 a shorter spring removes drift (x corr 0.28 at 6 s -> 0.33 at 3 s), at the cost of not holding an off-centre pose
   disp.still = f.moving === false ? (f.still || disp.still + dt * 1000) : 0;
-  const tau0 = Number($('tau').value), tau = tau0 <= 0 ? Infinity : disp.still > 1000 ? Math.min(1, tau0) : tau0, k = Math.exp(-dt / tau);
+  const tau0 = Number($('tau').value), tau = tau0 <= 0 ? Infinity : disp.still > 1000 ? Math.min(2, tau0) : tau0, k = Math.exp(-dt / tau);
   disp.spring = disp.spring.map((s, i) => (s + step[i]) * k);
   const target = HOME.map((h, i) => h + disp.spring[i]);
   disp.raw = target;
   const sc = Number($('smooth').value);
   disp.pos = target.map((v, i) => euro[i].filter(v, dt, sc));
   disp.q = f.q; disp.moving = f.moving; disp.frames++; disp.t = t;
+  if (disp.frames % 3 === 0) { hist.push([t, ...vsub(disp.cont, H0), ...vsub(disp.pos, HOME)]); while (hist.length && hist[0][0] < t - 6000) hist.shift(); }
+  if (rec.on) rec.log.push([+(t / 1000).toFixed(3), ...f.raw.map((v) => +v.toFixed(5)), ...disp.pos.map((v) => +v.toFixed(5)), f.moving ? 1 : 0, f.levelDb != null ? +f.levelDb.toFixed(1) : null,
+    ...(f.amp || []).map((v) => +v.toExponential(3)), ...(f.q || []).map((v) => +v.toFixed(2)), ...(f.act || []).map((v) => +v.toFixed(3))]);
   disp.s = f.s;
   disp.eng = f.raw;
   if (REC) REC.push([f.s, f.raw[0], f.raw[1], f.raw[2], f.moving ? 1 : 0]);   // ?rec=1: the engine stream, for tuning offline
+  disp.amp = f.amp; disp.act = f.act; if (f.levelDb != null) disp.levelDb = 0.9 * (disp.levelDb ?? f.levelDb) + 0.1 * f.levelDb;
 }
 
 // ------------------------------------------------------------------ engine: bravo's Bat3D, or simulated motion (?sim=1)
@@ -355,7 +375,7 @@ function makeSim() {
     originReset() {},
   };
 }
-let engine = null, running = false, mode = '';
+let engine = null, running = false, mode = '', audioG = null;
 function phonesFromUi() {
   const ph = [];
   if ($('phoneOn').checked) ph.push({ id: 'A', hz: Number($('phoneHz').value), x_right_cm: Number($('px').value), h_cm: Number($('py').value), z_front_cm: Number($('pz').value) });
@@ -384,7 +404,7 @@ async function start(m, file) {
   engine.on('frame', onFrame);
   engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
-  try { await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) { $('status').textContent = '⚠️ 시작하지 못했어요: ' + (e.message || e); engine = null; return; }
+  try { audioG = await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) { $('status').textContent = '⚠️ 시작하지 못했어요: ' + (e.message || e); engine = null; return; }
   running = true;
   const info = engine.info();
   drawSources(info.G, info.phones);
@@ -392,6 +412,7 @@ async function start(m, file) {
   if (m === 'mic') $('status').textContent = '듣는 중 · 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에서 움직여요';
 }
 function stop() {
+  if (rec.on) recStop();
   if (engine && running) { try { engine.stop(); } catch (e) { /* ignore */ } }
   running = false;
 }
@@ -458,6 +479,93 @@ function renderHud(now) {
   }
   $('bars').innerHTML = h ? '<div class="note">경로 품질 (움직이는 반사 / 잡음)</div>' + h : '';
 }
+// ------------------------------------------------------------------ 🔍 diagnosis: received tone level vs the teach sittings, raw vs shown
+const REF = ((window.Bat3D || {}).REF_AMP || {}).galaxy || null;   // bravo: laptop carrier level, median of the five teach sittings
+function renderDebug() {
+  const lv = disp.levelDb;
+  $('levelWarn').textContent = lv != null && running && mode === 'mic' && lv < -6 ? `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)` : '';
+  if ($('debug').style.display !== 'block') return;
+  const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k·마이크0', 'L 18k·마이크1', 'R 19.5k·마이크0', 'R 19.5k·마이크1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
+  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -4 ? 'ok' : lv > -6 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (teach 다섯 세션 기준, ±6dB는 보통)</div>`;
+  h += '<table style="width:100%;font-size:12px"><tr><th align="left">경로</th><th>톤 크기</th><th>teach 대비</th><th>품질</th><th>움직임</th></tr>';
+  for (let i = 0; i < a.length; i++) {
+    const db = 20 * Math.log10(a[i] || 1e-9), dd = REF && REF[i] ? 20 * Math.log10((a[i] || 1e-9) / REF[i]) : NaN;
+    h += `<tr><td>${nm[i] || i}</td><td align="center">${db.toFixed(0)} dBFS</td><td align="center" class="${!Number.isFinite(dd) ? '' : dd > -4 ? 'ok' : dd > -10 ? 'warn' : 'bad'}">${Number.isFinite(dd) ? (dd >= 0 ? '+' : '') + dd.toFixed(0) + ' dB' : '–'}</td><td align="center">${(q[i] || 0).toFixed(1)}</td><td align="center">${Math.round(100 * (act[i] || 0))}%</td></tr>`;
+  }
+  $('dbgTone').innerHTML = a.length ? h + '</table>' : '시작하면 경로별 톤 크기가 보여요';
+  const c = $('dbgPlot'), g = c.getContext('2d'), W = c.width, H = c.height, t1 = disp.t || 0;
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+  const X = (t) => W - ((t1 - t) / 6000) * W, Y = (m) => H / 2 - (m / 0.15) * (H / 2);
+  const line = (k, color) => { g.strokeStyle = color; g.lineWidth = 1.5; g.beginPath(); hist.forEach((r, i) => { const x = X(r[0]), y = Y(r[k]); if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke(); };
+  // hist rows: [t, raw x, y, z (vs the engine origin), shown x, y, z (vs the centre)]
+  line(1, 'rgba(239,83,80,.8)'); line(4, '#4fd8ff'); line(3, 'rgba(255,183,77,.8)'); line(6, '#3d7bff'); line(5, 'rgba(200,200,200,.6)');
+}
+// ⏺: the mic (2 ch, raw) + the engine stream + what was shown, into ml/data/holo/ (or downloaded), for bravo
+const rec = { on: false, chunks: [], log: [], node: null, mute: null, rate: 48000, start: '', frames: 0 };
+async function recStart() {
+  if (!audioG || !audioG.ctx || !audioG.source || mode !== 'mic') { $('recInfo').textContent = '⏺는 ▶ 시작(마이크) 뒤에 눌러요'; $('debug').style.display = 'block'; return; }
+  await dataDir(true);
+  const ctx = audioG.ctx, node = ctx.createScriptProcessor(4096, 2, 1);
+  node.channelCount = 2; node.channelCountMode = 'explicit'; node.channelInterpretation = 'discrete';
+  Object.assign(rec, { on: true, chunks: [], log: [], node, rate: ctx.sampleRate, start: new Date().toISOString(), frames: 0 });
+  node.onaudioprocess = (e) => {
+    if (!rec.on) return;
+    const ib = e.inputBuffer, n = ib.length, L = ib.getChannelData(0), R = ib.numberOfChannels > 1 ? ib.getChannelData(1) : L, out = new Int16Array(2 * n);
+    for (let i = 0; i < n; i++) { out[2 * i] = Math.max(-1, Math.min(1, L[i])) * 32767; out[2 * i + 1] = Math.max(-1, Math.min(1, R[i])) * 32767; }
+    rec.chunks.push(out); rec.frames += n;
+    if (rec.frames > rec.rate * 300) recStop();   // 5 min cap
+  };
+  rec.mute = ctx.createGain(); rec.mute.gain.value = 0;
+  audioG.source.connect(node); node.connect(rec.mute).connect(ctx.destination);
+  $('btnRec').textContent = '⏹ 녹화 끝'; $('btnRec').classList.add('recOn');
+  $('recInfo').textContent = '⏺ 녹화 중: 손을 좌우·앞뒤·위아래로 또렷하게 움직여요 (30초~1분이면 충분해요)';
+  $('debug').style.display = 'block';
+}
+async function recStop() {
+  if (!rec.on) return;
+  rec.on = false;
+  try { audioG.source.disconnect(rec.node); rec.node.disconnect(); rec.mute.disconnect(); } catch (e) { /* ignore */ }
+  $('btnRec').textContent = '⏺ 녹화'; $('btnRec').classList.remove('recOn');
+  const bytes = rec.frames * 4, hd = new DataView(new ArrayBuffer(44)), tag = (o, t) => { for (let i = 0; i < 4; i++) hd.setUint8(o + i, t.charCodeAt(i)); };
+  tag(0, 'RIFF'); hd.setUint32(4, 36 + bytes, true); tag(8, 'WAVE'); tag(12, 'fmt '); hd.setUint32(16, 16, true); hd.setUint16(20, 1, true); hd.setUint16(22, 2, true);
+  hd.setUint32(24, rec.rate, true); hd.setUint32(28, rec.rate * 4, true); hd.setUint16(32, 4, true); hd.setUint16(34, 16, true); tag(36, 'data'); hd.setUint32(40, bytes, true);
+  const p2 = (n) => String(n).padStart(2, '0'), d = new Date(), stamp = `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;
+  const dev = (() => { try { return localStorage.getItem('batears-dev') || 'anon'; } catch (e) { return 'anon'; } })(), base = `batears_${stamp}_holo_${dev}`;
+  const info = engine && engine.info ? engine.info() : {};
+  const meta = { page: 'hologram.html', session: base, startedAt: rec.start, seconds: +(rec.frames / rec.rate).toFixed(2), rate: rec.rate, ua: navigator.userAgent,
+    volume: Number($('vol').value), filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
+    engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
+    log_columns: 't_s, raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams]', log: rec.log };
+  const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
+  rec.chunks = [];
+  const where = await saveFiles(files);
+  $('recInfo').textContent = `저장했어요 (${where}): ${base}.wav · .json, ${meta.seconds}초. 브라보에게 알려 주세요`;
+}
+// data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its holo/
+let dir = null;
+const idbOpen = () => new Promise((res, rej) => { const r = indexedDB.open('batears', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idbGet = async (k) => { const db = await idbOpen(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); };
+const idbPut = async (k, v) => { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
+async function dataDir(ask) {
+  if (dir) return dir;
+  if (NOFOLDER) return null;
+  try { const h = await idbGet('dataDir'); if (h) { let q = await h.queryPermission({ mode: 'readwrite' }); if (q !== 'granted' && ask) q = await h.requestPermission({ mode: 'readwrite' }); if (q === 'granted') return (dir = h); } } catch (e) { /* none */ }
+  if (!ask || !window.showDirectoryPicker) return null;
+  try { const h = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' }); idbPut('dataDir', h).catch(() => {}); return (dir = h); } catch (e) { return null; }
+}
+async function saveFiles(files) {
+  const root = await dataDir(false);
+  if (root) {
+    try {
+      const sub = await root.getDirectoryHandle('holo', { create: true });
+      for (const [name, blob] of files) { const h = await sub.getFileHandle(name, { create: true }), w = await h.createWritable(); await w.write(blob); await w.close(); }
+      return `${root.name}/holo/`;
+    } catch (e) { console.warn('[holo] folder save', e); }
+  }
+  for (const [name, blob] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
+  return '다운로드했어요. ml/data/holo/로 옮겨 주세요';
+}
 const clock = new THREE.Clock();
 let frameN = 0;
 function frame() {
@@ -500,6 +608,7 @@ function frame() {
   composer.render();
   labels.render(scene, camera);
   renderHud(now);
+  if (now - (renderDebug.t || 0) > 150) { renderDebug.t = now; renderDebug(); }
 }
 requestAnimationFrame(frame);
 
@@ -511,8 +620,11 @@ addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target === docu
 $('wavFile').onchange = (e) => openRecording([...e.target.files]);
 $('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+$('btnDebug').onclick = () => { const s = $('debug'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+$('btnRec').onclick = () => (rec.on ? recStop() : recStart());
+$('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (teach와 같은 크기)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
 $('smooth').oninput = () => { $('smoothV').textContent = '×' + Number($('smooth').value).toFixed(1); };
-$('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? '끔' : `${v}초 (멈추면 ${Math.min(1, v)}초)`; };
+$('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? '끔' : `${v}초 (멈추면 ${Math.min(2, v)}초)`; };
 $('calibFile').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
   try { calib = JSON.parse(await f.text()); $('calibName').textContent = '불러옴: ' + (calib.session || f.name) + ' · 다시 시작하면 적용돼요'; } catch (er) { $('calibName').textContent = '⚠️ 읽을 수 없어요'; }

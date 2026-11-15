@@ -10,7 +10,8 @@
  *                              onFrame(f) {...}, onCircle(c) {...}, onStatus(text) {...} });
  *   await eng.start({ mode: 'mic', vol: 0.5 })   or   await eng.start({ mode: 'wav', arrayBuffer, name })
  *   eng.stop(); eng.originReset(); eng.setCalib(json); eng.info()
- *   onFrame every 10 ms: { t (ms of audio), raw [x,y,z] (solve output + rebase offset), kf [x,y,z], v [vx,vy,vz],
+ *   onFrame every 10 ms: { t (ms of audio), levelDb (laptop tone level vs the teach sittings; < -6 dB: turn the volume up,
+ *     the map under-predicts), raw [x,y,z] (solve output + rebase offset), kf [x,y,z], v [vx,vy,vz],
  *     moving, still (ms held still), rebased (true on the frame a rebase / origin reset happened), q[], act[], amp[],
  *     off[] (phone clock offsets, Hz), identical (mic channels equal), mono }
  *   onCircle: { dir 'cw' | 'ccw', turns, ru, rw (cm), plane, t }   (fires once a circle has FINISHED)
@@ -113,6 +114,10 @@ registerProcessor('bat-iq6', BatIQ6);
   const H0 = [0, 0.12, 0.0];
   // built-in Galaxy Book calibration (laptop only): learned on five webcam-taught sittings; error = leave-one-sitting-out
   const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652"} };
+  // tone level the built-in calibration was learned at (worklet carrier amplitude per laptop stream, median of the teach
+  // sittings, tones at 0.6 per channel). A quieter tone -> fewer phase steps pass the gate -> the map under-predicts motion.
+  const REF_AMP = { galaxy: [0.0089, 0.0183, 0.0056, 0.0101] };
+  const VOLUME_TEACH = 1.2;   // osc 0.5 x volume 1.2 = 0.6 per channel, as in teach.html (dsp.js stereo tones)
   const sub = (a, b) => a.map((v, i) => v - b[i]), nrm = (a) => Math.hypot(...a), unit = (a) => { const n = nrm(a) || 1; return a.map((v) => v / n); };
   function inv3(A) {
     const [a, b, c] = A[0], [d, e, f] = A[1], [g, h, i] = A[2], det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
@@ -258,14 +263,15 @@ registerProcessor('bat-iq6', BatIQ6);
             }
           }
         }
-        if (o.onFrame) o.onFrame({ t, s: wavMode ? t / 1000 : undefined, raw: z, kf: kf.p.slice(), v: kf.v.slice(), moving, still: live.still, reset: rebased, rebased, q: live.q.slice(), act: live.act.slice(), amp: live.amp.slice(), off: live.off, identical: live.identical, mono: live.mono, circle });
+        const ref = REF_AMP[o.geom], levelDb = ref ? 20 * Math.log10(Math.max(1e-9, (live.amp[0] + live.amp[1] + live.amp[2] + live.amp[3]) / (ref[0] + ref[1] + ref[2] + ref[3]))) : null;
+        if (o.onFrame) o.onFrame({ t, s: wavMode ? t / 1000 : undefined, levelDb, raw: z, kf: kf.p.slice(), v: kf.v.slice(), moving, still: live.still, reset: rebased, rebased, q: live.q.slice(), act: live.act.slice(), amp: live.amp.slice(), off: live.off, identical: live.identical, mono: live.mono, circle });
       }
     }
     // ---------------------------------------------------------------- audio (browser)
     let ctx = null, node = null, src = null, stream = null, oscs = [], gainNode = null;
     const status = (s) => { if (o.onStatus) o.onStatus(s); };
     async function start({ mode = 'mic', arrayBuffer = null, file = null, name = 'WAV', vol, volume } = {}) {
-      vol = volume ?? vol ?? 0.5;
+      vol = volume ?? vol ?? VOLUME_TEACH;
       if (file && !arrayBuffer) { arrayBuffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer(); if (file.name) name = file.name; }
       stop(); buildSolver(); resetLive(); wavMode = mode !== 'mic'; live.t = 0; sub10 = 0;
       ctx = new AudioContext({ sampleRate: 48000 });
@@ -312,5 +318,5 @@ registerProcessor('bat-iq6', BatIQ6);
       get live() { return live; }, get kf() { return kf; }, get trail() { return trail; }, get lastCircle() { return lastCircle; },
     };
   }
-  return { create, start: async (opts, startOpts) => { const e = create(opts); await e.start(startOpts); return e; }, PROC, GEOMS, H0, DEFAULT_CALIB, phonePos, VERSION };
+  return { create, start: async (opts, startOpts) => { const e = create(opts); await e.start(startOpts); return e; }, PROC, GEOMS, H0, DEFAULT_CALIB, REF_AMP, VOLUME_TEACH, phonePos, VERSION };
 });
