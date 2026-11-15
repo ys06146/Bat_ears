@@ -35,9 +35,12 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
 .big{font-size:16px;padding:10px 16px}
 @media(max-width:950px){main{grid-template-columns:1fr}}
 @media(max-width:600px){header{flex-wrap:wrap;gap:6px;padding:10px 12px}header h1{font-size:16px}header h1 span{display:block}main{padding:10px}.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.tabs a{flex:0 0 auto}}
+
+/* Side-by-side presentation, using the existing enrollment and matcher. */
+.compare{max-width:1440px;margin:auto;padding:36px 28px 18px}.eyebrow{font-size:11px;letter-spacing:.18em;color:#72daca;font-weight:700}.hero{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:24px}.hero h2{font-size:clamp(28px,4vw,48px);letter-spacing:-.045em;margin:8px 0}.hero p{max-width:650px;font-size:14px;margin:0;line-height:1.7}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.toolbar button,.compare button{border:1px solid #354152;background:#192332;color:#e8eef9;border-radius:9px;padding:10px 15px;font:inherit;font-size:13px}.toolbar .primary{background:#c93a50;border-color:#c93a50;font-weight:700}.mode{font-size:12px;border:1px solid #39465c;border-radius:100px;padding:8px 12px;white-space:nowrap}.mode.sample{color:#ffd18b;border-color:#906c36}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.vault{border:1px solid #303b4d;background:linear-gradient(145deg,#151e2c,#0e141f);border-radius:18px;overflow:hidden}.vault-top{padding:20px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2b3544}.vault-top h3{font-size:18px;margin:5px 0 0}.role{font-size:11px;letter-spacing:.12em;color:#94a7bd}.verdict{font-size:11px;letter-spacing:.08em;font-weight:700;color:#9aaec4}.vault-body{padding:24px}.door{position:relative;min-height:170px;background:#0a101a;border:1px solid #2e3c50;border-radius:12px;display:grid;place-content:center;text-align:center;overflow:hidden}.door-icon{font-size:38px;transition:transform .35s}.door strong{font-size:20px;display:block;margin:10px 0 4px}.door small{color:#94a7bd}.file-preview{display:none;background:#edf3f6;color:#182536;border-radius:8px;padding:18px;text-align:left;width:min(290px,90%);margin:auto}.file-preview p{color:#536477;margin:7px 0;font-size:12px}.file-preview b{font-size:16px}.vault.open{border-color:#4ab8a1}.vault.open .verdict{color:#78e0be}.vault.open .door{border-color:#4ab8a1;background:#0e2926}.vault.open .door-icon,.vault.open .door-copy{display:none}.vault.open .file-preview{display:block;animation:reveal .4s ease-out}.vault.denied{border-color:#a65064}.vault.denied .verdict{color:#ff94a5}.vault.denied .door-icon{transform:rotate(-8deg)}.vault.uncertain .verdict{color:#ffd18b}.explanation{min-height:42px;font-size:13px;line-height:1.6;margin:16px 0;color:#b5c2d4}.trace-label{display:flex;justify-content:space-between;font-size:11px;color:#9eafc3;margin:18px 0 8px}.trace{width:100%;height:95px;display:block;background:#0a101a;border-radius:8px}.legend{font-size:11px;color:#8fa1b6;margin-top:7px}.legend span{color:#72daca;margin-left:12px}.checks{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{padding:10px;background:#111a27;border-radius:7px;display:flex;justify-content:space-between;font-size:12px;color:#9eafc3}.check b{color:#dce6f2}.distance{font-size:12px;color:#b1c2d6;margin-top:16px}.score-track{height:7px;position:relative;background:#283345;border-radius:5px;margin-top:8px}.score-track i{height:100%;display:block;background:#72daca;border-radius:5px;width:0;max-width:100%}.score-track:after{content:'';position:absolute;left:50%;height:13px;width:2px;top:-3px;background:#e5bd72}.compare-foot{display:flex;justify-content:space-between;gap:20px;margin:16px 0;font-size:12px;color:#94a7bd;line-height:1.6}.setup-panel{max-width:1440px;margin:8px auto 30px;border-top:1px solid #2b3544}.setup-panel>summary{padding:18px 28px;cursor:pointer;color:#c2d0e0;font-size:14px}.setup-panel main{max-width:none}.compare button:focus-visible,summary:focus-visible{outline:3px solid #72daca;outline-offset:4px}.capture-note{color:#72daca;min-height:22px;font-size:13px}.compare button:disabled{opacity:.4;cursor:wait}@keyframes reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@media(max-width:760px){.compare{padding:24px 14px}.compare-grid{grid-template-columns:1fr}.hero{display:block}.mode{display:inline-block;margin-top:14px}.vault-body{padding:18px}.compare-foot{display:block}}@media(prefers-reduced-motion:reduce){.file-preview,.door-icon{animation:none!important;transition:none!important}}
 </style></head><body>
 <header><h1>🔐 Bat Ears 제스처 키 <span>손짓 순서 + 나만의 리듬으로 잠금 해제 · 카메라 없음 · 기록은 이 브라우저에만</span></h1><span id="status" class="chip">대기 중</span></header>
-<main>
+<section class="compare" aria-label="제스처 인증 비교"><div class="hero"><div><div class="eyebrow">BAT EARS / GESTURE SECURITY</div><h2>Same gesture. Different signature.</h2><p>같은 손짓에도 리듬과 움직임은 다릅니다.<br>등록자와 다른 사람의 시도를 나란히 비교해 보세요.</p></div><span class="mode" id="compare-mode">LIVE · 실제 입력 대기</span></div><div class="toolbar"><button class="primary" id="setup-open">① 제스처 등록 / 설정</button><button id="compare-mic">② 마이크 켜기</button><button id="sample-compare">예시 비교 보기</button><button id="clear-compare">비교 초기화</button></div><div class="capture-note" id="compare-note" role="status" aria-live="polite">먼저 아래 설정에서 제스처를 등록하세요. 두 사람은 같은 노트북에서 차례로 시도합니다.</div><div class="compare-grid"><article class="vault" id="vault-owner"><div class="vault-top"><div><div class="role">01 / ENROLLED USER</div><h3>등록자</h3></div><span class="verdict">WAITING</span></div><div class="vault-body"><div class="door"><div class="door-icon" aria-hidden="true">🔒</div><div class="door-copy"><strong>Vault locked</strong><small>인증 결과를 기다리고 있어요</small></div><div class="file-preview"><span class="eyebrow" style="color:#19715f">ACCESS GRANTED · DEMO FILE</span><p>PRIVATE WORKSPACE / 01</p><b>Research Notes</b><p>Bat Ears · Acoustic gesture experiment</p><hr><p>노트북 스피커와 마이크로 읽은 움직임.<br>카메라 없이, 나만의 리듬으로.</p></div></div><p class="explanation">같은 등록 기준으로 두 시도를 비교합니다.</p><button type="button" data-try="owner">③ 등록자 시도</button><div class="trace-label"><span>움직임 모양 · 정규화된 속도</span><span class="sequence">입력 대기</span></div><svg class="trace" viewBox="0 0 480 95" role="img" aria-label="등록 기준과 이번 시도의 움직임 비교"><path d="M0 47.5 H480" stroke="#273447"/><polyline class="reference" fill="none" stroke="#91a1b6" stroke-width="2" stroke-dasharray="5 5"/><polyline class="attempt" fill="none" stroke="#72daca" stroke-width="2.5"/></svg><div class="legend">┄ 등록 기준<span>━ 이번 시도</span></div><div class="checks"><div class="check">리듬 차이 <b data-part="rhythm">—</b></div><div class="check">속도 차이 <b data-part="speed">—</b></div><div class="check">지속시간 차이 <b data-part="duration">—</b></div><div class="check">모양 차이 <b data-part="shape">—</b></div></div><div class="distance">차이 점수 <b class="score">—</b> / 허용 기준 <b class="threshold">—</b><div class="score-track"><i></i></div></div></div></article><article class="vault" id="vault-guest"><div class="vault-top"><div><div class="role">02 / SECOND PARTICIPANT</div><h3>다른 사람</h3></div><span class="verdict">WAITING</span></div><div class="vault-body"><div class="door"><div class="door-icon" aria-hidden="true">🔒</div><div class="door-copy"><strong>Vault locked</strong><small>인증 결과를 기다리고 있어요</small></div><div class="file-preview"><span class="eyebrow" style="color:#19715f">ACCESS GRANTED · DEMO FILE</span><p>PRIVATE WORKSPACE / 01</p><b>Research Notes</b><p>Bat Ears · Acoustic gesture experiment</p><hr><p>노트북 스피커와 마이크로 읽은 움직임.<br>카메라 없이, 나만의 리듬으로.</p></div></div><p class="explanation">같은 등록 기준으로 두 시도를 비교합니다.</p><button type="button" data-try="guest">④ 다른 사람 시도</button><div class="trace-label"><span>움직임 모양 · 정규화된 속도</span><span class="sequence">입력 대기</span></div><svg class="trace" viewBox="0 0 480 95" role="img" aria-label="등록 기준과 이번 시도의 움직임 비교"><path d="M0 47.5 H480" stroke="#273447"/><polyline class="reference" fill="none" stroke="#91a1b6" stroke-width="2" stroke-dasharray="5 5"/><polyline class="attempt" fill="none" stroke="#72daca" stroke-width="2.5"/></svg><div class="legend">┄ 등록 기준<span>━ 이번 시도</span></div><div class="checks"><div class="check">리듬 차이 <b data-part="rhythm">—</b></div><div class="check">속도 차이 <b data-part="speed">—</b></div><div class="check">지속시간 차이 <b data-part="duration">—</b></div><div class="check">모양 차이 <b data-part="shape">—</b></div></div><div class="distance">차이 점수 <b class="score">—</b> / 허용 기준 <b class="threshold">—</b><div class="score-track"><i></i></div></div></div></article></div><div class="compare-foot"><span>낮은 점수일수록 등록된 움직임과 비슷합니다. 금색 선은 허용 기준입니다.</span><span>카메라 미사용 · 브라우저 내 인증 실험 · 보관함은 데모 콘텐츠</span></div></section><details class="setup-panel" id="setup-panel"><summary>등록 및 실험 설정 · 기존 제스처 키 도구</summary><main>
 <section>
 <div class="tabs"><a href="index.html">🎮 게임</a><a href="experiment-live.html">🧪 자유 실험 모드</a><a class="sel" href="key.html">🔐 제스처 키</a><a href="tone.html">📢 톤 재생기</a></div>
 <div class="card" id="lockCard">
@@ -79,9 +82,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="delTpl" class="secondary">이 잠금 지우기</button></div>
 <div class="card"><h3>📁 평가 기록</h3>
   <p class="hint">시도마다 잠금 주인, 수행자, 본인/타인, 순서 일치, 스타일 점수를 남겨요 (FAR·FRR 계산용, python ml/auth_report.py).</p>
-  <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
+  <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox"> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
-</aside></main>
+</aside></main></details>
 <script src="robust.js?v=20261115101840"></script><script src="swipe.js?v=20261115101840"></script><script src="wave.js?v=20261115101840"></script><script src="iq.js?v=20261115101840"></script><script src="dsp.js?v=20261115101840"></script><script src="circle.js?v=20261115101840"></script><script src="auth.js?v=20261115101840"></script>
 <script>
 (() => {
@@ -228,7 +231,7 @@ function meter(sc) {
     $('p_' + k).style.width = v == null ? '0%' : Math.min(100, v * 25) + '%';
   }
 }
-function lock(v) { ['enroll', 'unlock', 'delTpl', 'owner', 'tpl', 'reps', 'back'].forEach((id) => { $(id).disabled = v; }); document.querySelectorAll('[data-g]').forEach((b) => { b.disabled = v; }); }
+function lock(v) { document.querySelectorAll('.compare button').forEach(b => b.disabled = v); ['enroll', 'unlock', 'delTpl', 'owner', 'tpl', 'reps', 'back', 'attack', 'performer'].forEach((id) => { $(id).disabled = v; }); document.querySelectorAll('[data-g]').forEach((b) => { b.disabled = v; }); }
 function renderPick() {
   $('pick').replaceChildren(...pick.map((k) => { const d = document.createElement('span'); d.className = 'chip2'; d.textContent = ICON[k]; return d; }));
 }
@@ -328,10 +331,11 @@ async function enroll() {
   templates[owner] = tpl;
   store.set('batears-auth-templates', templates);
   refreshTpl(owner);
+  comparison.clear();
   say('✅', `${owner} 등록 완료`, `동작 ${tpl.kinds.length}개 · ${tpl.n}번 반복 · 기준 점수 ${tpl.threshold} (반복끼리 차이 ${tpl.loo.join(' ')})`);
   busy = false; lock(false);
 }
-async function unlock() {
+async function unlock(side) {
   if (busy) return;
   const owner = $('tpl').value, tpl = templates[owner];
   if (!tpl) { alert('먼저 등록해 주세요'); return; }
@@ -339,6 +343,8 @@ async function unlock() {
   if (!E.running && !confirm('마이크가 꺼져 있어요. 키보드 시뮬레이션(↑ ↓ W)으로만 시도할까요?')) return;
   if ($('autoSave').checked) await dataDir(true); // ask for the folder now, while the click still counts as a gesture
   busy = true; lock(true); meter(null);
+  const compareSide = side || ($('attack').value === 'genuine' ? 'owner' : 'guest');
+  comparison.begin(compareSide);
   say('👂', '제스처 비밀번호를 해 주세요', `동작 ${tpl.kinds.length}개 · 동작마다 빠르게, 사이에 손을 아주 잠깐 멈추기`);
   showLive([]);
   const r = await capture(tpl.kinds.length, { sign: tpl.circleSign == null ? null : tpl.circleSign });
@@ -353,6 +359,7 @@ async function unlock() {
     intervals: r.att.intervals.map((x) => +x.toFixed(3)), g: r.att.g.map((g) => g && { peak: +g.peak.toFixed(3), dur: Math.round(g.dur), tPeak: +g.tPeak.toFixed(3) }),
     end: r.why, expected_n: tpl.kinds.length, detected_n: r.gestures.length, frames: r.frames, te_ms: r.te,
     simulated: r.gestures.some((x) => x.simulated), noMotion: r.gestures.filter((x) => !x.seg && !x.simulated).length, device, freq: E.freq };
+  comparison.finish(compareSide, tpl, r.att, sc, a);
   session.attempts.push(a);
   log.push(a);
   store.set('batears-auth-log', log);
@@ -360,6 +367,73 @@ async function unlock() {
   if ($('autoSave').checked) save(false);
   busy = false; lock(false);
 }
+
+
+const comparison = (() => {
+  let sample = false;
+  const initial = {};
+  for (const side of ['owner','guest']) initial[side] = $('vault-' + side).innerHTML;
+  const card = side => $('vault-' + side);
+  const resetCard = side => { card(side).className = 'vault'; card(side).innerHTML = initial[side]; };
+  const mode = text => { $('compare-mode').textContent = text; $('compare-mode').className = 'mode' + (sample ? ' sample' : ''); };
+  function clear() { sample = false; ['owner','guest'].forEach(resetCard); mode('LIVE · 실제 입력 대기'); $('compare-note').textContent = '같은 등록 기준으로 두 사람이 차례로 시도하세요.'; }
+  function points(traces) {
+    const values = traces.flatMap((t,i) => i ? [null, ...t] : t);
+    return values.map((v,i) => v == null ? null : [10 + i * 460 / Math.max(1,values.length-1),47.5 - Math.max(-1,Math.min(1,v))*35]);
+  }
+  function draw(el, traces) {
+    // Separate strokes rather than inventing a time-continuous trajectory.
+    const ps = points(traces); el.setAttribute('points',ps.filter(Boolean).map(p=>p.join(',')).join(' '));
+  }
+  function begin(side) {
+    if (sample) clear();
+    resetCard(side);
+    card(side).querySelector('.verdict').textContent = 'LISTENING';
+    card(side).querySelector('.door-copy strong').textContent = 'Listening…';
+    $('compare-note').textContent = (side === 'owner' ? '등록자' : '다른 사람') + ' 입력 중 · 동작 후 잠깐 멈춰 주세요.';
+    document.querySelectorAll('.compare button').forEach(b=>b.disabled=true);
+    mode('LIVE · 마이크 입력 판정 중');
+  }
+  function finish(side,tpl,att,sc,meta={}) {
+    const c = card(side), uncertain = !meta.simulated && (!att.g.length || att.g.some(g=>!g));
+    const open = sc.accepted && !uncertain;
+    c.className = 'vault ' + (uncertain ? 'uncertain' : open ? 'open' : 'denied');
+    c.querySelector('.verdict').textContent = uncertain ? 'RETRY · 신호 부족' : open ? 'ACCESS GRANTED' : 'ACCESS DENIED';
+    c.querySelector('.door-copy strong').textContent = uncertain ? '다시 측정해 주세요' : 'Vault locked';
+    c.querySelector('.door-copy small').textContent = uncertain ? '비교할 움직임이 충분하지 않아요' : '이번 시도는 등록 기준을 통과하지 못했어요';
+    c.querySelector('.explanation').textContent = uncertain ? '신호가 부족해 보관함을 열지 않았습니다. 손 위치와 마이크를 확인하세요.' : open ? '동작 순서와 움직임 차이가 허용 범위 안에 있습니다. 데모 파일이 열렸어요.' : !sc.orderOk ? '등록된 동작 순서와 다릅니다. 보관함은 잠겨 있어요.' : '순서는 같지만 ' + ({rhythm:'리듬',speed:'속도',duration:'지속시간',shape:'움직임 모양'}[sc.reason] || '움직임') + ' 차이가 커서 허용 기준을 넘었습니다.';
+    c.querySelector('.sequence').textContent = (sample ? '합성 예시 · ' : meta.simulated ? '키보드 포함 · ' : '실제 입력 · ') + (sc.orderOk ? '순서 일치' : '순서 불일치');
+    for(const k of ['rhythm','speed','duration','shape']) c.querySelector('[data-part="'+k+'"]').textContent = sc.parts?.[k] == null ? '—' : sc.parts[k].toFixed(2);
+    c.querySelector('.score').textContent = sc.score == null ? '—' : sc.score.toFixed(2);
+    c.querySelector('.threshold').textContent = tpl.threshold.toFixed(2);
+    c.querySelector('.score-track i').style.width = sc.score == null ? '0%' : Math.min(100,50*sc.score/tpl.threshold)+'%';
+    c.querySelector('.score-track i').style.background = open ? '#72daca' : '#ff94a5';
+    draw(c.querySelector('.reference'),tpl.gest.map(g=>g?.trace || []));
+    draw(c.querySelector('.attempt'),att.g.map(g=>g?.trace || []));
+    if(!sample) mode(meta.simulated ? 'SIMULATED · 키보드 입력 포함' : 'LIVE · 실제 입력 결과');
+    $('compare-note').textContent = sample ? '합성 예시입니다. 실제 측정값이 아니며 등록·평가 기록에 저장되지 않습니다.' : '실제 판정 결과입니다. 다른 사람도 통과할 수 있으며 결과를 강제로 바꾸지 않습니다.';
+  }
+  function examples() {
+    clear(); sample = true;
+    const fixture = (gap,peak,dur) => ({kinds:['push','pull','push'],intervals:[gap,gap*1.1],g:[1,-1,1].map(sign=>({peak,dur,trace:Array.from({length:24},(_,i)=>sign*Math.sin(Math.PI*i/23))}))});
+    const tpl = A.buildTemplate([fixture(.7,.5,350),fixture(.72,.51,360),fixture(.69,.49,340),fixture(.71,.5,355),fixture(.7,.5,350)]);
+    const a=fixture(.71,.5,355), b=fixture(1.4,.85,650);
+    finish('owner',tpl,a,A.score(tpl,a)); finish('guest',tpl,b,A.score(tpl,b)); mode('SAMPLE · 합성 예시 / 실제 측정 아님');
+  }
+  $('setup-open').onclick = () => { $('setup-panel').open=true; $('setup-panel').scrollIntoView({behavior:'smooth'}); };
+  $('compare-mic').onclick = micOn;
+  $('sample-compare').onclick = examples;
+  $('clear-compare').onclick = clear;
+  document.querySelector('.compare-grid').addEventListener('click',e=>{
+    const b=e.target.closest('[data-try]'); if(!b || busy)return;
+    if(!templates[$('tpl').value]) { $('setup-panel').open=true; $('setup-panel').scrollIntoView(); $('owner').focus(); $('compare-note').textContent='먼저 이름과 동작 순서를 정해 등록해 주세요.'; return; }
+    const side=b.dataset.try;
+    $('attack').value=side==='owner'?'genuine':'imitation-watched'; $('performer').value=side==='owner'?'':'guest';
+    unlock(side);
+  });
+  $('tpl').addEventListener('change',clear);
+  return {begin,finish,clear};
+})();
 
 // ---- wiring
 $('tokens').replaceChildren(...ON.map((t) => { const b = document.createElement('button'); b.className = 'secondary'; b.dataset.g = t.id; b.textContent = t.label; return b; }),
@@ -370,7 +444,7 @@ $('mic').onclick = micOn;
 $('enroll').onclick = (e) => { e.target.blur(); enroll(); };
 $('unlock').onclick = (e) => { e.target.blur(); unlock(); };
 $('save').onclick = () => save(true);
-$('delTpl').onclick = () => { const n = $('tpl').value; if (n && confirm(`'${n}' 잠금을 지울까요?`)) { delete templates[n]; store.set('batears-auth-templates', templates); refreshTpl(); } };
+$('delTpl').onclick = () => { const n = $('tpl').value; if (n && confirm(`'${n}' 잠금을 지울까요?`)) { delete templates[n]; store.set('batears-auth-templates', templates); refreshTpl(); comparison.clear(); } };
 window.addEventListener('keydown', (e) => {
   const tag = (e.target && e.target.tagName) || '';
   if (e.code === 'Space' && !['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(tag)) { e.preventDefault(); unlock(); }
