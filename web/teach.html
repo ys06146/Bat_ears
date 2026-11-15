@@ -69,6 +69,10 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   <div class="card hidden" id="newVersion" style="border-color:#ffca28"><b>🔄 teach.html 새 버전이 올라왔어요.</b> <button id="reloadBtn" class="go">새로고침</button> <span class="muted">세션이 끝난 뒤에 눌러요</span></div>
   <div class="card" id="setup">
     <h2>1. 준비</h2>
+    <div id="presetBox" class="hidden" style="border:1px solid #ffca28;border-radius:10px;padding:10px 12px;margin:0 0 12px;background:#2a2410">
+      <b>📋 폰 위에서 실험</b> <span class="muted">(위에서 배치가 들어가 있어요: 📱A 17000을 손 자리 위 45cm에서 아래로, 📱B 끔)</span>
+      <div id="presetList" style="margin-top:6px;line-height:1.9"></div>
+    </div>
     <ul class="tips">
       <li>화면을 거의 세워요(약 95°). 많이 젖히면 웹캠이 키보드 위의 손을 못 봐요</li>
       <li>손은 <b>웹캠에서 25~45cm</b>, 책상 위 18~25cm에서 움직여요(오른쪽 📏 거리가 초록이면 돼요). 미리보기에서 손이 가운데 오게 하세요</li>
@@ -144,6 +148,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const E = window.BatEars, R = window.BatRecorder;
   const Q = new URLSearchParams(location.search);
   const QUICK = Q.get('quick') === '1', NOFOLDER = Q.get('nofolder') === '1';
+  const PRESET = Q.get('preset') === 'above';   // the overhead-phone experiment in one link
   const MP_VER = '0.10.21';
   const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
@@ -1101,12 +1106,43 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   setInterval(checkNew, 60000);
   $('reloadBtn').addEventListener('click', () => location.reload());
   renderPhones();
+  // ?preset=above: phone A 17000 straight above the hand area facing down, B off, and a live checklist
+  const pre = { fixed: false };
+  function renderPreset() {
+    const A = phones.find((p) => p.id === 'A'), lv = A ? levelOf(A.hz) : null;
+    const heardA = !!(A && audio.on && (heardHz(A.hz) || (lv ?? -99) >= LV_OK));
+    const tw = audio.on && (E.foreign || []).some((k) => Math.abs(k - 20) < 0.15);
+    const vis = cam.recent.length ? cam.recent.filter((x) => x[1]).length / cam.recent.length : 0;
+    const dm = cam.dist.length >= 3 ? cam.dist.slice().sort((x, y) => x - y)[cam.dist.length >> 1] : null;
+    const item = (ok, text, wait) => `<div>${ok === true ? '✅' : ok === false ? '⚠️' : '⬜'} ${text}${wait && ok == null ? ` <span class="muted">${wait}</span>` : ''}</div>`;
+    const all = pre.fixed && heardA && !tw && vis >= 0.8 && dm != null && dm >= 25 && dm <= 45;
+    $('presetList').innerHTML = [
+      `<div><label><input type="checkbox" id="preFixed" ${pre.fixed ? 'checked' : ''}> 📱A를 노트북 가운데 · 경첩에서 앞으로 30cm · 책상 위 45cm에 세로로 고정했어요 (아래쪽 스피커가 손 자리를 향해요)</label></div>`,
+      item(audio.on ? heardA : null, `폰에서 <b>tone.html?preset=A</b> → ▶ 시작 → 노트북에 📱A ✅ 들림${lv != null ? ` (${lv >= 0 ? '+' : ''}${Math.round(lv)}dB)` : ''}`, '① 켜기 뒤에 확인돼요'),
+      item(audio.on ? !tw : null, '20kHz 경고 없음 (🔊 다른 Bat Ears 탭 닫기)', '① 켜기 뒤에 확인돼요'),
+      item(cam.on && cam.recent.length > 20 ? vis >= 0.8 : null, `손 보임 80% 이상 (지금 ${Math.round(100 * vis)}%) · 미리보기에 폰이 안 보여요`, '카메라가 켜지면 확인돼요'),
+      item(dm != null ? dm >= 25 && dm <= 45 : null, `📏 웹캠에서 25~45cm (지금 ${dm != null ? Math.round(dm) + 'cm' : '–'})`, '손을 미리보기에 넣어요'),
+      `<div>${all ? '👉 모두 됐어요. <b>② 세션 시작</b>을 눌러요' : '<span class="muted">모두 ✅가 되면 ② 세션 시작</span>'}</div>`,
+    ].join('');
+    const cb = $('preFixed');
+    if (cb) cb.onchange = () => { pre.fixed = cb.checked; renderPreset(); };
+  }
+  if (PRESET) {
+    if (!phones.some((p) => p.id === 'A')) phones.unshift({ on: true, id: 'A', hz: 17000, x: '', h: '', z: '', note: '' });
+    for (const p of phones) { if (p.id === 'A') { p.on = true; p.hz = 17000; } else p.on = false; }
+    useLayout('top');
+    if (!$('memo').value) $('memo').value = '폰 A 위에서 (preset=above)';
+    $('presetBox').classList.remove('hidden');
+    renderPreset();
+    setInterval(renderPreset, 700);
+  }
   if (movedOld || freqMoved) {
     savePhones();
     setStatus([movedOld ? 'ℹ️ 전에 적은 폰 위치를 H키 기준 값으로 그대로 옮겼어요. 맞는지 확인해 주세요' : '',
       freqMoved ? '📱 폰 주파수를 A 17000 · B 18750으로 바꿨어요 (아이폰은 20kHz 넘는 소리를 못 내요). 폰 tone.html도 📱A 17000 · 📱B 18750으로 맞춰요' : ''].filter(Boolean).join(' · '));
     renderPhones();
   }
+  if (PRESET) setStatus('📋 폰 위에서 실험이에요. 위 체크를 따라 해요: ① 소리·카메라 켜기 → 모두 ✅ → ② 세션 시작');
   dataDir(false).then(showFolder);
   window.BatTeach = { get sess() { return sess; }, cam, audio, get vis() { return vis; }, plan, STEPS, derive, visionEvents, finish };   // for tests
 })();

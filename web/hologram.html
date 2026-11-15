@@ -640,6 +640,16 @@ function fillCalibs() {
   sel.innerHTML = Object.entries(C).map(([k, v]) => `<option value="${k}">${(v && v.label) || k}${k === 'galaxy' ? ' (기본)' : ''}</option>`).join('');
 }
 fillCalibs();
+// ?preset=above: bravo's phone-A-overhead calibration when bat3d.js has it; until then phone A with the physics solver, labelled
+if (Q.get('preset') === 'above') {
+  const C = (window.Bat3D && window.Bat3D.CALIBS) || {};
+  if (C['galaxy+A-top']) { $('calibSel').value = 'galaxy+A-top'; setTimeout(() => $('calibSel').onchange && $('calibSel').onchange(), 0); }   // the handler is set further down
+  else {
+    $('phoneOn').checked = true; $('phoneHz').value = 17000; $('px').value = 0; $('py').value = 45; $('pz').value = 30; $('phone2On').checked = false;
+    $('calibNote').innerHTML = '<span class="warn">📱 폰 A 위에서 (임시): 이 배치의 보정이 아직 없어서 물리 풀이로 풀어요. 정확도는 미확인이에요. 보정이 들어오면 이 링크가 자동으로 그걸 써요</span>';
+  }
+  $('status').textContent = '📱 폰 A 위에서 모드 · 폰에서 tone.html?preset=A를 켜고 ▶ 시작을 눌러요';
+}
 $('calibSel').onchange = () => {
   const cn = $('calibSel').value, C = (window.Bat3D && window.Bat3D.CALIBS) || {}, v = C[cn];
   $('calibNote').textContent = v && v.phones && v.phones.length ? `이 보정은 ${v.phones.map((p) => `📱${p.id} ${p.hz}Hz (오른쪽 ${p.x_right_cm} · 높이 ${p.h_cm} · 앞 ${p.z_front_cm}cm)`).join(', ')}로 배웠어요. 폰을 그 자리에 두고 tone.html을 켜요. 다른 폰은 꺼요` : '노트북 스피커만 써요. 폰은 꺼도 돼요';

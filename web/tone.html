@@ -26,6 +26,7 @@ a{color:#8ab4f8}
 </style></head><body>
 <main>
 <h1>📢 Bat Ears 톤 재생기</h1>
+<div id="presetNote" class="card note" style="display:none;border-color:#ffca28"></div>
 <div class="card">
   <label for="freq">주파수 (Hz)</label>
   <input id="freq" type="number" inputmode="numeric" min="100" max="23000" step="50" value="17000">
@@ -56,6 +57,16 @@ a{color:#8ab4f8}
   // each phone remembers its own frequency
   try { const f = Number(localStorage.getItem('batears-tone-freq')); if (f >= 100 && f <= 23000) $('freq').value = f; } catch (e) { /* private mode */ }
   const remember = () => { try { localStorage.setItem('batears-tone-freq', String(freqNow())); } catch (e) { /* ignore */ } };
+  // one-link setups: ?preset=A (17000, the overhead phone) / ?preset=B (18750) / ?f=<Hz>. iPhones still need one tap on ▶
+  const QP = new URLSearchParams(location.search), PRE = (QP.get('preset') || '').toUpperCase();
+  const PF = PRE === 'A' ? 17000 : PRE === 'B' ? 18750 : Number(QP.get('f')) || 0;
+  if (PF >= 100 && PF <= 23000) { $('freq').value = PF; remember(); }
+  if (PRE === 'A') {
+    $('vol').value = 0.8; $('volLabel').textContent = '80%';
+    const n = $('presetNote');
+    n.style.display = 'block';
+    n.innerHTML = '📱 <b>폰 A · 17000Hz · 위에서 배치</b><br>노트북 가운데, 경첩에서 앞으로 30cm(노트북 앞 모서리 위), 책상 위 45cm에 세로로 세우고, 아래쪽 스피커가 손 자리를 향하게 해요. 아래 <b>▶ 시작</b>을 한 번 눌러요.';
+  }
   const volNow = () => Number($('vol').value) || 0.6;
 
   async function keepAwake() {
