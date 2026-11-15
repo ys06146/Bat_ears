@@ -1,0 +1,358 @@
+{
+ "session": {
+  "started_at": "2026-11-15T08:29:08.988Z",
+  "device": "61f5",
+  "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "matcher": "BatAuth v1",
+  "weights": {
+   "rhythm": 0.45,
+   "speed": 0.2,
+   "duration": 0.15,
+   "shape": 0.2
+  },
+  "attempts": [
+   {
+    "t": "2026-11-15T08:29:27.891Z",
+    "owner": "seojin",
+    "performer": "seojin",
+    "attack": "genuine",
+    "genuine": true,
+    "expected": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "got": [],
+    "seq_ok": false,
+    "style_score": null,
+    "threshold": 2.86,
+    "accepted": false,
+    "reason": "timeout",
+    "parts": null,
+    "intervals": [],
+    "g": [],
+    "end": "timeout",
+    "simulated": false,
+    "device": "61f5",
+    "freq": 20000
+   },
+   {
+    "t": "2026-11-15T08:29:47.231Z",
+    "owner": "seojin",
+    "performer": "seojin",
+    "attack": "genuine",
+    "genuine": true,
+    "expected": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "got": [
+     "pull"
+    ],
+    "seq_ok": false,
+    "style_score": null,
+    "threshold": 2.86,
+    "accepted": false,
+    "reason": "order",
+    "parts": null,
+    "intervals": [],
+    "g": [
+     null
+    ],
+    "end": "timeout",
+    "simulated": true,
+    "device": "61f5",
+    "freq": 20000
+   },
+   {
+    "t": "2026-11-15T08:30:06.184Z",
+    "owner": "seojin",
+    "performer": "seojin",
+    "attack": "genuine",
+    "genuine": true,
+    "expected": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "got": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "seq_ok": true,
+    "style_score": 0.84,
+    "threshold": 2.86,
+    "accepted": true,
+    "reason": "ok",
+    "parts": {
+     "rhythm": 0.44,
+     "speed": 0.9,
+     "duration": 0.78,
+     "shape": 1.36
+    },
+    "intervals": [
+     0.984,
+     1.183
+    ],
+    "g": [
+     {
+      "peak": 1.414,
+      "dur": 734,
+      "tPeak": 0.75
+     },
+     {
+      "peak": 1.506,
+      "dur": 1183,
+      "tPeak": 0.648
+     },
+     {
+      "peak": 1.259,
+      "dur": 1366,
+      "tPeak": 0.586
+     }
+    ],
+    "end": "done",
+    "simulated": false,
+    "device": "61f5",
+    "freq": 20000
+   },
+   {
+    "t": "2026-11-15T08:30:36.687Z",
+    "owner": "seojin",
+    "performer": "seojin",
+    "attack": "genuine",
+    "genuine": true,
+    "expected": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "got": [
+     "pull",
+     "push",
+     "wave"
+    ],
+    "seq_ok": true,
+    "style_score": 0.85,
+    "threshold": 2.86,
+    "accepted": true,
+    "reason": "ok",
+    "parts": {
+     "rhythm": 0.29,
+     "speed": 0.48,
+     "duration": 1.33,
+     "shape": 1.37
+    },
+    "intervals": [
+     1.066,
+     1.184
+    ],
+    "g": [
+     {
+      "peak": 1.609,
+      "dur": 817,
+      "tPeak": 0.674
+     },
+     {
+      "peak": 1.468,
+      "dur": 1184,
+      "tPeak": 0.254
+     },
+     {
+      "peak": 1.248,
+      "dur": 1683,
+      "tPeak": 0.772
+     }
+    ],
+    "end": "done",
+    "simulated": false,
+    "device": "61f5",
+    "freq": 20000
+   }
+  ]
+ },
+ "templates": {
+  "seojin": {
+   "kinds": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "n": 5,
+   "threshold": 2.86,
+   "loo": [
+    1.07,
+    2.35,
+    0.81,
+    1.45,
+    1.08
+   ],
+   "created": "2026-11-15T08:28:55.465Z",
+   "device": "61f5"
+  }
+ },
+ "attempts": [
+  {
+   "t": "2026-11-15T08:29:27.891Z",
+   "owner": "seojin",
+   "performer": "seojin",
+   "attack": "genuine",
+   "genuine": true,
+   "expected": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "got": [],
+   "seq_ok": false,
+   "style_score": null,
+   "threshold": 2.86,
+   "accepted": false,
+   "reason": "timeout",
+   "parts": null,
+   "intervals": [],
+   "g": [],
+   "end": "timeout",
+   "simulated": false,
+   "device": "61f5",
+   "freq": 20000
+  },
+  {
+   "t": "2026-11-15T08:29:47.231Z",
+   "owner": "seojin",
+   "performer": "seojin",
+   "attack": "genuine",
+   "genuine": true,
+   "expected": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "got": [
+    "pull"
+   ],
+   "seq_ok": false,
+   "style_score": null,
+   "threshold": 2.86,
+   "accepted": false,
+   "reason": "order",
+   "parts": null,
+   "intervals": [],
+   "g": [
+    null
+   ],
+   "end": "timeout",
+   "simulated": true,
+   "device": "61f5",
+   "freq": 20000
+  },
+  {
+   "t": "2026-11-15T08:30:06.184Z",
+   "owner": "seojin",
+   "performer": "seojin",
+   "attack": "genuine",
+   "genuine": true,
+   "expected": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "got": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "seq_ok": true,
+   "style_score": 0.84,
+   "threshold": 2.86,
+   "accepted": true,
+   "reason": "ok",
+   "parts": {
+    "rhythm": 0.44,
+    "speed": 0.9,
+    "duration": 0.78,
+    "shape": 1.36
+   },
+   "intervals": [
+    0.984,
+    1.183
+   ],
+   "g": [
+    {
+     "peak": 1.414,
+     "dur": 734,
+     "tPeak": 0.75
+    },
+    {
+     "peak": 1.506,
+     "dur": 1183,
+     "tPeak": 0.648
+    },
+    {
+     "peak": 1.259,
+     "dur": 1366,
+     "tPeak": 0.586
+    }
+   ],
+   "end": "done",
+   "simulated": false,
+   "device": "61f5",
+   "freq": 20000
+  },
+  {
+   "t": "2026-11-15T08:30:36.687Z",
+   "owner": "seojin",
+   "performer": "seojin",
+   "attack": "genuine",
+   "genuine": true,
+   "expected": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "got": [
+    "pull",
+    "push",
+    "wave"
+   ],
+   "seq_ok": true,
+   "style_score": 0.85,
+   "threshold": 2.86,
+   "accepted": true,
+   "reason": "ok",
+   "parts": {
+    "rhythm": 0.29,
+    "speed": 0.48,
+    "duration": 1.33,
+    "shape": 1.37
+   },
+   "intervals": [
+    1.066,
+    1.184
+   ],
+   "g": [
+    {
+     "peak": 1.609,
+     "dur": 817,
+     "tPeak": 0.674
+    },
+    {
+     "peak": 1.468,
+     "dur": 1184,
+     "tPeak": 0.254
+    },
+    {
+     "peak": 1.248,
+     "dur": 1683,
+     "tPeak": 0.772
+    }
+   ],
+   "end": "done",
+   "simulated": false,
+   "device": "61f5",
+   "freq": 20000
+  }
+ ]
+}

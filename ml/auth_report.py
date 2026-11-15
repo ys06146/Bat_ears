@@ -105,7 +105,12 @@ def main():
         return
     print(f'{len(att)} attempts from {len(paths)} files, owners: {sorted({a.get("owner") for a in att})}')
     if any(a.get('simulated') for a in att):
-        print(f"note: {sum(bool(a.get('simulated')) for a in att)} attempts used keyboard-simulated gestures (no motion features)")
+        print(f"note: {sum(bool(a.get('simulated')) for a in att)} attempts used keyboard-simulated gestures (no motion features;"
+              " logs before 02:35 on 11/15 also set this when a gesture merely had no motion segment)")
+    miss = [a for a in att if a.get('genuine') and not a.get('seq_ok')]
+    if miss:
+        print(f"genuine attempts with the wrong order: {len(miss)} (detection misses count here: "
+              f"{sum(1 for a in miss if len(a.get('got') or []) < len(a.get('expected') or []))} had fewer gestures than expected)")
     table(att, 'all owners')
     for o in sorted({a.get('owner') for a in att}):
         table([a for a in att if a.get('owner') == o], f'lock: {o}')

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115022954">
+<link rel="stylesheet" href="style.css?v=20261115023250">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
@@ -79,7 +79,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115022954"></script><script src="swipe.js?v=20261115022954"></script><script src="wave.js?v=20261115022954"></script><script src="iq.js?v=20261115022954"></script><script src="dsp.js?v=20261115022954"></script><script src="circle.js?v=20261115022954"></script><script src="auth.js?v=20261115022954"></script>
+<script src="robust.js?v=20261115023250"></script><script src="swipe.js?v=20261115023250"></script><script src="wave.js?v=20261115023250"></script><script src="iq.js?v=20261115023250"></script><script src="dsp.js?v=20261115023250"></script><script src="circle.js?v=20261115023250"></script><script src="auth.js?v=20261115023250"></script>
 <script>
 (() => {
 'use strict';
@@ -115,7 +115,9 @@ let pick = [], buf = [], cap = null, busy = false, dir = null;
 const session = { started_at: new Date().toISOString(), device, ua: navigator.userAgent, matcher: 'BatAuth v' + A.VERSION, weights: A.WEIGHTS, attempts: [] };
 
 // ---- engine: frames (for each gesture's motion) and gestures
+let calibrating = false;
 E.on('frame', (f) => {
+  calibrating = !!f.calibrating;
   if (f.calibrating || !f.tone) return;
   const a = Math.max(f.dUp || 0, f.dDown || 0);
   buf.push({ t: f.t, v: f.v, a });
@@ -137,9 +139,9 @@ function circleStep(t, a) {
   // the gestures the engine fired during the circle are its own strokes
   k.gestures = k.gestures.filter((x) => !(x.te >= r.t0 - 100 && x.te <= r.t1 + 300));
   const s = Math.sign(c.turns);
-  if (k.sign == null && k.want) {                       // enrollment teaches which turn sign is clockwise here
+  if (k.want) {                                          // enrollment: every circle votes on which sign is clockwise
     const exp = k.want[k.gestures.length];
-    if (exp === 'cw' || exp === 'ccw') k.sign = (exp === 'cw' ? 1 : -1) * s;
+    if (exp === 'cw' || exp === 'ccw') { k.vote = (k.vote || 0) + (exp === 'cw' ? 1 : -1) * c.turns; k.sign = Math.sign(k.vote) || null; }
   }
   if (k.sign == null) return;
   k.gestures.push({ kind: s * k.sign > 0 ? 'cw' : 'ccw', te: r.t1, simulated: false, circle: { turns: +c.turns.toFixed(2), ru: +c.ru.toFixed(1), rw: +c.rw.toFixed(1) } });
@@ -161,16 +163,21 @@ E.on('state', (s) => {
 });
 
 // one attempt: n gestures, then 0.8 s of quiet; or 3 s of quiet after the first gesture; or 12 s in all
-function capture(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null } = {}) {
+async function capture(n, opts = {}) {
+  // never listen while the engine is still calibrating (gestures can't fire then)
+  for (let i = 0; E.running && calibrating && i < 60; i++) { $('detail').textContent = '기준값 잡는 중 · 손을 치우고 잠깐만요'; await sleep(100); }
+  return listen(n, opts);
+}
+function listen(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null, vote = 0 } = {}) {
   return new Promise((resolve) => {
     run = null;
-    cap = { gestures: [], start: performance.now(), last: 0, want, sign };
+    cap = { gestures: [], start: performance.now(), last: 0, want, sign, vote };
     const tick = () => {
       const c = cap, now = performance.now();
       if (!c) return;
       const done = c.gestures.length >= n && now - c.last > 800;
       const idle = c.gestures.length && now - c.last > idleMs;
-      if (done || idle || now - c.start > timeoutMs) { cap = null; const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout'); r.sign = c.sign; resolve(r); return; }
+      if (done || idle || now - c.start > timeoutMs) { cap = null; const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout'); r.sign = c.sign; r.vote = c.vote; resolve(r); return; }
       setTimeout(tick, 100);
     };
     tick();
@@ -182,7 +189,7 @@ function finish(c, why) {
     const hi = i + 1 < all.length ? all[i + 1].te - 120 : Infinity;   // don't run into the next gesture
     const seg = g.simulated ? null : A.segment(buf, g.te, { lo: prevEnd, hi });
     if (seg) prevEnd = seg.t1;
-    return { kind: g.kind, te: g.te, seg };
+    return { kind: g.kind, te: g.te, seg, simulated: g.simulated };
   });
   return { why, gestures: gs, att: A.attemptFeatures(gs) };
 }
@@ -216,7 +223,7 @@ function renderPick() {
 }
 function refreshTpl(sel) {
   const names = Object.keys(templates);
-  $('tpl').replaceChildren(...names.map((n) => { const o = document.createElement('option'); o.value = n; o.textContent = `${n} (${templates[n].kinds.length}개)`; return o; }));
+  $('tpl').replaceChildren(...names.map((n) => { const o = document.createElement('option'); o.value = n; o.textContent = `${n} (${templates[n].kinds.length}개)${templates[n].v !== A.VERSION ? ' · 다시 등록 필요' : ''}`; return o; }));
   if (sel) $('tpl').value = sel;
 }
 function stats() {
@@ -289,12 +296,13 @@ async function enroll() {
   busy = true; lock(true); meter(null);
   $('dots').replaceChildren(...Array.from({ length: N }, () => document.createElement('span')));
   const reps = [];
-  let circleSign = null;
+  let circleSign = null, circleVote = 0;
   for (let tries = 0; reps.length < N && tries < N * 3; tries++) {
     say('📝', `${reps.length + 1}/${N}번째`, seqText(want) + ' · 지금 해 주세요');
     showLive([]);
-    const r = await capture(want.length, { want, sign: circleSign });
-    if (r.sign != null) circleSign = r.sign;
+    const r = await capture(want.length, { want, sign: circleSign, vote: circleVote });
+    circleVote = r.vote || 0;
+    circleSign = Math.sign(circleVote) || null;
     const k = r.att.kinds, ok = k.length === want.length && k.every((x, i) => x === want[i]);
     showLive(k, want);
     if (ok) { reps.push(r.att); $('dots').children[reps.length - 1].className = 'on'; say('✓', `${reps.length}/${N} 기록했어요`, `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
@@ -303,7 +311,7 @@ async function enroll() {
   }
   if (reps.length < 3) { say('❌', '등록하지 못했어요', '반복이 3번보다 적게 잡혔어요. 다시 해 주세요'); busy = false; lock(false); return; }
   const tpl = A.buildTemplate(reps);
-  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, stereo: STEREO });
+  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, circleVote: +circleVote.toFixed(2), stereo: STEREO });
   templates[owner] = tpl;
   store.set('batears-auth-templates', templates);
   refreshTpl(owner);
@@ -314,6 +322,7 @@ async function unlock() {
   if (busy) return;
   const owner = $('tpl').value, tpl = templates[owner];
   if (!tpl) { alert('먼저 등록해 주세요'); return; }
+  if (tpl.v !== A.VERSION) { say('📝', '판정 방식이 바뀌어서 다시 등록해야 해요', `'${owner}'를 같은 순서로 다시 등록해 주세요 (리듬을 동작 중심으로 재요)`); return; }
   if (!E.running && !confirm('마이크가 꺼져 있어요. 키보드 시뮬레이션(↑ ↓ W)으로만 시도할까요?')) return;
   if ($('autoSave').checked) await dataDir(true); // ask for the folder now, while the click still counts as a gesture
   busy = true; lock(true); meter(null);
@@ -329,7 +338,8 @@ async function unlock() {
   const a = { t: new Date().toISOString(), owner, performer, attack, genuine: attack === 'genuine', expected: tpl.kinds, got: r.att.kinds,
     seq_ok: sc.orderOk, style_score: sc.score, threshold: sc.threshold, accepted: sc.accepted, reason: sc.reason, parts: sc.parts,
     intervals: r.att.intervals.map((x) => +x.toFixed(3)), g: r.att.g.map((g) => g && { peak: +g.peak.toFixed(3), dur: Math.round(g.dur), tPeak: +g.tPeak.toFixed(3) }),
-    end: r.why, simulated: r.gestures.some((x) => !x.seg), device, freq: E.freq };
+    end: r.why, expected_n: tpl.kinds.length, detected_n: r.gestures.length,
+    simulated: r.gestures.some((x) => x.simulated), noMotion: r.gestures.filter((x) => !x.seg && !x.simulated).length, device, freq: E.freq };
   session.attempts.push(a);
   log.push(a);
   store.set('batears-auth-log', log);

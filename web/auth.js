@@ -3,7 +3,9 @@
  *
  * Stage 1, order = password: the attempt's gesture kinds must equal the enrolled sequence.
  * Stage 2, style = key: features of how this person does it, compared with the enrollment repetitions.
- *   rhythm   intervals between gesture onsets (s)        weight 0.45 (most device-independent)
+ *   rhythm   intervals between gesture CENTRES (s)       weight 0.45 (most device-independent)
+ *            centre = |v|^2-weighted time of the motion (v2, bravo): the echo-threshold onset moves with the echo
+ *            level (onset->peak lead drifts up to ~250 ms between sittings, drift.js); the energy centre does not
  *   speed    log peak hand speed per gesture             weight 0.20
  *   duration motion length per gesture (ms)              weight 0.15
  *   shape    velocity curve per gesture (24 points, / peak) weight 0.20
@@ -13,7 +15,7 @@
  * enrollment spread: leave-one-out scores of the repetitions -> mean + 2.5 sd, clamped to [1.8, 4.5].
  *
  * API (window.BatAuth in the browser, module.exports in Node):
- *   segment(frames, te, { lo, hi }) -> { t0, t1, dur, peak, tPeak, trace, n } | null
+ *   segment(frames, te, { lo, hi }) -> { t0, t1, dur, peak, tPeak, tc, trace, n } | null   (tc = energy centre, ms)
  *       frames = [{ t (ms), v (m/s, + toward the screen), a (echo excess dB) }], te = gesture event time;
  *       the active motion run around te (bridging gaps < 140 ms), kept inside [lo, hi]
  *   attemptFeatures(gestures) -> { kinds, onsets, intervals, total, g }   gestures = [{ kind, te, seg }]
@@ -26,7 +28,7 @@
   else root.BatAuth = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 1;
+  const VERSION = 2;   // 2: rhythm from motion centres (templates from v1 should be re-enrolled)
   const TRACE_N = 24;
   const W = { rhythm: 0.45, speed: 0.2, duration: 0.15, shape: 0.2 };
   const mean = (xs) => xs.reduce((s, x) => s + x, 0) / Math.max(1, xs.length);
@@ -67,15 +69,15 @@
     const seg = frames.slice(s, e + 1);
     if (seg.length < 3) return null;
     const t0 = seg[0].t, t1 = seg[seg.length - 1].t, dur = t1 - t0;
-    let pk = 0, ipk = 0;
-    seg.forEach((f, j) => { if (Math.abs(f.v) > Math.abs(pk)) { pk = f.v; ipk = j; } });
+    let pk = 0, ipk = 0, sw = 0, swt = 0;
+    seg.forEach((f, j) => { if (Math.abs(f.v) > Math.abs(pk)) { pk = f.v; ipk = j; } const q = f.v * f.v; sw += q; swt += q * f.t; });
     const peak = Math.abs(pk);
-    return { t0, t1, dur, peak, tPeak: dur > 0 ? (seg[ipk].t - t0) / dur : 0, trace: resample(seg.map((f) => f.v / (peak || 1)), TRACE_N), n: seg.length };
+    return { t0, t1, dur, peak, tPeak: dur > 0 ? (seg[ipk].t - t0) / dur : 0, tc: sw > 0 ? swt / sw : (t0 + t1) / 2, trace: resample(seg.map((f) => f.v / (peak || 1)), TRACE_N), n: seg.length };
   }
 
   function attemptFeatures(gestures) {
     const kinds = gestures.map((g) => g.kind);
-    const onsets = gestures.map((g) => (g.seg ? g.seg.t0 : g.te));
+    const onsets = gestures.map((g) => (g.seg ? (Number.isFinite(g.seg.tc) ? g.seg.tc : g.seg.t0) : g.te));
     const intervals = onsets.slice(1).map((t, i) => (t - onsets[i]) / 1000);
     return {
       kinds, onsets, intervals, total: onsets.length > 1 ? (onsets[onsets.length - 1] - onsets[0]) / 1000 : 0,
