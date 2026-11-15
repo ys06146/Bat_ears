@@ -17,6 +17,11 @@ node_modules/
 *.wav
 *.mp4
 *.mov
+*.webm
+*.mkv
+# raw webcam video and its frame timing from teach sessions: local only, never in the public repo
+ml/data/teach/*.webm
+ml/data/teach/*_frames.csv
 chrome-profile/
 *.log
 

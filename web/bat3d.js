@@ -114,12 +114,17 @@ registerProcessor('bat-iq6', BatIQ6);
     macbook: { SL: [-0.14, 0.0, 0.02], SR: [0.14, 0.0, 0.02], M: [[-0.10, 0.0, 0.10], [-0.10, 0.0, 0.10]], swapLR: false },
   };
   const H0 = [0, 0.12, 0.0];
-  // built-in Galaxy Book calibration (laptop only): learned on five webcam-taught sittings; error = leave-one-sitting-out
-  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652","amp":{"method":"leave-one-sitting-out over 5 sittings, scale estimated without the held-out sitting","corr":[0.78,0.47,0.72],"motion":[6.96,3.4,6.25],"modes":{"mse":{"k":[1,1,1],"rms":[4.42,2.99,4.33],"size":[0.7,0.47,0.72]},"half":{"k":[1.2,1.46,1.17],"rms":[4.42,3.08,4.45],"size":[0.85,0.69,0.86]},"matched":{"k":[1.44,2.12,1.38],"rms":[4.75,3.51,4.81],"size":[1.03,1.01,1.03]}}}} };
+  // built-in Galaxy Book calibration (laptop only): learned on 7 webcam-taught sittings; error = leave-one-sitting-out
+  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (7 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.82648,0.755361,-0.455314,-0.793856,0.000382],[0.141591,0.146009,0.213563,0.173146,0.000928],[-0.222529,-0.38697,-0.402846,-0.581152,-0.000143]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.13,2.52,4.24],"motion":[5.49,2.98,5.74],"corr":[0.67,0.53,0.67]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652, 20261115_082736, 20261115_090503","amp":{"method":"leave-one-sitting-out over 7 sittings, scale estimated without the held-out sitting","corr":[0.67,0.53,0.67],"motion":[5.49,2.98,5.74],"modes":{"mse":{"k":[1,1,1],"rms":[4.13,2.52,4.24],"size":[0.57,0.52,0.66]},"half":{"k":[1.325,1.391,1.235],"rms":[4.13,2.58,4.32],"size":[0.76,0.72,0.81]},"matched":{"k":[1.756,1.935,1.526],"rms":[4.53,2.89,4.66],"size":[1.01,1,1.01]}}}} };
   // tone level the built-in calibration was learned at (worklet carrier amplitude per laptop stream, median of the teach
   // sittings, tones at 0.6 per channel). A quieter tone -> fewer phase steps pass the gate -> the map under-predicts motion.
   const REF_AMP = { galaxy: [0.0089, 0.0183, 0.0056, 0.0101] };
   const VOLUME_TEACH = 1.2;   // osc 0.5 x volume 1.2 = 0.6 per channel, as in teach.html (dsp.js stereo tones)
+  // named calibrations: { calib, phones (the tone set it was learned with), label, scope } -- pass calib: CALIBS[name].calib
+  // and phones: CALIBS[name].phones (or create({ calibName: name }) which sets both)
+  const CALIBS = {
+    galaxy: { label: '노트북만 (일곱 앉음)', scope: 'leave-one-sitting-out over 7 sittings', phones: [], calib: DEFAULT_CALIB.galaxy },
+  };
   const sub = (a, b) => a.map((v, i) => v - b[i]), nrm = (a) => Math.hypot(...a), unit = (a) => { const n = nrm(a) || 1; return a.map((v) => v / n); };
   function inv3(A) {
     const [a, b, c] = A[0], [d, e, f] = A[1], [g, h, i] = A[2], det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
@@ -142,6 +147,7 @@ registerProcessor('bat-iq6', BatIQ6);
 
   function create(opts = {}) {
     const o = { geom: 'galaxy', paths: 'avg', model: 'learned', useDefault: true, calib: null, flipDir: false, stillMode: 'origin', autoReset: true, actOn: 0.004, amp: 'half', ...opts };
+    if (o.calibName && CALIBS[o.calibName]) { const C = CALIBS[o.calibName]; o.calib = C.calib; if (!opts.phones) o.phones = C.phones; }
     let wavMode = false;
     let cfg = null, solver = null, calibInUse = null;
     // ---------------------------------------------------------------- solver (same as 3d.html buildSolver)
@@ -315,14 +321,14 @@ registerProcessor('bat-iq6', BatIQ6);
     return {
       start, stop, originReset, feed,
       setCalib(c) { o.calib = c; if (c) o.model = 'learned'; buildSolver(); resetLive(); },
-      setOptions(x) { Object.assign(o, x); buildSolver(); resetLive(); },
+      setOptions(x) { Object.assign(o, x); if (x.calibName && CALIBS[x.calibName]) { o.calib = CALIBS[x.calibName].calib; if (!x.phones) o.phones = CALIBS[x.calibName].phones; } buildSolver(); resetLive(); },
       setVolume(v) { if (gainNode) gainNode.gain.value = v; },
-      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, amp: solver.amp, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
+      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, amp: solver.amp, calibName: o.calibName || null, calibScope: o.calibName && CALIBS[o.calibName] ? CALIBS[o.calibName].scope : null, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
         G: { SL: solver.G.SL, SR: solver.G.SR, M: solver.G.M }, calib: calibInUse ? { paths: calibInUse.paths.map((p) => ({ key: p.key, hz: p.hz, ch: p.ch, pos: p.pos, gain: p.gain })), mics: calibInUse.mics, cam: calibInUse.cam, lagMs: calibInUse.lagMs, truthFloorCm: calibInUse.truthFloorCm } : null }),
       onFrame(fn) { o.onFrame = fn; }, onCircle(fn) { o.onCircle = fn; }, onStatus(fn) { o.onStatus = fn; },
       on(name, fn) { if (name === 'frame') o.onFrame = fn; else if (name === 'circle') o.onCircle = fn; else if (name === 'status') o.onStatus = fn; },
       get live() { return live; }, get kf() { return kf; }, get trail() { return trail; }, get lastCircle() { return lastCircle; },
     };
   }
-  return { create, start: async (opts, startOpts) => { const e = create(opts); await e.start(startOpts); return e; }, PROC, GEOMS, H0, DEFAULT_CALIB, REF_AMP, VOLUME_TEACH, phonePos, VERSION };
+  return { create, start: async (opts, startOpts) => { const e = create(opts); await e.start(startOpts); return e; }, PROC, GEOMS, H0, DEFAULT_CALIB, CALIBS, REF_AMP, VOLUME_TEACH, phonePos, VERSION };
 });

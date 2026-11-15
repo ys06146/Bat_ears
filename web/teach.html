@@ -77,13 +77,14 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       <li>화면을 거의 세워요(약 95°). 많이 젖히면 웹캠이 키보드 위의 손을 못 봐요</li>
       <li>손은 <b>웹캠에서 25~45cm</b>, 책상 위 18~25cm에서 움직여요(오른쪽 📏 거리가 초록이면 돼요). 미리보기에서 손이 가운데 오게 하세요</li>
       <li>노트북 스피커·마이크를 쓰고(이어폰 X) 볼륨은 50% 이상. 폰은 <a href="tone.html">tone.html</a>로 톤을 켜서 노트북 쪽을 보게 두세요</li>
-      <li>영상과 사진은 저장하지 않아요. 손 관절 좌표(숫자)만 저장해요</li>
+      <li>📹 원본 영상 저장(기본 켜짐)은 이 컴퓨터의 데이터 폴더(ml/data/teach)에만 남고, 깃·공개 레포에는 절대 올라가지 않아요. 끄면 손 관절 좌표(숫자)만 저장해요</li>
     </ul>
     <div class="grid">
       <label class="f">화면 각도 (°, 대략)<input id="angle" type="number" min="60" max="150" step="1" value="95"></label>
       <label class="f">손바닥 폭 cm (검지 뿌리~새끼 뿌리)<input id="palm" type="number" min="4" max="14" step="0.1" placeholder="예: 8.0"></label>
       <label class="f">메모 (선택)<input id="memo" type="text" maxlength="80" placeholder="예: 노트북만 / 폰 2대"></label>
       <label class="f">카메라<select id="camSel"><option value="">기본 카메라</option></select></label>
+      <label class="f">📹 원본 영상<span><input type="checkbox" id="saveVideo" checked> 저장 (로컬 전용, 깃 제외)</span></label>
     </div>
     <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰 · 주파수 A 17000 · B 18750)</span></h2>
     <div class="rule">📐 <b>폰 놓기</b> (브라보) · <b>⬇️ 위에서</b>(추천, 높이가 잘 잡혀요): 📱A를 손 자리 바로 위에 둬요. 노트북 가운데, 경첩에서 앞으로 30cm(노트북 앞 모서리 근처), 책상 위 45cm. 세로로 세워 아래쪽 스피커가 아래 손을 향하게 하고, 스탠드·셀카봉·조명 팔에 고정해요. 📱B는 빼도 돼요(남기면 왼쪽 25cm·높이 40cm, 음량 최대) · <b>↔ 양옆</b>: A 오른쪽 25cm·높이 25cm, B 왼쪽 25cm·높이 40cm, 손 쪽을 향하게. 놓은 배치의 버튼을 누르면 위치가 들어가요</div>
@@ -121,7 +122,8 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
 <aside>
   <div class="card">
     <div id="camBox"><video id="video" muted playsinline autoplay></video><canvas id="overlay" width="384" height="216"></canvas></div>
-    <div id="camNote">📷 학습용으로만 사용 · 데모에서는 꺼짐 · 영상은 저장하지 않아요</div>
+    <div id="camNote">📷 학습용으로만 사용 · 데모에서는 꺼짐</div>
+    <div id="videoNote" style="font-size:14px;font-weight:700;color:#ef5350;min-height:18px"></div>
     <div id="vis">✋ 손 보임 –</div>
     <div id="edge"></div>
     <div id="dist"></div>
@@ -132,7 +134,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   </div>
 </aside>
 </main>
-<script src="robust.js?v=20261115062253"></script><script src="swipe.js?v=20261115062253"></script><script src="wave.js?v=20261115062253"></script><script src="iq.js?v=20261115062253"></script><script src="dsp.js?v=20261115062253"></script><script src="recorder.js?v=20261115062253"></script>
+<script src="robust.js?v=20261115091200"></script><script src="swipe.js?v=20261115091200"></script><script src="wave.js?v=20261115091200"></script><script src="iq.js?v=20261115091200"></script><script src="dsp.js?v=20261115091200"></script><script src="recorder.js?v=20261115091200"></script>
 <script>
 /* Bat Ears teach mode: the webcam is a temporary teacher. MediaPipe HandLandmarker (VIDEO mode, one hand, no
  * smoothing) logs where the hand is while the engine plays its stereo tones (18 / 19.5 kHz) and records the raw mic
@@ -455,9 +457,14 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     recent: [], ring: [], seenUntil: 0, lat: [], dist: [] };
   async function startCamera(deviceId) {
     stopCamera();
-    const v = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
+    const v = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, min: 30 } };
     if (deviceId) v.deviceId = { exact: deviceId };
-    const stream = await navigator.mediaDevices.getUserMedia({ video: v, audio: false });
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: v, audio: false }); } catch (e) {
+      if (e.name !== 'OverconstrainedError') throw e;
+      v.frameRate = { ideal: 30 };   // this camera can't promise 30 fps: take what it gives (logged per frame anyway)
+      stream = await navigator.mediaDevices.getUserMedia({ video: v, audio: false });
+    }
     cam.stream = stream;
     cam.track = stream.getVideoTracks()[0];
     video.srcObject = stream;
@@ -502,6 +509,8 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   }
   function onVideoFrame(now, md) {
     if (!cam.on) return;
+    if (vrec.on && md) vrec.frames.push([+performance.now().toFixed(2), fin(md.captureTime) ? +md.captureTime.toFixed(2) : '', fin(md.expectedDisplayTime) ? +md.expectedDisplayTime.toFixed(2) : '',
+      fin(md.mediaTime) ? +md.mediaTime.toFixed(4) : '', md.presentedFrames ?? '', md.width ?? '', md.height ?? '']);
     const hasCap = md && typeof md.captureTime === 'number' && md.captureTime > 0;
     if (md && md.presentedFrames) {
       if (cam.lastPresented && md.presentedFrames - cam.lastPresented > 1) cam.skipped += md.presentedFrames - cam.lastPresented - 1;
@@ -748,6 +757,41 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     setStatus('꺼졌어요');
   });
 
+  // ---- 📹 raw webcam video (서진 11/15 09:10: keep it for re-analysis with other hand trackers). Local data folder
+  // only, never committed (.gitignore *.webm). Sidecar _frames.csv = every frame callback's timing on the session clock
+  const vrec = { on: false, rec: null, chunks: [], frames: [], mime: '', startPerf: null, stopPerf: null, bytes: 0, err: '' };
+  const VIDEO_BPS = 5000000;
+  function pickMime() {
+    const c = ['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm'];
+    return window.MediaRecorder ? c.find((m) => MediaRecorder.isTypeSupported(m)) || '' : '';
+  }
+  function videoStart() {
+    Object.assign(vrec, { on: false, rec: null, chunks: [], frames: [], startPerf: null, stopPerf: null, bytes: 0, err: '' });
+    if (!$('saveVideo').checked || !cam.stream) { $('videoNote').textContent = ''; return; }
+    const mime = pickMime();
+    if (!mime) { vrec.err = 'MediaRecorder 없음'; $('videoNote').textContent = '⚠️ 이 브라우저는 영상 저장을 못 해요'; return; }
+    try {
+      const rec = new MediaRecorder(new MediaStream(cam.stream.getVideoTracks()), { mimeType: mime, videoBitsPerSecond: VIDEO_BPS });
+      rec.ondataavailable = (e) => { if (e.data && e.data.size) { vrec.chunks.push(e.data); vrec.bytes += e.data.size; } };
+      rec.onstart = () => { vrec.startPerf = performance.now(); };
+      rec.onerror = (e) => { vrec.err = (e.error && e.error.message) || 'recorder error'; };
+      Object.assign(vrec, { on: true, rec, mime });
+      rec.start(1000);
+      $('videoNote').textContent = '● 📹 영상 저장 중 (로컬 전용, 깃 제외)';
+    } catch (e) { vrec.err = e.message || String(e); $('videoNote').textContent = '⚠️ 영상 저장을 시작하지 못했어요'; }
+  }
+  function videoStop() {
+    return new Promise((resolve) => {
+      const rec = vrec.rec;
+      if (!vrec.on || !rec) { resolve(null); return; }
+      vrec.on = false;
+      rec.onstop = () => { vrec.stopPerf = performance.now(); $('videoNote').textContent = ''; resolve(new Blob(vrec.chunks, { type: vrec.mime.split(';')[0] })); };
+      try { rec.stop(); } catch (e) { resolve(null); }
+    });
+  }
+  $('saveVideo').checked = store.get('batears-teach-video', true);
+  $('saveVideo').addEventListener('change', () => store.set('batears-teach-video', $('saveVideo').checked));
+
   // ---- ② session
   let sess = null, warnedBlank = false;
   $('startBtn').addEventListener('click', startSession);
@@ -763,6 +807,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     warnedBlank = false;
     $('startBtn').disabled = true;
     const capOk = await E.captureStart();
+    videoStart();
     R.setTag(`teach_${device}`);
     R.clear();
     R.start();
@@ -997,6 +1042,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     $('result').classList.remove('hidden');
     $('resultText').textContent = '저장하는 중…';
     const wav = sess.capOk ? await E.captureStop() : null;
+    const vblob = await videoStop();
     const rows = sess.vision;
     derive(rows);
     const vev = visionEvents(rows);
@@ -1046,6 +1092,10 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
         latency_ms_median: lats.length ? rd(lats[lats.length >> 1], 1) : null, cap_src: rows.length ? rows[rows.length - 1].src : '',
       },
       wav: wav ? { file: `${base}.wav`, rate: wav.rate, channels: wav.channels, seconds: wav.seconds, t0: wav.t0, capped: wav.capped, via: wav.via } : null,
+      video: vblob ? { file: `${base}.webm`, frames_file: `${base}_frames.csv`, mime: vrec.mime, bitrate: VIDEO_BPS, bytes: vblob.size, startPerf: rd(vrec.startPerf, 2), stopPerf: rd(vrec.stopPerf, 2),
+        frames_logged: vrec.frames.length, err: vrec.err || null, local_only: true,
+        note: 'raw webcam (not mirrored), MediaRecorder; video t=0 is about startPerf (performance.now, same clock as wav.t0 and t_cap). _frames.csv has every requestVideoFrameCallback: perf_now, captureTime, expectedDisplayTime, mediaTime, presentedFrames, width, height. Never committed (.gitignore *.webm).' }
+        : ($('saveVideo').checked ? { err: vrec.err || 'not recorded' } : null),
       iq: { file: `${base}_iq.csv`, bins: sess.iq.length, live: sess.iqLive, binMs: 10, units: 'm', u: 'sideways (dR - dL) / 2', w: 'depth -(dL + dR) / 2', t: 'bin start; du / dw = change in [t, t + 10 ms)' },
       schedule: { quick: QUICK, restMs: REST_MS, leadMs: LEAD_MS, steps: STEPS.map((s) => s.kind) },
       trials, events: sess.events, bursts: sess.bursts, foreign: sess.foreign, vision_events: vev,
@@ -1059,6 +1109,10 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       [`${base}_iq.csv`, new Blob([iqCsv(sess.iq)], { type: 'text/csv' })],
     ];
     if (wav && wav.blob) files.push([`${base}.wav`, wav.blob]);
+    if (vblob && vblob.size) {
+      files.push([`${base}.webm`, vblob]);
+      files.push([`${base}_frames.csv`, new Blob(['perf_now,capture_time,expected_display_time,media_time,presented_frames,width,height\n' + vrec.frames.map((r) => r.join(',')).join('\n') + '\n'], { type: 'text/csv' })]);
+    }
     sess.files = files;
     sess.meta = meta;
     await saveAndReport();
