@@ -12,7 +12,9 @@
  * Each part is an RMS of z-scores against the enrollment mean/sd (sd floored so 5 reps can't make it brittle);
  * the score is their weighted ROOT-MEAN-SQUARE, so one aspect that is far off can't be averaged away by the others
  * (a plain weighted mean let 27/40 wrong-rhythm impostors in, tools/auth-tests). The threshold comes from the
- * enrollment spread: leave-one-out scores of the repetitions -> mean + 2.5 sd, clamped to [1.8, 4.5].
+ * enrollment spread: leave-one-out scores of the repetitions -> median + 3 x MAD (x1.4826, floored at 0.15),
+ * clamped to [1.8, 4.5] - robust to one sloppy repetition (bravo, drift_test_thr.js: a sloppy rep had doubled
+ * the impostor pass rate under mean + 2.5 sd).
  *
  * API (window.BatAuth in the browser, module.exports in Node):
  *   segment(frames, te, { lo, hi }) -> { t0, t1, dur, peak, tPeak, tc, trace, n } | null   (tc = energy centre, ms)
@@ -130,7 +132,9 @@
     if (!reps.every((r) => sameKinds(r.kinds, kinds))) throw new Error('all repetitions must have the same gestures');
     const loo = reps.map((r, i) => combine(parts(stats(reps.filter((_, j) => j !== i)), r)));
     const fin = loo.filter(Number.isFinite);
-    const threshold = Math.min(4.5, Math.max(1.8, mean(fin) + 2.5 * (fin.length > 1 ? sd(fin) : 0.5)));
+    const med = (xs) => { const x = xs.slice().sort((p, q) => p - q), h = x.length >> 1; return x.length % 2 ? x[h] : (x[h - 1] + x[h]) / 2; };
+    const mad = fin.length > 1 ? 1.4826 * med(fin.map((v) => Math.abs(v - med(fin)))) : 0.5;
+    const threshold = Math.min(4.5, Math.max(1.8, med(fin) + 3 * Math.max(mad, 0.15)));
     return { v: VERSION, ...stats(reps), n: reps.length, threshold: r2(threshold), loo: loo.map(r2), reps, created: new Date().toISOString() };
   }
 
