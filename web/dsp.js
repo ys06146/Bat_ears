@@ -54,6 +54,9 @@
     //   dropped. Recordings: 3/3 wave episodes (was 2/3), 0 false waves on 135 push/pulls, 44 swipes, 2.5 quiet min.
     //   null = BatWave.DEFAULTS
     wave: null,
+    // sequence: gesture passwords (key.html) - re-arm a burst after a calm moment so each fast stroke of a flowing
+    //   sequence fires; start({ sequence }) overrides it. Off for the game and the collection pages
+    sequence: false,
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -357,6 +360,7 @@
       running: true, tone: false, busy: true, raw, f0, binHz,
       idleSpectra: [], mask: null, volume: config.volume,
       followPull: opt.continuousPull && window.BatRobust ? new window.BatRobust.PullAfterPush() : null,
+      sequence: opt.sequence != null ? !!opt.sequence : !!config.sequence,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
       base: null, cand: null, candFrames: 0, lastFire: 0, last: null,
       wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
@@ -739,6 +743,7 @@ registerProcessor('bat-tap', BatTap);`;
     guardFrame(ev, Math.max(up, dn), v);
     ev.vmax = Math.max(ev.vmax, v);
     ev.vmin = Math.min(ev.vmin, v);
+    if (st.sequence) rearm(ev, v, now);
     const s = v > B.vMin ? 1 : v < -B.vMin ? -1 : 0;
     if (s && ev.sign && s !== ev.sign) ev.flips++;
     if (s) ev.sign = s;
@@ -746,10 +751,10 @@ registerProcessor('bat-tap', BatTap);`;
     if (!ev.waved && ev.flips >= B.waveFlips) { kinds.push('wave'); ev.waved = ev.fired = true; }
     else if (!ev.fired && v > B.vFire) { kinds.push('push'); ev.fired = true; }
     else if (!ev.fired && v < -B.vFire) { kinds.push('pull'); ev.fired = true; }
-    const maxMs = ev.flips >= 2 ? 3000 : B.maxMs; // a wave keeps going; don't chop it into extra pushes/pulls
+    const maxMs = st.sequence ? 6000 : ev.flips >= 2 ? 3000 : B.maxMs; // a wave keeps going; don't chop it into extra pushes/pulls
     const capped = now - ev.start > maxMs;
     if (now - ev.last > B.gapMs || capped) {
-      if (!ev.fired && !(B.rejectCapped && capped) && Math.max(ev.vmax, -ev.vmin) >= B.vMin && guardOk(ev)) {
+      if (!ev.fired && !ev.rearmed && !(B.rejectCapped && capped) && Math.max(ev.vmax, -ev.vmin) >= B.vMin && guardOk(ev)) {
         kinds.push(ev.vmax >= -ev.vmin ? 'push' : 'pull');
       }
       st.burst = null;
@@ -778,6 +783,17 @@ registerProcessor('bat-tap', BatTap);`;
     const g = config.burst.slowGuard;
     return !g || ev.peak >= g.peak || (ev.preAct < g.preAct && ev.wvD > 0 && ev.wvN / ev.wvD >= g.wv);
   }
+  // sequence mode: a fired burst re-arms after the hand calms down (|v| < 0.6 vMin for 80 ms); only fast strokes
+  // (> vFire) fire after that, never the end-of-burst decision, so slow returns between strokes stay silent
+  function rearm(ev, v, now, speed = Math.abs(v)) {
+    const calm = speed < config.burst.vMin * 0.6;
+    if (!ev.fired) { ev.calm = 0; return; }
+    if (!calm) { ev.calm = 0; return; }
+    if (!ev.calm) ev.calm = now;
+    if (now - ev.calm < 80) return;
+    Object.assign(ev, { fired: false, rearmed: true, calm: 0, flips: 0, sign: 0, vmax: v, vmin: v, depMax: v, depMin: v });
+  }
+
   // bravo's wave detector (wave.js), fed every frame; returns true while a wave is going on
   function waveStep(now, a, v, vetoed, speed) {
     if (!window.BatWave) return false;
@@ -889,6 +905,7 @@ registerProcessor('bat-tap', BatTap);`;
     guardFrame(ev, Math.max(L.dUp, L.dDown, R.dUp, R.dDown), dep);
     ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
     ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
+    if (st.sequence) rearm(ev, dep, now);
     if (ev.sb) {
       const eL = SW.excessDb(L.dUp, L.dDown), eR = SW.excessDb(R.dUp, R.dDown);
       ev.ePk = Math.max(ev.ePk == null ? -Infinity : ev.ePk, Math.min(eL, eR)); // the weaker tone's echo peak (dB)
@@ -898,7 +915,7 @@ registerProcessor('bat-tap', BatTap);`;
     // early push/pull only when left/right can't happen: a swipe also moves toward then away from the mic, so with
     // a model the whole burst has to be seen first (costs ~gapMs of latency)
     if (!ev.fired && !model && Math.abs(dep) > B.vFire) { kind = dep > 0 ? 'push' : 'pull'; ev.fired = true; }
-    const capped = now - ev.start > B.maxMs;
+    const capped = now - ev.start > (st.sequence ? 6000 : B.maxMs);
     if (now - ev.last > B.gapMs || capped) {
       const feat = ev.sb ? ev.sb.features() : null;
       if (feat && Number.isFinite(ev.ePk)) feat.ePk = +ev.ePk.toFixed(1); // echo strength: a far hand can't do left/right
@@ -912,7 +929,7 @@ registerProcessor('bat-tap', BatTap);`;
         if (pk && pk.n > 20) { feat.pPk = pk.pPk; feat.pDPk = pk.pDPk; if (Number.isFinite(pk.pStroke)) feat.pStroke = pk.pStroke; }
       }
       emit('burst', { t: now, start: ev.start, feat, capped });
-      if (!ev.fired && !(B.rejectCapped && capped)) {
+      if (!ev.fired && !ev.rearmed && !(B.rejectCapped && capped)) {
         if (model && feat) {
           const c = SW.classify(feat, model);
           if (c.dir) kind = c.dir;

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115023250">
+<link rel="stylesheet" href="style.css?v=20261115023800">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
@@ -79,7 +79,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115023250"></script><script src="swipe.js?v=20261115023250"></script><script src="wave.js?v=20261115023250"></script><script src="iq.js?v=20261115023250"></script><script src="dsp.js?v=20261115023250"></script><script src="circle.js?v=20261115023250"></script><script src="auth.js?v=20261115023250"></script>
+<script src="robust.js?v=20261115023800"></script><script src="swipe.js?v=20261115023800"></script><script src="wave.js?v=20261115023800"></script><script src="iq.js?v=20261115023800"></script><script src="dsp.js?v=20261115023800"></script><script src="circle.js?v=20261115023800"></script><script src="auth.js?v=20261115023800"></script>
 <script>
 (() => {
 'use strict';
@@ -177,7 +177,15 @@ function listen(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null,
       if (!c) return;
       const done = c.gestures.length >= n && now - c.last > 800;
       const idle = c.gestures.length && now - c.last > idleMs;
-      if (done || idle || now - c.start > timeoutMs) { cap = null; const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout'); r.sign = c.sign; r.vote = c.vote; resolve(r); return; }
+      if (done || idle || now - c.start > timeoutMs) {
+        cap = null;
+        const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout');
+        r.sign = c.sign; r.vote = c.vote;
+        // the attempt's frames (ms from the start, v, echo dB) so a missed gesture can be replayed later
+        r.frames = buf.filter((f) => f.t >= c.start - 300 && f.t <= now).map((f) => [Math.round(f.t - c.start), +f.v.toFixed(2), +f.a.toFixed(1)]);
+        r.te = c.gestures.map((g) => Math.round(g.te - c.start));
+        resolve(r); return;
+      }
       setTimeout(tick, 100);
     };
     tick();
@@ -279,7 +287,7 @@ async function save(ask) {
 async function micOn() {
   if (E.running) return;
   $('mic').disabled = true;
-  const ok = await E.start({ freq: 20000, raw: true, stereo: STEREO });
+  const ok = await E.start({ freq: 20000, raw: true, stereo: STEREO, sequence: true }); // re-arm between strokes
   $('mic').disabled = false;
   if (!ok) { say('🎤', '마이크를 켤 수 없어요', '주소창 왼쪽에서 마이크를 허용해 주세요'); return; }
   $('mic').textContent = '🎤 마이크 켜짐';
@@ -298,7 +306,7 @@ async function enroll() {
   const reps = [];
   let circleSign = null, circleVote = 0;
   for (let tries = 0; reps.length < N && tries < N * 3; tries++) {
-    say('📝', `${reps.length + 1}/${N}번째`, seqText(want) + ' · 지금 해 주세요');
+    say('📝', `${reps.length + 1}/${N}번째`, seqText(want) + ' · 지금 해 주세요 (동작마다 빠르게, 사이에 잠깐 멈추기)');
     showLive([]);
     const r = await capture(want.length, { want, sign: circleSign, vote: circleVote });
     circleVote = r.vote || 0;
@@ -326,7 +334,7 @@ async function unlock() {
   if (!E.running && !confirm('마이크가 꺼져 있어요. 키보드 시뮬레이션(↑ ↓ W)으로만 시도할까요?')) return;
   if ($('autoSave').checked) await dataDir(true); // ask for the folder now, while the click still counts as a gesture
   busy = true; lock(true); meter(null);
-  say('👂', '제스처 비밀번호를 해 주세요', `동작 ${tpl.kinds.length}개`);
+  say('👂', '제스처 비밀번호를 해 주세요', `동작 ${tpl.kinds.length}개 · 동작마다 빠르게, 사이에 손을 아주 잠깐 멈추기`);
   showLive([]);
   const r = await capture(tpl.kinds.length, { sign: tpl.circleSign == null ? null : tpl.circleSign });
   const sc = r.gestures.length ? A.score(tpl, r.att)
@@ -338,7 +346,7 @@ async function unlock() {
   const a = { t: new Date().toISOString(), owner, performer, attack, genuine: attack === 'genuine', expected: tpl.kinds, got: r.att.kinds,
     seq_ok: sc.orderOk, style_score: sc.score, threshold: sc.threshold, accepted: sc.accepted, reason: sc.reason, parts: sc.parts,
     intervals: r.att.intervals.map((x) => +x.toFixed(3)), g: r.att.g.map((g) => g && { peak: +g.peak.toFixed(3), dur: Math.round(g.dur), tPeak: +g.tPeak.toFixed(3) }),
-    end: r.why, expected_n: tpl.kinds.length, detected_n: r.gestures.length,
+    end: r.why, expected_n: tpl.kinds.length, detected_n: r.gestures.length, frames: r.frames, te_ms: r.te,
     simulated: r.gestures.some((x) => x.simulated), noMotion: r.gestures.filter((x) => !x.seg && !x.simulated).length, device, freq: E.freq };
   session.attempts.push(a);
   log.push(a);

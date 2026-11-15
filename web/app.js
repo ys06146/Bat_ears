@@ -356,6 +356,7 @@
   if (params.get('auto') === '1') {
     (async () => {
       if (params.get('stereo') === '1') $('stereo').checked = true;
+      if (params.get('seq') === '1') BatEars.config.sequence = true; // &seq=1: gesture-password sequence mode
       const t0 = performance.now(), events = [], bursts = [];
       BatEars.on('gesture', (e) => events.push(`${e.kind}@${((e.t - t0) / 1000).toFixed(2)}`));
       window.__autoEvents = events;
