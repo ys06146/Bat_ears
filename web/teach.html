@@ -51,6 +51,7 @@ aside .card{padding:12px}
 #camNote{font-size:13px;color:#e1bee7;margin-top:6px}
 #vis{font-size:28px;font-weight:800;margin-top:8px}
 #edge{min-height:20px;font-size:14px;font-weight:700;color:var(--warn)}
+#dist{min-height:22px;font-size:17px;font-weight:700}
 .live{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .live div{background:#0b111b;border:1px solid var(--line);border-radius:10px;padding:8px;min-height:62px;font-size:13px;color:var(--muted)}
 .live b{display:block;font-size:19px;margin-top:2px;color:var(--fg)}
@@ -69,7 +70,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     <h2>1. 준비</h2>
     <ul class="tips">
       <li>화면을 거의 세워요(약 95°). 많이 젖히면 웹캠이 키보드 위의 손을 못 봐요</li>
-      <li>손은 책상 위 18~25cm, 화면 앞 15~30cm(키보드 앞쪽 절반 위)에서 움직여요. 오른쪽 미리보기에서 손이 가운데 오게 하세요</li>
+      <li>손은 <b>웹캠에서 25~45cm</b>, 책상 위 18~25cm에서 움직여요(오른쪽 📏 거리가 초록이면 돼요). 미리보기에서 손이 가운데 오게 하세요</li>
       <li>노트북 스피커·마이크를 쓰고(이어폰 X) 볼륨은 50% 이상. 폰은 <a href="tone.html">tone.html</a>로 톤을 켜서 노트북 쪽을 보게 두세요</li>
       <li>영상과 사진은 저장하지 않아요. 손 관절 좌표(숫자)만 저장해요</li>
     </ul>
@@ -79,7 +80,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       <label class="f">메모 (선택)<input id="memo" type="text" maxlength="80" placeholder="예: 노트북만 / 폰 2대"></label>
       <label class="f">카메라<select id="camSel"><option value="">기본 카메라</option></select></label>
     </div>
-    <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰)</span></h2>
+    <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰 · 주파수 A 17000 · B 18750)</span></h2>
     <div class="rule">📏 <b>키보드 H키 가운데 → 폰 스피커</b>까지 cm · 방향: <b>오른쪽 +</b> · <b>위 +</b> · <b>내 쪽 +</b> (왼쪽·아래·화면 쪽은 −)</div>
     <div class="grid">
       <label class="f">⌨️ H키: 경첩 선에서 내 쪽으로 (cm)<input id="hkz" type="number" step="0.5"></label>
@@ -117,6 +118,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     <div id="camNote">📷 학습용으로만 사용 · 데모에서는 꺼짐 · 영상은 저장하지 않아요</div>
     <div id="vis">✋ 손 보임 –</div>
     <div id="edge"></div>
+    <div id="dist"></div>
     <div class="live"><div>📷 본 것<b id="seen">–</b></div><div>🦇 들은 것<b id="heard">–</b></div></div>
     <div class="muted" id="camInfo" style="margin-top:8px">카메라 꺼짐</div>
     <div class="muted" id="audioInfo">소리 꺼짐</div>
@@ -169,7 +171,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     { kind: 'still', label: 'idle', icon: '✋', title: '가만히 5초', how: '손바닥을 펴서 화면 앞 가운데(책상 위 약 20cm)에 가만히 들고 있어요', mode: 'still', dur: 5000 },
     { kind: 'lr', label: 'other', icon: '↔️', title: '좌우 왕복 5번', how: '점을 따라 손을 좌우로 약 20cm 움직여요', mode: 'lr', reps: 5, period: 1600 },
     { kind: 'ud', label: 'other', icon: '↕️', title: '위아래 왕복 5번', how: '점을 따라 손을 위아래로 약 15cm 움직여요', mode: 'ud', reps: 5, period: 1600 },
-    { kind: 'fb', label: 'other', icon: '🔁', title: '앞뒤 왕복 5번', how: '점이 커지면 화면 쪽으로, 작아지면 몸 쪽으로 약 15cm', mode: 'fb', reps: 5, period: 1600 },
+    { kind: 'fb', label: 'other', icon: '🔁', title: '앞뒤 왕복 5번', how: '점이 커지면 화면 쪽, 작아지면 몸 쪽으로 약 15cm. 웹캠에서 25~45cm 안에서', mode: 'fb', reps: 5, period: 1600 },
     { kind: 'hcw', label: 'cw', icon: '🔃', title: '수평 원, 시계 방향 5번', how: '책상과 나란히, 위에서 볼 때 시계 방향. 지름 12~15cm로 작게, 손은 노트북 앞 모서리 근처(웹캠에서 35~40cm), 책상 위 18~25cm', mode: 'hcircle', dir: 1, reps: 5, period: 1800 },
     { kind: 'hccw', label: 'ccw', icon: '🔄', title: '수평 원, 반시계 방향 5번', how: '위에서 볼 때 반시계 방향. 지름 12~15cm, 노트북 앞 모서리 근처, 책상 위 18~25cm', mode: 'hcircle', dir: -1, reps: 5, period: 1800 },
     { kind: 'vcw', label: 'cw', icon: '🔃', title: '수직 원, 시계 방향 5번', how: '화면과 나란히, 내가 볼 때 시계 방향으로 지름 12~15cm', mode: 'vcircle', dir: 1, reps: 5, period: 1800 },
@@ -177,7 +179,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     { kind: 'push', label: 'push', icon: '👉', title: '밀기 5번', how: '신호마다 화면 쪽으로 빠르게 밀고, 천천히 돌아와요', mode: 'push', reps: 5, period: 2000 },
     { kind: 'pull', label: 'pull', icon: '👈', title: '당기기 5번', how: '손을 화면 가까이 두고, 신호마다 몸 쪽으로 빠르게 당겨요', mode: 'pull', reps: 5, period: 2000 },
     { kind: 'wave', label: 'wave', icon: '👋', title: '흔들기 3번', how: '신호마다 손을 좌우로 빠르게 3~4번 흔들어요', mode: 'wave', reps: 3, period: 2500 },
-    { kind: 'free', label: 'other', icon: '🌀', title: '자유 동작 30초', how: '위아래·좌우·앞뒤·원을 섞어서, 빠르게 느리게. 손은 미리보기 안에', mode: 'free', dur: 30000 },
+    { kind: 'free', label: 'other', icon: '🌀', title: '자유 동작 30초', how: '위아래·좌우·앞뒤·원을 섞어서, 빠르게 느리게. 웹캠에서 25~45cm, 손은 미리보기 안에', mode: 'free', dur: 30000 },
   ];
   const SCALE = QUICK ? 0.12 : 1, REST_MS = QUICK ? 400 : 2000, LEAD_MS = QUICK ? 600 : 3000, CUE_OFF = 300;
   const CUE_MODES = new Set(['push', 'pull', 'wave']);
@@ -209,8 +211,18 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   if (!phones) {
     // the page before 11/15 04:10 had no H-key inputs; 서진 measured those numbers from the H key, so they move over as they are
     const old = store.get('batears-teach-phones', null);
-    phones = old || [{ on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' }, { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' }];
+    phones = old || [{ on: true, id: 'A', hz: 17000, x: '', h: '', z: '', note: '' }, { on: true, id: 'B', hz: 18750, x: '', h: '', z: '', note: '' }];
     movedOld = !!old && old.some((p) => POS.some((k) => Number.isFinite(parseFloat(p[k]))));
+  }
+  // 11/15 04:20: the iPhones can't play 20.5 / 21.5 kHz (서진's first session had neither). bravo's plan: A 17000 (500 Hz from the
+  // laptop's 16.5 kHz intermod), B 18750 (midway between the laptop's 18 and 19.5 kHz). Switch the stored table once
+  let freqMoved = false;
+  if (store.get('batears-teach-freqplan', 0) < 2) {
+    for (const p of phones) {
+      if (p.id === 'A' && Number(p.hz) !== 17000) { p.hz = 17000; freqMoved = true; }
+      if (p.id === 'B' && Number(p.hz) !== 18750) { p.hz = 18750; freqMoved = true; }
+    }
+    store.set('batears-teach-freqplan', 2);
   }
   const savePhones = () => store.set('batears-teach-phones-h2', phones);
   const hingeOf = (p) => {
@@ -345,7 +357,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   $('addPhone').addEventListener('click', () => {
     const ids = phones.map((p) => p.id);
     const id = ['A', 'B', 'C', 'D', 'E', 'F'].find((x) => !ids.includes(x)) || String(phones.length + 1);
-    phones.push({ on: true, id, hz: phones.some((p) => Number(p.hz) === 17000) ? 22000 : 17000, x: '', h: '', z: '', note: '' });
+    phones.push({ on: true, id, hz: [17000, 18750, 20500, 21500].find((f) => !phones.some((p) => Number(p.hz) === f)) || 17000, x: '', h: '', z: '', note: '' });
     savePhones();
     renderPhones();
   });
@@ -411,7 +423,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   // ---- camera (its own getUserMedia: asking for audio and video together can turn the mic processing back on)
   const video = $('video');
   const cam = { on: false, stream: null, track: null, w: 640, h: 480, lastTs: 0, frames: 0, skipped: 0, lastPresented: 0,
-    recent: [], ring: [], seenUntil: 0, lat: [] };
+    recent: [], ring: [], seenUntil: 0, lat: [], dist: [] };
   async function startCamera(deviceId) {
     stopCamera();
     const v = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
@@ -529,7 +541,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const d = (a, b) => Math.hypot((lm[a].x - lm[b].x) * asp, lm[a].y - lm[b].y);
     // hand size in image heights: mean side of the wrist - index knuckle - pinky knuckle triangle (rigid, ~8 cm)
     const scale = (d(0, 5) + d(0, 17) + d(5, 17)) / 3;
-    return { tcap, tres, src, present: 1, hand, handMp, score: cat ? cat.score : NaN, px, py, scale, L, W, minx, maxx, miny, maxy };
+    return { tcap, tres, src, present: 1, hand, handMp, score: cat ? cat.score : NaN, px, py, scale, pw: d(5, 17), L, W, minx, maxx, miny, maxy };
   }
 
   // velocities in hand sizes per second, in the person's frame: + = to their right / up / toward the screen
@@ -571,6 +583,12 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     }
     $('edge').textContent = warn;
     cam.edgeWarn = !!warn && r.present;
+    // rough distance from the webcam: palm width (knuckles 5-17; 서진's, else 8 cm) over its size in the picture
+    if (r.present && r.pw > 0) { cam.dist.push((F_H * (numOr($('palm').value) || 8)) / r.pw); if (cam.dist.length > 9) cam.dist.shift(); }
+    if (!r.present) cam.dist.length = 0;
+    const dm = cam.dist.length >= 3 ? cam.dist.slice().sort((x, y) => x - y)[cam.dist.length >> 1] : null;
+    $('dist').innerHTML = dm == null ? '' : `📏 웹캠에서 약 <span class="${dm >= 25 && dm <= 45 ? 'ok' : dm >= 20 && dm <= 50 ? 'warn' : 'bad'}">${Math.round(dm)}cm</span>`
+      + (dm > 45 ? ' <span class="warn">· 화면 쪽으로 오세요 (25~45cm)</span>' : dm < 25 ? ' <span class="warn">· 조금 뒤로 (25~45cm)</span>' : '');
     $('camBox').classList.toggle('edgeBad', !!warn);   // red frame: the hand is leaving (or out of) the picture
     if (r.present) { cam.lat.push(r.tres - r.tcap); if (cam.lat.length > 90) cam.lat.shift(); }
     // live auto label (causal, 3 frames back)
@@ -1040,7 +1058,12 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   window.addEventListener('beforeunload', (e) => { if (sess && !sess.done) { e.preventDefault(); e.returnValue = ''; } });
 
   renderPhones();
-  if (movedOld) { savePhones(); setStatus('ℹ️ 전에 적은 폰 위치를 H키 기준 값으로 그대로 옮겼어요. 맞는지 확인해 주세요'); }
+  if (movedOld || freqMoved) {
+    savePhones();
+    setStatus([movedOld ? 'ℹ️ 전에 적은 폰 위치를 H키 기준 값으로 그대로 옮겼어요. 맞는지 확인해 주세요' : '',
+      freqMoved ? '📱 폰 주파수를 A 17000 · B 18750으로 바꿨어요 (아이폰은 20kHz 넘는 소리를 못 내요). 폰 tone.html도 📱A 17000 · 📱B 18750으로 맞춰요' : ''].filter(Boolean).join(' · '));
+    renderPhones();
+  }
   dataDir(false).then(showFolder);
   window.BatTeach = { get sess() { return sess; }, cam, audio, get vis() { return vis; }, plan, STEPS, derive, visionEvents, finish };   // for tests
 })();

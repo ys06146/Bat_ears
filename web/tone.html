@@ -28,9 +28,9 @@ a{color:#8ab4f8}
 <h1>📢 Bat Ears 톤 재생기</h1>
 <div class="card">
   <label for="freq">주파수 (Hz)</label>
-  <input id="freq" type="number" inputmode="numeric" min="100" max="23000" step="100" value="20500">
-  <div class="presets"><button data-f="20500">📱A 20500</button><button data-f="21500">📱B 21500</button><button data-f="17000">17000</button><button data-f="20000">20000</button></div>
-  <p class="note" style="color:var(--muted);margin:10px 0 0;font-size:13px">노트북은 18000·19500Hz를 써요. 폰 A는 20500, 폰 B는 21500이에요. B가 노트북에 안 들리면 17000으로 바꿔요(17kHz는 들릴 수 있어요). 노트북 teach.html에서 들리는지 확인돼요.</p>
+  <input id="freq" type="number" inputmode="numeric" min="100" max="23000" step="50" value="17000">
+  <div class="presets"><button data-f="17000">📱A 17000</button><button data-f="18750">📱B 18750</button><button data-f="20500">20500</button><button data-f="21500">21500</button></div>
+  <p class="note" style="color:var(--muted);margin:10px 0 0;font-size:13px">노트북은 18000·19500Hz를 써요. 폰 A는 17000, 폰 B는 18750이에요(아이폰은 20kHz 넘는 소리를 거의 못 내요). 17kHz는 작게 들릴 수 있으니 음량을 낮게 시작해요. 노트북 teach.html에서 폰마다 dB로 들리는지 보여요.</p>
 </div>
 <div class="card">
   <label for="vol">음량</label>
@@ -51,8 +51,8 @@ a{color:#8ab4f8}
   'use strict';
   const $ = (id) => document.getElementById(id);
   let ctx = null, osc = null, gain = null, lock = null, playing = false;
-  const freqNow = () => Math.max(100, Math.min(23000, Math.round(Number($('freq').value) || 20500)));
-  const ROLE = { 20500: '폰 A', 21500: '폰 B', 17000: '폰 B 예비' };
+  const freqNow = () => Math.max(100, Math.min(23000, Math.round(Number($('freq').value) || 17000)));
+  const ROLE = { 17000: '폰 A', 18750: '폰 B' };
   // each phone remembers its own frequency
   try { const f = Number(localStorage.getItem('batears-tone-freq')); if (f >= 100 && f <= 23000) $('freq').value = f; } catch (e) { /* private mode */ }
   const remember = () => { try { localStorage.setItem('batears-tone-freq', String(freqNow())); } catch (e) { /* ignore */ } };
