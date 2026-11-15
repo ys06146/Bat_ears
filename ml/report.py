@@ -239,7 +239,9 @@ def lr_row(name, dev, dist, m, feats, seen):
     earlier = _fmt(lr_score(rule, feats, rule.fit(prev))) if prev else '–'
     seen.append(((dev, pair), rule.name, feats))
     pp = f"{c['pp_fp']}/{c['pp']}" if c['pp'] else '–'
-    return (f"| {name[:15]} | {rule.name} | {dev} | {dist} | {tones} | {nl}+{nr} | {c['hit']}/{c['n']} ({pct(c['hit'], c['n'])}) "
+    picked = (m.get('lrCheck') or {}).get('keys')  # cue set the page's bestCheck picked (fft / phase / phaseFft)
+    rname = rule.name + (f' (page: {picked})' if picked else '')
+    return (f"| {name[:15]} | {rname} | {dev} | {dist} | {tones} | {nl}+{nr} | {c['hit']}/{c['n']} ({pct(c['hit'], c['n'])}) "
             f"| {c['wrong']} | {c['n'] - c['hit'] - c['wrong']} | {pp} | {_fmt(lr_halves(rule, feats))} | {earlier} | {'✅' if ok else '❌'} |")
 
 

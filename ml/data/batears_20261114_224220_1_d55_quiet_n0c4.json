@@ -1,0 +1,249 @@
+{
+ "session": "20261114_224220_1_d55_quiet_n0c4",
+ "who": "1",
+ "dist": 55,
+ "noise": "quiet",
+ "noiseSource": "auto",
+ "device": "n0c4",
+ "sessionIndex": 2,
+ "room": {
+  "ambientDb": -115.88809066001579,
+  "noiseDb": -138.88165283203125,
+  "snrDb": 85.12677764892578,
+  "fps": 60
+ },
+ "perGesture": 10,
+ "wave": false,
+ "swipe": false,
+ "swipeOnly": false,
+ "typing": true,
+ "startedAt": "2026-11-15T04:42:14.706Z",
+ "finishedAt": "2026-11-15T04:44:05.914Z",
+ "aborted": false,
+ "live": {
+  "trials": 20,
+  "hits": 19,
+  "accuracy": 0.95,
+  "byGesture": {
+   "push": {
+    "n": 10,
+    "hit": 10,
+    "wrong": 0,
+    "miss": 0
+   },
+   "pull": {
+    "n": 10,
+    "hit": 9,
+    "wrong": 0,
+    "miss": 1
+   }
+  },
+  "typingFalseTriggers": 0
+ },
+ "engine": {
+  "f0": 20000,
+  "raw": true,
+  "stereo": false,
+  "stereoFreqs": null,
+  "ctxRate": 48000,
+  "micRate": 48000,
+  "ec": false,
+  "ns": false,
+  "agc": false,
+  "ch": 1,
+  "fft": 8192,
+  "binHz": 5.86,
+  "mic": "MacBook Air Microphone (Built-in)"
+ },
+ "detector": "burst",
+ "burst": {
+  "aOn": 12,
+  "vFire": 1.3,
+  "vMin": 0.9,
+  "gapMs": 120,
+  "maxMs": 900,
+  "waveFlips": 3,
+  "lockMs": 150,
+  "rejectCapped": true,
+  "vetoSnrDb": 50,
+  "slowGuard": {
+   "peak": 15,
+   "preAct": 0.3,
+   "wv": 0.4
+  }
+ },
+ "volume": 0.6,
+ "freq": 20000,
+ "stereo": false,
+ "foreignTones": [],
+ "wav": null,
+ "client": {
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "platform": "macOS",
+  "lang": "ko-KR",
+  "tz": "America/Chicago",
+  "screen": "1470x956@2"
+ },
+ "trials": [
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.49,
+   "tStart": 63969.5,
+   "tEnd": 68033.90000000596
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.42,
+   "tStart": 68334.5,
+   "tEnd": 72390.80000001192
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.76,
+   "tStart": 72692.5,
+   "tEnd": 76751.60000002384
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.82,
+   "tStart": 77052.60000002384,
+   "tEnd": 81108.90000000596
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.4,
+   "tStart": 81410.20000001788,
+   "tEnd": 85471.5
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.77,
+   "tStart": 85773.80000001192,
+   "tEnd": 89835.40000000596
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.75,
+   "tStart": 90136.90000000596,
+   "tEnd": 94195.10000002384
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.4,
+   "tStart": 94500.10000002384,
+   "tEnd": 98556.90000000596
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.46,
+   "tStart": 98858.80000001192,
+   "tEnd": 102918.80000001192
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.32,
+   "tStart": 103219.30000001192,
+   "tEnd": 107274.40000000596
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.35,
+   "tStart": 107575.30000001192,
+   "tEnd": 111634.80000001192
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.51,
+   "tStart": 111936,
+   "tEnd": 115992
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.28,
+   "tStart": 116293.40000000596,
+   "tEnd": 120352.80000001192
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.36,
+   "tStart": 120653.40000000596,
+   "tEnd": 124710.80000001192
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.34,
+   "tStart": 125012.5,
+   "tEnd": 129071.60000002384
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.55,
+   "tStart": 129372.60000002384,
+   "tEnd": 133434.20000001788
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.36,
+   "tStart": 133735.30000001192,
+   "tEnd": 137790.30000001192
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.33,
+   "tStart": 138092,
+   "tEnd": 142150.60000002384
+  },
+  {
+   "kind": "pull",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 142451,
+   "tEnd": 146505.30000001192
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.32,
+   "tStart": 146806.60000002384,
+   "tEnd": 150867.5
+  }
+ ]
+}
