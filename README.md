@@ -34,7 +34,8 @@ Other pages:
 | 🔐 `key.html` | **Gesture key**: a sequence of gestures is the password, your rhythm and style are the key. Enroll 1 practice + 5-10 repetitions, then unlock; the verdict says why (order, rhythm, speed, length, shape). Matcher in `web/auth.js`; attempt logs feed `python ml/auth_report.py` (FAR / FRR / EER). |
 | 🧪 `experiment-live.html` | Countdown-free live experiments (free gestures, continuous push -> pull sets), a 📢 jammer mode and a one-click interference test. |
 | 📢 `tone.html` | A mobile tone player, to use a phone as an extra sound source. |
-| 🧪 `3d.html` | 3D hand tracking experiment: the phase of each speaker's tone, optionally with a phone as a third source. |
+| 🧪 `3d.html` | 3D hand tracking (the new main demo candidate): the I/Q phase of every source, i.e. the laptop's two speakers plus phones A (20.5 kHz) and B (21.5 kHz), solved for the hand's position. It can load a calibration fitted from teach sessions. |
+| 📷 `teach.html` | **Teacher mode** (experimental): the webcam's MediaPipe hand landmarks mark where the hand is while the engine records the stereo features, the I/Q path changes and the raw WAV, all on one clock, during a 2.5-minute guided session. Phones running `tone.html` add sources. Files go to `ml/data/teach/` to train the audio to 3D position mapping. The camera is only for training, and no video or image is stored. |
 
 `web/batears.html` is the original single-file test page, with a band check.
 

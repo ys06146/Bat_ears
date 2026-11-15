@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bat Ears | 선생님 모드 (실험)</title>
+<style>
+:root{--bg:#090c13;--card:#121927;--line:#2c3850;--fg:#e8eef9;--muted:#9aa3b2;--ok:#66bb6a;--warn:#ffca28;--bad:#ef5350;--acc:#64b5f6}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+a{color:#8ab4f8}
+header{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0;flex:1;min-width:240px}
+.pill{font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid #5e3f7a;background:#251c38;color:#e1bee7;white-space:nowrap}
+main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px 16px;max-width:1200px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--acc)}
+.tips{margin:0;padding-left:18px;line-height:1.6;font-size:14px;color:#cfd8e6}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;font-size:14px;background:#0c121d;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:4px;text-align:left;border-bottom:1px solid #1e2738;white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+td input{width:100%}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+button{font:inherit;font-size:14px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#1b2538;color:var(--fg);cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button.big{font-size:17px;font-weight:700;padding:12px 18px}
+button.go{background:#1f5f2a;border-color:#2e7d32}
+button.stop{background:#6d1f1f;border-color:#b23b3b}
+.muted{color:var(--muted);font-size:13px}
+#status{margin-top:10px;font-size:15px;min-height:20px}
+#stepHead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+#stepIcon{font-size:40px}
+#stepTitle{font-size:30px;font-weight:800}
+#stepCount{font-size:24px;font-weight:700;color:var(--warn)}
+#stepHow{font-size:16px;color:#cfd8e6;margin:6px 0 10px;min-height:22px}
+#guide{width:100%;height:auto;background:#0b111b;border-radius:10px;border:1px solid var(--line);display:block}
+.bar{height:8px;background:#0b111b;border-radius:99px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;width:0;background:var(--acc)}
+#overall{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+aside .card{padding:12px}
+#camBox{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;border:3px solid transparent}
+#camBox.edgeBad{border-color:var(--bad)}
+#video,#overlay{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)}
+#video{object-fit:fill}
+#camNote{font-size:13px;color:#e1bee7;margin-top:6px}
+#vis{font-size:28px;font-weight:800;margin-top:8px}
+#edge{min-height:20px;font-size:14px;font-weight:700;color:var(--warn)}
+.live{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.live div{background:#0b111b;border:1px solid var(--line);border-radius:10px;padding:8px;min-height:62px;font-size:13px;color:var(--muted)}
+.live b{display:block;font-size:19px;margin-top:2px;color:var(--fg)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui-monospace,Consolas,monospace}
+.hidden{display:none}
+</style></head><body>
+<header>
+  <h1>📷 Bat Ears 선생님 모드 <span class="muted">(실험: 웹캠이 손 위치를 알려 주고, 소리 모델이 그걸 배워요)</span></h1>
+  <span class="pill">📷 학습용으로만 사용 · 데모에서는 꺼짐</span>
+  <a href="index.html">메인</a>
+</header>
+<main>
+<section>
+  <div class="card" id="setup">
+    <h2>1. 준비</h2>
+    <ul class="tips">
+      <li>화면을 거의 세워요(약 95°). 많이 젖히면 웹캠이 키보드 위의 손을 못 봐요</li>
+      <li>손은 책상 위 18~25cm, 화면 앞 15~30cm(키보드 앞쪽 절반 위)에서 움직여요. 오른쪽 미리보기에서 손이 가운데 오게 하세요</li>
+      <li>노트북 스피커·마이크를 쓰고(이어폰 X) 볼륨은 50% 이상. 폰은 <a href="tone.html">tone.html</a>로 톤을 켜서 노트북 쪽을 보게 두세요</li>
+      <li>영상과 사진은 저장하지 않아요. 손 관절 좌표(숫자)만 저장해요</li>
+    </ul>
+    <div class="grid">
+      <label class="f">화면 각도 (°, 대략)<input id="angle" type="number" min="60" max="150" step="1" value="95"></label>
+      <label class="f">손바닥 폭 cm (검지 뿌리~새끼 뿌리)<input id="palm" type="number" min="4" max="14" step="0.1" placeholder="예: 8.0"></label>
+      <label class="f">메모 (선택)<input id="memo" type="text" maxlength="80" placeholder="예: 노트북만 / 폰 2대"></label>
+      <label class="f">카메라<select id="camSel"><option value="">기본 카메라</option></select></label>
+    </div>
+    <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰. 위치는 cm)</span></h2>
+    <div class="tbl"><table id="phones"><thead><tr><th>사용</th><th>ID</th><th>Hz</th><th>오른쪽+</th><th>높이</th><th>앞+</th><th>메모 (기종·방향)</th><th>들림</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button id="addPhone">+ 폰 추가</button><span class="muted">오른쪽 = 노트북 가운데에서 오른쪽(왼쪽은 −) · 높이 = 책상 위 · 앞 = 화면 선에서 내 쪽(뒤는 −). 폰 없이 하려면 '사용'을 끄세요</span></div>
+    <div class="row">
+      <button id="onBtn" class="big">① 소리·카메라 켜기</button>
+      <button id="startBtn" class="big go" disabled>② 세션 시작 (약 2분 30초)</button>
+      <button id="offBtn" disabled>모두 끄기</button>
+    </div>
+    <div class="row"><button id="folderBtn">📁 저장 폴더</button><span id="folderName" class="muted">ml/data 폴더를 고르면 ml/data/teach/에 저장돼요. 안 고르면 다운로드돼요</span></div>
+    <div id="status"></div>
+  </div>
+  <div class="card hidden" id="stage">
+    <div id="stepHead"><span id="stepIcon">⏳</span><span id="stepTitle">준비</span><span id="stepCount"></span></div>
+    <div id="stepHow"></div>
+    <canvas id="guide" width="720" height="300"></canvas>
+    <div class="bar"><i id="stepBar"></i></div>
+    <div id="overall" class="muted"><span id="nextStep"></span><span id="remain"></span></div>
+    <div class="row"><button id="stopBtn" class="stop">■ 멈추고 저장</button><span class="muted">손이 미리보기에서 안 보이는 구간은 정답이 없어서 버려요</span></div>
+  </div>
+  <div class="card hidden" id="result">
+    <h2>결과</h2>
+    <pre id="resultText"></pre>
+    <div class="row"><button id="againBtn" class="go">↻ 한 번 더</button><button id="resaveBtn">💾 다시 저장</button></div>
+  </div>
+</section>
+<aside>
+  <div class="card">
+    <div id="camBox"><video id="video" muted playsinline autoplay></video><canvas id="overlay" width="384" height="216"></canvas></div>
+    <div id="camNote">📷 학습용으로만 사용 · 데모에서는 꺼짐 · 영상은 저장하지 않아요</div>
+    <div id="vis">✋ 손 보임 –</div>
+    <div id="edge"></div>
+    <div class="live"><div>📷 본 것<b id="seen">–</b></div><div>🦇 들은 것<b id="heard">–</b></div></div>
+    <div class="muted" id="camInfo" style="margin-top:8px">카메라 꺼짐</div>
+    <div class="muted" id="audioInfo">소리 꺼짐</div>
+    <div class="muted" id="foreignInfo"></div>
+  </div>
+</aside>
+</main>
+<script src="robust.js?v=20261115030207"></script><script src="swipe.js?v=20261115030207"></script><script src="wave.js?v=20261115030207"></script><script src="iq.js?v=20261115030207"></script><script src="dsp.js?v=20261115030207"></script><script src="recorder.js?v=20261115030207"></script>
+<script>
+/* Bat Ears teach mode: the webcam is a temporary teacher. MediaPipe HandLandmarker (VIDEO mode, one hand, no
+ * smoothing) logs where the hand is while the engine plays its stereo tones (18 / 19.5 kHz) and records the raw mic
+ * WAV, the per-frame features and the live I/Q path changes, all on the performance.now() clock. Phones running
+ * tone.html add more sources (their Hz and position go into the metadata). Offline, the audio -> position mapping is
+ * trained on this; the camera is not used by the demo.
+ * Files (ml/data/teach/, or downloaded): batears_<session>.json (meta, trials, events), _vision.csv, _audio.csv,
+ * _iq.csv, .wav. No video or image is ever stored: only landmark numbers.
+ * URL flags: ?quick=1 short schedule (tests), ?nofolder=1 never ask for a folder (tests). */
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const E = window.BatEars, R = window.BatRecorder;
+  const Q = new URLSearchParams(location.search);
+  const QUICK = Q.get('quick') === '1', NOFOLDER = Q.get('nofolder') === '1';
+  const MP_VER = '0.10.21';
+  const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
+  const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+  const VFOV_DEG = 43;   // typical laptop webcam vertical field of view (bravo); only used for the auto labels
+  const F_H = 1 / (2 * Math.tan((VFOV_DEG / 2) * Math.PI / 180));   // focal length in image heights
+  const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12],
+    [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
+  const EDGE = 0.05;     // landmarks this close to the frame edge = about to leave the picture
+  E.config.keyboard = false;   // arrow keys must not fake gestures here
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } },
+  };
+  const device = (() => { try { let id = localStorage.getItem('batears-dev'); if (!id) { id = Math.random().toString(36).slice(2, 6); localStorage.setItem('batears-dev', id); } return id; } catch (e) { return 'anon'; } })();
+  const fin = (x) => typeof x === 'number' && Number.isFinite(x);
+  const fx = (x, d) => (fin(x) ? x.toFixed(d) : '');
+  const rd = (x, d) => (fin(x) ? +x.toFixed(d) : null);
+  const numOr = (v) => { const x = parseFloat(v); return Number.isFinite(x) ? x : null; };
+  const mmss = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const kb = (n) => (n > 1e6 ? (n / 1e6).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1e3)) + 'KB');
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const setStatus = (t) => { $('status').textContent = t; };
+
+  // ---- guided schedule (bravo's order). period = one round trip / one circle / one cue
+  const STEPS = [
+    { kind: 'still', label: 'idle', icon: '✋', title: '가만히 5초', how: '손바닥을 펴서 화면 앞 가운데(책상 위 약 20cm)에 가만히 들고 있어요', mode: 'still', dur: 5000 },
+    { kind: 'lr', label: 'other', icon: '↔️', title: '좌우 왕복 5번', how: '점을 따라 손을 좌우로 약 20cm 움직여요', mode: 'lr', reps: 5, period: 1600 },
+    { kind: 'ud', label: 'other', icon: '↕️', title: '위아래 왕복 5번', how: '점을 따라 손을 위아래로 약 15cm 움직여요', mode: 'ud', reps: 5, period: 1600 },
+    { kind: 'fb', label: 'other', icon: '🔁', title: '앞뒤 왕복 5번', how: '점이 커지면 화면 쪽으로, 작아지면 몸 쪽으로 약 15cm', mode: 'fb', reps: 5, period: 1600 },
+    { kind: 'hcw', label: 'cw', icon: '🔃', title: '수평 원, 시계 방향 5번', how: '책상과 나란히, 위에서 볼 때 시계 방향. 지름 12~15cm로 작게, 손은 노트북 앞 모서리 근처(웹캠에서 35~40cm), 책상 위 18~25cm', mode: 'hcircle', dir: 1, reps: 5, period: 1800 },
+    { kind: 'hccw', label: 'ccw', icon: '🔄', title: '수평 원, 반시계 방향 5번', how: '위에서 볼 때 반시계 방향. 지름 12~15cm, 노트북 앞 모서리 근처, 책상 위 18~25cm', mode: 'hcircle', dir: -1, reps: 5, period: 1800 },
+    { kind: 'vcw', label: 'cw', icon: '🔃', title: '수직 원, 시계 방향 5번', how: '화면과 나란히, 내가 볼 때 시계 방향으로 지름 12~15cm', mode: 'vcircle', dir: 1, reps: 5, period: 1800 },
+    { kind: 'vccw', label: 'ccw', icon: '🔄', title: '수직 원, 반시계 방향 5번', how: '화면과 나란히, 내가 볼 때 반시계 방향으로 지름 12~15cm', mode: 'vcircle', dir: -1, reps: 5, period: 1800 },
+    { kind: 'push', label: 'push', icon: '👉', title: '밀기 5번', how: '신호마다 화면 쪽으로 빠르게 밀고, 천천히 돌아와요', mode: 'push', reps: 5, period: 2000 },
+    { kind: 'pull', label: 'pull', icon: '👈', title: '당기기 5번', how: '손을 화면 가까이 두고, 신호마다 몸 쪽으로 빠르게 당겨요', mode: 'pull', reps: 5, period: 2000 },
+    { kind: 'wave', label: 'wave', icon: '👋', title: '흔들기 3번', how: '신호마다 손을 좌우로 빠르게 3~4번 흔들어요', mode: 'wave', reps: 3, period: 2500 },
+    { kind: 'free', label: 'other', icon: '🌀', title: '자유 동작 30초', how: '위아래·좌우·앞뒤·원을 섞어서, 빠르게 느리게. 손은 미리보기 안에', mode: 'free', dur: 30000 },
+  ];
+  const SCALE = QUICK ? 0.12 : 1, REST_MS = QUICK ? 400 : 2000, LEAD_MS = QUICK ? 600 : 3000, CUE_OFF = 300;
+  const CUE_MODES = new Set(['push', 'pull', 'wave']);
+  function plan(t0) {
+    const out = [];
+    let t = t0 + LEAD_MS;
+    out.push({ type: 'lead', t0, t1: t, next: STEPS[0] });
+    STEPS.forEach((s, i) => {
+      if (i > 0) { out.push({ type: 'rest', t0: t, t1: t + REST_MS, next: s }); t += REST_MS; }
+      const per = s.period ? s.period * SCALE : 0, d = Math.round((s.dur || s.reps * s.period) * SCALE);
+      const off = CUE_MODES.has(s.mode) ? CUE_OFF * SCALE : 0;
+      const beats = per ? Array.from({ length: s.reps }, (_, k) => ({ t: t + off + k * per, done: false })) : [];
+      out.push({ type: 'step', t0: t, t1: t + d, step: s, idx: i, per, off, beats });
+      t += d;
+    });
+    return out;
+  }
+  $('startBtn').textContent = `② 세션 시작 (약 ${mmss(plan(0).slice(-1)[0].t1)})`;
+
+  // ---- phones (tone sources): id, Hz, position in cm relative to the laptop
+  let phones = store.get('batears-teach-phones', [
+    { on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' },
+    { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' },
+  ]);
+  const savePhones = () => store.set('batears-teach-phones', phones);
+  const heardHz = (hz) => (E.foreign || []).some((k) => Math.abs(k * 1000 - Number(hz)) <= 80);
+  function renderPhones() {
+    const tb = $('phones').querySelector('tbody');
+    tb.innerHTML = phones.map((p, i) => `<tr data-i="${i}">
+      <td><input type="checkbox" data-k="on" ${p.on ? 'checked' : ''}></td>
+      <td><input data-k="id" value="${esc(p.id)}" maxlength="3" style="width:44px"></td>
+      <td><input data-k="hz" type="number" step="100" min="15000" max="23000" value="${esc(p.hz)}" style="width:86px"></td>
+      <td><input data-k="x" type="number" step="1" value="${esc(p.x)}" style="width:62px"></td>
+      <td><input data-k="h" type="number" step="1" value="${esc(p.h)}" style="width:62px"></td>
+      <td><input data-k="z" type="number" step="1" value="${esc(p.z)}" style="width:62px"></td>
+      <td><input data-k="note" value="${esc(p.note)}" maxlength="60" placeholder="예: 아이폰 13, 노트북 쪽" style="min-width:150px"></td>
+      <td class="heard">–</td>
+      <td><button data-del="${i}" title="삭제">✕</button></td></tr>`).join('');
+    renderHeard();
+  }
+  function renderHeard() {
+    const on = !!audio.on;
+    document.querySelectorAll('#phones tbody tr').forEach((tr) => {
+      const p = phones[Number(tr.dataset.i)];
+      const cell = tr.querySelector('.heard');
+      if (!p || !cell) return;
+      cell.innerHTML = !on ? '–' : heardHz(p.hz) ? '<span class="ok">✅ 들림</span>' : `<span class="${p.on ? 'bad' : 'muted'}">❌ 안 들림</span>`;
+    });
+    const mine = phones.filter((p) => p.on).map((p) => Number(p.hz));
+    const other = (E.foreign || []).filter((k) => !mine.some((hz) => Math.abs(k * 1000 - hz) <= 80));
+    $('foreignInfo').innerHTML = on && other.length ? `<span class="warn">⚠️ 표에 없는 초음파: ${other.map((k) => k.toFixed(1) + 'kHz').join(', ')} (다른 기기?)</span>` : '';
+  }
+  $('phones').addEventListener('input', (e) => {
+    const tr = e.target.closest('tr'), k = e.target.dataset.k;
+    if (!tr || !k) return;
+    const p = phones[Number(tr.dataset.i)];
+    p[k] = k === 'on' ? e.target.checked : e.target.value;
+    savePhones();
+    renderHeard();
+  });
+  $('phones').addEventListener('click', (e) => {
+    const i = e.target.dataset && e.target.dataset.del;
+    if (i == null) return;
+    phones.splice(Number(i), 1);
+    savePhones();
+    renderPhones();
+  });
+  $('addPhone').addEventListener('click', () => {
+    const ids = phones.map((p) => p.id);
+    const id = ['A', 'B', 'C', 'D', 'E', 'F'].find((x) => !ids.includes(x)) || String(phones.length + 1);
+    phones.push({ on: true, id, hz: phones.some((p) => Number(p.hz) === 17000) ? 22000 : 17000, x: '', h: '', z: '', note: '' });
+    savePhones();
+    renderPhones();
+  });
+  const phoneMeta = () => phones.filter((p) => p.on).map((p) => ({
+    id: String(p.id), hz: numOr(p.hz), x_right_cm: numOr(p.x), h_cm: numOr(p.h), z_front_cm: numOr(p.z), note: String(p.note || ''),
+    heard: audio.on ? heardHz(p.hz) : null,
+  }));
+  ['angle', 'palm', 'memo'].forEach((k) => {
+    const v = store.get('batears-teach-' + k, null);
+    if (v != null && v !== '') $(k).value = v;
+    $(k).addEventListener('change', () => store.set('batears-teach-' + k, $(k).value));
+  });
+
+  // ---- data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its teach/
+  let dir = null;
+  const idbOpen = () => new Promise((res, rej) => { const r = indexedDB.open('batears', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const idbGet = async (k) => { const db = await idbOpen(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); };
+  const idbPut = async (k, v) => { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
+  async function dataDir(ask, pick) {
+    if (dir && !pick) return dir;
+    if (NOFOLDER) return null;
+    if (!pick) {
+      try {
+        const h = await idbGet('dataDir');
+        if (h) {
+          let q = await h.queryPermission({ mode: 'readwrite' });
+          if (q !== 'granted' && ask) q = await h.requestPermission({ mode: 'readwrite' });
+          if (q === 'granted') { dir = h; showFolder(); return dir; }
+        }
+      } catch (e) { /* no stored folder */ }
+      if (!ask) return null;
+    }
+    if (!window.showDirectoryPicker) return null;
+    try { const h = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' }); idbPut('dataDir', h).catch(() => {}); dir = h; showFolder(); return dir; } catch (e) { return null; }
+  }
+  const showFolder = () => { $('folderName').textContent = dir ? `📁 ${dir.name}/teach/ 에 저장해요` : 'ml/data 폴더를 고르면 ml/data/teach/에 저장돼요. 안 고르면 다운로드돼요'; };
+  $('folderBtn').addEventListener('click', () => dataDir(true, true));
+
+  // ---- MediaPipe HandLandmarker (loaded once, in the background as soon as the page opens)
+  let vis = null, visLoading = null;
+  function loadVision() {
+    if (vis) return Promise.resolve(vis);
+    if (visLoading) return visLoading;
+    visLoading = (async () => {
+      const mod = await import(`${MP_BASE}/vision_bundle.mjs`);
+      const files = await mod.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
+      const opts = (delegate) => ({ baseOptions: { modelAssetPath: MODEL_URL, delegate }, runningMode: 'VIDEO', numHands: 1,
+        minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 });
+      let lmk, delegate = 'GPU';
+      try { lmk = await mod.HandLandmarker.createFromOptions(files, opts('GPU')); } catch (e) {
+        delegate = 'CPU';
+        lmk = await mod.HandLandmarker.createFromOptions(files, opts('CPU'));
+      }
+      vis = { lmk, delegate, mod, files, errors: 0 };
+      return vis;
+    })();
+    visLoading.catch(() => { visLoading = null; });
+    return visLoading;
+  }
+  loadVision().catch(() => { /* retried on ① */ });
+
+  // ---- camera (its own getUserMedia: asking for audio and video together can turn the mic processing back on)
+  const video = $('video');
+  const cam = { on: false, stream: null, track: null, w: 640, h: 480, lastTs: 0, frames: 0, skipped: 0, lastPresented: 0,
+    recent: [], ring: [], seenUntil: 0, lat: [] };
+  async function startCamera(deviceId) {
+    stopCamera();
+    const v = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
+    if (deviceId) v.deviceId = { exact: deviceId };
+    const stream = await navigator.mediaDevices.getUserMedia({ video: v, audio: false });
+    cam.stream = stream;
+    cam.track = stream.getVideoTracks()[0];
+    video.srcObject = stream;
+    try { await video.play(); } catch (e) { /* autoplay muted is allowed; ignore */ }
+    for (let i = 0; i < 40 && !video.videoWidth; i++) await new Promise((r) => setTimeout(r, 50));
+    const s = cam.track.getSettings();
+    cam.w = video.videoWidth || s.width || 640;
+    cam.h = video.videoHeight || s.height || 480;
+    $('camBox').style.aspectRatio = `${cam.w} / ${cam.h}`;
+    const ov = $('overlay');
+    ov.width = 384;
+    ov.height = Math.round(384 * cam.h / cam.w);
+    cam.on = true;
+    cam.lastPresented = 0;
+    cam.ring.length = 0;
+    nextFrame();
+  }
+  function stopCamera() {
+    cam.on = false;
+    if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop());
+    cam.stream = null;
+    cam.track = null;
+  }
+  async function listCameras() {
+    try {
+      const devs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+      const cur = cam.track && cam.track.getSettings().deviceId;
+      $('camSel').innerHTML = devs.map((d, i) => `<option value="${esc(d.deviceId)}" ${d.deviceId === cur ? 'selected' : ''}>${esc(d.label || '카메라 ' + (i + 1))}</option>`).join('');
+    } catch (e) { /* keep the default entry */ }
+  }
+  $('camSel').addEventListener('change', async () => {
+    if (!cam.on || (sess && !sess.done)) return;
+    try { await startCamera($('camSel').value); } catch (e) { setStatus('⚠️ 카메라: ' + e.message); }
+  });
+
+  // frames: requestVideoFrameCallback gives the capture time of each frame (t_cap); t_res = when the landmarks came back
+  let lastVt = -1;
+  function nextFrame() {
+    if (!cam.on) return;
+    if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(onVideoFrame);
+    else requestAnimationFrame(pollFrame);
+  }
+  function onVideoFrame(now, md) {
+    if (!cam.on) return;
+    const hasCap = md && typeof md.captureTime === 'number' && md.captureTime > 0;
+    if (md && md.presentedFrames) {
+      if (cam.lastPresented && md.presentedFrames - cam.lastPresented > 1) cam.skipped += md.presentedFrames - cam.lastPresented - 1;
+      cam.lastPresented = md.presentedFrames;
+    }
+    processFrame(hasCap ? md.captureTime : (md && md.expectedDisplayTime) || now, hasCap ? 'c' : 'e');
+    nextFrame();
+  }
+  function pollFrame() {   // browsers without requestVideoFrameCallback
+    if (!cam.on) return;
+    if (video.currentTime !== lastVt && video.readyState >= 2) { lastVt = video.currentTime; processFrame(performance.now(), 'r'); }
+    nextFrame();
+  }
+
+  function processFrame(tcap, src) {
+    cam.frames++;
+    let res = null;
+    if (vis) {
+      const ts = Math.max(cam.lastTs + 1, Math.round(tcap));   // MediaPipe wants strictly increasing timestamps
+      cam.lastTs = ts;
+      try { res = vis.lmk.detectForVideo(video, ts); vis.errors = 0; } catch (e) {
+        if (++vis.errors === 1 || vis.errors % 100 === 0) console.warn('[teach] detectForVideo', e);
+        if (vis.errors > 30 && vis.delegate === 'GPU') switchToCpu();
+      }
+    }
+    const tres = performance.now();
+    const r = parse(res, tcap, tres, src);
+    if (vis) live(r);
+    draw(r);
+    if (sess && !sess.done && vis) sess.vision.push(r);
+  }
+  let switching = false;
+  async function switchToCpu() {
+    if (switching || !vis) return;
+    switching = true;
+    try {
+      const lmk = await vis.mod.HandLandmarker.createFromOptions(vis.files, { baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
+        runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 });
+      try { vis.lmk.close(); } catch (e) { /* ignore */ }
+      Object.assign(vis, { lmk, delegate: 'CPU', errors: 0 });
+    } catch (e) { console.warn('[teach] CPU fallback failed', e); }
+    switching = false;
+  }
+
+  function parse(res, tcap, tres, src) {
+    const lm = res && res.landmarks && res.landmarks[0];
+    if (!lm || lm.length < 21) return { tcap, tres, src, present: 0 };
+    const wl = res.worldLandmarks && res.worldLandmarks[0];
+    const hd = res.handedness || res.handednesses;
+    const cat = hd && hd[0] && hd[0][0];
+    // MediaPipe names the hand as if the picture were mirrored (selfie). Ours is the raw camera image, so swap it
+    const handMp = cat ? cat.categoryName || '' : '';
+    const hand = handMp === 'Left' ? 'Right' : handMp === 'Right' ? 'Left' : '';
+    const asp = cam.w / cam.h;
+    const L = new Float32Array(63);
+    let minx = 1, maxx = 0, miny = 1, maxy = 0;
+    for (let i = 0; i < 21; i++) {
+      const p = lm[i];
+      L[3 * i] = p.x; L[3 * i + 1] = p.y; L[3 * i + 2] = p.z;
+      if (p.x < minx) minx = p.x; if (p.x > maxx) maxx = p.x; if (p.y < miny) miny = p.y; if (p.y > maxy) maxy = p.y;
+    }
+    let W = null;
+    if (wl && wl.length >= 21) { W = new Float32Array(63); for (let i = 0; i < 21; i++) { W[3 * i] = wl[i].x; W[3 * i + 1] = wl[i].y; W[3 * i + 2] = wl[i].z; } }
+    const P = [0, 5, 9, 13, 17];
+    const px = P.reduce((s, i) => s + lm[i].x, 0) / 5, py = P.reduce((s, i) => s + lm[i].y, 0) / 5;
+    const d = (a, b) => Math.hypot((lm[a].x - lm[b].x) * asp, lm[a].y - lm[b].y);
+    // hand size in image heights: mean side of the wrist - index knuckle - pinky knuckle triangle (rigid, ~8 cm)
+    const scale = (d(0, 5) + d(0, 17) + d(5, 17)) / 3;
+    return { tcap, tres, src, present: 1, hand, handMp, score: cat ? cat.score : NaN, px, py, scale, L, W, minx, maxx, miny, maxy };
+  }
+
+  // velocities in hand sizes per second, in the person's frame: + = to their right / up / toward the screen
+  function vel(a, b) {
+    const dt = (b.tcap - a.tcap) / 1000;
+    if (!(dt > 0)) return null;
+    const asp = cam.w / cam.h, s = (a.scale + b.scale) / 2;
+    const vr = -((b.px - a.px) * asp) / dt / s;   // raw image x grows toward the person's left
+    const vu = -(b.py - a.py) / dt / s;
+    const vs = (Math.log(b.scale / a.scale) / dt) * (F_H / s);   // depth speed / hand size = (f / s) * dln(s)/dt
+    return { vr, vu, vs, sp: Math.hypot(vr, vu, vs) };
+  }
+  const dominant = (v) => {
+    const a = Math.abs(v.vr), b = Math.abs(v.vu), c = Math.abs(v.vs);
+    if (a >= b && a >= c) return v.vr > 0 ? 'right' : 'left';
+    if (b >= c) return v.vu > 0 ? 'up' : 'down';
+    return v.vs > 0 ? 'push' : 'pull';
+  };
+  const SEEN = { right: '→ 오른쪽', left: '← 왼쪽', up: '↑ 위', down: '↓ 아래', push: '👉 화면 쪽', pull: '👈 몸 쪽',
+    wave: '👋 흔들기', hcw: '🔃 수평 원', hccw: '🔄 수평 원', vcw: '🔃 수직 원', vccw: '🔄 수직 원' };
+  const HEARD = { push: '👉 밀기', pull: '👈 당기기', wave: '👋 흔들기', left: '← 왼쪽', right: '→ 오른쪽' };
+
+  function live(r) {
+    const now = r.tres;
+    cam.recent.push([now, r.present]);
+    while (cam.recent.length && cam.recent[0][0] < now - 5000) cam.recent.shift();
+    const shown = cam.recent.filter((x) => x[1]).length / Math.max(1, cam.recent.length);
+    const pct = Math.round(100 * shown);
+    $('vis').innerHTML = `✋ 손 보임 <span class="${pct >= 80 ? 'ok' : pct >= 50 ? 'warn' : 'bad'}">${pct}%</span> <span class="muted">(5초)</span>`;
+    let warn = '';
+    if (!r.present) warn = '⚠️ 손이 안 보여요: 손을 조금 올리고 미리보기 가운데로';
+    else {
+      const side = [];
+      if (r.minx < EDGE) side.push('오른쪽');   // raw image left = the person's right
+      if (r.maxx > 1 - EDGE) side.push('왼쪽');
+      if (r.miny < EDGE) side.push('위쪽');
+      if (r.maxy > 1 - EDGE) side.push('아래쪽 (손을 조금 올려요)');
+      if (side.length) warn = `⚠️ 손이 화면 ${side.join('·')} 끝에 걸려요`;
+    }
+    $('edge').textContent = warn;
+    cam.edgeWarn = !!warn && r.present;
+    $('camBox').classList.toggle('edgeBad', !!warn);   // red frame: the hand is leaving (or out of) the picture
+    if (r.present) { cam.lat.push(r.tres - r.tcap); if (cam.lat.length > 90) cam.lat.shift(); }
+    // live auto label (causal, 3 frames back)
+    if (!r.present) cam.ring.length = 0;
+    else {
+      cam.ring.push(r);
+      if (cam.ring.length > 4) cam.ring.shift();
+      const a = cam.ring[0];
+      if (cam.ring.length === 4 && r.tcap - a.tcap < 300) {
+        const v = vel(a, r);
+        if (v && v.sp >= 3) { $('seen').textContent = SEEN[dominant(v)]; cam.seenUntil = now + 600; }
+      }
+    }
+    if (now > cam.seenUntil && $('seen').textContent !== '–') $('seen').textContent = '–';
+    if (cam.frames % 15 === 0) {
+      const ts = cam.recent.map((x) => x[0]);
+      const fps = ts.length > 1 ? (ts.length - 1) / ((ts[ts.length - 1] - ts[0]) / 1000) : 0;
+      const lat = cam.lat.length ? cam.lat.slice().sort((x, y) => x - y)[cam.lat.length >> 1] : NaN;
+      $('camInfo').textContent = `📷 ${cam.w}×${cam.h} · 처리 ${fps.toFixed(0)}fps · 지연 ${fin(lat) ? Math.round(lat) : '–'}ms · ${vis.delegate}`
+        + (ts.length > 30 && fps < 20 ? ' · ⚠️ 느려요: 방이 어두우면 카메라가 느려져요. 불을 켜 주세요' : '');
+    }
+  }
+
+  function draw(r) {
+    const c = $('overlay'), g = c.getContext('2d');
+    g.clearRect(0, 0, c.width, c.height);
+    g.strokeStyle = 'rgba(255,202,40,.25)';
+    g.lineWidth = 1;
+    g.strokeRect(EDGE * c.width, EDGE * c.height, (1 - 2 * EDGE) * c.width, (1 - 2 * EDGE) * c.height);
+    if (!r.present) return;
+    const X = (i) => r.L[3 * i] * c.width, Y = (i) => r.L[3 * i + 1] * c.height;
+    g.strokeStyle = cam.edgeWarn ? '#ffca28' : '#66bb6a';
+    g.lineWidth = 2;
+    g.beginPath();
+    for (const [a, b] of BONES) { g.moveTo(X(a), Y(a)); g.lineTo(X(b), Y(b)); }
+    g.stroke();
+    g.fillStyle = '#ffffff';
+    for (let i = 0; i < 21; i++) g.fillRect(X(i) - 2, Y(i) - 2, 4, 4);
+  }
+
+  // ---- audio engine (stereo 18 / 19.5 kHz, raw mic, live I/Q)
+  const audio = { on: false, snr: NaN, calibrating: false, lastInfo: 0, lastHeard: 0 };
+  E.on('frame', (f) => {
+    audio.snr = f.snr;
+    audio.calibrating = !!f.calibrating;
+    const now = performance.now();
+    if (now - audio.lastInfo > 500) {
+      audio.lastInfo = now;
+      const i = E.info || {};
+      const proc = i.ec || i.ns || i.agc ? '<span class="bad">⚠️ 마이크 처리 켜짐</span>' : '처리 꺼짐';
+      $('audioInfo').innerHTML = `🎤 ${i.micRate || i.ctxRate || '?'}Hz ${i.ch || '?'}ch · ${proc} · 톤 ${(E.config.stereoFreqs || []).map((x) => x / 1000).join('/')}kHz · SNR ${fin(f.snr) ? f.snr.toFixed(0) : '–'}dB${f.calibrating ? ' · 보정 중 (손 치워요)' : ''}`;
+    }
+    if (now - audio.lastHeard > 1200 && $('heard').textContent !== '–') $('heard').textContent = '–';
+  });
+  E.on('gesture', (g) => {
+    $('heard').textContent = HEARD[g.kind] || g.kind;
+    audio.lastHeard = performance.now();
+    if (sess && !sess.done) sess.events.push({ t: rd(g.t, 1), kind: g.kind, speed: rd(g.speed, 3), strength: rd(g.strength, 1), simulated: !!g.simulated });
+  });
+  E.on('burst', (b) => { if (sess && !sess.done) sess.bursts.push({ t: rd(b.t, 1), start: rd(b.start, 1), capped: !!b.capped, feat: b.feat || null }); });
+  E.on('foreign', (f) => { renderHeard(); if (sess && !sess.done) sess.foreign.push({ t: rd(f.t, 1), tones: f.tones }); });
+  E.on('error', (e) => { console.warn('[teach] engine', e); setStatus(`⚠️ ${e.where}: ${e.message}`); });
+
+  // I/Q: every 100 ms, fold the live path steps (BatIQ, ~1 kHz) into 10 ms bins, 200 ms behind (late batches)
+  function iqPoll(final) {
+    if (!sess) return;
+    const upto = final ? performance.now() : performance.now() - 200;
+    const end = Math.floor(upto / 10) * 10;
+    if (sess.iqUpTo == null) { sess.iqUpTo = Math.max(Math.floor(sess.t0 / 10) * 10, end - 10); return; }
+    if (end <= sess.iqUpTo) return;
+    const tr = E.iqTrack(sess.iqUpTo, end, 1);
+    if (!tr) { sess.iqUpTo = end; return; }
+    sess.iqLive = sess.iqLive || tr.t.length > 0;
+    let k = 0, pu = 0, pw = 0;
+    for (let b = sess.iqUpTo; b < end; b += 10) {
+      let du = 0, dw = 0;
+      while (k < tr.t.length && tr.t[k] < b + 10) {
+        if (tr.t[k] >= b) { du += tr.u[k] - pu; dw += tr.w[k] - pw; }
+        pu = tr.u[k]; pw = tr.w[k]; k++;
+      }
+      sess.U += du; sess.W += dw;
+      sess.iq.push([b, du, dw, sess.U, sess.W]);
+    }
+    sess.iqUpTo = end;
+  }
+
+  // ---- ① on: folder (needs this click), mic + tones, camera, model
+  $('onBtn').addEventListener('click', async () => {
+    $('onBtn').disabled = true;
+    if (!dir) await dataDir(true);
+    setStatus('🎤 마이크와 톤을 켜요. 손을 치우고 2초 기다려요…');
+    const ok = audio.on || await E.start({ freq: 20000, raw: true, stereo: true });
+    if (!ok) { setStatus('⚠️ 마이크를 켜지 못했어요. 주소창의 권한을 확인해 주세요'); $('onBtn').disabled = false; return; }
+    audio.on = true;
+    $('offBtn').disabled = false;
+    renderHeard();
+    setStatus('📷 카메라를 켜요…');
+    try { await startCamera($('camSel').value); } catch (e) { setStatus('⚠️ 카메라를 켜지 못했어요: ' + e.message); $('onBtn').disabled = false; return; }
+    listCameras();
+    setStatus('🧠 손 추적 모델을 받는 중… (처음 한 번, 약 17MB)');
+    try { await loadVision(); } catch (e) { setStatus('⚠️ 손 추적 모델을 받지 못했어요: ' + (e.message || e)); $('onBtn').disabled = false; return; }
+    $('startBtn').disabled = false;
+    $('onBtn').textContent = '✅ 켜짐';
+    setStatus('✅ 준비됐어요. 오른쪽 미리보기에 손이 보이는지 확인하고(손 보임 80% 이상) ② 세션 시작을 눌러요');
+  });
+  $('offBtn').addEventListener('click', async () => {
+    if (sess && !sess.done) await finish(true);
+    stopCamera();
+    if (audio.on) { await E.stop(); audio.on = false; }
+    $('onBtn').disabled = false;
+    $('onBtn').textContent = '① 소리·카메라 켜기';
+    $('startBtn').disabled = true;
+    $('offBtn').disabled = true;
+    $('camInfo').textContent = '카메라 꺼짐';
+    $('audioInfo').textContent = '소리 꺼짐';
+    $('vis').textContent = '✋ 손 보임 –';
+    $('edge').textContent = '';
+    $('overlay').getContext('2d').clearRect(0, 0, 9999, 9999);
+    renderHeard();
+    setStatus('꺼졌어요');
+  });
+
+  // ---- ② session
+  let sess = null;
+  $('startBtn').addEventListener('click', startSession);
+  async function startSession() {
+    if (!audio.on || !cam.on || !vis || (sess && !sess.done)) return;
+    $('startBtn').disabled = true;
+    const capOk = await E.captureStart();
+    R.setTag(`teach_${device}`);
+    R.clear();
+    R.start();
+    window.BatCollect = { active: true };   // recorder.js hotkeys stay quiet during the session
+    const t0 = performance.now();
+    sess = { t0, startedAt: new Date().toISOString(), session: R.session, plan: plan(t0), i: 0, done: false, capOk,
+      vision: [], events: [], bursts: [], foreign: [], iq: [], iqUpTo: null, U: 0, W: 0, iqLive: false,
+      phonesStart: phoneMeta(), foreignStart: (E.foreign || []).slice() };
+    sess.iqTimer = setInterval(() => iqPoll(false), 100);
+    $('setup').classList.add('hidden');
+    $('result').classList.add('hidden');
+    $('stage').classList.remove('hidden');
+    beginSeg(sess.plan[0]);
+    requestAnimationFrame(tick);
+  }
+  function beginSeg(seg) { R.setLabel(seg.type === 'step' ? seg.step.label : 'idle'); }
+  function tick() {
+    if (!sess || sess.done) return;
+    const now = performance.now();
+    while (sess.i < sess.plan.length && now >= sess.plan[sess.i].t1) {
+      sess.i++;
+      if (sess.i < sess.plan.length) beginSeg(sess.plan[sess.i]);
+    }
+    if (sess.i >= sess.plan.length) { finish(false); return; }
+    const seg = sess.plan[sess.i];
+    if (seg.type === 'step') for (const b of seg.beats) if (!b.done && now >= b.t) { b.done = true; R.markCue(seg.step.kind); }
+    drawGuide(seg, now);
+    stageText(seg, now);
+    requestAnimationFrame(tick);
+  }
+  const txt = (id, s) => { const el = $(id); if (el.textContent !== s) el.textContent = s; };
+  function stageText(seg, now) {
+    const s = seg.type === 'step' ? seg.step : seg.next, left = Math.max(0, seg.t1 - now);
+    if (seg.type === 'step') {
+      txt('stepIcon', s.icon); txt('stepTitle', s.title); txt('stepHow', s.how);
+      txt('stepCount', seg.per ? `${Math.min(s.reps, Math.floor(Math.max(0, now - seg.t0 - seg.off) / seg.per) + 1)} / ${s.reps}` : `${Math.ceil(left / 1000)}초`);
+      $('stepBar').style.width = (100 * Math.min(1, (now - seg.t0) / (seg.t1 - seg.t0))).toFixed(1) + '%';
+    } else {
+      txt('stepIcon', seg.type === 'lead' ? '⏳' : '☕');
+      txt('stepTitle', seg.type === 'lead' ? '준비' : '쉬어요');
+      txt('stepHow', `다음: ${s.icon} ${s.title} · ${s.how}`);
+      txt('stepCount', String(Math.ceil(left / 1000)));
+      $('stepBar').style.width = '0%';
+    }
+    const nx = seg.type === 'step' ? sess.plan.slice(sess.i + 1).find((p) => p.type === 'step') : null;
+    txt('nextStep', nx ? `다음: ${nx.step.icon} ${nx.step.title}` : '');
+    txt('remain', `남은 시간 ${mmss(sess.plan[sess.plan.length - 1].t1 - now)}`);
+  }
+
+  // the moving target the hand follows (the camera records where the hand really went)
+  function drawGuide(seg, now) {
+    const c = $('guide'), g = c.getContext('2d'), W = c.width, H = c.height, cx = W / 2, cy = H / 2 + 14;
+    g.clearRect(0, 0, W, H);
+    const s = seg.type === 'step' ? seg.step : seg.next;
+    if (!s) return;
+    const on = seg.type === 'step', per = (s.period || 1000) * SCALE, tt = on ? now - seg.t0 : 0, ph = (2 * Math.PI * tt) / per;
+    const A = W * 0.3, B = H * 0.34, r0 = 16, quick = Math.max(SCALE, 0.4);
+    let x = cx, y = cy, r = r0, word = '';
+    g.globalAlpha = on ? 1 : 0.45;
+    g.strokeStyle = '#3a4a68';
+    g.lineWidth = 3;
+    const stroke = (f) => { g.beginPath(); f(); g.stroke(); };
+    const ring = (rr) => stroke(() => g.arc(cx, cy, rr, 0, 2 * Math.PI));
+    switch (s.mode) {
+      case 'still': ring(r0 * 2.2); word = on ? '가만히' : ''; break;
+      case 'lr': stroke(() => { g.moveTo(cx - A, cy); g.lineTo(cx + A, cy); }); x = cx + A * Math.sin(ph); break;
+      case 'ud': stroke(() => { g.moveTo(cx, cy - B); g.lineTo(cx, cy + B); }); y = cy - B * Math.sin(ph); break;
+      case 'fb': ring(r0 * 0.8); ring(r0 * 3.4); r = r0 * (2.1 + 1.3 * Math.sin(ph)); word = on ? (Math.cos(ph) > 0 ? '화면 쪽으로' : '몸 쪽으로') : ''; break;
+      case 'hcircle': case 'vcircle': {
+        const rx = s.mode === 'hcircle' ? A : B, ry = s.mode === 'hcircle' ? B * 0.45 : B, dir = s.dir || 1;
+        stroke(() => g.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI));
+        g.fillStyle = '#3a4a68';
+        g.beginPath(); g.moveTo(cx + 16 * dir, cy - ry); g.lineTo(cx - 8 * dir, cy - ry - 11); g.lineTo(cx - 8 * dir, cy - ry + 11); g.closePath(); g.fill();
+        const phi = -Math.PI / 2 + dir * ph;
+        x = cx + rx * Math.cos(phi); y = cy + ry * Math.sin(phi);
+        break;
+      }
+      case 'free': x = cx + A * 0.7 * Math.sin(tt / 900); y = cy + B * 0.6 * Math.sin(tt / 1300 + 1); r = r0 * (1.6 + 0.8 * Math.sin(tt / 1700)); word = on ? '자유롭게' : ''; break;
+      default: {   // push / pull / wave: one stroke per cue
+        const k = Math.floor((tt - seg.off) / per), since = tt - seg.off - k * per;
+        const cue = on && tt >= seg.off && k < s.reps, fast = 260 * quick;
+        if (s.mode === 'wave') {
+          stroke(() => { g.moveTo(cx - A * 0.5, cy); g.lineTo(cx + A * 0.5, cy); });
+          if (cue && since < 1000 * quick) { x = cx + A * 0.45 * Math.sin((2 * Math.PI * since) / (250 * quick)); word = '흔들어요!'; } else word = on ? '준비' : '';
+        } else {
+          ring(r0 * 0.9); ring(r0 * 3.2);
+          let e = 0;   // 0 = where the stroke starts, 1 = where the fast stroke ends
+          if (cue) e = since < fast ? since / fast : Math.max(0, 1 - (since - fast) / Math.max(1, per - fast - 150 * quick));
+          r = s.mode === 'push' ? r0 + 2 * r0 * e : 3 * r0 - 2 * r0 * e;
+          word = cue && since < fast * 2.2 ? (s.mode === 'push' ? '밀어요!' : '당겨요!') : (on ? '준비' : '');
+        }
+      }
+    }
+    g.fillStyle = '#64b5f6';
+    g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.fill();
+    if (word) { g.fillStyle = '#ffffff'; g.font = 'bold 32px system-ui, sans-serif'; g.textAlign = 'center'; g.fillText(word, cx, 38); }
+    g.globalAlpha = 1;
+  }
+  $('stopBtn').addEventListener('click', () => finish(true));
+
+  // ---- offline labels (centred differences) and vision events
+  function derive(rows) {
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      r.vr = r.vu = r.vs = r.sp = NaN;
+      r.auto = '';
+      if (!r.present) continue;
+      let a = i, b = i;
+      for (let k = i - 1; k >= 0 && i - k <= 2; k--) { if (!rows[k].present || rows[a].tcap - rows[k].tcap > 150) break; a = k; }
+      for (let k = i + 1; k < rows.length && k - i <= 2; k++) { if (!rows[k].present || rows[k].tcap - rows[b].tcap > 150) break; b = k; }
+      if (a === b) continue;
+      const v = vel(rows[a], rows[b]);
+      if (!v) continue;
+      Object.assign(r, v);
+      r.auto = v.sp < 1 ? 'still' : v.sp < 2.5 ? '' : dominant(v);
+    }
+  }
+  // strokes = runs of moving frames (>= 1.5 hand sizes/s) split at speed valleys (a turnaround); each stroke is named by
+  // its fastest frame, or as a circle when its direction turns >= 0.9 turns; 3+ short alternating sideways strokes = wave
+  function visionEvents(rows) {
+    const strokes = [];
+    let cur = null, low = 0;
+    const end = () => { if (cur && cur.length >= 3) strokes.push(cur); cur = null; low = 0; };
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r.present || !fin(r.sp)) { end(); continue; }
+      if (!cur) { if (r.sp >= 1.5) { cur = [r]; cur.pk = r.sp; low = 0; } continue; }
+      const prev = cur[cur.length - 1], next = rows[i + 1];
+      if (next && next.present && fin(next.sp) && r.sp <= prev.sp && r.sp <= next.sp && r.sp < 0.45 * cur.pk) {
+        end();   // a turnaround: the next stroke starts here
+        if (r.sp >= 1.5) { cur = [r]; cur.pk = r.sp; }
+        continue;
+      }
+      if (r.sp < 1.5) { if (++low >= 2) end(); else cur.push(r); continue; }
+      low = 0;
+      cur.push(r);
+      if (r.sp > cur.pk) cur.pk = r.sp;
+    }
+    end();
+    const wind = (f, ka, kb) => {
+      let tot = 0, prev = null;
+      for (const x of f) {
+        if (Math.hypot(x[ka], x[kb]) < 1.5) { prev = null; continue; }
+        const an = Math.atan2(x[kb], x[ka]);
+        if (prev != null) { let d = an - prev; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; tot += d; }
+        prev = an;
+      }
+      return tot / (2 * Math.PI);
+    };
+    const ev = [];
+    for (const f of strokes) {
+      let pk = f[0];
+      for (const x of f) if (x.sp > pk.sp) pk = x;
+      if (pk.sp < 3) continue;
+      const wv = wind(f, 'vr', 'vu'), wh = wind(f, 'vr', 'vs');
+      let kind = dominant(pk);
+      // counter-clockwise angle growth = ccw as the person sees it (vertical circle) / seen from above (horizontal)
+      if (Math.abs(wv) >= 0.9 && Math.abs(wv) >= Math.abs(wh)) kind = wv > 0 ? 'vccw' : 'vcw';
+      else if (Math.abs(wh) >= 0.9) kind = wh > 0 ? 'hccw' : 'hcw';
+      ev.push({ t0: rd(f[0].tcap, 1), t1: rd(f[f.length - 1].tcap, 1), tPeak: rd(pk.tcap, 1), kind, peak: rd(pk.sp, 2), turns_v: rd(wv, 2), turns_h: rd(wh, 2) });
+    }
+    const out = [];
+    for (let i = 0; i < ev.length;) {
+      let j = i;
+      const side = (e) => e.kind === 'left' || e.kind === 'right';
+      while (j + 1 < ev.length && side(ev[j]) && side(ev[j + 1]) && ev[j + 1].kind !== ev[j].kind && ev[j + 1].t0 - ev[j].t1 < 200
+        && ev[j].t1 - ev[j].t0 < 450 && ev[j + 1].t1 - ev[j + 1].t0 < 450) j++;
+      if (j - i + 1 >= 3) {
+        const run = ev.slice(i, j + 1), top = run.reduce((a, b) => (b.peak > a.peak ? b : a));
+        out.push({ t0: run[0].t0, t1: run[run.length - 1].t1, tPeak: top.tPeak, kind: 'wave', peak: top.peak, strokes: run.length });
+        i = j + 1;
+      } else { out.push(ev[i]); i++; }
+    }
+    return out;
+  }
+
+  // ---- files
+  function visionCsv(rows) {
+    const head = ['t_cap', 't_res', 'cap_src', 'present', 'hand', 'hand_mp', 'score', 'palm_x', 'palm_y', 'scale', 'v_right', 'v_up', 'v_screen', 'auto'];
+    for (let i = 0; i < 21; i++) head.push(`lm${i}_x`, `lm${i}_y`, `lm${i}_z`);
+    for (let i = 0; i < 21; i++) head.push(`wlm${i}_x`, `wlm${i}_y`, `wlm${i}_z`);
+    const blank63 = new Array(63).fill('').join(',');
+    const lines = [head.join(',')];
+    for (const r of rows) {
+      const base = [fx(r.tcap, 2), fx(r.tres, 2), r.src, r.present, r.hand || '', r.handMp || '', fx(r.score, 3), fx(r.px, 4), fx(r.py, 4), fx(r.scale, 4), fx(r.vr, 2), fx(r.vu, 2), fx(r.vs, 2), r.auto || ''].join(',');
+      if (!r.present) { lines.push(`${base},${blank63},${blank63}`); continue; }
+      const L = Array.from(r.L, (v) => v.toFixed(4)).join(','), Wl = r.W ? Array.from(r.W, (v) => v.toFixed(4)).join(',') : blank63;
+      lines.push(`${base},${L},${Wl}`);
+    }
+    return lines.join('\n') + '\n';
+  }
+  const iqCsv = (rows) => 't_ms,du,dw,u,w\n' + rows.map((r) => `${r[0]},${r[1].toFixed(6)},${r[2].toFixed(6)},${r[3].toFixed(6)},${r[4].toFixed(6)}`).join('\n') + '\n';
+  function download(name, blob) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  async function writeFiles(files) {
+    const root = await dataDir(false);
+    let sub = null, err = '';
+    if (root) { try { sub = await root.getDirectoryHandle('teach', { create: true }); } catch (e) { err = e.message || String(e); } }
+    const out = [];
+    for (const [name, blob] of files) {
+      if (sub) {
+        try {
+          const h = await sub.getFileHandle(name, { create: true }), w = await h.createWritable();
+          await w.write(blob);
+          await w.close();
+          out.push({ name, size: blob.size, where: 'folder' });
+          continue;
+        } catch (e) { err = e.message || String(e); }
+      }
+      download(name, blob);
+      out.push({ name, size: blob.size, where: 'download' });
+      await new Promise((r) => setTimeout(r, 250));   // several downloads in a row: give Chrome a moment
+    }
+    return { out, err, folder: root ? root.name : '' };
+  }
+
+  async function finish(early) {
+    if (!sess || sess.done) return;
+    sess.done = true;
+    const tStop = performance.now();
+    clearInterval(sess.iqTimer);
+    iqPoll(true);
+    R.stop();
+    window.BatCollect = null;
+    $('stage').classList.add('hidden');
+    $('result').classList.remove('hidden');
+    $('resultText').textContent = '저장하는 중…';
+    const wav = sess.capOk ? await E.captureStop() : null;
+    const rows = sess.vision;
+    derive(rows);
+    const vev = visionEvents(rows);
+    const steps = sess.plan.filter((p) => p.type === 'step');
+    const trials = steps.filter((p) => p.t0 < tStop).map((p) => {
+      const t1 = Math.min(p.t1, tStop);
+      const inStep = rows.filter((r) => r.tcap >= p.t0 && r.tcap < t1);
+      const count = (list, key) => list.reduce((m, e) => { m[e[key]] = (m[e[key]] || 0) + 1; return m; }, {});
+      return {
+        kind: p.step.kind, label: p.step.label, title: p.step.title, mode: p.step.mode, dir: p.step.dir || 0,
+        tGo: rd(p.t0, 1), tEnd: rd(t1, 1), durMs: Math.round(t1 - p.t0), complete: tStop >= p.t1, reps: p.step.reps || 0,
+        periodMs: p.per ? Math.round(p.per) : 0, beats: p.beats.map((b) => rd(b.t, 1)),
+        visible: inStep.length ? rd(inStep.filter((r) => r.present).length / inStep.length, 3) : null,
+        heard: count(sess.events.filter((e) => e.t >= p.t0 && e.t < t1 + 300), 'kind'),
+        seen: count(vev.filter((e) => e.tPeak >= p.t0 && e.tPeak < t1 + 300), 'kind'),
+      };
+    });
+    const present = rows.filter((r) => r.present);
+    const span = rows.length > 1 ? (rows[rows.length - 1].tcap - rows[0].tcap) / 1000 : 0;
+    const lats = present.map((r) => r.tres - r.tcap).sort((a, b) => a - b);
+    const settings = cam.track ? cam.track.getSettings() : {};
+    const base = `batears_${sess.session}`;
+    const meta = {
+      version: 1, page: 'teach.html', session: sess.session, startedAt: sess.startedAt, device, early,
+      clock: 'performance.now() ms in every file (t_cap, t_res, t_ms, tGo, wav.t0)',
+      ua: navigator.userAgent, note: $('memo').value || '',
+      screen_angle_deg: numOr($('angle').value), palm_width_cm: numOr($('palm').value),
+      engine: E.info || null, stereoFreqs: (E.config.stereoFreqs || []).slice(), volume: E.config.volume,
+      phones: phoneMeta(), phones_at_start: sess.phonesStart, foreign_at_start: sess.foreignStart, foreign_at_end: (E.foreign || []).slice(),
+      camera: { label: cam.track ? cam.track.label : '', width: settings.width || cam.w, height: settings.height || cam.h, frameRate: settings.frameRate || null,
+        deviceId: settings.deviceId || '', facingMode: settings.facingMode || '', resizeMode: settings.resizeMode || '' },
+      vision: {
+        lib: `@mediapipe/tasks-vision@${MP_VER}`, model: MODEL_URL, task: 'HandLandmarker', runningMode: 'VIDEO', numHands: 1,
+        minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5, delegate: vis ? vis.delegate : '', smoothing: false,
+        mirrored: false,
+        coords: 'lm: raw (not mirrored) camera image, x 0..1 left->right of the camera picture (= toward the person\'s left), y 0..1 top->bottom, z MediaPipe relative depth (smaller = nearer the camera); wlm: MediaPipe world landmarks in m, hand-centred',
+        hand: "hand = the person's own hand (MediaPipe's label swapped, because it assumes a mirrored picture); hand_mp = MediaPipe's raw label",
+        t_cap: 'requestVideoFrameCallback metadata.captureTime (cap_src c) or expectedDisplayTime (e) or performance.now() (r)',
+        derived: `palm = mean of landmarks 0,5,9,13,17; scale = mean side of the 0-5-17 triangle in image heights; v_right/v_up/v_screen = centred-difference speeds in hand sizes per second in the person's frame (depth from d ln(scale)/dt with an assumed ${VFOV_DEG} deg vertical FOV); auto = still / left / right / up / down / push / pull (blank = slow move)`,
+        frames: rows.length, present: present.length, present_ratio: rows.length ? rd(present.length / rows.length, 3) : null,
+        fps: span > 0 ? rd((rows.length - 1) / span, 2) : null,
+        skipped_frames: cam.skipped, skipped_note: 'frames the browser presented but this page did not process (requestVideoFrameCallback presentedFrames gaps, whole camera run)',
+        latency_ms_median: lats.length ? rd(lats[lats.length >> 1], 1) : null, cap_src: rows.length ? rows[rows.length - 1].src : '',
+      },
+      wav: wav ? { file: `${base}.wav`, rate: wav.rate, channels: wav.channels, seconds: wav.seconds, t0: wav.t0, capped: wav.capped, via: wav.via } : null,
+      iq: { file: `${base}_iq.csv`, bins: sess.iq.length, live: sess.iqLive, binMs: 10, units: 'm', u: 'sideways (dR - dL) / 2', w: 'depth -(dL + dR) / 2', t: 'bin start; du / dw = change in [t, t + 10 ms)' },
+      schedule: { quick: QUICK, restMs: REST_MS, leadMs: LEAD_MS, steps: STEPS.map((s) => s.kind) },
+      trials, events: sess.events, bursts: sess.bursts, foreign: sess.foreign, vision_events: vev,
+      files: { audio: `${base}_audio.csv`, vision: `${base}_vision.csv`, iq: `${base}_iq.csv`, wav: wav ? `${base}.wav` : null },
+      tStart: rd(sess.t0, 1), tStop: rd(tStop, 1),
+    };
+    const files = [
+      [`${base}.json`, new Blob([JSON.stringify(meta, null, 1)], { type: 'application/json' })],
+      [`${base}_vision.csv`, new Blob([visionCsv(rows)], { type: 'text/csv' })],
+      [`${base}_audio.csv`, new Blob([R.toCsv(sess.session)], { type: 'text/csv' })],
+      [`${base}_iq.csv`, new Blob([iqCsv(sess.iq)], { type: 'text/csv' })],
+    ];
+    if (wav && wav.blob) files.push([`${base}.wav`, wav.blob]);
+    sess.files = files;
+    sess.meta = meta;
+    await saveAndReport();
+  }
+  async function saveAndReport() {
+    const s = sess, m = s.meta;
+    $('resultText').textContent = '저장하는 중…';
+    const w = await writeFiles(s.files);
+    const inFolder = w.out.every((f) => f.where === 'folder');
+    const lines = [];
+    lines.push(inFolder ? `✅ ${w.folder}/teach/ 에 저장했어요` : `⬇ 다운로드했어요. ml/data/teach/ 로 옮겨 주세요${w.err ? ` (폴더 저장 실패: ${w.err})` : ''}`);
+    for (const f of w.out) lines.push(`  · ${f.name}  ${kb(f.size)}`);
+    const v = m.vision;
+    lines.push('');
+    lines.push(`세션 ${mmss((m.tStop - m.tStart))}${m.early ? ' (중간에 멈춤)' : ''} · 영상 ${v.frames}프레임 ${v.fps || '–'}fps · 손 보임 ${v.present_ratio != null ? Math.round(100 * v.present_ratio) : '–'}% · 지연 중앙값 ${v.latency_ms_median ?? '–'}ms`);
+    lines.push(m.wav ? `WAV ${m.wav.channels}ch ${m.wav.rate}Hz ${m.wav.seconds}초${m.wav.capped ? ' ⚠️ 잘림' : ''} · I/Q ${m.iq.bins}칸${m.iq.live ? '' : ' ⚠️ 비어 있음'} · 🦇 제스처 ${m.events.length}개` : '⚠️ WAV를 녹음하지 못했어요');
+    if (m.phones.length) lines.push(`📱 ${m.phones.map((p) => `${p.id} ${p.hz}Hz ${p.heard ? '✅들림' : '❌안들림'}`).join(' · ')}`);
+    if (m.palm_width_cm == null) lines.push('❓ 손바닥 폭(cm)이 비어 있어요. 다음 세션 전에 적어 주세요');
+    lines.push('');
+    lines.push('단계 | 손 보임 | 📷 본 것 | 🦇 들은 것');
+    const fmt = (o) => Object.entries(o).map(([k, n]) => `${k} ${n}`).join(', ') || '–';
+    for (const t of m.trials) lines.push(`${t.title} | ${t.visible != null ? Math.round(100 * t.visible) + '%' : '–'} | ${fmt(t.seen)} | ${fmt(t.heard)}`);
+    $('resultText').textContent = lines.join('\n');
+  }
+  $('resaveBtn').addEventListener('click', async () => { if (sess && sess.files) { await dataDir(true); await saveAndReport(); } });
+  $('againBtn').addEventListener('click', () => {
+    $('result').classList.add('hidden');
+    $('setup').classList.remove('hidden');
+    $('startBtn').disabled = !(audio.on && cam.on && vis);
+    renderHeard();
+  });
+  window.addEventListener('beforeunload', (e) => { if (sess && !sess.done) { e.preventDefault(); e.returnValue = ''; } });
+
+  renderPhones();
+  dataDir(false).then(showFolder);
+  window.BatTeach = { get sess() { return sess; }, cam, audio, get vis() { return vis; }, plan, STEPS, derive, visionEvents, finish };   // for tests
+})();
+</script>
+</body></html>

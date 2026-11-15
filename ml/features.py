@@ -165,4 +165,6 @@ def build_dataset(paths, seed=0):
 
 
 def find_csvs(folder):
-    return sorted(glob.glob(os.path.join(folder, '**', '*.csv'), recursive=True))
+    # ml/data/teach/ holds the webcam-teacher sessions (web/teach.html): vision / I/Q tables, not gesture trials
+    return sorted(p for p in glob.glob(os.path.join(folder, '**', '*.csv'), recursive=True)
+                  if os.sep + 'teach' + os.sep not in p)
