@@ -1,9 +1,9 @@
 {
   "schema": 2,
-  "checked_at_utc": "2026-11-15T17:40:45Z",
-  "main_sha": "25d4aaad29113cdae4e7cb5ad45fa48b0c7c4a98",
-  "exp_sha_before_run": "917c433b627a28b01770600440e80cda7da0a23f",
-  "report": "experiments/monitor-2026-11-15-1139.md",
+  "checked_at_utc": "2026-11-15T18:37:34Z",
+  "main_sha": "a921fe86874fe86fcdcd5d3cade1f43b6e91633d",
+  "exp_sha_before_run": "f3f366efd3f98b2342ddbaa82539cb11d5ff1f93",
+  "report": "experiments/monitor-2026-11-15-1238.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -17,38 +17,38 @@
     },
     {
       "path": "README.md",
-      "sha": "baccb2f1bc1ca5c3cbdf1ae86ba12faf9c10d9f5",
-      "size": 8518
+      "sha": "4b656fafaaafb31afb94821428af825807a955a8",
+      "size": 8784
     },
     {
       "path": "TEAM.md",
-      "sha": "a6a3c79b1c047b305413021d7e758abdfae3a2ca",
-      "size": 11677
+      "sha": "c0400a58fbaeaf7521d3f780d01d713cc2050b16",
+      "size": 11799
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "b9a12f69d95e21db0e572acf8e1ddd4f07b925eb",
-      "size": 8199
+      "sha": "c158bd0828ebbbbe61599087e4a32bd428146c21",
+      "size": 8465
     },
     {
       "path": "docs/devpost.md",
-      "sha": "0d85106af411b5669ce9c6a5b23077fd81564fe4",
-      "size": 11941
+      "sha": "824b66eab375e69140d0509b8bd7ada63a6fb4b8",
+      "size": 12454
     },
     {
       "path": "docs/judge-qa.md",
-      "sha": "d9df39fc6f0beaf8bb6e5d788ac5da5c835dc8a7",
-      "size": 5685
+      "sha": "485314e3757b4af5a2b84faaa7178831bfd74d7d",
+      "size": 6131
     },
     {
       "path": "docs/pitch.md",
-      "sha": "adbd9e21c849487f12653157244847ad2e01d91d",
-      "size": 2251
+      "sha": "12b1ec2ac6ee08d1c5f8761cb9494cdc578188c8",
+      "size": 2253
     },
     {
       "path": "docs/slides.md",
-      "sha": "0a89627bbbb6747b8a0cde128380984e994392ed",
-      "size": 1592
+      "sha": "6c74298882af996cdd832a77f36d91b992b1cfc9",
+      "size": 1662
     },
     {
       "path": "ml/README.md",
@@ -376,9 +376,24 @@
       "size": 3766
     },
     {
+      "path": "tools/bravo/adapt.js",
+      "sha": "489f80325f43788ef8e1a449305530c261ccef6d",
+      "size": 5302
+    },
+    {
       "path": "tools/bravo/agree.js",
-      "sha": "98a294737246890ea223245143b0127754ff0040",
-      "size": 4156
+      "sha": "035e3090ce249a77daa1fc45c592e3b2be07ae08",
+      "size": 4186
+    },
+    {
+      "path": "tools/bravo/amp_pos.js",
+      "sha": "a3159a714ca05fe8e73f0df70e19ccb5f25b4003",
+      "size": 6395
+    },
+    {
+      "path": "tools/bravo/auto_train.js",
+      "sha": "daf45d3124b4e7a0f2cbbfecafbf0c28deb605a4",
+      "size": 25441
     },
     {
       "path": "tools/bravo/chagree.js",
@@ -416,9 +431,69 @@
       "size": 5409
     },
     {
+      "path": "tools/bravo/e2e.js",
+      "sha": "23ddc523bebd02eb1d903dc026c1cc3667fd9dd6",
+      "size": 7487
+    },
+    {
+      "path": "tools/bravo/embed_default.js",
+      "sha": "575b8d3a569aa44d0e6c4a23098d3ac8e37a007f",
+      "size": 1103
+    },
+    {
+      "path": "tools/bravo/embed_gated.js",
+      "sha": "d42518fb08533ff271f1ddcc4b7d75ae7e785aa8",
+      "size": 1340
+    },
+    {
+      "path": "tools/bravo/engine_side.js",
+      "sha": "641885d1be396b7f28f917b7579683845456b160",
+      "size": 2537
+    },
+    {
+      "path": "tools/bravo/fake_cmp.js",
+      "sha": "f23de9da03e0ba589d12b4f53351798ce56e4bdd",
+      "size": 2132
+    },
+    {
+      "path": "tools/bravo/feat_loso.js",
+      "sha": "6122bf29e44d599eeffa7bbac1df27b52e62abb3",
+      "size": 14715
+    },
+    {
+      "path": "tools/bravo/feat_src.js",
+      "sha": "c78ef6119acf7efe7879926ce9879d9bb838716d",
+      "size": 3690
+    },
+    {
+      "path": "tools/bravo/gated_check.js",
+      "sha": "e73d019d6b844cc0418e7c432d2b74b0879f423c",
+      "size": 4205
+    },
+    {
+      "path": "tools/bravo/gated_eval.js",
+      "sha": "5b56ec0d3bd097d23a6923168b30bea3df344c21",
+      "size": 2498
+    },
+    {
+      "path": "tools/bravo/gated_stream.js",
+      "sha": "d392c7d7d634debbec7f3232bc3f60aa7026917b",
+      "size": 13598
+    },
+    {
+      "path": "tools/bravo/gated_stream2.js",
+      "sha": "305ffd3a99368cdf87c749518fb05515d8990159",
+      "size": 14092
+    },
+    {
       "path": "tools/bravo/holo_check.js",
       "sha": "088af50f31de1badd2bb1b76939431b22e566121",
       "size": 6864
+    },
+    {
+      "path": "tools/bravo/hybrid_loso.js",
+      "sha": "c85e4446f922b5272b8f0c3493a02320fcd85d25",
+      "size": 5734
     },
     {
       "path": "tools/bravo/ldaeval.js",
@@ -427,8 +502,23 @@
     },
     {
       "path": "tools/bravo/loso.js",
-      "sha": "9826a0bba089ebed3e121e3d9a5300ab74ae2342",
-      "size": 6905
+      "sha": "e42c6052180626aa2774a144d82f53444013356f",
+      "size": 7002
+    },
+    {
+      "path": "tools/bravo/make_gs2.js",
+      "sha": "a23e5a6aec22b2dcad6f7b0f6d29217a4660640b",
+      "size": 3273
+    },
+    {
+      "path": "tools/bravo/map_loso.js",
+      "sha": "2dde8816943b909810da6b6cd0f4453ac759cc55",
+      "size": 5409
+    },
+    {
+      "path": "tools/bravo/mvsynth.js",
+      "sha": "36f6dd2ae7461bf8ab2a795c7e52eb75ac02a951",
+      "size": 5700
     },
     {
       "path": "tools/bravo/phase.js",
@@ -439,6 +529,11 @@
       "path": "tools/bravo/phone.js",
       "sha": "3566fe127554bae9f3cf1985d1d5e75fa54a42c8",
       "size": 3745
+    },
+    {
+      "path": "tools/bravo/phonepos.js",
+      "sha": "13955cbb00705db0e10632d76dada60febdb09e8",
+      "size": 2147
     },
     {
       "path": "tools/bravo/phones2.js",
@@ -456,14 +551,19 @@
       "size": 4788
     },
     {
+      "path": "tools/bravo/reapply_gated.js",
+      "sha": "1f13c148cd726a396066328831e4ed5c21b77939",
+      "size": 6560
+    },
+    {
       "path": "tools/bravo/refamp.js",
       "sha": "3c83c35e5edf5f47c35c1dd62fe02b36fc49f6fb",
       "size": 1521
     },
     {
       "path": "tools/bravo/scale_loso.js",
-      "sha": "7d061f3fdec695bea1993d3753d544e96f12b2a3",
-      "size": 7471
+      "sha": "191352169f31a6c6ef72377c5a4fe96666869c14",
+      "size": 8078
     },
     {
       "path": "tools/bravo/sim2d.js",
@@ -476,9 +576,19 @@
       "size": 4689
     },
     {
+      "path": "tools/bravo/target_loso.js",
+      "sha": "a4450ac6ce21f4b026ed42ad6ce9affa83204d57",
+      "size": 5197
+    },
+    {
       "path": "tools/bravo/teach_fit.js",
-      "sha": "8e9b48af3e71216666ed40480bae4b34d0ed1365",
-      "size": 19581
+      "sha": "092cd5af1b7b1fe00859e6d52f3f06e1a9ba4295",
+      "size": 19611
+    },
+    {
+      "path": "tools/bravo/teachsynth.js",
+      "sha": "01977920f0897c13672c721db1dc6c8a725ef799",
+      "size": 5801
     },
     {
       "path": "tools/bravo/teachsynth2.js",
@@ -502,13 +612,13 @@
     },
     {
       "path": "tools/bravo/track4.js",
-      "sha": "3743c7e77dce451dd18fee2962bf2ede1119d1b1",
-      "size": 9715
+      "sha": "153693ceb319091c8fcb6d323c4ecc0d658aae5f",
+      "size": 9716
     },
     {
       "path": "tools/bravo/track6.js",
-      "sha": "024e9793dcc37cbda9193f0fe53c0a7a527c5702",
-      "size": 7858
+      "sha": "6cfccf3057ec82fb63b55e08356e168250767b7c",
+      "size": 7859
     },
     {
       "path": "tools/bravo/vision3d.js",
@@ -517,13 +627,13 @@
     },
     {
       "path": "tools/bravo/vision_labels.js",
-      "sha": "b252d66494f630a85c4fb0aeebd9b515943ba8b7",
-      "size": 6445
+      "sha": "8388c82f74d4a166c92c72c484dcc97ef218b46a",
+      "size": 6475
     },
     {
       "path": "tools/bravo/xfer.js",
-      "sha": "3c2f79e8736f5d5864274c47a47bbdf68fb1a314",
-      "size": 7104
+      "sha": "121c409d29c072522747b621f196ce51924bc507",
+      "size": 7201
     },
     {
       "path": "tools/bravo/xsess.js",
@@ -587,8 +697,8 @@
     },
     {
       "path": "tools/vision_full/vf_post.py",
-      "sha": "00d9d1e19b247521db951073959175308ff852b5",
-      "size": 6638
+      "sha": "3bb7ba459b62ca6b028da60bd51b4083250cdc1a",
+      "size": 7530
     },
     {
       "path": "tools/vision_full/vf_run.mjs",
@@ -617,6 +727,11 @@
     },
     {
       "path": "web/bat3d.js",
+      "sha": "f9def599c819a8fbaf723a9eafb821664a732cf3",
+      "size": 34351
+    },
+    {
+      "path": "web/bat3d_v15.js",
       "sha": "8a9cf9905117e661d8daa3c061ccc08e27d4becb",
       "size": 28241
     },
@@ -647,7 +762,7 @@
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "6dd7db5d652792c2b6cd64a0f53bff59343e06f6",
+      "sha": "092b8e1bd7ae70a611e98522ecec3741a1478ef3",
       "size": 26578
     },
     {
@@ -662,12 +777,12 @@
     },
     {
       "path": "web/hologram.html",
-      "sha": "6be39e35c26cdd6455884d2638f4a2a2d928db4b",
-      "size": 84980
+      "sha": "9d7efacbd2813a0c8b84a26ae647e4e8a01f1be3",
+      "size": 88828
     },
     {
       "path": "web/index.html",
-      "sha": "f4ca730a7f76a4f0839e4fa23a23bad53c1b8851",
+      "sha": "e2cf82def0ec0f756c1949858a6f2e6da4d33c74",
       "size": 9968
     },
     {
@@ -677,7 +792,7 @@
     },
     {
       "path": "web/key.html",
-      "sha": "f0273152427d95f84cc3951ad0105e082524e575",
+      "sha": "42a051d6db7c604680d89482cb8142f364037c09",
       "size": 27644
     },
     {
@@ -717,7 +832,7 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "1b67313779caca3e49b430b740ec259c4fe2ab1b",
+      "sha": "92469e9ca3e8b316d254db8b544ca9cdb220cf7b",
       "size": 80213
     },
     {
@@ -976,9 +1091,30 @@
       }
     },
     "compare": {
-      "count": 51,
+      "count": 72,
       "hash_algorithm": "sha256(id) -> sha256(JSON([title,String(size),modified_time])) UTF-8; JSON separators comma/colon; ensure_ascii=false",
       "file_fingerprints": {
+        "96cab0e5019714c49f1538484a0e6bf14374136e9e822b7c728289074c87d42b": "cb1f04817f964286bcbde4d21243816a49492cc12c01bddea4e8be88b8f0aaa6",
+        "8227b2a8c63b12735927284e9f2b2f5576c620f035628c53473089fb276ef03a": "eedc12b99834736d6a94e2c3715d2c104b460352ecc7fd7766ac64662c6e964a",
+        "9f9c2610a8420e68634c9f3093227b9ab84549992c92187f8004fb1155b70cef": "a21ed71cd0a3dc0ca55ea59178a885d4b9ede325e9797b4040badaac468efcc5",
+        "32d95f97df574b7ff2abe03dad27016c268f6dd9ac60ab02a401327194690f10": "0069352bfa3c43483f8e9fdbe8100d5c39006f6e5a895960289cd78702ae4122",
+        "97db9b8ef898b09e45627b3aee261847f5ff29f3b164d020d5fb1336a6d5e2d2": "53b93e76a208a42694c0dd4f21bf9354ea4d7033683e34d09b356984a8c910df",
+        "d47bc300484ccf30c226f1482df6a8ffcf19dfd2ee2614900d3e38c0846cc6d8": "e5acf702e7c913d01fe724e279560914262fc41ea5a60a2d1fbb428abc4cc356",
+        "8a6349792fb6fe39170a7b2fcf2a11727d6dbbdeb9c80df6bbb7d9489cc3ed27": "f3f997e317419c495b6b0ab6ef5e393fe7962d1a5e05c7cd24e0ef3a306b32cc",
+        "2bf685beb5b5fc359d16173e0e45ab41bbe4b62689e73596f5ac973f606e869f": "c69feb9fef3fe8fdc40875bb6bc36b02e1e02d8d53c7b492b92068310f499af7",
+        "4097941fb0319f43fcae48259ee0b9b42903ddb6da88417299cc5ef5721a81b4": "a546927e4d13642dcdda75906296a3e48e6a7fb7d30fb1a179546e28f1494dad",
+        "62a787ca022127f9f93a8fb3e65f1563afe41c8dbd9efe4a5df1705a226b72d4": "5f7f81e10a0e2ecb7b446729ad29673c6022beefc9ffb023f0d3748ccc521ce1",
+        "833342e4624e87caa2255aad9bc8c70072ecb0ab01a110223fdf044ea60145b4": "16e8535f0c6a32400111a51b8365d13d2cbcaebded2379082820e6b4cc3ec44b",
+        "df7ce5019c4d2e8950b1b420054e776f5160d126666a39ece769ca5aa4edb1ae": "f95403280765fc6354e3727fae6c2e71f0efdcb193aeb1b614c873432b2ad52b",
+        "39958024bd7c38d39314f8fb22c1387a74708da0d970196e593899ea0e1434fb": "780054eceffdabee69bc690c9890c2b474c208f27de6c74ba10f419d19598c4b",
+        "f9866f7cc2f642f795547a4336042fd675e7d7b5a82aca8e93cf79b31558f9e2": "48c74481f87e33933d4dc9e1e96b4ef7ba6b5d96075272dffcf564bd7d9e3e33",
+        "232b9f66355d9f8ea65f24a6cb8c6787d5b89e2710cfdbb1e9f922eadb10298f": "4e7c90d4e537d2535cbc011b17fe2d2ad8dbd7504cf2c9cf40846fea68f697ec",
+        "4f3a6dca8a647f2a08ef6fb46d42c852f5221e48140536dc063c93c67e8aac34": "f6b912c9c01cf1002a7cc60a1af5ecb2f53d1ba7c08e80e37d92d9ea134b32da",
+        "02c1f6a19c15fc5c3c1a954bac3a1d91e40e62887275272499ecfedb1ebcd4a6": "c628c3dad7030ce6bc0d6cc5706a39bcffe14424cdafc2e6cc49dfd44b7d6203",
+        "f27ecd16e0befb5765b4adf373f0c0d4099c4baa886eed24738252ac5e971002": "38698d97889bd47bc9142638a6432f3751f71f07f33b17cca68106b7c382cb50",
+        "1e041629d54cc09f8116b2082f372553f8cbf1389745d0566c65b2f223d88bb7": "d3920ef51e79f533d88815fc60abcc8f7df26dbcf6d738378bb8c0ccb38402c6",
+        "aedc1c94711801158672f882e64f3765ecd92d09df786975a57925f5036c683b": "9150de27d09111b88f86e5644bd0cb1cf5464770eacc5a629ad59edd252ca1bd",
+        "232f22f6fd4c45aef64889607e7c839f4b10a61305e6ff5467f13277239672c8": "c75c2ae65a093fe353008e18f1c9f475004b8643c0f52d85b8ed9b70f4eb1b69",
         "52b9eece373c21b176d1922b9afc161fb2ba8e036073d0d1ac2132758a8d41c6": "676756a0adae1899d4ce30a90dac556b069ea7ae89be7dbfb8738e658a748ebf",
         "621d3d9d9cd82bee7f37899915858fc7870575a8cdfabdbb227c2da4a50cee1d": "c5fe3948b7cbada6e984c54323795da7508ba62ecdd188cfba9df7c5586c21d7",
         "f5dc3a9338d6433be4664362b13abb8a53d7bbfedc20dae06c40772b7385c8fe": "5d0a93216710c827545325771f655a47af132c9bdb3fcaecb7d070bf6d46c04b",
@@ -1033,9 +1169,13 @@
       }
     },
     "holo": {
-      "count": 12,
+      "count": 16,
       "hash_algorithm": "sha256(id) -> sha256(JSON([title,String(size),modified_time])) UTF-8; JSON separators comma/colon; ensure_ascii=false",
       "file_fingerprints": {
+        "799f0719685bdb0077ef95b73eb92b8973c4e3ff778256ed3996da9e5fdba482": "58ea5fcd15da842804e67e5a34d833727a9c47dfe961c38faba4b33c9b496960",
+        "4c50f020247e62500985077ede0a1629c8fc87a2a86f173ff4b55b5c7de9abe9": "bc51d9cd5b42c1f66124c3d6d8fb189778a892360998b4b8176e29ed9f8f6e8f",
+        "c83b54826610c9abd9d71df69504a87584b21bc8acb4f51d7726163d8289bd76": "32e2b19efa7f82e23bed0cd7185283f21a9cfd5afb85d88617d33d497d87608b",
+        "a378b0ddc60999904cbaef942a1fa919884771d8dadd2420fa7d307dbaa92fc5": "f765ae8d5175fce40b978d4dc47cd853d4a820fb0ad70b9f4de8e102ce9bab73",
         "5d16c4cfc92c37555f7facfe78a9eed7538f97a475f2062e57ce2fa5df8d8d05": "d9e1966ebd383e4a3413be4a31a5e30aa1ec226e7d22f772bddc8a0d1b77d0f7",
         "45731671ee7554934851ef4165f15fb98e23c309f324b83c28b20116f6e3bd9d": "613df74c7cf8c63263d2b0f86009538e47973753dc1c425d0587fd702de87ccf",
         "474e82fedff905700cd64380f2af425e24ad85cd949c14c06850f1e3b983b9fa": "664c9c4e010ab657f1fe7acb84a8137ea87b7dcdeb32d935e9f8e5fad3fa7b40",
@@ -1086,7 +1226,10 @@
     "batears_20261115_102750_holo_61f5",
     "batears_20261115_103345_holo_61f5",
     "batears_20261115_103531_holo_61f5",
-    "batears_20261115_110303_holo_61f5"
+    "batears_20261115_110303_holo_61f5",
+    "batears_20261115_113747_cmp_61f5",
+    "batears_20261115_120410_cmp_61f5",
+    "batears_20261115_123005_holo_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1134,26 +1277,34 @@
     "cmp112943_largeXYerror_vsZero_noInterferenceConclusion",
     "cmp110640_sparse5p5fps_cmp112204_short2p82",
     "collection_compareWavTimingAndForeignThresholdChanged",
-    "compare3_reextract_noNewIndependentSessions"
+    "compare3_reextract_noNewIndependentSessions",
+    "default_gated15_modelChanges_numbers3p3_4p2_3p1",
+    "gated_trainingIncludes113747_field120410_heightWeak",
+    "gated_size_pooledEval_and_missingLagCache_provenanceUnresolved",
+    "122157_incomplete_113429_derivedOnly_inTraining",
+    "new_guidance_handHeight25to35_smoothRecenterCosmetics"
   ],
-  "notes": "No new independent sessions. Existing092315 video re-extracted to4393 rows4219 present.8-session v15 now trains on092315; prior7-model holdout historical only. Tracker gate1.0/tau0.1, spring2s and additional height1.331x. No new categorical accuracy or false-trigger rate observation. Full t_res/speeds/auto blank, do not convert to idle/zero. Full/live same-session alternatives, never independent or concatenated. Prior duplicate/auth/protocol caveats in experiments reports remain; re-read previous reports when needed rather than storing identifiable Drive manifests here. Compare sha256(id) keys with payload fingerprints specified in each manifest. Run13: root83/teach48 unchanged content plus new compare51/holo12.13 new recordings (7 paired,6 sound-only),3 full labels derived from same paired sessions. All text read, WAV/video not decoded. Diagnostic fixed final camera scale, 250±50ms windows, nearest shown-log clock<=30ms, endpoints estimated<=45cm; shown coordinates are pre-soft-limit, not exact pixels/live panel.112943 high x7.85/y6.97/z8.79cm, x/z baseline3.67/3.48 and predicted movement2.41/2.45x; exploratory CIs broad, no cause proof.1106405.5fps and1122042.82s limited. New warning thresholds(weak−12dB; foreign within15dB of carrier), callback t0 min-of-two estimates unvalidated hardware timing. Source IDs/access links remain omitted in checkpoint. Always discover compare/holo subfolders from root by name, not root modification time. Preserve source quality and same-session duplicates; no categorical accuracy/false-trigger labels inferred.",
+  "notes": "No new independent sessions. Existing092315 video re-extracted to4393 rows4219 present.8-session v15 now trains on092315; prior7-model holdout historical only. Tracker gate1.0/tau0.1, spring2s and additional height1.331x. No new categorical accuracy or false-trigger rate observation. Full t_res/speeds/auto blank, do not convert to idle/zero. Full/live same-session alternatives, never independent or concatenated. Prior duplicate/auth/protocol caveats in experiments reports remain; re-read previous reports when needed rather than storing identifiable Drive manifests here. Compare sha256(id) keys with payload fingerprints specified in each manifest. Run13: root83/teach48 unchanged content plus new compare51/holo12.13 new recordings (7 paired,6 sound-only),3 full labels derived from same paired sessions. All text read, WAV/video not decoded. Diagnostic fixed final camera scale, 250±50ms windows, nearest shown-log clock<=30ms, endpoints estimated<=45cm; shown coordinates are pre-soft-limit, not exact pixels/live panel.112943 high x7.85/y6.97/z8.79cm, x/z baseline3.67/3.48 and predicted movement2.41/2.45x; exploratory CIs broad, no cause proof.1106405.5fps and1122042.82s limited. New warning thresholds(weak−12dB; foreign within15dB of carrier), callback t0 min-of-two estimates unvalidated hardware timing. Source IDs/access links remain omitted in checkpoint. Always discover compare/holo subfolders from root by name, not root modification time. Preserve source quality and same-session duplicates; no categorical accuracy/false-trigger labels inferred. Run14: root83/teach48, compare72/holo16 snapshot. New completed paired113747(30.63s, historical linear, now gated train)/120410(41.3s, gated-card numbers, not in15 train). Fixed stored-camera/pre-soft-limit comparison x/y/z errors3.45/3.22/3.42 and2.48/5.12/2.76cm; latter height r−.076 vs zero3.04cm with broad CI1.76–8.34. New holo12300523.13s plus provisional12335835.50s no hand truth.7 full derived,6 audited,113429 originals missing. New default gated15 (8teach+7compare) uses NN context; embedded model x/y/z half3.33/2.94/4.19, displayed height3.14. Published gated eval computes pooled scale from evaluation pairs; exact embedded all-held-out export provenance unresolved, old scale_loso indirect leakage unchanged. Lag cache not committed and HFOV66 versus live78; no independent LOSO reproduction. Keep112943 field outlier, exclusion alignment rationale not independently verified. No categorical scores or idle rates inferred. Follow pending bundles even when hashes do not change. Source IDs/links omitted from checkpoint.",
   "latest_3d_stored_metrics": {
-    "training_sessions": 8,
+    "source_main_sha": "a921fe86874fe86fcdcd5d3cade1f43b6e91633d",
+    "model": "gated",
+    "training_sessions": 15,
+    "linear_fallback_training_sessions": 8,
     "tracker": {
       "gate": 1,
       "tauS": 0.1
     },
     "engine_half_rmse_cm": [
-      3.76,
-      2.48,
-      4.26
+      3.33,
+      2.94,
+      4.19
     ],
     "display_mixed_rmse_cm": [
-      3.76,
-      2.74,
-      4.26
+      3.33,
+      3.14,
+      4.19
     ],
-    "status": "embedded LOSO claim, not independently reproduced; scale fold leakage unresolved"
+    "status": "embedded claim; independent validation not reproduced; pooled-scale evaluation and missing lag-cache provenance require review"
   },
   "latest_reextract_summary": {
     "session": "20261115_092315_teach_61f5",
@@ -1185,30 +1336,43 @@
     "range_exclusion_warning": "All UD prompt present frames outside assumed 45cm range",
     "current_model_holdout": false
   },
-  "historical_report": "experiments/monitor-2026-11-15-1028.md",
+  "historical_report": "experiments/monitor-2026-11-15-1139.md",
   "watch_subfolder_names": [
     "teach",
     "compare",
     "holo"
   ],
   "latest_field_comparison": {
-    "artifact": "experiments/compare-field-2026-11-15.json",
-    "source_main_sha": "25d4aaad29113cdae4e7cb5ad45fa48b0c7c4a98",
-    "paired_sessions": 7,
-    "sound_only_sessions": 6,
+    "artifact": "experiments/compare-field-2026-11-15-1238.json",
+    "source_main_sha": "a921fe86874fe86fcdcd5d3cade1f43b6e91633d",
+    "paired_sessions": 2,
     "axes": "x,y,z",
-    "method": "recorded pre-soft-limit display vs fixed-final-scale webcam; exploratory overlapping250ms displacement",
-    "outlier_session": "batears_20261115_112943_cmp_61f5",
-    "outlier_rmse_cm": [
-      7.85277,
-      6.97388,
-      8.78809
+    "latest_session": "batears_20261115_120410_cmp_61f5",
+    "rmse_cm": [
+      2.47549,
+      5.12277,
+      2.76331
     ],
-    "outlier_zero_motion_rmse_cm": [
-      3.67318,
-      6.94839,
-      3.48114
+    "zero_motion_rmse_cm": [
+      3.2469,
+      3.04397,
+      3.48119
     ],
+    "method": "recorded pre-soft-limit display vs final fixed camera scale; not live panel reproduction",
     "categorical_accuracy_available": false
-  }
+  },
+  "pending_bundles": [
+    {
+      "session": "batears_20261115_122157_cmp_61f5",
+      "status": "WAV+vision only, JSON/holo missing, do not score until bundle confirmed"
+    },
+    {
+      "session": "batears_20261115_113429_cmp_61f5",
+      "status": "vision_full only in Drive, listed in gated training, originals missing"
+    },
+    {
+      "session": "batears_20261115_123358_holo_61f5",
+      "status": "JSON+WAV and ended log read; first appeared during run, confirm stability even if next digest unchanged"
+    }
+  ]
 }
