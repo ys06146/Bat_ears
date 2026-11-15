@@ -1,14 +1,14 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T15:11:07Z",
-  "main_sha": "70a73c47632601c42e34512a14ae4312c4b1bc0b",
-  "exp_sha_before_run": "5c83370d3abef466387f738067299f576600e20d",
-  "report": "experiments/monitor-2026-11-15-0908.md",
+  "checked_at_utc": "2026-11-15T15:31:05Z",
+  "main_sha": "7f2a9d4aa53eccfdde5044377a8b08d9d0db5ba6",
+  "exp_sha_before_run": "055450e737099e3e54a38ba8822d771da8f72f3b",
+  "report": "experiments/monitor-2026-11-15-0932.md",
   "github_files": [
     {
       "path": ".gitignore",
-      "sha": "9fade0b7f56eb800c614f591a89648c933188006",
-      "size": 366
+      "sha": "6539265053342b15bd0b5c7cd0b65939b7a8d67e",
+      "size": 525
     },
     {
       "path": ".nojekyll",
@@ -17,38 +17,38 @@
     },
     {
       "path": "README.md",
-      "sha": "4daa7611344bcd11e70d73218c723f6fc36f4ac4",
-      "size": 6448
+      "sha": "0b4118aea06b2fe9a115035de9ebd6256012c386",
+      "size": 6710
     },
     {
       "path": "TEAM.md",
-      "sha": "425d57adbd63a37f28a75383d64d31973c17d2e6",
-      "size": 11397
+      "sha": "2f904995e5868e0e52d5b2e04cfb5b9a505aae8b",
+      "size": 11879
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "ec1491a989cecf656b81b549804cb460eee9e355",
-      "size": 7106
+      "sha": "327ae2f7e0f220679e961475d1df2fd1b93c8143",
+      "size": 7364
     },
     {
       "path": "docs/devpost.md",
-      "sha": "e53594f091786eb2d33448e74606321e9424f4f8",
-      "size": 10106
+      "sha": "e5e7089c75a64aaf3145f9f95ee9a65f4fb37c70",
+      "size": 10755
     },
     {
       "path": "docs/judge-qa.md",
-      "sha": "3f416b67052679d381ae740cbc57507038de6aed",
-      "size": 5128
+      "sha": "a47775f233ba32be6d842ea8564f13a37192eca1",
+      "size": 5601
     },
     {
       "path": "docs/pitch.md",
-      "sha": "4b496ff3734781d6f5a7ed04c2b800a2d70622ea",
-      "size": 2236
+      "sha": "6061b69e0d62da429fc1d81e44933c99350c1cd5",
+      "size": 2251
     },
     {
       "path": "docs/slides.md",
-      "sha": "586c187f656ead7a77a559d0e2d2d787373c4ecf",
-      "size": 1513
+      "sha": "3074f52fdbc2088bf783f1c625223f6ac31192f0",
+      "size": 1592
     },
     {
       "path": "ml/README.md",
@@ -582,8 +582,8 @@
     },
     {
       "path": "web/3d.html",
-      "sha": "ad73bca8344ee25127e9d323c77c2a125be8a179",
-      "size": 42358
+      "sha": "f2faa53e3c447a01a1576c1452226b201df8e28b",
+      "size": 42411
     },
     {
       "path": "web/app.js",
@@ -597,8 +597,8 @@
     },
     {
       "path": "web/bat3d.js",
-      "sha": "4597a0fa6c56af25b78e2732861bbba7654d908f",
-      "size": 27252
+      "sha": "430de3101c5018ba60fee63d9e5a635c74bcc835",
+      "size": 28065
     },
     {
       "path": "web/batears.html",
@@ -627,7 +627,7 @@
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "b019b7d2606d4325d459a51f52afa82c7581805c",
+      "sha": "5c26765decb78859f07130cb8d962aab015022f3",
       "size": 27246
     },
     {
@@ -642,12 +642,12 @@
     },
     {
       "path": "web/hologram.html",
-      "sha": "d3a1c8afcbd3e089ff631932445fd3e030a839bd",
-      "size": 52493
+      "sha": "2b2588b931fb070ad389c6495720c7634b592025",
+      "size": 55389
     },
     {
       "path": "web/index.html",
-      "sha": "5c8b03355c5951a9b778eb05d0292d23571dc1f9",
+      "sha": "caff57759c8dc32e33e3ad903109785dec8edca7",
       "size": 9921
     },
     {
@@ -657,7 +657,7 @@
     },
     {
       "path": "web/key.html",
-      "sha": "919775c88df0de4bb0ee7ff54e909048bf92178e",
+      "sha": "78865dfb3637d67cbc27f3ae3b4144a01fda3775",
       "size": 28152
     },
     {
@@ -697,8 +697,8 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "a4d5cfc70617b8d3e4cc09521ca09024c6c46258",
-      "size": 74077
+      "sha": "0386f0ad18e59b5f372dda135722db7865ce1d5a",
+      "size": 80458
     },
     {
       "path": "web/tone.html",
@@ -1385,7 +1385,9 @@
     "20261115_040721_teach_61f5",
     "20261115_043301_teach_61f5",
     "20261115_044652_teach_61f5",
-    "20261115_082736_teach_61f5"
+    "20261115_082736_teach_61f5",
+    "20261115_090503_teach_61f5",
+    "20261115_092315_teach_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1418,9 +1420,14 @@
     "overheadPresets_added_noNamedCalibrationInCurrentEngine",
     "overhead082736_complete_labelFixed97presence_highPhoneLevel",
     "frozen5map082736_half_x3.65_vs_zero2.80_singleSessionDiagnostic",
-    "scale_loso_outerFoldIndirectLeakage_requiresTrueNested_reprovenance"
+    "scale_loso_outerFoldIndirectLeakage_requiresTrueNested_reprovenance",
+    "sevenSessionDefault_includes082736_090503",
+    "092315_phoneWeak_negative0p4_to2p7_changedXminus40",
+    "092315_rangeExclusions_udEntirelyOutside45",
+    "092315_frozen7_half_height151percent_rmse2p40_baseline2p18",
+    "092315_webmDrive_localOnlyFlagMismatch"
   ],
-  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports. Run10: root81/teach35; new completed082736 teacher session, including WAV, analyzed without modifying originals. Frozen five-session model, laptop four paths only, no new fitting or display filters: half displacement RMSE cm x3.645/y1.349/z2.762 versus zero-motion x2.799/y1.786/z3.461. Exploratory within-session block intervals, not participant generalization. No overhead-phone benefit inferred. Published scale_loso.js has indirect outer-test leakage in scale fitting; embedded table provenance must be checked before attributing bias. Report0908 and holdout-082736.json contain reproduction and limits.",
+  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports. Run10: root81/teach35; new completed082736 teacher session, including WAV, analyzed without modifying originals. Frozen five-session model, laptop four paths only, no new fitting or display filters: half displacement RMSE cm x3.645/y1.349/z2.762 versus zero-motion x2.799/y1.786/z3.461. Exploratory within-session block intervals, not participant generalization. No overhead-phone benefit inferred. Published scale_loso.js has indirect outer-test leakage in scale fitting; embedded table provenance must be checked before attributing bias. Report0908 and holdout-082736.json contain reproduction and limits. Run11: root81/teach47, two new completed teacher sessions090503 and092315. New7-session calibration trains on082736+090503 so prior082736 holdout remains historical5-session only. Frozen7 diagnostic092315:635 overlapping in-range windows half RMSE x5.165/y2.397/z3.864cm; height amplification1.513, zero-motion2.178. Camera proxy outside45cm1664/2633; allUD present140 outside. 17kHz phone heard=false at x−40/h45/z30; no interference cause established. WEBM92.6MB present in Drive despite local_only metadata; contents not fetched/decoded. scale_loso indirect fold leak unchanged, embedded-table provenance unconfirmed. Report0932 and holdout-092315.json preserve results, hashes and limits.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1465,6 +1472,102 @@
       "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
       "path": "nhng/ml/data/teach",
       "files": [
+        {
+          "id": "15Vg4EtRzqIE2OvYT_UflhXJ0Rc19qx8I",
+          "name": "batears_20261115_092315_teach_61f5_frames.csv",
+          "mime": "text/csv",
+          "size": "135641",
+          "modified": "2026-11-15T15:25:49.207Z",
+          "url": "https://drive.google.com/file/d/15Vg4EtRzqIE2OvYT_UflhXJ0Rc19qx8I/view?usp=drivesdk"
+        },
+        {
+          "id": "1tAYrRpp8qq4hUYBn8CrpFRzTeyvsZQAU",
+          "name": "batears_20261115_092315_teach_61f5.webm",
+          "mime": "video/webm",
+          "size": "92608956",
+          "modified": "2026-11-15T15:25:46.864Z",
+          "url": "https://drive.google.com/file/d/1tAYrRpp8qq4hUYBn8CrpFRzTeyvsZQAU/view?usp=drivesdk"
+        },
+        {
+          "id": "1G4t1Mn2F4OArA7TLXAcc8eD7egmWUmQr",
+          "name": "batears_20261115_092315_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28327980",
+          "modified": "2026-11-15T15:25:44.858Z",
+          "url": "https://drive.google.com/file/d/1G4t1Mn2F4OArA7TLXAcc8eD7egmWUmQr/view?usp=drivesdk"
+        },
+        {
+          "id": "1lAb3rLiqV6LWnb5DuMBhxRN0ianqzF3g",
+          "name": "batears_20261115_092315_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "661483",
+          "modified": "2026-11-15T15:25:44.416Z",
+          "url": "https://drive.google.com/file/d/1lAb3rLiqV6LWnb5DuMBhxRN0ianqzF3g/view?usp=drivesdk"
+        },
+        {
+          "id": "1Tqd0u85th6NJVQoL92UsaTtQg4C0eBet",
+          "name": "batears_20261115_092315_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1502460",
+          "modified": "2026-11-15T15:25:44.191Z",
+          "url": "https://drive.google.com/file/d/1Tqd0u85th6NJVQoL92UsaTtQg4C0eBet/view?usp=drivesdk"
+        },
+        {
+          "id": "19PGUFMBuma7phKbEo4Yh4dKGuM5JSyqh",
+          "name": "batears_20261115_092315_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "2708960",
+          "modified": "2026-11-15T15:25:43.973Z",
+          "url": "https://drive.google.com/file/d/19PGUFMBuma7phKbEo4Yh4dKGuM5JSyqh/view?usp=drivesdk"
+        },
+        {
+          "id": "16KfuXnTbwENyFtftGpB1RQT9vIorNQhP",
+          "name": "batears_20261115_092315_teach_61f5.json",
+          "mime": "application/json",
+          "size": "96330",
+          "modified": "2026-11-15T15:25:43.765Z",
+          "url": "https://drive.google.com/file/d/16KfuXnTbwENyFtftGpB1RQT9vIorNQhP/view?usp=drivesdk"
+        },
+        {
+          "id": "165gltHDpXEceJa2SlYxbxcjX5RzYGWxl",
+          "name": "batears_20261115_090503_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28325932",
+          "modified": "2026-11-15T15:07:32.865Z",
+          "url": "https://drive.google.com/file/d/165gltHDpXEceJa2SlYxbxcjX5RzYGWxl/view?usp=drivesdk"
+        },
+        {
+          "id": "1wtIJXmhwO2kmbIzTEomc5s5O9NEyRXO_",
+          "name": "batears_20261115_090503_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "659394",
+          "modified": "2026-11-15T15:07:32.490Z",
+          "url": "https://drive.google.com/file/d/1wtIJXmhwO2kmbIzTEomc5s5O9NEyRXO_/view?usp=drivesdk"
+        },
+        {
+          "id": "1OErsl_Q8ww1BO0_HdQbBG7ofqhtWwuVp",
+          "name": "batears_20261115_090503_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1220103",
+          "modified": "2026-11-15T15:07:32.277Z",
+          "url": "https://drive.google.com/file/d/1OErsl_Q8ww1BO0_HdQbBG7ofqhtWwuVp/view?usp=drivesdk"
+        },
+        {
+          "id": "1QjbUXZp-BmOWaWFg20WjBShH6PC7CIGo",
+          "name": "batears_20261115_090503_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "3033451",
+          "modified": "2026-11-15T15:07:31.911Z",
+          "url": "https://drive.google.com/file/d/1QjbUXZp-BmOWaWFg20WjBShH6PC7CIGo/view?usp=drivesdk"
+        },
+        {
+          "id": "1t-MtmU-dfEBnbgPl5UbfMpHJhiV1tXzE",
+          "name": "batears_20261115_090503_teach_61f5.json",
+          "mime": "application/json",
+          "size": "95437",
+          "modified": "2026-11-15T15:07:31.510Z",
+          "url": "https://drive.google.com/file/d/1t-MtmU-dfEBnbgPl5UbfMpHJhiV1tXzE/view?usp=drivesdk"
+        },
         {
           "id": "1U-E38rPw-CoU0aziEBMFrB5jQJO8AQzp",
           "name": "batears_20261115_082736_teach_61f5.wav",
@@ -1749,88 +1852,44 @@
     }
   ],
   "latest_3d_stored_metrics": {
-    "method": "leave-one-sitting-out over 5 sittings, scale estimated without the held-out sitting",
-    "corr": [
-      0.78,
-      0.47,
-      0.72
-    ],
-    "motion": [
-      6.96,
-      3.4,
-      6.25
-    ],
-    "modes": {
-      "mse": {
-        "k": [
-          1,
-          1,
-          1
-        ],
-        "rms": [
-          4.42,
-          2.99,
-          4.33
-        ],
-        "size": [
-          0.7,
-          0.47,
-          0.72
-        ]
-      },
-      "half": {
-        "k": [
-          1.2,
-          1.46,
-          1.17
-        ],
-        "rms": [
-          4.42,
-          3.08,
-          4.45
-        ],
-        "size": [
-          0.85,
-          0.69,
-          0.86
-        ]
-      },
-      "matched": {
-        "k": [
-          1.44,
-          2.12,
-          1.38
-        ],
-        "rms": [
-          4.75,
-          3.51,
-          4.81
-        ],
-        "size": [
-          1.03,
-          1.01,
-          1.03
-        ]
-      }
-    }
-  },
-  "latest_holdout_summary": {
-    "session": "20261115_082736_teach_61f5",
-    "source_main_sha": "70a73c47632601c42e34512a14ae4312c4b1bc0b",
-    "artifact": "experiments/holdout-082736.json",
+    "source_main_sha": "7f2a9d4aa53eccfdde5044377a8b08d9d0db5ba6",
+    "training_sessions": 7,
     "mode": "half",
     "rmse_cm": [
-      3.64546,
-      1.34907,
-      2.76167
+      4.13,
+      2.58,
+      4.32
+    ],
+    "motion_rms_cm": [
+      5.49,
+      2.98,
+      5.74
+    ],
+    "size_ratio": [
+      0.76,
+      0.72,
+      0.81
+    ],
+    "status": "embedded claimed LOSO numbers; independent computation not reproduced; scale_loso leakage concern remains"
+  },
+  "latest_holdout_summary": {
+    "session": "20261115_092315_teach_61f5",
+    "source_main_sha": "7f2a9d4aa53eccfdde5044377a8b08d9d0db5ba6",
+    "artifact": "experiments/holdout-092315.json",
+    "mode": "half",
+    "rmse_cm": [
+      5.16544,
+      2.39692,
+      3.86425
     ],
     "zero_motion_rmse_cm": [
-      2.7989,
-      1.78582,
-      3.46126
+      6.27512,
+      2.1779,
+      8.09118
     ],
-    "overlapping_windows": 2660,
+    "overlapping_windows": 635,
     "independent_sessions": 1,
-    "full_display_pipeline": false
+    "full_display_pipeline": false,
+    "range_exclusion_warning": "All UD prompt present frames outside assumed 45cm range"
   }
 }
