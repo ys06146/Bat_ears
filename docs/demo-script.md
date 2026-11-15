@@ -24,7 +24,7 @@ Filming tips: record the teach step and the camera-off step in one take, so nobo
 5. Re-teach (`teach.html`, ② session, 2½ min) only if the laptop, the room or the hand spot changed.
 
 ### Live (30 s per judge)
-1. Tape over the webcam. Open `hologram.html` and press ▶ 시작. Tone volume 1.2 (the teach level) is the default; 🔍 진단 shows the tone level against the teach sessions.
+1. Tape over the webcam. Open `hologram.html`: a start card lists the four steps. Press ▶ 시작 on it and allow the mic; if the mic is blocked, missing or busy, the card says what to do. Tone volume 1.2 (the teach level) is the default; 🔍 진단 shows the tone level against the teach sessions, and the accuracy card warns when the tone is weak.
 2. Hand over the tape mark, press ◎ 가운데 (or space), then move left-right and toward-away briskly (about 20 cm a second). The hologram follows. Sound measures movement, not position, so the hand drifts back to the centre when you stop.
 3. Honest numbers on screen (default 'balanced' size): left-right ±4.1 · toward-away ±4.3 · up-down ±2.6 cm. That's the RMS error of the hand's 250 ms movement on a sitting the model never saw (eight webcam-taught sittings, each left out once; laptop speakers only; hand within about 45 cm of the webcam; one person, one laptop). The movements themselves were 5.5 / 5.8 / 3.0 cm RMS, and the screen draws them at 76 / 82 / 72 % of their true size: a least-squares map draws motion at (correlation × true size), so the weak axis looks small. ⚙ 'real size' draws ~100 % at about 10 % more error.
 4. For engineers: `3d.html` shows the per-path quality bars, the geometry and the circle calls.
