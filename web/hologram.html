@@ -57,8 +57,8 @@
 </style>
 <script type="importmap">
 { "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  "three": "./vendor/three-0.160.0/build/three.module.js",
+  "three/addons/": "./vendor/three-0.160.0/examples/jsm/"
 } }
 </script>
 </head>
@@ -108,11 +108,12 @@
   <label class="note">소리만으로 추정하면 정보가 약한 축(특히 높이)을 실제보다 작게 그려요. 크게 그리면 맞는 움직임과 틀린 움직임이 같이 커져요</label>
   <h3>필터 (One Euro, Casiez 2012)</h3>
   <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
-  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="6"> <span id="tauV" class="note">6초 (멈추면 2초)</span></label>
+  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="2"> <span id="tauV" class="note">2초 (멈추면 2초)</span></label>
   <h3>보기</h3>
   <label><input type="checkbox" id="showTrail" checked> 궤적</label>
   <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
   <label><input type="checkbox" id="showRaw"> 필터 전 원값 점</label>
+  <label><input type="checkbox" id="showCircle"> ↻ 원 동작 알림 (엔진의 원 판정, 실험)</label>
   <label>톤 볼륨 <input type="range" id="vol" min="0.2" max="1.6" step="0.05" value="1.2"> <span id="volV" class="note">1.20 (teach와 같은 크기)</span></label>
   <p class="note">손가락 모양은 서진 님 오른손(teach 세션 웹캠에서 본 모양)으로 고정이에요. 소리는 손의 위치만 재요.</p>
 </div>
@@ -121,7 +122,7 @@
   <p class="note">노트북 스피커 두 개가 18kHz·19.5kHz를 내고, 마이크 두 개가 손에 반사된 소리를 들어요. 소리원마다 I/Q 위상으로 경로 길이 변화를 재고(LLAP 방식), 웹캠으로 가르친 세션(teach.html, MediaPipe 손 관절이 정답)에서 배운 지도로 경로 변화를 손 이동으로 바꿔요(브라보). 이 화면은 그 위치를 One Euro 필터로 다듬고, 소리는 움직임만 재기 때문에 천천히 가운데로 돌아오게 해요. 손가락 모양은 고정이에요.</p>
   <h3>오픈소스 (라이선스)</h3>
   <ul class="note">
-    <li>three.js r160: 3D 화면, OrbitControls, EffectComposer, UnrealBloomPass(글로우), CSS2DRenderer (MIT)</li>
+    <li>three.js r160: 3D 화면, OrbitControls, EffectComposer, UnrealBloomPass(글로우), CSS2DRenderer (MIT). <code>web/vendor/</code>에 같이 들어 있어서 인터넷 없이 로컬 서버로도 떠요</li>
     <li>MediaPipe Tasks Vision 0.10.21 HandLandmarker와 hand_landmarker 모델: teach.html의 웹캠 선생님 (Apache-2.0)</li>
     <li>bat3d.js·vision3d.browser.js: 팀 코드(브라보). 1€ 필터는 논문을 보고 직접 구현했어요(참고 구현은 BSD/MIT)</li>
   </ul>
@@ -154,8 +155,8 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115093459" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
-<script src="vision3d.browser.js?v=20261115093459"></script>
+<script src="bat3d.js?v=20261115095849" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115095849"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -344,6 +345,10 @@ function ghostAt(t) {   // the webcam frame nearest to WAV time t (s); null when
 const palmOf = (pts) => [0, 1, 2].map((k) => [0, 5, 9, 13, 17].reduce((a, i) => a + pts[i][k], 0) / 5);
 
 // ------------------------------------------------------------------ display chain (per engine frame, ~100 Hz)
+// the taught zone around the hand spot (m; left-right, height, depth). Past it the sound map extrapolates, so the hand turns
+// amber and is drawn with a soft limit: motion inside the zone 1:1, past the edge at 30 %, never beyond 1.4 x the zone
+const ZONE = [0.18, 0.12, 0.15];
+const softLimit = (d, L) => { const a = Math.abs(d); return a <= L ? d : Math.sign(d) * Math.min(1.4 * L, L + (a - L) * 0.3); };
 const hist = [];
 const disp = { pos: HOME.slice(), raw: HOME.slice(), cont: null, off: [0, 0, 0], spring: [0, 0, 0], last: null, still: 0, frames: 0, t: 0 };
 const vsub = (a, b) => a.map((v, i) => v - b[i]), vadd = (a, b) => a.map((v, i) => v + b[i]);
@@ -364,7 +369,9 @@ function onFrame(f) {
   if (f.reset && disp.cont) { disp.off = vsub(disp.cont, f.raw); cont = disp.cont.slice(); }
   const step = disp.cont ? vsub(cont, disp.cont) : [0, 0, 0];
   disp.cont = cont;
-  // spring back to the centre: sound measures movement, so the absolute place slowly returns. tau 3 s moving, 1 s still:
+  // spring back to the centre: sound measures movement, so the absolute place slowly returns. Default 2 s (11/15 10:00): replaying
+  // 043301 through the 8-sitting engine, 2 s vs 6 s keeps the drawn hand 44 % closer to the webcam (x drift 8.8 vs 15.7 cm),
+  // 1 s motion corr 0.51 vs 0.33 (x), the same 250 ms corr (0.73), and out of the zone 9 % vs 23 % of the time. Older note:
   // on 044652 a shorter spring removes drift (x corr 0.28 at 6 s -> 0.33 at 3 s), at the cost of not holding an off-centre pose
   disp.still = f.moving === false ? (f.still || disp.still + dt * 1000) : 0;
   const tau0 = Number($('tau').value), tau = tau0 <= 0 ? Infinity : disp.still > 1000 ? Math.min(2, tau0) : tau0, k = Math.exp(-dt / tau);
@@ -435,7 +442,8 @@ async function start(m, file) {
     ? { geom: 'galaxy', calibName: cn, model: 'learned', autoReset: false, amp: $('ampMode').value }
     : { geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
   engine.on('frame', onFrame);
-  engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
+  // circle calls are an experiment (bravo v15 makes them more frequent): off by default so a sweep doesn't pop a false '원' mid-demo
+  engine.on('circle', (c) => { if (c && c.dir && $('showCircle').checked) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
   try { audioG = await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) {
     const msg = startErrMsg(e);
@@ -528,7 +536,7 @@ function renderHud(now) {
   hudT = now;
   const d = disp.pos.map((v, i) => 100 * (v - HOME[i]));
   $('pos').innerHTML = `<b>좌우</b><span>${d[0] >= 0 ? '→' : '←'} ${Math.abs(d[0]).toFixed(1)} cm</span><b>앞뒤</b><span>${d[2] >= 0 ? '화면 쪽' : '몸 쪽'} ${Math.abs(d[2]).toFixed(1)} cm</span>`
-    + `<b>높이</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(약함)</span></span><b>상태</b><span>${!running ? '멈춤' : disp.moving ? '움직이는 중' : '멈춤 · 가운데로 돌아오는 중'}</span>`
+    + `<b>높이</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(약함)</span></span><b>상태</b><span>${!running ? '멈춤' : disp.out ? '<span style="color:var(--warn);font-weight:700">범위 밖 · 테이프 자리로 와서 ◎(스페이스)</span>' : disp.moving ? '움직이는 중' : '멈춤 · 가운데로 돌아오는 중'}</span>`
     + (ghost.on && ghost.errs.length > 20 ? (() => { const r = [0, 1, 2].map((i) => 100 * Math.sqrt(ghost.errs.reduce((a, q) => a + q.e[i] ** 2, 0) / ghost.errs.length)); return `<b>🟩 정답과 차이</b><span>좌우 ${r[0].toFixed(1)} · 앞뒤 ${r[2].toFixed(1)} · 높이 ${r[1].toFixed(1)} cm <span class="note">(최근 5초 RMS)</span></span>`; })() : '');
   const q = disp.q || [], nm = ['L 18k', 'R 19.5k', '📱A', '📱B'];
   let h = '';
@@ -641,7 +649,14 @@ function frame() {
     perf.low = perf.fps < 40 ? perf.low + 1 : 0;
     if (perf.low >= 3 && !perf.reduced) { perf.reduced = true; renderer.setPixelRatio(1); composer.setPixelRatio ? composer.setPixelRatio(1) : null; bloom.resolution.set(innerWidth / 2, innerHeight / 2); composer.setSize(innerWidth, innerHeight); } } }
   const now = performance.now(), el = clock.getElapsedTime();
-  const P = T3(disp.pos);
+  const dOff = disp.pos.map((v, i) => v - HOME[i]);
+  const out = running && dOff.some((v, i) => Math.abs(v) > ZONE[i]);
+  disp.out = out;
+  if (out !== frame.wasOut) {
+    frame.wasOut = out;
+    boneMat.color.set(out ? 0xffb74d : 0x2bb8f0); jointMat.color.set(out ? 0xffd180 : 0x7fdcff); palmShader.uniforms.color.value.set(out ? 0xffb74d : CYAN);
+  }
+  const P = T3(HOME.map((h, i) => h + softLimit(dOff[i], ZONE[i])));
   hand.position.copy(P);
   hand.visible = running || SIM;
   palmShader.uniforms.time.value = el;
@@ -743,7 +758,21 @@ $('calibFile').onchange = async (e) => {
 };
 if (SIM) { $('sim').style.display = 'block'; $('intro').style.display = 'none'; start('sim'); }
 else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: $('ampMode').value }).info() : null);
+window.__holoReady = true;
 window.Holo = { REC, disp, onFrame, euro, start, stop, ghost, ghostAt: (t) => ghostAt(t), palmOf, get running() { return running; }, get engine() { return engine; } };   // for tests
+</script>
+<script>
+// if the 3D module never started (no network for three.js, no WebGL, an old browser), say so instead of a blank page
+setTimeout(function () {
+  if (window.__holoReady) return;
+  var d = document.createElement('div');
+  d.className = 'hud';
+  d.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%);max-width:520px;font-size:15px;border-color:#ef5350';
+  d.innerHTML = '<b>⚠️ 3D 화면을 불러오지 못했어요</b><br>새로고침해 보고, Chrome(또는 Edge)인지, WebGL(하드웨어 가속)이 켜져 있는지 확인해요.'
+    + '<br>대신 보여 줄 데모: <a href="index.html" style="color:#4fd8ff">🎮 Force Push</a>';
+  document.body.appendChild(d);
+  var i = document.getElementById('intro'); if (i) i.style.display = 'none';
+}, 7000);
 </script>
 </body>
 </html>
