@@ -1,9 +1,9 @@
 {
   "schema": 2,
-  "checked_at_utc": "2026-11-15T19:55:03Z",
-  "main_sha": "d7067e7cd0be7dfa7da407e609ba041e8e6d5c36",
-  "exp_sha_before_run": "41a4bb2164a460a592d79d9afb53c16f5324df7a",
-  "report": "experiments/monitor-2026-11-15-1356.md",
+  "checked_at_utc": "2026-11-15T21:36:42Z",
+  "main_sha": "03ef39d52bcb46ca6735d480b64b9443c9b097a1",
+  "exp_sha_before_run": "b5201797d6f9ca4f9ace2d717199f605d1a908bd",
+  "report": "experiments/monitor-2026-11-15-1537.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -722,8 +722,8 @@
     },
     {
       "path": "web/airkey.js",
-      "sha": "7fa4bb68a3c1fa35044761f527fa8995c1392d72",
-      "size": 5645
+      "sha": "ad015b5982d0ce2633f415f8a8658162114ce18d",
+      "size": 5664
     },
     {
       "path": "web/app.js",
@@ -737,8 +737,8 @@
     },
     {
       "path": "web/bat3d.js",
-      "sha": "28900ba1b0cb46351dc483623a2f0280bbe6e606",
-      "size": 34333
+      "sha": "c183cd59f9d04cbc6187f2df98d95812a5820da9",
+      "size": 40330
     },
     {
       "path": "web/bat3d_v15.js",
@@ -762,7 +762,7 @@
     },
     {
       "path": "web/collect.html",
-      "sha": "ff6f2de607a8f428517aaa136096120d0fe91a48",
+      "sha": "f24a0129ba7672425aa4206a6bab4f234191dcc4",
       "size": 10900
     },
     {
@@ -777,7 +777,7 @@
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "d8bbb17515aa70ba8286308316dfce7aa33542e7",
+      "sha": "bfd7e3fbeddafc60e5836a3caf2316d4d394e4e5",
       "size": 26578
     },
     {
@@ -792,12 +792,12 @@
     },
     {
       "path": "web/hologram.html",
-      "sha": "760c595b53db6d5fbc214906a8b762ec08e7b382",
-      "size": 89676
+      "sha": "967c80df468c0b483dbb20d40409a1b68ac53432",
+      "size": 90278
     },
     {
       "path": "web/index.html",
-      "sha": "4bbe782d3713db156f226e0e5c41d777edb19471",
+      "sha": "5aee3eccaff843184d7d5e38bfd57f0efffc52d4",
       "size": 10895
     },
     {
@@ -807,13 +807,13 @@
     },
     {
       "path": "web/key-lab.html",
-      "sha": "3fc7f1e0cc40eb35a33e1900b68991539df0fe46",
+      "sha": "0b7fdfe08ee470546783ab438f5417f9bb678426",
       "size": 27702
     },
     {
       "path": "web/key.html",
-      "sha": "83186ae14a0b76473dcb939c93b115ea0c0bea8b",
-      "size": 34386
+      "sha": "0f07789b4495a710ccb34433519bc9949d179006",
+      "size": 33829
     },
     {
       "path": "web/lr.js",
@@ -857,7 +857,7 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "3ea23e06239d61c2876fb636972d3a1600b53408",
+      "sha": "c9c5b688a94ae85f17cae5268242fc5c04dc51fb",
       "size": 80213
     },
     {
@@ -1333,25 +1333,43 @@
     "cmp123938_height3p02_vsZero1p75_nowInTraining",
     "qualityFlags12_112943high34p4pct_notDeletionRule",
     "savingGuard_added_122157_stillIncomplete",
-    "collectMoved_labToolsHidden_airkeyV4_newProtocol"
+    "collectMoved_labToolsHidden_airkeyV4_newProtocol",
+    "default_seqg_oneSecondHistory17_model_change",
+    "seqg_display3p3_4p1_3p1_longerClaimsUnreproduced",
+    "fallbackLinearGated_syntheticRawParity_zero",
+    "airkey_v5_twoSecondHold_reenroll_required",
+    "repositoryRenamed_Bat_ears_sameID1458084003",
+    "oldPagesNhng404_newBatEars200_docsOldLinks9"
   ],
-  "notes": "No new independent sessions. Existing092315 video re-extracted to4393 rows4219 present.8-session v15 now trains on092315; prior7-model holdout historical only. Tracker gate1.0/tau0.1, spring2s and additional height1.331x. No new categorical accuracy or false-trigger rate observation. Full t_res/speeds/auto blank, do not convert to idle/zero. Full/live same-session alternatives, never independent or concatenated. Prior duplicate/auth/protocol caveats in experiments reports remain; re-read previous reports when needed rather than storing identifiable Drive manifests here. Compare sha256(id) keys with payload fingerprints specified in each manifest. Run13: root83/teach48 unchanged content plus new compare51/holo12.13 new recordings (7 paired,6 sound-only),3 full labels derived from same paired sessions. All text read, WAV/video not decoded. Diagnostic fixed final camera scale, 250±50ms windows, nearest shown-log clock<=30ms, endpoints estimated<=45cm; shown coordinates are pre-soft-limit, not exact pixels/live panel.112943 high x7.85/y6.97/z8.79cm, x/z baseline3.67/3.48 and predicted movement2.41/2.45x; exploratory CIs broad, no cause proof.1106405.5fps and1122042.82s limited. New warning thresholds(weak−12dB; foreign within15dB of carrier), callback t0 min-of-two estimates unvalidated hardware timing. Source IDs/access links remain omitted in checkpoint. Always discover compare/holo subfolders from root by name, not root modification time. Preserve source quality and same-session duplicates; no categorical accuracy/false-trigger labels inferred. Run14: root83/teach48, compare72/holo16 snapshot. New completed paired113747(30.63s, historical linear, now gated train)/120410(41.3s, gated-card numbers, not in15 train). Fixed stored-camera/pre-soft-limit comparison x/y/z errors3.45/3.22/3.42 and2.48/5.12/2.76cm; latter height r−.076 vs zero3.04cm with broad CI1.76–8.34. New holo12300523.13s plus provisional12335835.50s no hand truth.7 full derived,6 audited,113429 originals missing. New default gated15 (8teach+7compare) uses NN context; embedded model x/y/z half3.33/2.94/4.19, displayed height3.14. Published gated eval computes pooled scale from evaluation pairs; exact embedded all-held-out export provenance unresolved, old scale_loso indirect leakage unchanged. Lag cache not committed and HFOV66 versus live78; no independent LOSO reproduction. Keep112943 field outlier, exclusion alignment rationale not independently verified. No categorical scores or idle rates inferred. Follow pending bundles even when hashes do not change. Source IDs/links omitted from checkpoint. Run15: root83/teach49/compare90/holo16 stable. Only new recording12393840.7s;7 base+full files and12 flags sidecars are not extra trials. Fixed stored-camera pre-soft-limit 225 overlapping windows x/y/z RMSE2.40/3.02/2.33cm vs zero4.53/1.75/4.73, height r.257 and within-session CI2.73–3.55.123938 now in17-session final weights; evaluation explicitly16 only, old model historical. Flags112943163/47434.4%,12393810/9781%; definitions/threshold producer not verified, no rows removed. New full1199 rows, live778 all match <=3ms, handedness mismatch2; no hardware audio sync proof.123358 stable now completed,122157missingJSON/holo and113429missingoriginals persist. Saving guard added, Collect moved tocollect.html, holo lab tools require lab=1. New AirKeyv4 path matcher replaces key.html, prior auth metrics not transferable. No new categorical truth/idle labels. Related evaluation scripts unchanged, pooled-scale/lag-cache concerns unresolved. compare folder90 approaches fetch100-child cap; use paginated listing if count reaches100, never treat truncated list as complete.",
+  "notes": "No new independent sessions. Existing092315 video re-extracted to4393 rows4219 present.8-session v15 now trains on092315; prior7-model holdout historical only. Tracker gate1.0/tau0.1, spring2s and additional height1.331x. No new categorical accuracy or false-trigger rate observation. Full t_res/speeds/auto blank, do not convert to idle/zero. Full/live same-session alternatives, never independent or concatenated. Prior duplicate/auth/protocol caveats in experiments reports remain; re-read previous reports when needed rather than storing identifiable Drive manifests here. Compare sha256(id) keys with payload fingerprints specified in each manifest. Run13: root83/teach48 unchanged content plus new compare51/holo12.13 new recordings (7 paired,6 sound-only),3 full labels derived from same paired sessions. All text read, WAV/video not decoded. Diagnostic fixed final camera scale, 250±50ms windows, nearest shown-log clock<=30ms, endpoints estimated<=45cm; shown coordinates are pre-soft-limit, not exact pixels/live panel.112943 high x7.85/y6.97/z8.79cm, x/z baseline3.67/3.48 and predicted movement2.41/2.45x; exploratory CIs broad, no cause proof.1106405.5fps and1122042.82s limited. New warning thresholds(weak−12dB; foreign within15dB of carrier), callback t0 min-of-two estimates unvalidated hardware timing. Source IDs/access links remain omitted in checkpoint. Always discover compare/holo subfolders from root by name, not root modification time. Preserve source quality and same-session duplicates; no categorical accuracy/false-trigger labels inferred. Run14: root83/teach48, compare72/holo16 snapshot. New completed paired113747(30.63s, historical linear, now gated train)/120410(41.3s, gated-card numbers, not in15 train). Fixed stored-camera/pre-soft-limit comparison x/y/z errors3.45/3.22/3.42 and2.48/5.12/2.76cm; latter height r−.076 vs zero3.04cm with broad CI1.76–8.34. New holo12300523.13s plus provisional12335835.50s no hand truth.7 full derived,6 audited,113429 originals missing. New default gated15 (8teach+7compare) uses NN context; embedded model x/y/z half3.33/2.94/4.19, displayed height3.14. Published gated eval computes pooled scale from evaluation pairs; exact embedded all-held-out export provenance unresolved, old scale_loso indirect leakage unchanged. Lag cache not committed and HFOV66 versus live78; no independent LOSO reproduction. Keep112943 field outlier, exclusion alignment rationale not independently verified. No categorical scores or idle rates inferred. Follow pending bundles even when hashes do not change. Source IDs/links omitted from checkpoint. Run15: root83/teach49/compare90/holo16 stable. Only new recording12393840.7s;7 base+full files and12 flags sidecars are not extra trials. Fixed stored-camera pre-soft-limit 225 overlapping windows x/y/z RMSE2.40/3.02/2.33cm vs zero4.53/1.75/4.73, height r.257 and within-session CI2.73–3.55.123938 now in17-session final weights; evaluation explicitly16 only, old model historical. Flags112943163/47434.4%,12393810/9781%; definitions/threshold producer not verified, no rows removed. New full1199 rows, live778 all match <=3ms, handedness mismatch2; no hardware audio sync proof.123358 stable now completed,122157missingJSON/holo and113429missingoriginals persist. Saving guard added, Collect moved tocollect.html, holo lab tools require lab=1. New AirKeyv4 path matcher replaces key.html, prior auth metrics not transferable. No new categorical truth/idle labels. Related evaluation scripts unchanged, pooled-scale/lag-cache concerns unresolved. compare folder90 approaches fetch100-child cap; use paginated listing if count reaches100, never treat truncated list as complete. Run17: followed canonical same repository ID1458084003 fromys06146/nhng to ys06146/Bat_ears. GitHub API old path301 was not followed by connector; canonical tools now read/write normally. Main still03ef (same asprevious1436 report), Drive83/49/90/16 fingerprints all unchanged. Mergedpreviouslynotified seqg/AirKeyv5 findings from1436/pending to avoid duplication. Old Pages /nhng root+holodemo404; /Bat_ears root,holo,collect,game,key,and2JSassets200; not actualmic test. README3+TEAM1+Devpostdraft5 oldPageslinks needownerupdate, main/docs notmodified. External Devpost/QR unknown. Report1537 preserves diagnosis andnewURLs. Repairpreviousfailed checkpoint write via canonicalrepository; no new accuracy/CI/idle estimates.",
   "latest_3d_stored_metrics": {
-    "source_main_sha": "d7067e7cd0be7dfa7da407e609ba041e8e6d5c36",
-    "model": "gated-v3",
+    "source_main_sha": "03ef39d52bcb46ca6735d480b64b9443c9b097a1",
+    "model": "seqg-v1",
     "training_sessions": 17,
-    "evaluation_sessions": 16,
+    "evaluation_sessions_claim": 17,
     "engine_half_rmse_cm": [
-      3.32,
-      2.94,
-      4.16
+      3.29,
+      2.88,
+      4.1
     ],
     "display_mixed_rmse_cm": [
-      3.32,
-      3.14,
-      4.16
+      3.29,
+      3.12,
+      4.1
     ],
-    "status": "embedded claimed evaluation; exact fold pipeline not independently reproduced; previous pooled scale/cached-lag limits persist"
+    "longer_rmse_cm": {
+      "1000": [
+        5.14,
+        4.54,
+        5.5
+      ],
+      "2000": [
+        5.94,
+        4.94,
+        6.32
+      ]
+    },
+    "status": "previous1436 embedded claims unchanged; independent full evaluation not reproduced"
   },
   "latest_reextract_summary": {
     "session": "20261115_092315_teach_61f5",
@@ -1383,7 +1401,7 @@
     "range_exclusion_warning": "All UD prompt present frames outside assumed 45cm range",
     "current_model_holdout": false
   },
-  "historical_report": "experiments/monitor-2026-11-15-1238.md",
+  "historical_report": "experiments/monitor-2026-11-15-1436.md",
   "watch_subfolder_names": [
     "teach",
     "compare",
@@ -1416,5 +1434,31 @@
       "session": "batears_20261115_113429_cmp_61f5",
       "status": "vision_full only in Drive, listed in gated training, originals missing"
     }
-  ]
+  ],
+  "canonical_repository": "ys06146/Bat_ears",
+  "repository_id": 1458084003,
+  "previous_repository_name": "ys06146/nhng",
+  "latest_model_regression": {
+    "artifact": "experiments/model-audit-2026-11-15-1436.json",
+    "old_source_main_sha": "d7067e7cd0be7dfa7da407e609ba041e8e6d5c36",
+    "new_source_main_sha": "03ef39d52bcb46ca6735d480b64b9443c9b097a1",
+    "input": "synthetic worklet messages only",
+    "frames_per_model": 1920,
+    "learned_max_raw_diff_m": 0,
+    "gated_max_raw_diff_m": 0,
+    "seqg_all_finite": true,
+    "real_data_accuracy": false
+  },
+  "link_health": {
+    "checked_at_utc": "2026-11-15T21:36:42Z",
+    "old_demo_status": 404,
+    "new_demo_url": "https://ys06146.github.io/Bat_ears/web/hologram.html",
+    "new_demo_status": 200,
+    "old_pages_links_in_main_docs": {
+      "README.md": 3,
+      "TEAM.md": 1,
+      "docs/devpost.md": 5
+    }
+  },
+  "pending_remote_checkpoint_write": false
 }
