@@ -617,11 +617,18 @@ function gatedSet() {
   const cmp = L.filter((x) => /c$/.test(String(x))).length;
   return `, weights trained on ${L.length} sittings (${L.length - cmp} teach + ${cmp} compare)`;
 }
+// alpha's sequence map: its numbers are held out over every sittings it lists (leave-one-sitting-out)
+function seqgSet() {
+  const B = window.Bat3D || {}, c = calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)), L = c && c.seqg && Array.isArray(c.seqg.sittings) ? c.seqg.sittings : null;
+  if (!L) return '';
+  const cmp = L.filter((x) => /c$/.test(String(x))).length;
+  return `, held out over ${L.length} sittings (${L.length - cmp} teach + ${cmp} compare)`;
+}
 let curModel = '';   // info().model of the engine shown on the card ('gated', 'learned', 'physics')
 function ampTable() {
   const B = window.Bat3D || {}, cn = $('calibSel').value;
   const c = calib || (cn && B.CALIBS && B.CALIBS[cn] && B.CALIBS[cn].calib) || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB));
-  const src = curModel === 'gated' && c && c.gated && c.gated.amp ? c.gated : c;
+  const src = curModel === 'seqg' && c && c.seqg && c.seqg.amp ? c.seqg : curModel === 'gated' && c && c.gated && c.gated.amp ? c.gated : c;
   return src && src.amp && src.amp.modes ? src.amp : null;
 }
 function yBoost() {
@@ -652,7 +659,7 @@ function renderAcc(s) {
     + (sz ? li('Drawn size', `${Math.round(100 * sz[0])}% · ${Math.round(100 * sz[2])}% · ${Math.round(100 * sz[1])}% of real (${AMP[e.amp || s.amp] || e.amp || ''})`) : '')
     + li('Real movement', `${mo.length ? f1(mo[0]) : '–'} · ${mo.length ? f1(mo[2]) : '–'} · ${mo.length ? f1(mo[1]) : '–'} cm`)
     + li('Correlation', `${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'}${c[1] != null ? ` (height explains ~${Math.round(100 * c[1] * c[1])}%)` : ''}`)
-    + (s.model ? li('Model', (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) + (s.calName ? ` · ${s.calName}` : '')) : '');
+    + (s.model ? li('Model', (s.model === 'seqg' ? 'seqg (1 s history)' + seqgSet() : s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) + (s.calName ? ` · ${s.calName}` : '')) : '');
 }
 
 // ------------------------------------------------------------------ HUD + render loop
