@@ -15,7 +15,9 @@
  *     moving, still (ms held still), rebased (true on the frame a rebase / origin reset happened), q[], act[], amp[],
  *     off[] (phone clock offsets, Hz), identical (mic channels equal), mono }
  *   onCircle: { dir 'cw' | 'ccw', turns, ru, rw (cm), plane, t }   (fires once a circle has FINISHED)
- *   info(): { freqs, phone, cal, learned, calName, err {rms, motion, corr} | null, sv [3], gain [3], swapLR }
+ *   info(): { freqs, phone, cal, learned, calName, amp ('half' default | 'matched' | 'mse'), err {rms, motion, corr, size} | null, sv [3], gain [3], swapLR }
+ *   opts.amp: size scale after the learned map ('half': ~no error cost, height drawn 0.69 of true instead of 0.47;
+ *     'matched': true size, +7-17 % error; 'mse': the raw least-squares map)
  *   Node / tests: Bat3D.create(...).feed(workletMessage) runs the same per-batch code without audio.
  */
 (function (root, factory) {
@@ -113,7 +115,7 @@ registerProcessor('bat-iq6', BatIQ6);
   };
   const H0 = [0, 0.12, 0.0];
   // built-in Galaxy Book calibration (laptop only): learned on five webcam-taught sittings; error = leave-one-sitting-out
-  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652"} };
+  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652","amp":{"method":"leave-one-sitting-out over 5 sittings, scale estimated without the held-out sitting","corr":[0.78,0.47,0.72],"motion":[6.96,3.4,6.25],"modes":{"mse":{"k":[1,1,1],"rms":[4.42,2.99,4.33],"size":[0.7,0.47,0.72]},"half":{"k":[1.2,1.46,1.17],"rms":[4.42,3.08,4.45],"size":[0.85,0.69,0.86]},"matched":{"k":[1.44,2.12,1.38],"rms":[4.75,3.51,4.81],"size":[1.03,1.01,1.03]}}}} };
   // tone level the built-in calibration was learned at (worklet carrier amplitude per laptop stream, median of the teach
   // sittings, tones at 0.6 per channel). A quieter tone -> fewer phase steps pass the gate -> the map under-predicts motion.
   const REF_AMP = { galaxy: [0.0089, 0.0183, 0.0056, 0.0101] };
@@ -139,7 +141,7 @@ registerProcessor('bat-iq6', BatIQ6);
   const phonePos = (x, h, zf) => [Number(x) / 100, Number(h) / 100 - 0.015, 0.10 - Number(zf) / 100];
 
   function create(opts = {}) {
-    const o = { geom: 'galaxy', paths: 'avg', model: 'learned', useDefault: true, calib: null, flipDir: false, stillMode: 'origin', autoReset: true, actOn: 0.004, ...opts };
+    const o = { geom: 'galaxy', paths: 'avg', model: 'learned', useDefault: true, calib: null, flipDir: false, stillMode: 'origin', autoReset: true, actOn: 0.004, amp: 'half', ...opts };
     let wavMode = false;
     let cfg = null, solver = null, calibInUse = null;
     // ---------------------------------------------------------------- solver (same as 3d.html buildSolver)
@@ -167,10 +169,14 @@ registerProcessor('bat-iq6', BatIQ6);
       const L = cal && cfg.model === 'learned' ? (phone ? cal.learned.all : cal.learned.laptop) : null;
       calibInUse = cal;
       const meas = useAvg ? (D) => Array.from({ length: T }, (_, t) => (D[2 * t] + D[2 * t + 1]) / 2) : (D) => D.slice(0, 2 * T);
-      const solve = L ? (D) => H0.map((h, i) => h + L.idx.reduce((s, p, n) => s + L.W[i][n] * D[p], 0))
+      // size scale: a least-squares map draws motion at (correlation) x its true size; 'half' = sqrt correction (almost no
+      // error cost), 'matched' = true size (+7-17 % error), 'mse' = none. From the calibration's leave-one-out table.
+      const ampMode = cal && cal.amp && cal.amp.modes[o.amp || 'half'] ? (o.amp || 'half') : null, kAmp = ampMode ? cal.amp.modes[ampMode].k : [1, 1, 1];
+      const solve = L ? (D) => H0.map((h, i) => h + kAmp[i] * L.idx.reduce((s, p, n) => s + L.W[i][n] * D[p], 0))
         : (D) => { const m = meas(D); return H0.map((h, i) => h + K[i].reduce((s, v, n) => s + v * m[n], 0)); };
       const errKey = cal ? Object.keys(cal.errors).find((k) => k.startsWith(L ? 'learned' : 'physics') && (phone ? /phone/.test(k) : /laptop only/.test(k))) : null;
-      solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L, err: errKey ? cal.errors[errKey] : null, errName: errKey, solve, calName: cal ? cal.session : null };
+      const errA = L && ampMode ? { rms: cal.amp.modes[ampMode].rms, motion: cal.amp.motion, corr: cal.amp.corr, size: cal.amp.modes[ampMode].size, amp: ampMode } : null;
+      solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L, err: errA || (errKey ? cal.errors[errKey] : null), errName: errKey, solve, calName: cal ? cal.session : null, amp: L ? ampMode || 'mse' : null };
     }
     // ---------------------------------------------------------------- Kalman (constant velocity, per axis)
     const kf = { p: H0.slice(), v: [0, 0, 0], P: [0, 1, 2].map(() => [[1e-4, 0], [0, 1e-2]]) };
@@ -311,7 +317,7 @@ registerProcessor('bat-iq6', BatIQ6);
       setCalib(c) { o.calib = c; if (c) o.model = 'learned'; buildSolver(); resetLive(); },
       setOptions(x) { Object.assign(o, x); buildSolver(); resetLive(); },
       setVolume(v) { if (gainNode) gainNode.gain.value = v; },
-      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
+      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, amp: solver.amp, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
         G: { SL: solver.G.SL, SR: solver.G.SR, M: solver.G.M }, calib: calibInUse ? { paths: calibInUse.paths.map((p) => ({ key: p.key, hz: p.hz, ch: p.ch, pos: p.pos, gain: p.gain })), mics: calibInUse.mics, cam: calibInUse.cam, lagMs: calibInUse.lagMs, truthFloorCm: calibInUse.truthFloorCm } : null }),
       onFrame(fn) { o.onFrame = fn; }, onCircle(fn) { o.onCircle = fn; }, onStatus(fn) { o.onStatus = fn; },
       on(name, fn) { if (name === 'frame') o.onFrame = fn; else if (name === 'circle') o.onCircle = fn; else if (name === 'status') o.onStatus = fn; },

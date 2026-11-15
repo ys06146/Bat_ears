@@ -76,6 +76,9 @@
   <label class="note">📱 지금은 폰을 켜지 마세요. 기본 보정은 노트북 스피커만으로 학습해서 폰 소리를 안 써요. 높이를 쓰려면 폰 A(17000)를 손 자리 바로 위 45cm에 아래를 향하게 두고 teach.html 세션을 한 번 녹화해요. 브라보가 그 배치로 보정을 만들면 📥로 불러오고 폰 A를 켜요. 보정 없이 폰을 켜면 물리 풀이로 돌아가서 더 나빠질 수 있어요</label>
   <label class="file" style="display:inline-block">📥 보정 불러오기<input id="calibFile" type="file" accept=".json,application/json"></label>
   <span id="calibName" class="note"></span>
+  <h3>움직임 크기 (브라보)</h3>
+  <label><select id="ampMode"><option value="half" selected>균형 (기본): 오차 거의 그대로, 높이를 더 크게</option><option value="matched">실제 크기: 오차 7~17% 늘어요</option><option value="mse">오차 가장 작게: 움직임을 작게 그려요</option></select></label>
+  <label class="note">소리만으로 추정하면 정보가 약한 축(특히 높이)을 실제보다 작게 그려요. 크게 그리면 맞는 움직임과 틀린 움직임이 같이 커져요</label>
   <h3>필터 (One Euro, Casiez 2012)</h3>
   <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
   <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="4"> <span id="tauV" class="note">4초 (멈추면 2초)</span></label>
@@ -124,8 +127,8 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115061308" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
-<script src="vision3d.browser.js?v=20261115061308"></script>
+<script src="bat3d.js?v=20261115062253" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115062253"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -400,7 +403,7 @@ async function start(m, file) {
   }
   if (!window.Bat3D) { $('status').textContent = '⚠️ 소리 엔진(bat3d.js)을 불러오지 못했어요'; return; }
   // bravo's engine (3d.html v8): autoReset off, the display chain below handles stillness (re-centre spring)
-  engine = window.Bat3D.create({ geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false });
+  engine = window.Bat3D.create({ geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
   engine.on('frame', onFrame);
   engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
@@ -457,7 +460,9 @@ function renderAcc(s) {
   if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? '가상 움직임이라 정확도가 없어요' : '정확도: 미확인 (보정 없음, 물리 풀이)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
   const r = e.rms, c = e.corr || [], mo = e.motion || [];
   errEl.userData.r = r.map((v) => v / 100);
+  const sz = e.size, AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
   $('accNums').innerHTML = `정확도 (처음 보는 세션, 250ms 이동의 RMS 오차):<br><b>좌우 ±${r[0].toFixed(1)}cm</b> · <b>앞뒤 ±${r[2].toFixed(1)}cm</b> · 높이 ±${r[1].toFixed(1)}cm<br>`
+    + (sz ? `그리는 크기: 실제 움직임의 좌우 ${Math.round(100 * sz[0])}% · 앞뒤 ${Math.round(100 * sz[2])}% · 높이 ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
     + `<span class="note">실제 움직임 ${mo.map((v) => v.toFixed(1)).join(' / ')}cm, 상관 ${c.map((v) => v.toFixed(2)).join(' / ')} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
 }
 
@@ -534,7 +539,7 @@ async function recStop() {
   const dev = (() => { try { return localStorage.getItem('batears-dev') || 'anon'; } catch (e) { return 'anon'; } })(), base = `batears_${stamp}_holo_${dev}`;
   const info = engine && engine.info ? engine.info() : {};
   const meta = { page: 'hologram.html', session: base, startedAt: rec.start, seconds: +(rec.frames / rec.rate).toFixed(2), rate: rec.rate, ua: navigator.userAgent,
-    volume: Number($('vol').value), filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
+    volume: Number($('vol').value), amp: $('ampMode').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
     engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
     log_columns: 't_s, raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams]', log: rec.log };
   const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
@@ -622,6 +627,11 @@ $('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.
 $('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnDebug').onclick = () => { const s = $('debug'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnRec').onclick = () => (rec.on ? recStop() : recStart());
+$('ampMode').onchange = () => {
+  const a = $('ampMode').value;
+  if (engine && engine.setOptions && !SIM) { engine.setOptions({ amp: a }); recenter(); renderAcc(engine.info()); }
+  else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: a }).info());
+};
 $('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (teach와 같은 크기)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
 $('smooth').oninput = () => { $('smoothV').textContent = '×' + Number($('smooth').value).toFixed(1); };
 $('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? '끔' : `${v}초 (멈추면 ${Math.min(2, v)}초)`; };
@@ -630,7 +640,7 @@ $('calibFile').onchange = async (e) => {
   try { calib = JSON.parse(await f.text()); $('calibName').textContent = '불러옴: ' + (calib.session || f.name) + ' · 다시 시작하면 적용돼요'; } catch (er) { $('calibName').textContent = '⚠️ 읽을 수 없어요'; }
 };
 if (SIM) { $('sim').style.display = 'block'; start('sim'); }
-else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false }).info() : null);
+else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: $('ampMode').value }).info() : null);
 window.Holo = { REC, disp, onFrame, euro, start, stop, ghost, ghostAt: (t) => ghostAt(t), palmOf, get running() { return running; }, get engine() { return engine; } };   // for tests
 </script>
 </body>

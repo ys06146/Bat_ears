@@ -228,7 +228,7 @@ const phonePos = (x, h, zf) => [Number(x) / 100, Number(h) / 100 - 0.015, 0.10 -
 let calib = null, calibInUse = null;   // teach_fit.js output (📥): fitted source per stream, mics, learned maps, held-out errors vs vision
 // built-in calibration for the Galaxy Book (laptop only): learned on five webcam-taught sittings (035336, 040340,
 // 040721, 043301, 044652); its error is leave-one-sitting-out (trained on four, scored on the fifth). Used when nothing is loaded.
-const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652"} };
+const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (5 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.856259,0.93255,-0.706279,-0.985171,-0.000048],[0.122328,0.15398,0.199745,0.128281,0.002188],[-0.295803,-0.434315,-0.435055,-0.50236,-0.001569]]},"all":null},"errors":{"learned, laptop only":{"rms":[4.42,2.99,4.33],"motion":[6.96,3.4,6.25],"corr":[0.78,0.48,0.72]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652","amp":{"method":"leave-one-sitting-out over 5 sittings, scale estimated without the held-out sitting","corr":[0.78,0.47,0.72],"motion":[6.96,3.4,6.25],"modes":{"mse":{"k":[1,1,1],"rms":[4.42,2.99,4.33],"size":[0.7,0.47,0.72]},"half":{"k":[1.2,1.46,1.17],"rms":[4.42,3.08,4.45],"size":[0.85,0.69,0.86]},"matched":{"k":[1.44,2.12,1.38],"rms":[4.75,3.51,4.81],"size":[1.03,1.01,1.03]}}}} };
 function readCfg() {
   const G0 = GEOMS[$('geom').value], swap = $('swapLR').checked;
   const G = swap ? { ...G0, SL: G0.SR, SR: G0.SL } : G0;   // stream 0 (18 kHz) comes from G.SL
@@ -267,10 +267,14 @@ function buildSolver() {
   const L = cal && cfg.model === 'learned' ? (phone ? cal.learned.all : cal.learned.laptop) : null;
   if (cal) calibInUse = cal;
   const meas = useAvg ? (D) => Array.from({ length: T }, (_, t) => (D[2 * t] + D[2 * t + 1]) / 2) : (D) => D.slice(0, 2 * T);
-  const solve = L ? (D) => H0.map((h, i) => h + L.idx.reduce((s, p, n) => s + L.W[i][n] * D[p], 0))
+  // size scale after the learned map (same as bat3d.js, default 'half'): a least-squares map draws motion at
+  // (correlation) x its true size; 'half' = sqrt correction, almost no error cost (leave-one-out table in the calibration)
+  const ampMode = cal && cal.amp && cal.amp.modes.half ? 'half' : null, kAmp = ampMode ? cal.amp.modes[ampMode].k : [1, 1, 1];
+  const solve = L ? (D) => H0.map((h, i) => h + kAmp[i] * L.idx.reduce((s, p, n) => s + L.W[i][n] * D[p], 0))
     : (D) => { const m = meas(D); return H0.map((h, i) => h + K[i].reduce((s, v, n) => s + v * m[n], 0)); };
   const errKey = cal ? Object.keys(cal.errors).find((k) => k.startsWith(L ? 'learned' : 'physics') && (phone ? /phone/.test(k) : /laptop only/.test(k))) : null;
-  solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L, err: errKey ? cal.errors[errKey] : null, errName: errKey, solve, calName: cal ? cal.session : null };
+  const errA = L && ampMode ? { rms: cal.amp.modes[ampMode].rms, motion: cal.amp.motion, corr: cal.amp.corr } : null;
+  solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L, err: errA || (errKey ? cal.errors[errKey] : null), errName: errKey, solve, calName: cal ? cal.session : null };
   buildBars(); renderObs();
 }
 
