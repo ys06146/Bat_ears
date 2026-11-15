@@ -1249,5 +1249,11 @@ registerProcessor('bat-tap', BatTap);`;
     get freq() { return st.f0; },
     get counts() { return { ...st.counts }; },
   };
+  // another Bat Ears tab (hologram.html) asks who is playing ultrasound: answer while running. A forgotten tab's tone
+  // once spoiled hours of recordings, and two pages playing at once spoil each other
+  try {
+    const bc = new BroadcastChannel('batears-tones');
+    bc.onmessage = (e) => { if (e.data && e.data.q === 'who-plays' && st.running) bc.postMessage({ a: 'playing', page: location.pathname.split('/').pop() || 'index.html' }); };
+  } catch (_) { /* no BroadcastChannel */ }
   window.BatEars = api;
 })();
