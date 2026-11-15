@@ -81,7 +81,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}td,t
 @media(max-width:560px){.step{font-size:12px}.step+.step:before{width:14px;margin:0 6px}.bar button{flex:1 1 auto}.stage,.vault{padding:18px}.canvas{min-height:240px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<script src="sitenav.js?v=20261115133815"></script>
+<script src="sitenav.js?v=20261115134214"></script>
 <div class="wrap">
   <div class="hero">
     <div><div class="eyebrow">AIR PASSWORD · NO CAMERA</div><h1>Draw your password in the air</h1>
@@ -129,7 +129,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}td,t
     <p class="hint" style="margin-bottom:16px">The password and the log stay in this browser. Tracking uses the hologram's engine (bat3d.js), its built-in laptop calibration and the same filter. The limits are first estimates; we will retune them from exported logs.</p>
   </details>
 </div>
-<script src="bat3d.js?v=20261115133815"></script><script src="airkey.js?v=20261115133815"></script>
+<script src="bat3d.js?v=20261115134214"></script><script src="airkey.js?v=20261115134214"></script>
 <script>
 (() => {
 'use strict';
@@ -168,8 +168,13 @@ const disp = { cont: null, off: [0, 0, 0], last: null, pos: null, levelDb: null,
 // start point: the hand slow (< STOP_SPEED) for 1 s and within 4 cm (axis-weighted; tolerates ~3 cm/s of drift). ZONE = hologram.html's taught zone around the hand spot (half-widths, m)
 const HOLD_MS = 1000, HOLD_R = 0.04, ZONE = [0.18, 0.12, 0.15];
 // hologram.html default 'draw height at its true size': the engine runs the 'half' size, height gets matched k / half k (1.77 / 1.33)
-const CAL_AMP = ((((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy || {}).amp || {}).modes;
-const Y_GAIN = CAL_AMP && CAL_AMP.matched && CAL_AMP.half ? CAL_AMP.matched.k[1] / CAL_AMP.half.k[1] : 1;
+// as hologram.html's ampTable()/yBoost(): the gated model has its own size table (1.402 / 1.184), the linear one 1.77 / 1.33
+function heightGain(model) {
+  const c = (((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy) || {};
+  const src = model === 'gated' && c.gated && c.gated.amp ? c.gated : c, M = src.amp && src.amp.modes;
+  return M && M.matched && M.half ? M.matched.k[1] / M.half.k[1] : 1;
+}
+let Y_GAIN = 1;   // set when the engine starts, from the model it runs
 const AXIS_W = K.AXIS;   // left-right and depth are noisier than height: they count less in speed and in the match
 const MAX_DRIFT = 0.02;  // m/s: drift seen while the hand was held still, removed from the stroke (hologram hides it with its spring)
 const STILL_AFTER = 600, MAX_REC = 5000, WAIT_MOVE = 10000, SPEED_WIN = 150, GO_SPEED = 0.12, STOP_SPEED = 0.06;
@@ -408,6 +413,7 @@ async function start() {
   engine.on('frame', onFrame);
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
   try { await engine.start({ mode: 'mic', volume: 1.2 }); } catch (e) { say(startErrMsg(e), ''); engine = null; $('startBtn').disabled = false; return; }
+  Y_GAIN = SIM ? 1 : heightGain((engine.info && engine.info().model) || '');
   running = true;
   $('status').textContent = 'Listening'; $('status').className = 'chip on';
   $('startBtn').textContent = '■ Turn off'; $('startBtn').classList.remove('primary'); $('startBtn').disabled = false;

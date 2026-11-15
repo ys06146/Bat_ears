@@ -24,6 +24,10 @@
   #acc { left: 12px; bottom: 12px; max-width: 470px; font-size: 13px; }
   #acc b { color: var(--acc); }
   #acc .big { font-size: 15px; margin: 2px 0 4px; }
+  .accList { margin: 6px 0 0; padding-left: 16px; line-height: 1.55; }
+  .accList li { margin: 2px 0; }
+  #acc .accList b { color: var(--fg); font-weight: 600; }
+  #accMore summary { cursor: pointer; color: var(--dim); }
   #live { right: 12px; bottom: 12px; min-width: 250px; font-size: 13px; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
   .bar { display: grid; grid-template-columns: 92px 1fr; gap: 6px; align-items: center; margin: 3px 0; font-size: 12px; color: var(--dim); }
@@ -75,7 +79,7 @@
 </script>
 </head>
 <body>
-<script src="sitenav.js?v=20261115133815" data-overlay></script>
+<script src="sitenav.js?v=20261115134214" data-overlay></script>
 <div id="stage"></div>
 <div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 Sound only · 📷 Webcam off<small id="filmAcc"></small></div>
 <div class="hud" id="intro">
@@ -166,8 +170,13 @@
   <div class="big">🔊 <b>Sound only</b> · 📷 Webcam off</div>
   <div id="accNums">Accuracy: unconfirmed</div>
   <div class="note" style="margin-top:4px">Hand 25–35 cm above the keyboard, moving briskly. Height is the weakest axis.</div>
-  <details id="accMore" class="note" style="margin-top:4px"><summary>Details</summary><div id="accDetail"></div>
-    <div style="margin-top:4px">Height tracks best 25–35 cm above the keyboard (correlation 0.81, vs 0.58 below 17 cm, where up-down mixes with depth near the mic). Move about 20 cm a second: below 5–8 cm a second is hard to hear. Sound measures movement, not position, so a still hand drifts back to the centre.</div></details>
+  <details id="accMore" class="note" style="margin-top:4px"><summary>Details</summary>
+    <ul class="accList" id="accDetail"></ul>
+    <ul class="accList">
+      <li><b>Best spot</b> 25–35 cm above the keyboard (height correlation 0.81 there, 0.58 below 17 cm)</li>
+      <li><b>Speed</b> about 20 cm/s; under 5–8 cm/s is hard to hear</li>
+      <li><b>Drift</b> sound measures movement, not position, so a still hand slides back to the centre</li>
+    </ul></details>
   <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
@@ -175,12 +184,12 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115133815" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115134214" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115133815"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115134214"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115133815"></script>
+<script src="vision3d.browser.js?v=20261115134214"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -637,10 +646,12 @@ function renderAcc(s) {
   const sz = yAdj(e.size, 'size'), AMP = { half: 'balanced', matched: 'true size', mse: 'smallest error' };
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
   $('accNums').innerHTML = `Error <b>±${f1(r[0])}</b> · <b>±${f1(r[2])}</b> · ±${f1(r[1])} cm <span class="note">(left-right · toward-away · height)</span>`;
-  $('accDetail').innerHTML = `RMS error of the 250 ms movement, ${scope}.<br>`
-    + (sz ? `Drawn size: ${Math.round(100 * sz[0])}% · ${Math.round(100 * sz[2])}% · ${Math.round(100 * sz[1])}% of the real movement (${AMP[e.amp || s.amp] || e.amp || ''}).<br>` : '')
-    + `Real movement ${mo.length ? f1(mo[0]) : '–'} · ${mo.length ? f1(mo[2]) : '–'} · ${mo.length ? f1(mo[1]) : '–'} cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'}${c[1] != null ? ` (height explains about ${Math.round(100 * c[1] * c[1])}% of up-down movement${yMatched() ? ', drawn at true size' : ''})` : ''}.<br>`
-    + `${s.model ? 'Model: ' + (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}`;
+  const li = (k, v) => `<li><b>${k}</b> ${v}</li>`;
+  $('accDetail').innerHTML = li('Error', `RMS of the 250 ms movement, ${scope}`)
+    + (sz ? li('Drawn size', `${Math.round(100 * sz[0])}% · ${Math.round(100 * sz[2])}% · ${Math.round(100 * sz[1])}% of real (${AMP[e.amp || s.amp] || e.amp || ''})`) : '')
+    + li('Real movement', `${mo.length ? f1(mo[0]) : '–'} · ${mo.length ? f1(mo[2]) : '–'} · ${mo.length ? f1(mo[1]) : '–'} cm`)
+    + li('Correlation', `${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'}${c[1] != null ? ` (height explains ~${Math.round(100 * c[1] * c[1])}%)` : ''}`)
+    + (s.model ? li('Model', (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) + (s.calName ? ` · ${s.calName}` : '')) : '');
 }
 
 // ------------------------------------------------------------------ HUD + render loop
