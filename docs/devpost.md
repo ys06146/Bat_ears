@@ -11,13 +11,13 @@ Bats find their way in the dark by listening to echoes. We wondered whether an o
 Bat Ears turns a stock laptop into a camera-free 3D hand tracker, in a web page:
 - The laptop's left and right speakers each play their own inaudible tone (18 and 19.5 kHz). The laptop mic hears the echoes off your hand.
 - From those echoes it follows your hand left-right, toward-away and up-down, and **`hologram.html`** draws a holographic hand that moves with yours. The webcam can stay taped over.
-- **Trained with a camera, runs without one.** In one guided session of about 2½ minutes (`teach.html`), the webcam watches your hand with MediaPipe and teaches the audio tracker where your hand really is. Only landmark numbers are kept, never video or images. After that, tracking uses sound alone.
-- **Measured, honestly.** We recorded 5 teach sittings and tested each one with a model trained on the other four:
+- **Trained with a camera, runs without one.** In one guided session of about 2½ minutes (`teach.html`), the webcam watches your hand with MediaPipe and teaches the audio tracker where your hand really is. The model learns from the landmark numbers. The raw webcam video can be kept too, for re-analysis, but only in a folder on the laptop: it is never uploaded and never committed. After that, tracking uses sound alone.
+- **Measured, honestly.** We recorded 7 teach sittings and tested each one with a model trained on the other six:
   - we predict how far the hand moves in every 250 ms from sound and compare with the webcam;
-  - RMS error: **left-right 4.4 cm, toward-away 4.5 cm, up-down 3.1 cm**, while the movements themselves were 7.0 / 6.3 / 3.4 cm RMS (correlation 0.78 / 0.72 / 0.47);
-  - left-right and depth follow the hand well; height is still weak with the laptop speakers alone;
-  - this is one person on one laptop (a Galaxy Book), hand 25-45 cm from the webcam. Other people and laptops: `[TBD]`.
-- Optional phones add sources: a phone opens `tone.html` and plays its own tone (17 kHz; iPhones can't play above about 20 kHz). With a phone held above the hand, height should improve: `[TBD, being measured]`.
+  - RMS error: **left-right 4.1 cm, toward-away 4.3 cm, up-down 2.6 cm**, while the movements themselves were 5.5 / 5.7 / 3.0 cm RMS (correlation 0.67 / 0.67 / 0.53, 9,621 windows);
+  - left-right and depth follow the hand best; height is still the weak axis with the laptop speakers alone;
+  - this is one person on one laptop (a Galaxy Book), hand within about 45 cm of the webcam. Other people and laptops: `[TBD]`.
+- Optional phones can add sources: a phone opens `tone.html` and plays its own tone (17 kHz; iPhones can't play above about 20 kHz). We measured them, and they didn't help yet: phones beside the laptop raised height correlation by 0.05 at most, and a phone above the hand, speaker down, gave an echo path that didn't follow the hand. The demo runs on the laptop alone.
 - On top of tracking: **push, pull and wave** gestures (the **Force Push** game), a **gesture key** (your sequence in your own rhythm), and an experimental left/right check.
 - No install, no server. The audio is analysed on the device and never sent anywhere.
 
@@ -36,12 +36,13 @@ What's new for us: **a web page on a stock laptop** (optional ordinary phones), 
 - **Phase ranging in an AudioWorklet.** Each carrier is mixed down to I/Q, low-pass filtered (250 Hz) and decimated to about 1 kHz. The static part (direct sound and room reflections) is removed and the phase is unwrapped into path-length steps, as LLAP does: about 1.8 cm of path per turn at 19 kHz. Phone tones run on their own clocks, so a phase-locked loop on the direct phone-to-mic sound cancels their drift.
 - **From path changes to 3D.** Each speaker → hand → mic path is one constraint, and two laptop speakers can't pin down a 3D point by geometry alone. A **linear (ridge) map**, trained against the webcam, turns the path changes of all streams into the hand's movement over 250 ms windows; a geometric least-squares solver is the fallback.
 - **The webcam teacher (`teach.html`).** MediaPipe HandLandmarker (tasks-vision, in the browser) gives 21 landmarks per frame, plus world landmarks in metres, on the same `performance.now()` clock as the raw stereo WAV. A guided 2½-minute session (still, left-right, up-down, toward-away, flat and upright circles both ways, push, pull, wave, free motion) covers the space. Offline, the landmarks are placed in the laptop's frame (PnP with the webcam's field of view, fitted per session) and the map is fitted.
-- **Size correction.** A least-squares map draws each movement at about (correlation × true size), so the weak axis looked shrunken: height at 47 %. A square-root correction draws 85 / 86 / 69 % of true size (left-right / depth / height) at almost the same error; a "true size" mode draws ~100 % for 7-17 % more error.
-- **The hologram (`hologram.html`).** Sound gives movement, not absolute position, so the hand is re-centred by a slow spring (4 s while moving, 2 s when still) and smoothed by a **One Euro filter** (Casiez et al., CHI 2012). three.js draws the hand, with UnrealBloom glow, a trail and an error ellipsoid of the honest RMS per axis. A replay mode overlays the webcam truth (a green hand) on a recorded session.
-- **Honest evaluation:** leave-one-sitting-out across 5 sittings for 3D, leave-one-session-out across 17 sessions for gestures. Every live rule is mirrored offline so we can replay all recordings after each change.
+- **Size correction.** A least-squares map draws each movement at about (correlation × true size), so the weak axis looked shrunken: height at 52 %. A square-root correction draws 76 / 81 / 72 % of true size (left-right / depth / height) at almost the same error; a "true size" mode draws ~100 % for about 10 % more error.
+- **The hologram (`hologram.html`).** Sound gives movement, not absolute position, so the hand is re-centred by a slow spring (6 s while moving, 2 s when still) and smoothed by a **One Euro filter** (Casiez et al., CHI 2012). three.js draws the hand, with UnrealBloom glow, a trail and an error ellipsoid of the honest RMS per axis. A replay mode overlays the webcam truth (a green hand) on a recorded session.
+- **Honest evaluation:** leave-one-sitting-out across 7 sittings for 3D, leave-one-session-out across 17 sessions for gestures. Every live rule is mirrored offline so we can replay all recordings after each change.
 - **Testing:** synthetic microphone input and a synthetic hand video run through headless Chrome; recorded sessions are replayed against the camera labels.
 
 ## Challenges we ran into
+- **Phones didn't add height.** We expected a phone above the hand to fix the weak axis. Its echo path didn't follow the hand at all, and phones beside the laptop added at most 0.05 to height correlation, so the demo runs on the laptop alone.
 - **Phones can't play ultrasound high enough.** Our first phone tones (20.5 / 21.5 kHz) simply weren't in the recordings: iPhone speakers stop around 20 kHz. We moved them to 17 and 18.75 kHz, between and below the laptop's tones.
 - **A quiet tone draws a small hand.** The hologram first played its tones 7.6 dB quieter than the teach sessions. Fewer phase steps passed the noise gate, and the map drew every movement too small. Matching the teach volume fixed it; the page now warns when the tone arrives more than 6 dB under the teach level.
 - **The weak axis looks frozen.** Height has little information with two speakers side by side, and a least-squares map shrinks what it isn't sure about. The size correction makes it visible without hiding the error.
@@ -51,7 +52,7 @@ What's new for us: **a web page on a stock laptop** (optional ordinary phones), 
 - **Left/right is physics, not tuning:** a sideways hand barely changes its distance to either speaker. Within a session our cues got 15 of 20 swipes, but only 7 of 20 on the next session, so left/right stays an experiment. Phase tracking in 3D is our answer to it.
 
 ## Accomplishments that we're proud of
-- Camera-free 3D hand tracking from a stock laptop, in a web page, taught by its own webcam in 2½ minutes: on sittings the model never saw (leave-one-sitting-out, hand 25-45 cm from the webcam), the RMS error of 250 ms movements is left-right 4.4 / toward-away 4.5 / up-down 3.1 cm.
+- Camera-free 3D hand tracking from a stock laptop, in a web page, taught by its own webcam in 2½ minutes: on sittings the model never saw (leave-one-sitting-out over 7 sittings, hand within about 45 cm of the webcam), the RMS error of 250 ms movements is left-right 4.1 / toward-away 4.3 / up-down 2.6 cm, against movements of 5.5 / 5.7 / 3.0 cm.
 - Push/pull from real recordings: 268 of 332 prompted gestures (81 %) across 17 sessions at 20-60 cm, on a Windows laptop and MacBooks, with about 0.6 false triggers per minute while typing or idle (`python ml/report.py`).
 - Honest numbers on screen: the hologram shows its held-out error and the size it draws, and the replay mode shows the webcam truth next to the sound.
 
@@ -62,7 +63,7 @@ What's new for us: **a web page on a stock laptop** (optional ordinary phones), 
 - Record first, then tune: replaying every saved session after each change caught regressions a live try would hide.
 
 ## What's next
-- **Height:** a phone above the hand as an extra source `[TBD]`, then more sources from ordinary phones.
+- **Height:** our first phone placements didn't add height, so next is a better source layout and teach sessions in more postures.
 - **More people and laptops:** we have one person on one laptop so far.
 - **Absolute position:** anchor the drift with the direct-path phase and short re-teach moments.
 - **Uses:** cooking with messy hands, sterile rooms, accessibility, and privacy-first smart devices.

@@ -679,7 +679,7 @@ if (Q.get('preset') === 'above') {
   if (C['galaxy+A-top']) { $('calibSel').value = 'galaxy+A-top'; setTimeout(() => $('calibSel').onchange && $('calibSel').onchange(), 0); }   // the handler is set further down
   else {
     $('phoneOn').checked = true; $('phoneHz').value = 17000; $('px').value = 0; $('py').value = 45; $('pz').value = 30; $('phone2On').checked = false;
-    $('calibNote').innerHTML = '<span class="warn">📱 폰 A 위에서 (임시): 이 배치의 보정이 아직 없어서 물리 풀이로 풀어요. 정확도는 미확인이에요. 보정이 들어오면 이 링크가 자동으로 그걸 써요</span>';
+    $('calibNote').innerHTML = '<span class="warn">📱 폰 A 위에서 (실험, 효과 미확인): 측정해 보니 위에서 아래로 둔 폰의 경로는 손을 따라가지 않았어요. 이 배치의 보정이 없어서 물리 풀이로 풀어요. 데모는 노트북만으로 해요</span>';
   }
   $('status').textContent = '📱 폰 A 위에서 모드 · 폰에서 tone.html?preset=A를 켜고 ▶ 시작을 눌러요';
 }

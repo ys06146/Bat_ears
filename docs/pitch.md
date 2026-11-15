@@ -10,11 +10,11 @@
 >
 > Here's the trick: the camera only teaches. For two and a half minutes MediaPipe showed the audio model where my hand was, then we switched it off. Trained with a camera, runs without one.
 >
-> It's just a web page: nothing to install, nothing sent anywhere. On sittings it had never seen, the laptop alone follows left-right and depth to about four and a half centimetres a quarter-second; height is still our weak axis, and the screen says so.
+> It's just a web page: nothing to install, nothing sent anywhere. On sittings it had never seen, the laptop alone follows left-right and depth to about four centimetres a quarter-second; height is still our weak axis, and the screen says so.
 >
 > On top of that: gestures, a gesture key and a game. Try it at the link on our slide."
 
-**If a judge asks "how accurate?":** "Every quarter second we predict how far the hand moves, and test on a sitting the model never saw. With the laptop alone and the hand 25 to 45 centimetres from the webcam, the error is 4.4 cm left-right, 4.5 cm toward-away and 3.1 cm up-down, while the movements themselves were 7.0, 6.3 and 3.4 cm. One person, one laptop so far."
+**If a judge asks "how accurate?":** "Every quarter second we predict how far the hand moves, and test on a sitting the model never saw. Over seven sittings, with the laptop alone and the hand within about 45 centimetres of the webcam, the error is 4.1 cm left-right, 4.3 cm toward-away and 2.6 cm up-down, while the movements themselves were 5.5, 5.7 and 3.0 cm. One person, one laptop so far."
 
 ## Fallback pitch: gestures (if 3D misbehaves live)
 
