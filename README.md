@@ -27,6 +27,15 @@ Requirements:
 
 Below the tabs, **🎯 데이터 수집** runs guided collection. A person drawn from behind demonstrates each gesture in time with a 3-2-1 countdown, and each prompt is scored live (✅/❌). The CSV and a JSON of conditions save into a folder automatically, and the experiment log keeps one row per run.
 
+Other pages:
+
+| Page | What it does |
+|---|---|
+| 🔐 `key.html` | **Gesture key**: a sequence of gestures is the password, your rhythm and style are the key. Enroll 1 practice + 5-10 repetitions, then unlock; the verdict says why (order, rhythm, speed, length, shape). Matcher in `web/auth.js`; attempt logs feed `python ml/auth_report.py` (FAR / FRR / EER). |
+| 🧪 `experiment-live.html` | Countdown-free live experiments (free gestures, continuous push -> pull sets), a 📢 jammer mode and a one-click interference test. |
+| 📢 `tone.html` | A mobile tone player, to use a phone as an extra sound source. |
+| 🧪 `3d.html` | 3D hand tracking experiment: the phase of each speaker's tone, optionally with a phone as a third source. |
+
 `web/batears.html` is the original single-file test page, with a band check.
 
 ## How it works
