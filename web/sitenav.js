@@ -17,15 +17,15 @@
   const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const css = `
 .site-nav{${overlay ? 'position:fixed;top:0;left:0;right:0;' : 'position:relative;'}z-index:60;height:${H}px;display:flex;align-items:center;gap:4px;
-  padding:0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));background:rgba(7,10,16,.88);
-  border-bottom:1px solid #1d2533;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  padding:0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));background:rgba(9,9,11,.9);
+  border-bottom:1px solid #27272a;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   font:600 12px/1 Inter,system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo",sans-serif;letter-spacing:.08em;overflow-x:auto;scrollbar-width:none}
 .site-nav::-webkit-scrollbar{display:none}
-.site-nav .brand{color:#e9eef7;font-weight:800;letter-spacing:0;font-size:14px;margin-right:12px;white-space:nowrap;text-decoration:none}
-.site-nav a.item{color:#8d9bb0;text-decoration:none;text-transform:uppercase;padding:8px 11px;border-radius:8px;white-space:nowrap}
-.site-nav a.item:hover{color:#e9eef7;background:#141c28}
-.site-nav a.item.sel{color:#e9eef7;background:#1a2433;box-shadow:inset 0 -2px 0 #72daca}
-.site-nav a:focus-visible{outline:2px solid #72daca;outline-offset:2px}
+.site-nav .brand{color:#fafafa;font-weight:800;letter-spacing:0;font-size:14px;margin-right:12px;white-space:nowrap;text-decoration:none}
+.site-nav a.item{color:#a1a1aa;text-decoration:none;text-transform:uppercase;padding:8px 11px;border-radius:8px;white-space:nowrap}
+.site-nav a.item:hover{color:#fafafa;background:#18181b}
+.site-nav a.item.sel{color:#fafafa;background:#27272a;box-shadow:inset 0 -2px 0 #c5050c}
+.site-nav a:focus-visible{outline:2px solid #e0464c;outline-offset:2px}
 body.present .site-nav,body.film .site-nav{display:none}
 body:not(.lab-mode) .lab-only{display:none!important}`;
   const style = document.createElement('style');

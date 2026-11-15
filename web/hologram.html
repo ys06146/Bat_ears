@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bat Ears | Sound hologram</title>
 <style>
-  :root { --bg: #04070c; --fg: #e6f4ff; --dim: #8aa4b8; --acc: #4fd8ff; --ok: #66bb6a; --warn: #ffb74d; --bad: #ef5350; --glass: rgba(10, 22, 34, .72); --line: rgba(79, 216, 255, .28); }
+  :root { --bg: #09090b; --fg: #fafafa; --dim: #a1a1aa; --acc: #e0464c; --primary: #c5050c; --ok: #4ade80; --warn: #fbbf24; --bad: #ef4444; --glass: rgba(12, 12, 15, .82); --line: #27272a; }   /* Badger theme, as style.css */
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; overflow: hidden; }
   #stage { position: fixed; inset: 0; }
@@ -15,9 +15,10 @@
   #top h1 { margin: 0; font-size: 18px; letter-spacing: .5px; }
   #top h1 small { color: var(--dim); font-weight: 400; font-size: 13px; }
   .grow { flex: 1; }
-  button, select, label.file { background: rgba(20, 40, 58, .9); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: inherit; cursor: pointer; }
+  button, select, label.file { background: rgba(24, 24, 27, .92); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: inherit; cursor: pointer; }
   button:hover, label.file:hover { border-color: var(--acc); }
-  button.go { background: #0f4c3a; border-color: #2e7d32; font-weight: 700; }
+  button.go { background: var(--primary); border-color: var(--primary); font-weight: 700; }
+  button.go:hover { background: #a00409; }
   input[type=file] { display: none; }
   #status { color: var(--dim); min-width: 200px; }
   #acc { left: 12px; bottom: 12px; max-width: 470px; font-size: 13px; }
@@ -78,18 +79,18 @@
 <div id="stage"></div>
 <div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 Sound only · 📷 Webcam off<small id="filmAcc"></small></div>
 <div class="hud" id="intro">
-  <h2>🦇 Following your hand in 3D with sound alone</h2>
+  <h2>🦇 Your hand in 3D, from sound alone</h2>
   <ol>
-    <li>📷 Tape over the webcam. This page never turns the camera on</li>
-    <li>🔊 Use the laptop’s built-in speakers and mic (unplug Bluetooth and earphones). Plug in the charger and set the volume to 50% or more</li>
+    <li>📷 Cover the webcam. It is never used</li>
+    <li>🔊 Built-in speakers and mic, volume 50% or more</li>
     <li>Press ▶ Start and allow the microphone</li>
-    <li>✋ Hold your hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam, and press ◎ Center (space). Then move it left-right and toward-away briskly (about 20 cm a second)</li>
+    <li>✋ Hand 25–35 cm above the keyboard → ◎ Center (space) → move left-right and toward-away</li>
   </ol>
-  <div class="row"><button id="introStart" class="go">▶ Start</button><button id="introClose">Close</button><span class="note">Sound is analysed only inside this browser and never sent anywhere</span></div>
+  <div class="row"><button id="introStart" class="go">▶ Start</button><button id="introClose">Close</button><span class="note">Sound stays in this browser</span></div>
   <div id="introErr"></div>
 </div>
 <div class="hud" id="top">
-  <h1>🦇 Bat Ears hologram <small>Hand position from sound alone, no webcam</small></h1>
+  <h1>🦇 Bat Ears hologram <small>Sound only · no webcam</small></h1>
   <button id="btnStart" class="go">▶ Start</button>
   <button id="btnStop">■ Stop</button>
   <button id="btnCenter" title="Hold your hand at its spot (25–35 cm above the keyboard) and press this (space bar)">◎ Center</button>
@@ -100,7 +101,7 @@
   <button id="btnCmp" class="lab-only" title="Draws the webcam hand (green, ground truth) and the sound hand together to compare them live. Used with ⏺, it saves training data (compare/). Turn it off for the demo">👁 Compare</button>
   <button id="btnFilm" title="Hide the panels and go full screen (H: panels, F: full screen, space: center)">🎬 Filming mode</button>
   <button id="btnRec" class="lab-only" title="Saves the raw mic audio and engine values (for Bravo’s analysis)">⏺ Record</button>
-  <span id="status" class="grow">Waiting · press ▶ Start and allow the microphone</span>
+  <span id="status" class="grow">Press ▶ Start</span>
 </div>
 <div class="hud" id="sim">🧪 Simulated motion (not sound, for testing the screen)</div>
 <div class="hud" id="toast"></div>
@@ -164,7 +165,9 @@
 <div class="hud" id="acc">
   <div class="big">🔊 <b>Sound only</b> · 📷 Webcam off</div>
   <div id="accNums">Accuracy: unconfirmed</div>
-  <div class="note" style="margin-top:4px">Keep your hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam: height tracks best there (correlation 0.81, vs 0.58 below 17 cm, where up-down mixes with depth near the mic), and move it briskly like in teach (about 20 cm a second). Very slow movement (below 5–8 cm a second) is hard for sound to catch. Sound only measures movement, so it doesn’t know absolute position, and when your hand stops it drifts slowly back to the center. Height is barely caught with the laptop speakers alone.</div>
+  <div class="note" style="margin-top:4px">Hand 25–35 cm above the keyboard, moving briskly. Height is the weakest axis.</div>
+  <details id="accMore" class="note" style="margin-top:4px"><summary>Details</summary><div id="accDetail"></div>
+    <div style="margin-top:4px">Height tracks best 25–35 cm above the keyboard (correlation 0.81, vs 0.58 below 17 cm, where up-down mixes with depth near the mic). Move about 20 cm a second: below 5–8 cm a second is hard to hear. Sound measures movement, not position, so a still hand drifts back to the centre.</div></details>
   <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
@@ -492,7 +495,7 @@ async function start(m, file) {
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
-  if (m === 'mic') $('status').textContent = 'Listening · hand 25–35 cm above the keyboard, a little higher than the top of the screen, within 45 cm of the webcam';
+  if (m === 'mic') $('status').textContent = 'Listening · hand 25–35 cm above the keyboard';
 }
 let startT = 0;
 // another Bat Ears tab playing its tones spoils this one: ask the other tabs every 3 s while listening (dsp.js pages answer too)
@@ -633,9 +636,11 @@ function renderAcc(s) {
   errEl.userData.r = r.map((v) => v / 100);
   const sz = yAdj(e.size, 'size'), AMP = { half: 'balanced', matched: 'true size', mse: 'smallest error' };
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
-  $('accNums').innerHTML = `Accuracy (${scope}, RMS error of the 250 ms movement):<br><b>left-right ±${f1(r[0])}cm</b> · <b>toward-away ±${f1(r[2])}cm</b> · height ±${f1(r[1])}cm<br>`
-    + (sz ? `Drawn size, as a share of the real movement: left-right ${Math.round(100 * sz[0])}% · toward-away ${Math.round(100 * sz[2])}% · height ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.model ? ' · model: ' + (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
+  $('accNums').innerHTML = `Error <b>±${f1(r[0])}</b> · <b>±${f1(r[2])}</b> · ±${f1(r[1])} cm <span class="note">(left-right · toward-away · height)</span>`;
+  $('accDetail').innerHTML = `RMS error of the 250 ms movement, ${scope}.<br>`
+    + (sz ? `Drawn size: ${Math.round(100 * sz[0])}% · ${Math.round(100 * sz[2])}% · ${Math.round(100 * sz[1])}% of the real movement (${AMP[e.amp || s.amp] || e.amp || ''}).<br>` : '')
+    + `Real movement ${mo.length ? f1(mo[0]) : '–'} · ${mo.length ? f1(mo[2]) : '–'} · ${mo.length ? f1(mo[1]) : '–'} cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'}${c[1] != null ? ` (height explains about ${Math.round(100 * c[1] * c[1])}% of up-down movement${yMatched() ? ', drawn at true size' : ''})` : ''}.<br>`
+    + `${s.model ? 'Model: ' + (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
