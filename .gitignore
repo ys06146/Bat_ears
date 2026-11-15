@@ -35,3 +35,5 @@ desktop.ini
 # fake data and models trained on it (regenerate with ml/make_fake_data.py)
 ml/data/fake/
 ml/model.json
+# hologram field recordings (mic WAV + engine log): local data, never in the public repo
+ml/data/holo/

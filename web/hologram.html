@@ -46,6 +46,7 @@
   #hgDot { position: absolute; left: -4px; width: 16px; height: 16px; margin-top: -8px; top: 50%; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); transition: top .08s linear; }
   #hgDot.out { background: var(--warn); box-shadow: 0 0 10px var(--warn); }
   @media (max-width: 760px) { #hgauge { display: none; } }
+  #alert { left: 50%; top: 84px; transform: translateX(-50%); width: max-content; max-width: min(760px, calc(100% - 32px)); font-size: 18px; font-weight: 800; color: #ffd180; border-color: var(--warn); display: none; text-align: center; }
   #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
   #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
@@ -97,6 +98,7 @@
 </div>
 <div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
 <div class="hud" id="toast"></div>
+<div class="hud" id="alert"></div>
 <div class="hud" id="settings">
   <h3>보정 (브라보)</h3>
   <label><select id="calibSel"><option value="galaxy">노트북만 (기본)</option></select></label>
@@ -462,6 +464,7 @@ async function start(m, file) {
   running = true;
   $('intro').style.display = 'none'; $('introErr').textContent = '';
   startT = performance.now();
+  foreignStart();
   yGain = yBoost(); renderAcc(engine.info());
   const info = engine.info();
   drawSources(info.G, info.phones);
@@ -480,6 +483,31 @@ try {
   };
   setInterval(() => { if (running && mode === 'mic') tabs.bc.postMessage({ q: 'who-plays' }); }, 3000);
 } catch (e) { /* no BroadcastChannel */ }
+// foreign ultrasound: a stray 20 kHz tone (Force Push, an old tab, another device) or the 375 Hz sidebands a nearby phone puts
+// on our tones. Peaks 30 dB over the 15-22 kHz floor that are more than 300 Hz from our own carriers
+const fx = { an: null, buf: null, peak: null, t: 0 };
+function foreignStart() {
+  fx.an = null; fx.peak = null;
+  if (!audioG || !audioG.ctx || !audioG.source) return;
+  try { const an = audioG.ctx.createAnalyser(); an.fftSize = 8192; an.smoothingTimeConstant = 0.6; audioG.source.connect(an); fx.an = an; fx.buf = new Float32Array(an.frequencyBinCount); } catch (e) { fx.an = null; }
+}
+function foreignCheck() {
+  if (!fx.an || !running) { fx.peak = null; return; }
+  const an = fx.an, hz = audioG.ctx.sampleRate / an.fftSize, n = an.frequencyBinCount;
+  an.getFloatFrequencyData(fx.buf);
+  const lo = Math.floor(15000 / hz), hi = Math.min(n - 1, Math.ceil(22000 / hz));
+  const band = Array.from(fx.buf.subarray(lo, hi)).filter(Number.isFinite).sort((a, b) => a - b);
+  if (band.length < 10) { fx.peak = null; return; }
+  const floor = band[band.length >> 1], fr = engine && engine.info ? engine.info().freqs : null;
+  const carriers = Array.isArray(fr) && fr.length && fr.every(Number.isFinite) ? fr : [18000, 19500];
+  let best = null;
+  for (let i = lo; i <= hi; i++) {
+    const v = fx.buf[i], f = i * hz;
+    if (!(v > floor + 30) || carriers.some((c) => Math.abs(f - c) < 300)) continue;
+    if (!best || v > best.v) best = { f, v, over: v - floor };
+  }
+  fx.peak = best;
+}
 function startErrMsg(e) {
   const n = (e && e.name) || '', m = (e && e.message) || String(e);
   if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ 마이크가 막혀 있어요: 주소창 왼쪽 🔒(사이트 설정)에서 마이크를 허용하고 새로고침해요';
@@ -571,6 +599,7 @@ function renderAcc(s) {
 }
 
 // ------------------------------------------------------------------ HUD + render loop
+function bigNote(text, ms) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(showToast.h); showToast.h = setTimeout(() => { t.style.display = 'none'; }, ms); }
 function showToast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(showToast.h); showToast.h = setTimeout(() => { t.style.display = 'none'; }, 1800); }
 let hudT = 0;
 function renderHud(now) {
@@ -600,6 +629,12 @@ function renderDebug() {
     else if (lv < -6) warn = `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
   }
   if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) warn = `🔊 다른 Bat Ears 탭(${tabs.other})도 초음파를 내고 있어요: 그 탭을 닫아요 (서로 방해해요)`;
+  if (performance.now() - fx.t > 1000) { fx.t = performance.now(); foreignCheck(); }
+  const alerts = [];
+  if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) alerts.push(`🔊 다른 Bat Ears 탭(${tabs.other})이 초음파를 내고 있어요 → 그 탭을 닫아요`);
+  if (fx.peak && running) alerts.push(`📡 다른 초음파가 들려요 (${(fx.peak.f / 1000).toFixed(2)}kHz, +${fx.peak.over.toFixed(0)}dB) → 다른 Bat Ears 탭·기기를 끄고 폰을 노트북에서 치워요`);
+  if (lv != null && running && mode === 'mic' && lv < -6) alerts.push(`🔈 톤이 teach 때보다 ${(-lv).toFixed(0)}dB 작아요 → 윈도우 볼륨을 teach 때만큼 올려요 (작으면 움직임을 작게 그려요)`);
+  $('alert').textContent = alerts[0] || ''; $('alert').style.display = alerts.length ? 'block' : 'none';
   const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ 톤이 잘 들려요 (teach 때와 ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
   $('levelWarn').textContent = warn || okMsg;
   $('levelWarn').style.color = okMsg ? 'var(--ok)' : '';
@@ -624,6 +659,7 @@ function renderDebug() {
 const rec = { on: false, chunks: [], log: [], node: null, mute: null, rate: 48000, start: '', frames: 0 };
 async function recStart() {
   if (!audioG || !audioG.ctx || !audioG.source || mode !== 'mic') { $('recInfo').textContent = '⏺는 ▶ 시작(마이크) 뒤에 눌러요'; $('debug').style.display = 'block'; return; }
+  if (!dir && !NOFOLDER) bigNote('📁 저장 폴더 권한 창이 뜨면 "방문할 때마다 허용"을 골라요 (다음부터 안 물어봐요)', 6000);
   await dataDir(true);
   const ctx = audioG.ctx, node = ctx.createScriptProcessor(4096, 2, 1);
   node.channelCount = 2; node.channelCountMode = 'explicit'; node.channelInterpretation = 'discrete';
@@ -661,6 +697,7 @@ async function recStop() {
   rec.chunks = [];
   const where = await saveFiles(files);
   $('recInfo').textContent = `저장했어요 (${where}): ${base}.wav · .json, ${meta.seconds}초. 브라보에게 알려 주세요`;
+  bigNote(where.endsWith('/holo/') ? `✅ 저장됨: ${base} (${meta.seconds}초, ${where})` : `⬇️ 다운로드됨: ${base} → ml/data/holo/로 옮겨 주세요`, 7000);
 }
 // data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its holo/
 let dir = null;
