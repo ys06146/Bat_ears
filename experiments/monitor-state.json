@@ -1,9 +1,9 @@
 {
-  "schema": 1,
-  "checked_at_utc": "2026-11-15T15:31:05Z",
-  "main_sha": "7f2a9d4aa53eccfdde5044377a8b08d9d0db5ba6",
-  "exp_sha_before_run": "055450e737099e3e54a38ba8822d771da8f72f3b",
-  "report": "experiments/monitor-2026-11-15-0932.md",
+  "schema": 2,
+  "checked_at_utc": "2026-11-15T16:29:37Z",
+  "main_sha": "ab57d8ae31bc598efee08e6200a59a669f9f0330",
+  "exp_sha_before_run": "222007a422edb5e9b829826645929962832439ea",
+  "report": "experiments/monitor-2026-11-15-1028.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -17,37 +17,37 @@
     },
     {
       "path": "README.md",
-      "sha": "0b4118aea06b2fe9a115035de9ebd6256012c386",
-      "size": 6710
+      "sha": "5252d3ff71d031aaad753df5e6287b758666db8c",
+      "size": 8540
     },
     {
       "path": "TEAM.md",
-      "sha": "2f904995e5868e0e52d5b2e04cfb5b9a505aae8b",
-      "size": 11879
+      "sha": "e44bfbaf102cd1ed8f7259082f7e8fb98a5c6af2",
+      "size": 11893
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "327ae2f7e0f220679e961475d1df2fd1b93c8143",
-      "size": 7364
+      "sha": "59da767d100afadabb2d425bc8009406fafe2eb5",
+      "size": 7984
     },
     {
       "path": "docs/devpost.md",
-      "sha": "e5e7089c75a64aaf3145f9f95ee9a65f4fb37c70",
-      "size": 10755
+      "sha": "106ddb87bc750ce7787b789f091dc1c071fb68f6",
+      "size": 11818
     },
     {
       "path": "docs/judge-qa.md",
-      "sha": "a47775f233ba32be6d842ea8564f13a37192eca1",
-      "size": 5601
+      "sha": "d9df39fc6f0beaf8bb6e5d788ac5da5c835dc8a7",
+      "size": 5685
     },
     {
       "path": "docs/pitch.md",
-      "sha": "6061b69e0d62da429fc1d81e44933c99350c1cd5",
+      "sha": "adbd9e21c849487f12653157244847ad2e01d91d",
       "size": 2251
     },
     {
       "path": "docs/slides.md",
-      "sha": "3074f52fdbc2088bf783f1c625223f6ac31192f0",
+      "sha": "0a89627bbbb6747b8a0cde128380984e994392ed",
       "size": 1592
     },
     {
@@ -581,9 +581,29 @@
       "size": 969
     },
     {
+      "path": "tools/vision_full/README.md",
+      "sha": "d551292e1939df707169dec13ec2736814a8f761",
+      "size": 1213
+    },
+    {
+      "path": "tools/vision_full/vf_post.py",
+      "sha": "00d9d1e19b247521db951073959175308ff852b5",
+      "size": 6638
+    },
+    {
+      "path": "tools/vision_full/vf_run.mjs",
+      "sha": "cd58a75d5a09f6b500403a06de52856b82fc17bf",
+      "size": 2183
+    },
+    {
+      "path": "tools/vision_full/vision_full.html",
+      "sha": "3ce1096008f5725dd79fd7d69fc2d0468926e6c8",
+      "size": 7392
+    },
+    {
       "path": "web/3d.html",
-      "sha": "f2faa53e3c447a01a1576c1452226b201df8e28b",
-      "size": 42411
+      "sha": "d498eb7e2a921a73798a51f6003ed108ce802270",
+      "size": 42635
     },
     {
       "path": "web/app.js",
@@ -597,8 +617,8 @@
     },
     {
       "path": "web/bat3d.js",
-      "sha": "430de3101c5018ba60fee63d9e5a635c74bcc835",
-      "size": 28065
+      "sha": "8713baa6f811bfbe39b2430130f2c06331d443d6",
+      "size": 28186
     },
     {
       "path": "web/batears.html",
@@ -622,12 +642,12 @@
     },
     {
       "path": "web/dsp.js",
-      "sha": "1b999874064184edc2ac164a8acd9d753a686feb",
-      "size": 63137
+      "sha": "86a82823cba039e5dff854a905e25d94a8024d08",
+      "size": 63625
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "5c26765decb78859f07130cb8d962aab015022f3",
+      "sha": "8417d1fcbe4ea2b67ff835fe7caba781749e27af",
       "size": 27246
     },
     {
@@ -642,13 +662,13 @@
     },
     {
       "path": "web/hologram.html",
-      "sha": "2b2588b931fb070ad389c6495720c7634b592025",
-      "size": 55389
+      "sha": "9a2e2aaedf7d8fb823c2e964d537c00a7e825935",
+      "size": 64865
     },
     {
       "path": "web/index.html",
-      "sha": "caff57759c8dc32e33e3ad903109785dec8edca7",
-      "size": 9921
+      "sha": "735aa68576820b420f43ae7b58b0342a8eccc949",
+      "size": 10149
     },
     {
       "path": "web/iq.js",
@@ -657,7 +677,7 @@
     },
     {
       "path": "web/key.html",
-      "sha": "78865dfb3637d67cbc27f3ae3b4144a01fda3775",
+      "sha": "871e65e28921ba47c408e43574dd56bf1af55eef",
       "size": 28152
     },
     {
@@ -697,13 +717,108 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "0386f0ad18e59b5f372dda135722db7865ce1d5a",
-      "size": 80458
+      "sha": "9518fa34ed93a56b32096c33702398e4d12af4ab",
+      "size": 80626
     },
     {
       "path": "web/tone.html",
       "sha": "78af52d92aec234eb84e6df73f3efef5c5c39f5e",
       "size": 7863
+    },
+    {
+      "path": "web/vendor/three-0.160.0/LICENSE",
+      "sha": "d07e209686512b9ac93d7df5481a4a6f622093e7",
+      "size": 1081
+    },
+    {
+      "path": "web/vendor/three-0.160.0/build/three.module.js",
+      "sha": "0bcc7a286da2c115853ceec9deea19923e10ddc1",
+      "size": 1272972
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/controls/OrbitControls.js",
+      "sha": "f29e7feb0fe53082099bf718233e2c1baa8a5627",
+      "size": 29868
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/lines/Line2.js",
+      "sha": "cdd1ddfd9bd0c5efd8665f00f47c183e21c23e23",
+      "size": 433
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/lines/LineGeometry.js",
+      "sha": "1314cf6b4d7c0c8c12bf980448e9b4bd14f83611",
+      "size": 1458
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/lines/LineMaterial.js",
+      "sha": "10d673d709296e0014d31ba9fb4a49623e3ec726",
+      "size": 11281
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/lines/LineSegments2.js",
+      "sha": "e2a3e2a14b9a249d80d6fca793f987d04ad9f644",
+      "size": 9330
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/lines/LineSegmentsGeometry.js",
+      "sha": "c7cf8774bc9c41803cfe76cc5a5cfefbfaf36dc4",
+      "size": 4632
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/EffectComposer.js",
+      "sha": "110eabc8e6025e01cce12da0c99269a4c457d656",
+      "size": 4651
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/MaskPass.js",
+      "sha": "b30811c8d4ca86d4adaa1e8b9050e7d776e138d3",
+      "size": 2231
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/OutputPass.js",
+      "sha": "56746e894330c1f27b21681ce48382808c164dfd",
+      "size": 2398
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/Pass.js",
+      "sha": "a81582d13de21a6b13216959396daf0d6f8dc294",
+      "size": 1706
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/RenderPass.js",
+      "sha": "a6c3804ec67b900e9809c7f4decc32908e117d89",
+      "size": 1915
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/ShaderPass.js",
+      "sha": "597016c9935e254a186ec810288ee8772dc2718a",
+      "size": 1576
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js",
+      "sha": "a53754288d989066a3d25cff2bc3d057af822bfc",
+      "size": 12406
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/renderers/CSS2DRenderer.js",
+      "sha": "6d67931b97ff4447950a8b69ab915459981e4eee",
+      "size": 4407
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/shaders/CopyShader.js",
+      "sha": "8c3f2cd443cd4c96edc9c2c04dc760f374d954c9",
+      "size": 571
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/shaders/LuminosityHighPassShader.js",
+      "sha": "9f6445bb3b621cb42813ef9bfd891419d7ea7d3e",
+      "size": 1192
+    },
+    {
+      "path": "web/vendor/three-0.160.0/examples/jsm/shaders/OutputShader.js",
+      "sha": "e654d853a8d7f16117f3f5e52b2a2d2cec7edfc2",
+      "size": 1393
     },
     {
       "path": "web/vision3d.browser.js",
@@ -716,656 +831,150 @@
       "size": 3699
     }
   ],
-  "drive_files": [
-    {
-      "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
-      "name": "teach",
-      "mime": "application/vnd.google-apps.folder",
-      "size": null,
-      "modified": "2026-11-15T09:56:04.453Z",
-      "url": "https://drive.google.com/drive/folders/1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG"
-    },
-    {
-      "id": "1Ln49gbuaSWfvbg9rDCLOQp1Di-WXS7zj",
-      "name": "batears_auth_61f5.json",
-      "mime": "application/json",
-      "size": "29866",
-      "modified": "2026-11-15T08:41:08.549Z",
-      "url": "https://drive.google.com/file/d/1Ln49gbuaSWfvbg9rDCLOQp1Di-WXS7zj/view?usp=drivesdk"
-    },
-    {
-      "id": "1_oSG41WM-SdHblqIBg0rwEwbyNCwnMZO",
-      "name": "batears_auth_61f5.csv",
-      "mime": "text/csv",
-      "size": "803",
-      "modified": "2026-11-15T08:41:08.548Z",
-      "url": "https://drive.google.com/file/d/1_oSG41WM-SdHblqIBg0rwEwbyNCwnMZO/view?usp=drivesdk"
-    },
-    {
-      "id": "1GFV8SEWuELTaCnUarw_H37D-BqqYNkVT",
-      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.wav",
-      "mime": "audio/x-wav",
-      "size": "27717164",
-      "modified": "2026-11-15T08:24:18.514Z",
-      "url": "https://drive.google.com/file/d/1GFV8SEWuELTaCnUarw_H37D-BqqYNkVT/view?usp=drivesdk"
-    },
-    {
-      "id": "1Poi29xnH6bGFpQlHp2co3mClSxjpy_dl",
-      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.csv",
-      "mime": "text/csv",
-      "size": "1759663",
-      "modified": "2026-11-15T08:24:18.228Z",
-      "url": "https://drive.google.com/file/d/1Poi29xnH6bGFpQlHp2co3mClSxjpy_dl/view?usp=drivesdk"
-    },
-    {
-      "id": "1uoJPJBWYSdgU2FK--osBTMJfuKTPBonv",
-      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.json",
-      "mime": "application/json",
-      "size": "18689",
-      "modified": "2026-11-15T08:24:18.149Z",
-      "url": "https://drive.google.com/file/d/1uoJPJBWYSdgU2FK--osBTMJfuKTPBonv/view?usp=drivesdk"
-    },
-    {
-      "id": "1LUDDb-MnlNOzLjjButSPstL6MTMwYoqq",
-      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.csv",
-      "mime": "text/csv",
-      "size": "1384472",
-      "modified": "2026-11-15T08:21:05.900Z",
-      "url": "https://drive.google.com/file/d/1LUDDb-MnlNOzLjjButSPstL6MTMwYoqq/view?usp=drivesdk"
-    },
-    {
-      "id": "1JTGdXo9HhU2FK8hDsrlCc4C4dU1H4hY1",
-      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.wav",
-      "mime": "audio/x-wav",
-      "size": "27715116",
-      "modified": "2026-11-15T08:21:00.021Z",
-      "url": "https://drive.google.com/file/d/1JTGdXo9HhU2FK8hDsrlCc4C4dU1H4hY1/view?usp=drivesdk"
-    },
-    {
-      "id": "19HFDSLyjeQ5V-jcZVt0v0Hz8icVL3Mlg",
-      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.json",
-      "mime": "application/json",
-      "size": "18608",
-      "modified": "2026-11-15T08:20:59.440Z",
-      "url": "https://drive.google.com/file/d/19HFDSLyjeQ5V-jcZVt0v0Hz8icVL3Mlg/view?usp=drivesdk"
-    },
-    {
-      "id": "1MdC9b1fqejqjHIlNtsh5_FKK7jS3uHh3",
-      "name": "batears_2026-11-15T07-40-04-429Z_p1.csv",
-      "mime": "text/csv",
-      "size": "3538",
-      "modified": "2026-11-15T07:41:23.111Z",
-      "url": "https://drive.google.com/file/d/1MdC9b1fqejqjHIlNtsh5_FKK7jS3uHh3/view?usp=drivesdk"
-    },
-    {
-      "id": "1-52WJLJla90KBinTBWR55F_jjhHJ2jqC",
-      "name": "batears_2026-11-15T07-40-04-429Z_p1.json",
-      "mime": "application/json",
-      "size": "11900",
-      "modified": "2026-11-15T07:41:22.946Z",
-      "url": "https://drive.google.com/file/d/1-52WJLJla90KBinTBWR55F_jjhHJ2jqC/view?usp=drivesdk"
-    },
-    {
-      "id": "1Tye4guIiXhjot21zRVrDkmEHjTOVN6xj",
-      "name": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.csv",
-      "mime": "text/csv",
-      "size": "3538",
-      "modified": "2026-11-15T07:41:03.318Z",
-      "url": "https://drive.google.com/file/d/1Tye4guIiXhjot21zRVrDkmEHjTOVN6xj/view?usp=drivesdk"
-    },
-    {
-      "id": "17VWw4EqMded2TljmPhguaiJ_3GiSa3Ph",
-      "name": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
-      "mime": "application/json",
-      "size": "11900",
-      "modified": "2026-11-15T07:41:03.104Z",
-      "url": "https://drive.google.com/file/d/17VWw4EqMded2TljmPhguaiJ_3GiSa3Ph/view?usp=drivesdk"
-    },
-    {
-      "id": "1J1xL8i41pAuJ7h9cDgoIYoBHO-_JtTCH",
-      "name": "batears_2026-11-15T07-37-56-093Z_p1_interference_off.csv",
-      "mime": "text/csv",
-      "size": "5003",
-      "modified": "2026-11-15T07:39:58.256Z",
-      "url": "https://drive.google.com/file/d/1J1xL8i41pAuJ7h9cDgoIYoBHO-_JtTCH/view?usp=drivesdk"
-    },
-    {
-      "id": "1scgUo2ndXzXs_RvyIhP5O7aBKq8bVPlH",
-      "name": "batears_2026-11-15T07-37-56-093Z_p1_interference_off.json",
-      "mime": "application/json",
-      "size": "15566",
-      "modified": "2026-11-15T07:39:58.000Z",
-      "url": "https://drive.google.com/file/d/1scgUo2ndXzXs_RvyIhP5O7aBKq8bVPlH/view?usp=drivesdk"
-    },
-    {
-      "id": "1bRbnG6xv6at1gIUTtLTLYhRqj7ohbUHR",
-      "name": "batears_20261114_235151_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "151166",
-      "modified": "2026-11-15T05:52:05.051Z",
-      "url": "https://drive.google.com/file/d/1bRbnG6xv6at1gIUTtLTLYhRqj7ohbUHR/view?usp=drivesdk"
-    },
-    {
-      "id": "10KNtOwMhDdrKiarkMGefCIyaaxTXJeX3",
-      "name": "batears_20261114_235151_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "1885",
-      "modified": "2026-11-15T05:52:05.051Z",
-      "url": "https://drive.google.com/file/d/10KNtOwMhDdrKiarkMGefCIyaaxTXJeX3/view?usp=drivesdk"
-    },
-    {
-      "id": "14ZGtx-gIBuVdBUwguHozS83tycTHeHfX",
-      "name": "batears_20261114_235001_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1188823",
-      "modified": "2026-11-15T05:51:47.001Z",
-      "url": "https://drive.google.com/file/d/14ZGtx-gIBuVdBUwguHozS83tycTHeHfX/view?usp=drivesdk"
-    },
-    {
-      "id": "14acISAITWxR_sfppmTTMA1Raobs2yKp0",
-      "name": "batears_20261114_235001_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "4430",
-      "modified": "2026-11-15T05:51:46.999Z",
-      "url": "https://drive.google.com/file/d/14acISAITWxR_sfppmTTMA1Raobs2yKp0/view?usp=drivesdk"
-    },
-    {
-      "id": "1HbHKgh_k5Xo2MGRuRYyenoT1qlnLgxDv",
-      "name": "batears_20261114_234730_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "2022",
-      "modified": "2026-11-15T05:47:47.545Z",
-      "url": "https://drive.google.com/file/d/1HbHKgh_k5Xo2MGRuRYyenoT1qlnLgxDv/view?usp=drivesdk"
-    },
-    {
-      "id": "1QPOV9jorN95uCWWXPS08KEk4ZhWJfgvw",
-      "name": "batears_20261114_234730_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "194216",
-      "modified": "2026-11-15T05:47:47.541Z",
-      "url": "https://drive.google.com/file/d/1QPOV9jorN95uCWWXPS08KEk4ZhWJfgvw/view?usp=drivesdk"
-    },
-    {
-      "id": "1U7psPyqgXPxK3rKfGotP3Umkxb7vl-tZ",
-      "name": "batears_20261114_234303_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1190625",
-      "modified": "2026-11-15T05:44:49.163Z",
-      "url": "https://drive.google.com/file/d/1U7psPyqgXPxK3rKfGotP3Umkxb7vl-tZ/view?usp=drivesdk"
-    },
-    {
-      "id": "1VV71kpKfRNWld3L0rt8UA9y4lgboE_6H",
-      "name": "batears_20261114_234303_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "4458",
-      "modified": "2026-11-15T05:44:49.161Z",
-      "url": "https://drive.google.com/file/d/1VV71kpKfRNWld3L0rt8UA9y4lgboE_6H/view?usp=drivesdk"
-    },
-    {
-      "id": "1DbriAVKCP_082VvKnWvaJVoH4khvsOv7",
-      "name": "batears_20261114_234041_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1188795",
-      "modified": "2026-11-15T05:42:26.214Z",
-      "url": "https://drive.google.com/file/d/1DbriAVKCP_082VvKnWvaJVoH4khvsOv7/view?usp=drivesdk"
-    },
-    {
-      "id": "1fa99AXgalTRm0MauNmldVBkCn9lQxQhB",
-      "name": "batears_20261114_234041_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "4450",
-      "modified": "2026-11-15T05:42:26.213Z",
-      "url": "https://drive.google.com/file/d/1fa99AXgalTRm0MauNmldVBkCn9lQxQhB/view?usp=drivesdk"
-    },
-    {
-      "id": "1roGOV44Jht5kcC0fo7-dlACFGlBMqwq2",
-      "name": "batears_20261114_233820_1_d60_quiet_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1185158",
-      "modified": "2026-11-15T05:40:06.117Z",
-      "url": "https://drive.google.com/file/d/1roGOV44Jht5kcC0fo7-dlACFGlBMqwq2/view?usp=drivesdk"
-    },
-    {
-      "id": "1vco1sMBGPAejQVkudEJzTfCJRMhNKkYF",
-      "name": "batears_20261114_233820_1_d60_quiet_n0c4.json",
-      "mime": "application/json",
-      "size": "4387",
-      "modified": "2026-11-15T05:40:06.115Z",
-      "url": "https://drive.google.com/file/d/1vco1sMBGPAejQVkudEJzTfCJRMhNKkYF/view?usp=drivesdk"
-    },
-    {
-      "id": "1pXiClKPzqq2SD8Pe8YTYHKLf-NCnaBFB",
-      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.wav",
-      "mime": "audio/x-wav",
-      "size": "19633196",
-      "modified": "2026-11-15T05:30:13.340Z",
-      "url": "https://drive.google.com/file/d/1pXiClKPzqq2SD8Pe8YTYHKLf-NCnaBFB/view?usp=drivesdk"
-    },
-    {
-      "id": "1o0c3q8JQ2O2TJl21JRBCxZvRhEO7lXmI",
-      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.json",
-      "mime": "application/json",
-      "size": "16067",
-      "modified": "2026-11-15T05:30:13.323Z",
-      "url": "https://drive.google.com/file/d/1o0c3q8JQ2O2TJl21JRBCxZvRhEO7lXmI/view?usp=drivesdk"
-    },
-    {
-      "id": "1IdSwlcd5kkYUfcEavakxBYuyBEhq1kFC",
-      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1352965",
-      "modified": "2026-11-15T05:30:13.187Z",
-      "url": "https://drive.google.com/file/d/1IdSwlcd5kkYUfcEavakxBYuyBEhq1kFC/view?usp=drivesdk"
-    },
-    {
-      "id": "1xqUDm3qt88zBjeJnNXy8bxs8dbHppiOv",
-      "name": "batears_20261114_232505_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1189200",
-      "modified": "2026-11-15T05:27:07.972Z",
-      "url": "https://drive.google.com/file/d/1xqUDm3qt88zBjeJnNXy8bxs8dbHppiOv/view?usp=drivesdk"
-    },
-    {
-      "id": "1U25TCSzWq5wW_0cQiXoaPbsff9gzmxd2",
-      "name": "batears_20261114_232505_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "4441",
-      "modified": "2026-11-15T05:26:50.733Z",
-      "url": "https://drive.google.com/file/d/1U25TCSzWq5wW_0cQiXoaPbsff9gzmxd2/view?usp=drivesdk"
-    },
-    {
-      "id": "1WSadLaVykOcMQNvBQ7C4Ddivg-MB5NvA",
-      "name": "batears_20261114_232432_1_d60_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "82793",
-      "modified": "2026-11-15T05:24:40.096Z",
-      "url": "https://drive.google.com/file/d/1WSadLaVykOcMQNvBQ7C4Ddivg-MB5NvA/view?usp=drivesdk"
-    },
-    {
-      "id": "1y7VKXrAwHu2NRqBq7Nr8VkjvQLXEUw57",
-      "name": "batears_20261114_232432_1_d60_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "1744",
-      "modified": "2026-11-15T05:24:40.096Z",
-      "url": "https://drive.google.com/file/d/1y7VKXrAwHu2NRqBq7Nr8VkjvQLXEUw57/view?usp=drivesdk"
-    },
-    {
-      "id": "1dMN6ey4F0MI-TWA6MLTwX6c6PVTbaMc4",
-      "name": "batears_20261114_231902_seohee_d20_quiet_milz.json",
-      "mime": "application/json",
-      "size": "25807",
-      "modified": "2026-11-15T05:22:15.149Z",
-      "url": "https://drive.google.com/file/d/1dMN6ey4F0MI-TWA6MLTwX6c6PVTbaMc4/view?usp=drivesdk"
-    },
-    {
-      "id": "1xtHMHqtVrOyE7D4WsC85NXGvoR5e9yie",
-      "name": "batears_20261114_231902_seohee_d20_quiet_milz.csv",
-      "mime": "text/csv",
-      "size": "5174268",
-      "modified": "2026-11-15T05:22:15.028Z",
-      "url": "https://drive.google.com/file/d/1xtHMHqtVrOyE7D4WsC85NXGvoR5e9yie/view?usp=drivesdk"
-    },
-    {
-      "id": "1drScNu_AQOnns5Ca8MHy1gTohcghHs7Y",
-      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.wav",
-      "mime": "audio/wav",
-      "size": "19249196",
-      "modified": "2026-11-15T05:15:48.997Z",
-      "url": "https://drive.google.com/file/d/1drScNu_AQOnns5Ca8MHy1gTohcghHs7Y/view?usp=drivesdk"
-    },
-    {
-      "id": "1YPH3IORKVVcpPPHO-NYv8SWN7R1uNRwW",
-      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.json",
-      "mime": "application/json",
-      "size": "15407",
-      "modified": "2026-11-15T05:15:48.979Z",
-      "url": "https://drive.google.com/file/d/1YPH3IORKVVcpPPHO-NYv8SWN7R1uNRwW/view?usp=drivesdk"
-    },
-    {
-      "id": "1DKGxDVbkJTrlH-sMbvx875XIipoQtvs3",
-      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.csv",
-      "mime": "text/csv",
-      "size": "2691943",
-      "modified": "2026-11-15T05:15:48.852Z",
-      "url": "https://drive.google.com/file/d/1DKGxDVbkJTrlH-sMbvx875XIipoQtvs3/view?usp=drivesdk"
-    },
-    {
-      "id": "16m3F7i5f3AGJozE_zLbPNaAo5uWSb-8G",
-      "name": "batears_20261114_231413_1_d55_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "34038",
-      "modified": "2026-11-15T05:14:16.976Z",
-      "url": "https://drive.google.com/file/d/16m3F7i5f3AGJozE_zLbPNaAo5uWSb-8G/view?usp=drivesdk"
-    },
-    {
-      "id": "1O5y533TKnqpJDnBJ8C2IuVopssxPiZad",
-      "name": "batears_20261114_231413_1_d55_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "1601",
-      "modified": "2026-11-15T05:14:16.976Z",
-      "url": "https://drive.google.com/file/d/1O5y533TKnqpJDnBJ8C2IuVopssxPiZad/view?usp=drivesdk"
-    },
-    {
-      "id": "15SwtDxyZ7uyTbIEV4MLacJ8Okxi00Qj-",
-      "name": "batears_20261114_231349_1_d55_noisy_n0c4.csv",
-      "mime": "text/csv",
-      "size": "132497",
-      "modified": "2026-11-15T05:14:01.551Z",
-      "url": "https://drive.google.com/file/d/15SwtDxyZ7uyTbIEV4MLacJ8Okxi00Qj-/view?usp=drivesdk"
-    },
-    {
-      "id": "1ol3CqFEdGulBnoIMRg4vclGP5fkTCLkz",
-      "name": "batears_20261114_231349_1_d55_noisy_n0c4.json",
-      "mime": "application/json",
-      "size": "1733",
-      "modified": "2026-11-15T05:14:01.551Z",
-      "url": "https://drive.google.com/file/d/1ol3CqFEdGulBnoIMRg4vclGP5fkTCLkz/view?usp=drivesdk"
-    },
-    {
-      "id": "11uvWSKhYyRBgwCmijHiWVUnzXs0OzPx9",
-      "name": "batears_20261114_224838_1_d55_quiet_n0c4.csv",
-      "mime": "text/csv",
-      "size": "132536",
-      "modified": "2026-11-15T04:48:50.433Z",
-      "url": "https://drive.google.com/file/d/11uvWSKhYyRBgwCmijHiWVUnzXs0OzPx9/view?usp=drivesdk"
-    },
-    {
-      "id": "1-GtXEqA_Fal2ItVHARBaaZy18JSCj0la",
-      "name": "batears_20261114_224838_1_d55_quiet_n0c4.json",
-      "mime": "application/json",
-      "size": "1743",
-      "modified": "2026-11-15T04:48:50.433Z",
-      "url": "https://drive.google.com/file/d/1-GtXEqA_Fal2ItVHARBaaZy18JSCj0la/view?usp=drivesdk"
-    },
-    {
-      "id": "1xcoQBNoLPmJWSBjOqYgpdi3OP0TJVPQz",
-      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.wav",
-      "mime": "audio/x-wav",
-      "size": "768044",
-      "modified": "2026-11-15T04:46:16.693Z",
-      "url": "https://drive.google.com/file/d/1xcoQBNoLPmJWSBjOqYgpdi3OP0TJVPQz/view?usp=drivesdk"
-    },
-    {
-      "id": "1c3lrvxyPy1F72KkKckfLoRbF4Ak59b1E",
-      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.json",
-      "mime": "application/json",
-      "size": "2064",
-      "modified": "2026-11-15T04:46:16.691Z",
-      "url": "https://drive.google.com/file/d/1c3lrvxyPy1F72KkKckfLoRbF4Ak59b1E/view?usp=drivesdk"
-    },
-    {
-      "id": "10zkWRW3DpzeNqVKFLIZOwGXSWEf5ZsdZ",
-      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.csv",
-      "mime": "text/csv",
-      "size": "53055",
-      "modified": "2026-11-15T04:46:16.568Z",
-      "url": "https://drive.google.com/file/d/10zkWRW3DpzeNqVKFLIZOwGXSWEf5ZsdZ/view?usp=drivesdk"
-    },
-    {
-      "id": "1_3cii_oSN0GB_yrgopoI3ho3Gwezb-VZ",
-      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.wav",
-      "mime": "audio/x-wav",
-      "size": "19253292",
-      "modified": "2026-11-15T04:46:00.686Z",
-      "url": "https://drive.google.com/file/d/1_3cii_oSN0GB_yrgopoI3ho3Gwezb-VZ/view?usp=drivesdk"
-    },
-    {
-      "id": "1X3DkwQcdq1uFyqFwFT-kosaDTSqVU1M8",
-      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.json",
-      "mime": "application/json",
-      "size": "14912",
-      "modified": "2026-11-15T04:46:00.665Z",
-      "url": "https://drive.google.com/file/d/1X3DkwQcdq1uFyqFwFT-kosaDTSqVU1M8/view?usp=drivesdk"
-    },
-    {
-      "id": "1FNbQGWNp3RYxCTUp9BcpeTNDeSFNAZtw",
-      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1335291",
-      "modified": "2026-11-15T04:46:00.539Z",
-      "url": "https://drive.google.com/file/d/1FNbQGWNp3RYxCTUp9BcpeTNDeSFNAZtw/view?usp=drivesdk"
-    },
-    {
-      "id": "1ZO9Qhur7mXn4uHjA6iMva8YKL7ktFGBE",
-      "name": "batears_20261114_224220_1_d55_quiet_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1187189",
-      "modified": "2026-11-15T04:44:23.399Z",
-      "url": "https://drive.google.com/file/d/1ZO9Qhur7mXn4uHjA6iMva8YKL7ktFGBE/view?usp=drivesdk"
-    },
-    {
-      "id": "1hCaACAJiYD9YlAHubGq7v5FenaVwiLtH",
-      "name": "batears_20261114_224220_1_d55_quiet_n0c4.json",
-      "mime": "application/json",
-      "size": "4420",
-      "modified": "2026-11-15T04:44:05.922Z",
-      "url": "https://drive.google.com/file/d/1hCaACAJiYD9YlAHubGq7v5FenaVwiLtH/view?usp=drivesdk"
-    },
-    {
-      "id": "1qfZDx5u253GfwTQ40LrmJ2ZZ7PdLLpCX",
-      "name": "batears_20261114_214602_anon_d20_quiet_lr_milz.json",
-      "mime": "application/json",
-      "size": "13408",
-      "modified": "2026-11-15T03:47:42.677Z",
-      "url": "https://drive.google.com/file/d/1qfZDx5u253GfwTQ40LrmJ2ZZ7PdLLpCX/view?usp=drivesdk"
-    },
-    {
-      "id": "1gV-E6vHwwWe0Cb6QDKrKqzRrQn9_IyZo",
-      "name": "batears_20261114_214602_anon_d20_quiet_lr_milz.csv",
-      "mime": "text/csv",
-      "size": "2716126",
-      "modified": "2026-11-15T03:47:42.551Z",
-      "url": "https://drive.google.com/file/d/1gV-E6vHwwWe0Cb6QDKrKqzRrQn9_IyZo/view?usp=drivesdk"
-    },
-    {
-      "id": "19XUdCIyNIyj2EA20rdV9mIbqLLVdienj",
-      "name": "batears_20261114_212758_anon_d20_quiet_milz.csv",
-      "mime": "text/csv",
-      "size": "2416096",
-      "modified": "2026-11-15T03:29:43.811Z",
-      "url": "https://drive.google.com/file/d/19XUdCIyNIyj2EA20rdV9mIbqLLVdienj/view?usp=drivesdk"
-    },
-    {
-      "id": "1b8XdTfV7kVeNGZs1hiVeYKJ1ng2RfSDN",
-      "name": "batears_20261114_212758_anon_d20_quiet_milz.json",
-      "mime": "application/json",
-      "size": "4408",
-      "modified": "2026-11-15T03:29:43.809Z",
-      "url": "https://drive.google.com/file/d/1b8XdTfV7kVeNGZs1hiVeYKJ1ng2RfSDN/view?usp=drivesdk"
-    },
-    {
-      "id": "1BEEDjXC3r3VcvwwkmOSnU6McZ0HGt2bM",
-      "name": "batears_20261114_212413_anon_d20_quiet_naiz.csv",
-      "mime": "text/csv",
-      "size": "4824022",
-      "modified": "2026-11-15T03:27:13.430Z",
-      "url": "https://drive.google.com/file/d/1BEEDjXC3r3VcvwwkmOSnU6McZ0HGt2bM/view?usp=drivesdk"
-    },
-    {
-      "id": "1luzLpuRxrx4tN_QZ80PcAaMO164UilKo",
-      "name": "batears_20261114_212242_anon_d20_quiet_lr_naiz.csv",
-      "mime": "text/csv",
-      "size": "2016335",
-      "modified": "2026-11-15T03:23:57.111Z",
-      "url": "https://drive.google.com/file/d/1luzLpuRxrx4tN_QZ80PcAaMO164UilKo/view?usp=drivesdk"
-    },
-    {
-      "id": "1-0SIgBiamSQNioxRVXuoFYaO_pKOgrYz",
-      "name": "batears_20261114_212242_anon_d20_quiet_lr_naiz.json",
-      "mime": "application/json",
-      "size": "8207",
-      "modified": "2026-11-15T03:23:57.110Z",
-      "url": "https://drive.google.com/file/d/1-0SIgBiamSQNioxRVXuoFYaO_pKOgrYz/view?usp=drivesdk"
-    },
-    {
-      "id": "1bYDbiQj7JOj5Kb2DZCpdpnwAEQlUptRU",
-      "name": "batears_20261114_211820_anon_d20_quiet_naiz.csv",
-      "mime": "text/csv",
-      "size": "5166112",
-      "modified": "2026-11-15T03:21:33.066Z",
-      "url": "https://drive.google.com/file/d/1bYDbiQj7JOj5Kb2DZCpdpnwAEQlUptRU/view?usp=drivesdk"
-    },
-    {
-      "id": "1NToRSKeL5ymPeSpZySb4XqZMp2J08SFH",
-      "name": "batears_20261114_211820_anon_d20_quiet_naiz.json",
-      "mime": "application/json",
-      "size": "17138",
-      "modified": "2026-11-15T03:21:33.061Z",
-      "url": "https://drive.google.com/file/d/1NToRSKeL5ymPeSpZySb4XqZMp2J08SFH/view?usp=drivesdk"
-    },
-    {
-      "id": "1vCUmO9sBaMKlPI328ot9LbxBjWq1hZIU",
-      "name": "batears_20261114_211226_anon_d20_quiet_naiz.csv",
-      "mime": "text/csv",
-      "size": "2422942",
-      "modified": "2026-11-15T03:14:11.252Z",
-      "url": "https://drive.google.com/file/d/1vCUmO9sBaMKlPI328ot9LbxBjWq1hZIU/view?usp=drivesdk"
-    },
-    {
-      "id": "1eXTfakcV37Sk19XTWIqidWx0HpzNUcQa",
-      "name": "batears_20261114_211226_anon_d20_quiet_naiz.json",
-      "mime": "application/json",
-      "size": "4406",
-      "modified": "2026-11-15T03:14:11.248Z",
-      "url": "https://drive.google.com/file/d/1eXTfakcV37Sk19XTWIqidWx0HpzNUcQa/view?usp=drivesdk"
-    },
-    {
-      "id": "1W2kjEZkf4PQKCDYZKllnwivPWrPfOQWl",
-      "name": "batears_20261114_205859_anon_d30_quiet_61f5.csv",
-      "mime": "text/csv",
-      "size": "2568254",
-      "modified": "2026-11-15T03:02:13.305Z",
-      "url": "https://drive.google.com/file/d/1W2kjEZkf4PQKCDYZKllnwivPWrPfOQWl/view?usp=drivesdk"
-    },
-    {
-      "id": "1XAoK4wsdJdoOsqJpvOVpOX3FWqgiDJji",
-      "name": "batears_20261114_205859_anon_d30_quiet_61f5.json",
-      "mime": "application/json",
-      "size": "17676",
-      "modified": "2026-11-15T03:02:13.152Z",
-      "url": "https://drive.google.com/file/d/1XAoK4wsdJdoOsqJpvOVpOX3FWqgiDJji/view?usp=drivesdk"
-    },
-    {
-      "id": "1OUDPrhIAdOqRxf74DKvf7NiriOE-dSmI",
-      "name": "batears_20261114_171130_anon_d30_quiet_lr_61f5.csv",
-      "mime": "text/csv",
-      "size": "552005",
-      "modified": "2026-11-14T23:13:27.180Z",
-      "url": "https://drive.google.com/file/d/1OUDPrhIAdOqRxf74DKvf7NiriOE-dSmI/view?usp=drivesdk"
-    },
-    {
-      "id": "1J4z54EARbviYNVureyWxr7-0AFeXIcQ7",
-      "name": "batears_20261114_171130_anon_d30_quiet_lr_61f5.json",
-      "mime": "application/json",
-      "size": "5975",
-      "modified": "2026-11-14T23:13:27.119Z",
-      "url": "https://drive.google.com/file/d/1J4z54EARbviYNVureyWxr7-0AFeXIcQ7/view?usp=drivesdk"
-    },
-    {
-      "id": "1Lxq9zWP8jwI0nNjnqjoUTscBjX7QxlEn",
-      "name": "batears_20261114_164738_anon_d30_quiet_61f5.json",
-      "mime": "application/json",
-      "size": "5667",
-      "modified": "2026-11-14T22:53:34.280Z",
-      "url": "https://drive.google.com/file/d/1Lxq9zWP8jwI0nNjnqjoUTscBjX7QxlEn/view?usp=drivesdk"
-    },
-    {
-      "id": "1Q0QyBeg0_BC7MHjJ8KlMVFAMWSaRvVIu",
-      "name": "batears_20261114_164412_anon_d30_quiet_61f5.csv",
-      "mime": "text/csv",
-      "size": "824304",
-      "modified": "2026-11-14T22:53:33.309Z",
-      "url": "https://drive.google.com/file/d/1Q0QyBeg0_BC7MHjJ8KlMVFAMWSaRvVIu/view?usp=drivesdk"
-    },
-    {
-      "id": "12p0yWfsMamOOCH2CGfOGYH0Xe4pUAsEf",
-      "name": "batears_20261114_164218_1_d35_quiet_n0c4.csv",
-      "mime": "text/csv",
-      "size": "1193116",
-      "modified": "2026-11-14T22:53:33.077Z",
-      "url": "https://drive.google.com/file/d/12p0yWfsMamOOCH2CGfOGYH0Xe4pUAsEf/view?usp=drivesdk"
-    },
-    {
-      "id": "1vyg0y4kA4NCJJ7vXw9YiwdAeptmd4mtK",
-      "name": "batears_20261114_164302_anon_d30_quiet_61f5.csv",
-      "mime": "text/csv",
-      "size": "114988",
-      "modified": "2026-11-14T22:53:32.833Z",
-      "url": "https://drive.google.com/file/d/1vyg0y4kA4NCJJ7vXw9YiwdAeptmd4mtK/view?usp=drivesdk"
-    },
-    {
-      "id": "1kH47tBBTx09mnOiRK-E6g2dhW82x-wRY",
-      "name": "batears_20261114_164412_anon_d30_quiet_61f5.json",
-      "mime": "application/json",
-      "size": "4557",
-      "modified": "2026-11-14T22:53:32.576Z",
-      "url": "https://drive.google.com/file/d/1kH47tBBTx09mnOiRK-E6g2dhW82x-wRY/view?usp=drivesdk"
-    },
-    {
-      "id": "1MY4e4-tiuqM4DTwAn5EmNiczhwV6nvwV",
-      "name": "batears_20261114_164218_1_d35_quiet_n0c4.json",
-      "mime": "application/json",
-      "size": "4501",
-      "modified": "2026-11-14T22:53:32.283Z",
-      "url": "https://drive.google.com/file/d/1MY4e4-tiuqM4DTwAn5EmNiczhwV6nvwV/view?usp=drivesdk"
-    },
-    {
-      "id": "1C8b1oxzl_kx6Dl0hJBa-_MxTD2CUSPah",
-      "name": "batears_20261114_164738_anon_d30_quiet_61f5.csv",
-      "mime": "text/csv",
-      "size": "1021688",
-      "modified": "2026-11-14T22:53:32.203Z",
-      "url": "https://drive.google.com/file/d/1C8b1oxzl_kx6Dl0hJBa-_MxTD2CUSPah/view?usp=drivesdk"
-    },
-    {
-      "id": "1oh72yhEHeRhvf9hyLvlGkha9DlWaXlfd",
-      "name": "batears_20261114_163007_anon_d30_quiet_61f5.json",
-      "mime": "application/json",
-      "size": "4591",
-      "modified": "2026-11-14T22:35:42.285Z",
-      "url": "https://drive.google.com/file/d/1oh72yhEHeRhvf9hyLvlGkha9DlWaXlfd/view?usp=drivesdk"
-    },
-    {
-      "id": "1enHLrv-iIHTo7k2t09annhE-T5hLnq6L",
-      "name": "batears_20261114_163007_anon_d30_quiet_61f5.csv",
-      "mime": "text/csv",
-      "size": "611249",
-      "modified": "2026-11-14T22:35:42.279Z",
-      "url": "https://drive.google.com/file/d/1enHLrv-iIHTo7k2t09annhE-T5hLnq6L/view?usp=drivesdk"
-    },
-    {
-      "id": "1SFWx_Fg9pEqTJvMpSC-HqacDw5Kwg8Bl",
-      "name": "batears_20261114_160233_d20_p1.csv",
-      "mime": "text/csv",
-      "size": "1110458",
-      "modified": "2026-11-14T22:10:54.237Z",
-      "url": "https://drive.google.com/file/d/1SFWx_Fg9pEqTJvMpSC-HqacDw5Kwg8Bl/view?usp=drivesdk"
-    },
-    {
-      "id": "1wBrQhYvRvF4gyHgbiFgLfBTbZTRlag7l",
-      "name": "batears_20261114_153352_d20_p1.csv",
-      "mime": "text/csv",
-      "size": "1104792",
-      "modified": "2026-11-14T21:46:21.423Z",
-      "url": "https://drive.google.com/file/d/1wBrQhYvRvF4gyHgbiFgLfBTbZTRlag7l/view?usp=drivesdk"
-    },
-    {
-      "id": "1z5BK0M-2F9uSuI8nKw6KdJPxx0ngaLUg",
-      "name": "batears_20261114_153615_d20_p1.csv",
-      "mime": "text/csv",
-      "size": "18229",
-      "modified": "2026-11-14T21:46:19.665Z",
-      "url": "https://drive.google.com/file/d/1z5BK0M-2F9uSuI8nKw6KdJPxx0ngaLUg/view?usp=drivesdk"
-    },
-    {
-      "id": "1nzzRB4y967nHtnYP8-7NiD3mHpdYOfA5",
-      "name": "fake",
-      "mime": "application/vnd.google-apps.folder",
-      "size": null,
-      "modified": "2026-11-14T20:22:47.152Z",
-      "url": "https://drive.google.com/drive/folders/1nzzRB4y967nHtnYP8-7NiD3mHpdYOfA5"
+  "drive_fingerprints": {
+    "root": {
+      "count": 81,
+      "hash_algorithm": "sha256(id) -> sha256(JSON([title,String(size),modified_time])) UTF-8; JSON separators comma/colon; ensure_ascii=false",
+      "file_fingerprints": {
+        "d39c56ec879af143c0b5ad0b8e3d9ff30ba6d7fd045a755ec116a1ea2f0aea48": "8ec154486529d4317c072f7ab68f258f47b484b7019ca70b9094ed4a22c82bad",
+        "7fe0bebf2f83231ce8ed3d089cc7b3f69a3b1259b43f7c6910066543ba56c1e3": "07ffc26ccd86cb4d389968b9e440cbe4a7d4a1d4691a2a98e23ea8b30db7d3ba",
+        "d7d73390dcff87751a90166fc7d857e13196bf95828aa9ddaf7f498fb4082103": "f5e63f6b479614deeff5e0d6f7d9b8fcfee0fa3f3fbeffdb9f325db8f73b504c",
+        "4394ceccf17249d824d17ac6a2f78317dac76abf3ebdd134f10b4ee7b9e23f6b": "30f5843dfa89893a345756580c8135d7d3914ba7124fb86fd62633a2d6eb2ecc",
+        "09959e7784d59cdc56d737fb3f0e9021a8e70647d0c690269ecddb583f0bb30a": "afe272be4994b252433403577b9a53c5978f366f4538fee8c9f7476870f82880",
+        "bd94d18f9ee960f9b3e291161cbe64e43a3a019a1da9bfd6ddf00597a38bda7c": "a79fc4267e17894d064026077d61f32a6818e8817a839d53f38a54b1a84ff96c",
+        "0d33fc9bf28003c9100d8928f63e061f2c58c6f17d68be7dde4abb46697dca46": "556115803423999d1bde43783284784ec938aac6f7599735b260183224883450",
+        "53ef5c3cdb8d835e428fe74f83c1d5c1b12214f8a743d7278cbdf262dc27eea9": "46b82ed643fa4dd3b5413c0918fc762a83efe2a74cabc83cb09e3f714cca4a78",
+        "427eed8191209af372e386da94a27a886d2d0d03e076bbac45978d67e96d7832": "1cf32a5c227b930752d3131bd4eddcbb6f00d7b09a06af9c0321d5f344345144",
+        "d269858fa5214df28ce169e6f5581b997609cf9229246713cf6d9660b01bbc75": "2b731ba8f16e611d0b8d74dd25f08708db3faf61063d097602fea6ab05bc0fcc",
+        "e883244ab21b390d0b4c89bd4f0b0b9a9535b1bff6d34af5c32f343ada88e1ca": "273b0e460494af7f646d96356bdc748e90b87ef533a7d08712b7b630f9c25c71",
+        "221c710383972bc7ba1468e695ab2bd5b015184664f1b4f98ccc0c3dda4c87eb": "25a1d52d0c2d138721d90bcf619daeef86a63d147ff5ad3cc29968ea29534a96",
+        "22b23927c2e0b2a75d814542250a136d0a66e0bc8d960349266aafb696c3069b": "ade892186d405b16e113194f14a50fda46116512d1de254771daaa776f3df8af",
+        "c78853af8d3a0f327343d03a42d19abc6e1f45eb5f55e10bdf02bf1a1c9e574e": "fd2c86c3f5b0562ab74193c18e5f0b3b249c09c7ff8be2ce7f99d27ddf776e4d",
+        "8b277fe5c57f0e50dc50d858b94ff1011d7315a624636351d5f07815442460fe": "e989499cd2f01e3cb816012d9b855b82bce5d6a253812ae12dc26ffa2bbc3e97",
+        "77345e00e85606108a6db710113725e75f7cfaab49fae9afac881b5452a260f9": "aad04556fd85030aa69722954de58638b4b848755652989b6587179fbf1641a1",
+        "04015f00bf9baacb224c3b09324ee229873bd7f56cbc19dbfbca71cf26423666": "9d12012d45e8edd2843d6a68531d8b62ae6eadc68970413e73db4ff3929f55c2",
+        "b2927f91c5cff423490ad1386fc475b65787e9fd913f365919a755075bba933d": "0844a6eba78415efd2cfd0270fa022c1d6e518a6a496ebb5e58d0eb4654558bf",
+        "cbbdaf71ad023e7030a013ebccf54b1bec413e4e6beb7fb123bd402923bf6b94": "bbbb8b7054f89fa427f0c927ef7b803898c4ed3c1443a8e3fd9d7c9929e72c9a",
+        "c4a8604eface4ea1851687cf729127ec6730a129505c570560d1524fff25aa29": "63688cadc1d84bf324bdcd96c130b917efa4f8953afb18ee0b4d8f34cfbe9d80",
+        "c30aef0c59f3e43d6d2e0ab176bf8d1307fcfb1fcafeee354fdb2821f112a7b8": "70de79ddb09db043f453434543e8d4c57649c82c22214e3b930ce726c4f017ca",
+        "6cb37cac400c89e764a44706837f7129019b07be73338b0650a244151dfbf4f7": "d391229154612887178b4c434a52970be1c1deb5a20fd084b9dee57c1463beec",
+        "cf7911e2b1066a4ec5998fc68e7f2dd27fed50b5fdf043b783596853fdebcea8": "b673afa7b950328eebc73b62fcc2de4dbd7ecd597c9fa571e94e2ec47cf41a4e",
+        "ab5d0b1dcc29a6f9b2546472825cce21e80e609c69dba4cc6deb61a07941ecb2": "daeb2139c207d18d418b44b2ae4a39bb014b7365e255e39422943dcb9bc31f4f",
+        "2629f677bc7021b37d7ae155f3afc4e6414238b7ea29e01fd5a1d7ac6d4a8e6d": "272f5efdaf722486130c8e0436415af9fea2388949e337a3d34ef7e3224ac352",
+        "532fd9b183f570040b45310df39a242c0866cda89ce1dc232c5f0ae1b7770ce8": "8824cad20a018f0bfcf0932f628d45a8eb8757d5414c3e7f63951395c2d54f98",
+        "c282ab78a3b2c65cdb7c9ff21c52c4994436c70f11572ff41a69a6284408f9be": "adaa59e3cd760815bc41e37961a92039ec68910a97c24730213bda1f4f8ff152",
+        "c9db51458519f93bf0fd51441dff29f8dc7954429b9abf9ab2e2a8dc1d3457f4": "74b0b941492c0667643f5073efb449d7a457f3c1c106640a1c0fdde387e3633a",
+        "12464aec4d2fea67d276316305ec4c4175f0dc8df5d3a3ca66fee9b04e1ab5fa": "ec0f89e633bc8490c3f297d5aa8150007001a3dd862a53905e4b31f2909d0b15",
+        "71c9de6c806b5e21e9cb8011e5bafe64321443086a14672a24c9a0f0fb6b5efa": "6274067f87931795d314fae3c199b3888ab4bc72875e970199ef293e413171ef",
+        "406224d3944b24a8156f0e9a7c0d471b4ccf9daaa9c1a2149f6b7e219300911a": "4ee9ca2e98b7e99e4fb8fb4e88dc7358407bc9fd7aa262af31d10de7c8f5b93e",
+        "d2ae1e310c381006dcf58602ffad0e68623d4a1be75a047703ce375d51e3f29a": "af5ed5cb2dd931c73d96b0048d677d0737f428f819dea95c812cd1759b2d300f",
+        "e538bfab9b476f3fcf9e53202a82e725b6f1a7db659fb17d151f3e0408488b6a": "10fc1eb4e51135fed9ba3c55c044143bdbe7533ac85eb9753f033d028f03f8f2",
+        "6a730d37af4cebeb5726b206e358854d7f36f8a06d9459d76f523d219c6ad798": "6d25b3340f3e2b0ef27eb62b8f047adeb365373b8d1f41cd5c116025b4844216",
+        "b3c3e8ab039bb6f87fdac346d8f48518b3814eb8d310413fa25e10403343ea34": "f6af3e6d61b63f47321e237263c29cb77bf9c09b3f286dc55e399f1fb914f7a8",
+        "c351156e6acceab824046d7dc7be88736aadf00675a85dc3b81f080ab6200c70": "cc9715e66f5e5009b55e64dd51c1b826b6b45ac7ef391f5ad37532586f1dba58",
+        "3129d642917a4c4203817cc00de8a5d34e0fb7517fe8e6434aea7fef26a5438f": "fd68f05d04ac439fdf8853bd5c665d74332f86e0ef58c5c0bc3fafdf0d65698b",
+        "1f5cff5e3f8a31b83211699ae09649ae740ec5fb8b164f5e7a7dcb740fce82f2": "d0b46aca209e6ab8d88f5a68efaf6e919c0066cfc0bb517362d45d485f559209",
+        "b0396c13e89d6ce4243dce43c90be085be6c1199327cc51f1ab9b070685afda7": "30bc10b87d789352f34cc84d494fcd1a4841bf085bd3dc0f32c6ed0ca811b9c1",
+        "e5bd6c7b887125cff27cbbeb5db9f7c5c519ad8fcbf634713c5777ba29e633a4": "b64c08655f3c4da3feb0e71061438b084a1a9831f28a0f7e554e2bf4502c0b6e",
+        "b026d6830e1cc85682980909a85ea5b885919f6a3ec63721de4c83cadea3c9a3": "88668fd44145f2dcafe5bf494aea1bc5a29f54dfc09c9b421739d8042c4f5015",
+        "0db3d5411331ffa2d03ad7c055a0efaab8c5ed9cb1216e58766e214f49978ba9": "075ac5d3c8473beb8bd62f221e49529c8b8ddb36ed6bfe9e2576dbcd458f3070",
+        "577e249cbe2a2e6ae521c67288baa89dc9708251e2dda735afa9559f0cb4c2c4": "191447faad29d6f30369df0ad331c02e89863944efa1349ad1e9009679024004",
+        "b7f570430f907c78badce0b2df3f86dbb0367fbb82b77e3b327a8e3fbbe5d998": "943f276147df9c9ae2e21640ed8c29b1ae2954916fe310a395bd97030dd0459e",
+        "af0fc2048593438da5872a50a9344660e38b27e7b8a7b4ba99465d52ab3585d4": "ead0cdd8c0cadc290cc0ff3794160200398ef7138fa2f5fa1582612c71bbbe79",
+        "5238f4a67024de104af66c43b0b11a27b550ae02b98d0e7f491345f55eadd7af": "90daed25b5d617cc9c6184240113b981a9edb0f8a720d37b2b9b3059b513920c",
+        "ceeb7b677db91a8277027273748efe9531617a67a819c3b0fad526c9492cfe1f": "7296567ee9aeb06a2f1f13bbb45977242df00dcf4eb780c6bd71a8cd737f1639",
+        "647181698a33ef5e2b8021b98556f25fbb0e1835a5a04310492c681bbf77f1dc": "452f4058b0268b66d56f99caf65dc1c552631c5ad2b304711ea66c382f9f1eb9",
+        "3986a2a56a6e6f2f5fe860650b737e5d9de02ac6b6c0800f47d52b44a2889af7": "97b857fd0ddc811662adc4aa73c68578b2e861fa33e263f901d77ffd8f91dee4",
+        "e06a126b44426e4cea72fb6a22cbcd2390073ec1bdf70e4325851eee3e8e8ef6": "22da70184859a5659d1c56ae916a4c6e0dcab0a5847293969472ba3786a2b1bf",
+        "11e43aad5e89553915ce2eaddd49116dfcdef2549f397f8428ccbb79194b6eaa": "2a1c346c13bdbe784a0d037d8285a4fdd6a32875c42e78b52e6927aad89e728f",
+        "8315b4419861d698745f22c257a6d13ff582c6598f4dceca572cccec6e662819": "877492676efcb564136abfbfc7165e2b882a5640ab1589725805a0e923f336ef",
+        "d85b79ec649c18ca6cc922c8bcc1ce85b985e2cbe485958dd340f8e89e88b0d9": "d790344434f2a6421be5a673ae55dd5d474add1f1333c4f9875dabfd44dfb75d",
+        "ff3c2d1bac0efda77d53ce102a0291f3f2c3b2b62250dd83dc54cd4f0c1814b7": "382082ae941bf0893a160bc1ddbdec197c9c8784e15cffd1bb15383eb9234778",
+        "3ba124aa707224afd5349328a4ebf7f9955a6cfe9a4c0bcf2844224b47967e93": "dc2c414b4b2db0f21512241e9857670b313aadca630594de6c9cc1089c5c82b7",
+        "94810fcdd2857b9108454d372e2c68059150659f0a9ba02a6fb09bf25c18d3e1": "5c4b1b8c7ba00211495adc13c2d0cee692b5d881e317c7e83a8faec201f253d3",
+        "f6f668c6bdf3c3c21c9a55ab1f3295be03884a9a8871488f5ccafd1386824f36": "046443043728e78da829617372eb37123544de0b4824781c2256fe9b6120e3b2",
+        "7da59d2f0f8b688bc315d0fb64986de2c7e1f346253cc679eab8b8d5419f800b": "416ba82a74a33e2e25b5ca77dd70019a6b19c81b6f7869f5e37f86b12f2b079c",
+        "d259c72d609165d1093e4b5bdd7a7831f455be5aa70e77b45bd844948e4a490f": "d8ba5ccf25a9882056525c67c2d9048649beb95fbf1bbdbbb740def1aa05d9e2",
+        "f906bbc3a3b5d394d72c2b864175058d213bb3f77c2d7b8bf9f063388c9c6cf7": "ec1786a6f40181263be483bbc40dc80d1708034abe158fb8a7540fca2377445a",
+        "6a0f00680c0ed1578594a23eb971a2000c689dd061df97467d4e2af59b93581c": "81ed52a96c29c253e056f682d487ae75532a49488f0403fe2de727e02db34895",
+        "dfd8d28480482190f6194a7137ed27bccbb6907190fbdd92feadb8f03270b230": "6ad4e915a4410da875e54d77757a7749d4ef4f689f81d9df0df620a670489281",
+        "b73fbb693f4d0e64ce0fbad6e4e645a5fbe5d25670f79dde55ea1eda80073b55": "025e514aba622a1f7de155f6f7b407ec620bfd053851b52006e917b2eb747a3e",
+        "fcc01ddb7735693ab2f4a69c390f4c095fc91beb649f93408d63783dae797362": "acb4700b8af98893506be8ba862fa078ac9a56782d2c478a9eaf8aa5c0a61131",
+        "96873b6efd24a37ee7c90cfd9f9d443c57cf872fd1b08c4e0dd440a292470477": "ec5761827db749d72b309ce69a9662194671137d4dc1c5e11704ca4ce82bef50",
+        "369218168363d7d9e5e5a98a6492ef8f6cc46636d7898e73093863ae9e656573": "d64e43eeaab86887efe143b7fd18b7e0ffd5215a11eb9d49842116453d874c7a",
+        "fb4b265c93d159e9f0e46ea378e185b1a0c50c93ce8f2bdc46aec313a3876422": "e8d739ad0ee83990376bd84459d93d7c71d44941fa33ea05f58d14f59b3de7c1",
+        "17907834d93e3e7a7a53b47c8cd8910e932cf5e21b8b59506fc8b2ee3892bad4": "4d574b04b386da4782b3efaabaf13bb591ced728d4fdc23b8a929c8bb56bf9c1",
+        "d67e6379d03ebafea94bc1a33fabed4675902ceed33b000b4d1d6330ab55e53a": "fb5bf229afc46e25f7f328f015297117bd85201c71d6d62fa6e1e7079cd5f6a8",
+        "407872212e86654df92daf43761c88c813362d076581e7a1954d49f39b0441a8": "2498a5932599297366fee0404384fe2f0f970d7e089027d101636b316fc0c434",
+        "26338ca1a960fbda865cf431db1852fcfdfd8e08aa0dd93b8e4804ecd0cc8e2a": "0eb6db085487d17082afc2f15fba04b1ec19af88f06730e42680206b4c9fac70",
+        "b3601e328342f719b1e71a566c59c5488459f1b0ab0d5374f44d8cbdad95474d": "f94c5b17c8b10e489ebde0397982e761147ec23cb26ba83a7351717629539735",
+        "17113ce37bb03932d8680599f601103c533497466c0a12afbba5d3b3a28b5e8e": "8249df5217dd59539be01e19964b13f628109c08b2c47e01d2768935f108aefa",
+        "1aced21d0f25f9e4949abb044ab8e47a76cd4167c83aa2121ab645e17f5ed08e": "c697da72774d4b7a100e2b7b1a710e3fdab4653112029c0a6d3be693710304ce",
+        "f17d604330bc52928327d91a8aaa55a710b4bca51a83eaf1774b19325c4e2c93": "9c91ac7e3eba9119bd31f38985d771264f775e36572219830806d6dec3fe739e",
+        "2ef422e5f46199cfa6f4f9a67dc966903b077a5e9325453f5a31656707fc01ca": "90c1ec0156f9c22f9ffc2f5471c7747a11dbb62c1bbd9df886bdc5ab1a17d14b",
+        "418319416b2d67305103c7f416d9a273a8b60cb6d7c829fe97591a425ec3e9bd": "a4f8e1ba0a64a7b7d6cd95e33332a21148b98963d9aa8ac60f51d28c3642074b",
+        "21c7a95262e91c6c238c50ebdf55d274c61b88284eba97910ac9a34e0b70b5a5": "2aead89f15590122a3acb53185cad9dd02652944d659cadefc1284357ca0a53e",
+        "91944843a9d5ea83f94af5cd8f58598f0f296ea33cbfaf298633ffa2a29e2fd0": "cb6cf4ccc46fb90c314bffe9ebd5c73fe5e919f375c97a1975ac884fa8fb802b",
+        "b1bb07f244a05f754c7f7ed889b85b9cb515ffacc8a3d10023121d15b7d11bf2": "dfd3d62cdc0043126052652ec9e8c19e011873f148494a2ca75caee353b6cd4c",
+        "99f62e6bdf4b10fccd87e6f6f7971e633089c37a17e91c4368cd5a791736174c": "d8cc3abf59290b21b56b052fdf93f61d70f19d5be79180664cec2bf8bce7533f"
+      }
+    },
+    "teach": {
+      "count": 48,
+      "hash_algorithm": "sha256(id) -> sha256(JSON([title,String(size),modified_time])) UTF-8; JSON separators comma/colon; ensure_ascii=false",
+      "file_fingerprints": {
+        "cf83a99021c46df75325d7c1ca752bf853d60ced7bb9e626ca7411169e3c15a5": "c61b1d29731725cf4ab610aa6a7fd362500714fb42c15d59d3bf162d93071085",
+        "1756776b5ab40f33629f071d92f93f8cc9b25332f35bee77e55ebe7e91e70312": "99fb1ff745bdc91d6b2f2c17f0eac8bd97b9baa7b6829d56edf030b2806f638b",
+        "f5fdd80e351a3bf6ac6c019267449a8aef917dbe64cda8b49a93b63ec5a70744": "0bea35e7d9a7f1e2ff3e7d3a5247356a526179787181a30909b61639f7ab52ec",
+        "fbe50de4eed8d54be3efe75c620ce415b53f54a3078942ff6a78dd54f7bf0d73": "f1cad19e261bd84717af3b09f4e27da78d61a31bdb8de53331a3ff5cde84900b",
+        "2b899a2af3843d847b79f7a5b3dac5a6531d2c2c69bccce2284d04c17a3254af": "053c09daf4dc7c8e5f7742bc47f02f1707933b38d85269b732bb90abf177790b",
+        "a0ff3066a93e50e116bcabea9b0c28e7abba07974a28d52980cd7d0bf97d1335": "e898a8679e0d019f724bc4db7d14430aa5066a80eee202d3b56e54235a4437b8",
+        "cfd3bbc5156dcdf54ad0ea550f10faa70668042e80e5067aafa4a00a3d27cfd1": "1194b232d22b9410951e3a205474abc3daaab60712a9c28b2a1387bbe5510180",
+        "1dbbd9bc24660fe6cf32da2feb5b4451cf3417c8c2cfc8c4fc4eb297ac33b5e9": "dd6bdd1a3962d22284f675ec7847c208c89100838e0dd355c643d30f8d0bcf64",
+        "e021b320aa944d46036dc074846621d7ae9edfffd50c0bb5ca39a3589483c90b": "4bc84c556c9b9cb02e2ec5ba18824f14bd46f49a0c4e8363026416a15285109f",
+        "4af7dbba9c83a99f8081dfc2d280189c950f92992d6e566ded6e9b631e9291f3": "2fa3a09847945635a63c16c710613a4df1aa3b9bcf548aabad706033af37505a",
+        "1dd4b995d8f064e6e879409da1f7d860769fdbf6e359edea0e8f7d473f435e84": "c75d3860e849462b0aaf9b2fada03bb42e689863b3f19da38f3d8454a95ea33b",
+        "3667082626d91f1b49f88180763f6c368af67216b1ede0740ba84652bd131eca": "c51ea1bd5a41913efafc75db1c1265501fa02324ce2d3250b3f3076813f9e60e",
+        "711346378634b1c35e55309aecf943b56f99c991a90e10825454c1371eadc1dc": "ecf53c688038052aa14305a6b94bea3e8fccd54bad8cdb6163548a966e8dd9f1",
+        "900456ad1bb0e685637ef86cc04270d6a6b70f3c96365253029d5404b16588ca": "10c42be0f1af78814f9a21bca6740c743b29640af9df286594546dd2fd672b68",
+        "2780fabfa2b99e6cc2700f362a013dfaf18023177c82c72d2b549fc2b5c4d076": "f65802869fd781f93c5c0fdc2e19182d8292a692e93cd605487a88288afc56ef",
+        "0c8998f406fdcbca6254c43eaa397ef52d58f7ee7affcdeaaee32dd9e2cefddb": "60e333d81a4a8e7d48766153bcf0af35f5dc309e303c6cb975792a0765e8c10b",
+        "60b2147e56ba4cfde270b6553ae03c84bf2b86ada84610838814ede177cbadf1": "0c72759e561e59c15d7cca749d7e56d9f6d37efc3a0dfe597de08f508f91c75d",
+        "2ae4013a1bd12028d2dbccca9d0ecce5edd605d6be2ea81250da7d757c522dfa": "d33e1e2109b7ea5749a116bc144dc233ba718fd27db9d4b2fa38713d38decd2c",
+        "b51e3c9c99e2df1cc907c7436c786ed8ea35ec9fc82d1c1064551c97c22db050": "21ef6e7664a79a234608560ad8acfe466cae016226b2d14fe651a090075d122f",
+        "6e9f55d44123e992f6eb1f72589ddf4f67bb855c357f12a501165d313266f3fe": "f35fd0b68d6ec5773e20ddb05493deddfa4e92e07b92db1aaffbac23d4a0536b",
+        "4b1a12781815f2d9f59df27d18022de78305b7b7f2aeae5fd7ba6342878d9604": "d7ff91c1b125fc68b68e374400b6954a7dacd40d52c357cfa89d8c96fb49e03e",
+        "f916f210deba7e4c76448833b8edce03723d9b4c8784c37bd89c5de1a4cea461": "ae93397007f5516eaa10c9f30365df231067ab8e4eff793231907676469311ec",
+        "b0d1f9d235d83f81150f4b48b6530ab3156612f8be29627ba87d56c9ee47122b": "025b5a194f6e91cfdeda540d8f04a6de15432190b605a6a5f28532d2182fed83",
+        "2fa0e8a1cb706e4e93b928d08004ec08b2c24edd3903a6d52d215dd80ab89f52": "788073d35d33aeddf5cd216e0d2e7c29e7f3b22a0341e692d21d20f6a0259e51",
+        "127ec9a5c98fb1ba120b88cf052ab9427fead31afed0d4521e2db607394b3a73": "75aa72d59a74ca863bbd2dfc80ab945dda409b72bc0204ad2100b4ddbc7657fb",
+        "7a59e0938deaa434a43a96eb9f23438ab679bff59200c8af3ae74cee2ee4c58b": "d714180991fe56c9e712404e42e2cad55dba7e8465936dffe2aa5ebd0d6956f8",
+        "74a16b73d88c8230b983bf10fd9e3fb888e46dc9c15c6635cf6cda529b138753": "6ff9422c02aaacec78f17c52be857f853fb019614fb7f36396ab9895a08f2fec",
+        "5ed4914b2fe8e6e23070bd9c802ca4b130edd314206419ebf52e1beb169d5b92": "c10267d1a65aea0f262815f358325bdddcb35de8daa1fcbd010a34cab5ba96a4",
+        "43dda74a0442204277ebbc3f00291f73501d2e69ee415089791c7c10b45577e9": "b3ab50bbcee68ff1bfbd22b773645940692e4d50e702166558b9f14a98699ce6",
+        "88d6461d137b88cf89027fadc6d14aea5d9406f3e3bda1937fb46b9325d91f8c": "fa0c2ead23f11d63dd07739744c1c6c241033f3b744bf382efd31b4862d714c4",
+        "fc88fd3ba03be76aa2e466bf3fa6c50fe547cdb2e5bfd8f83d157986e0cf887b": "c036fce5e5381fe255a007624f673e3f24eff2dbd5c417e54c62263c994cdd0d",
+        "a94e52fb2825cbf6e697110eff802d816ecae040f284d3a36a64649819d61e87": "db08aad57b778191dc2d0e2aa69dd149688d01ed0684f26ea69dbe381956cb9d",
+        "8e10e185283915002779088ca9daab6cf3ce34b1b8876839e20ee0e216bd647d": "adffb09ca94cb64df73f689e05d9e419f0843dcac419a8380a7191c1f69bd595",
+        "f74d298c0b04d60adc4b1e68cfb4c5bd9bdb3ffb6e4fb2e46de4842d0219a153": "7a4e5c6823f9c1ca7e731faf6e4d51fa57bd0fc8f8e5093cbcb5c96bad157fa6",
+        "79d8928b754b734bfaffa00397516f9452e3cbcd0c2705033569530f991adb66": "430ae0d79540b4164bd306d4293ba2aec106280f19aa273282dd2f9a0b67ca50",
+        "308f6e3e75409013400efff3dec12a416c86b82e852f748f71b26bd9d92b96e3": "54bbaa07a5aaf9bbfa5321fca6a738d4f5f61227252537e91b2c0f06b0f6e24d",
+        "f1b84b48c2bb5e92a3dd633c4a8c540903d1179291c82d32a32270c776c6c9b9": "30d0b2d6007d04d82923beeb1431b35c4a0a2de448c7673127d4ee2ddd1c214d",
+        "41d298b097181abb6a7c4f04331c447eea057e7d721ecbea83caa9660acb0d28": "58ee8709b98374e73f59a147c71dd1010d93fa442a98f38956e9448eb1e62832",
+        "9988e884a392e91b77a7a3ebbf5cd8d70454f59c50421cf92960c01c311303a4": "4628560ebab2a0caeac62746f9f34377c30d2f34ca453020019daa9c22dd029f",
+        "1faa1d8c19316f813c8a31b87dd38610fd81cbb973e96584a94773babb9ceefe": "39e22ed058184c9987f61ac2eaf5a6614852f1289261ca5424e182825f0d9e47",
+        "446c84898effa0ab8a52fffffe96c06819cff04d79184452142ede07bbb6e1d5": "08027f002de32c690df25d61778208810c1e784f8c2fc8d4de050fb0dbe652b9",
+        "25d960c75bbbbfd16d7d229b3215fe7df74c5cda67352f1c338f12378bb4c8ad": "6e7d3fa3511ae42575bddc87a538d36ea2917a50a0509daa6d18307e895c2f8f",
+        "d2f0b61fae99aa4be9a8f7d2ed8c405c639e7fa66b71156816a08047c76b0b5b": "df1746d284e386ce6a0ff6637930137b6162291efb3ef25f7c8b6d64b0f5de14",
+        "7bf92f61e81ba57d121ba2cd04306a32056587cef7136e12b4f077742677433e": "1e32a2d9566a1acba6989c6f63c57aaa59ff20a222fd601805ceaff2fae87574",
+        "546e372f361a945a044c54ceec96da10e309691e2e90613e2f11b80a5745cc52": "90bd2ea444bba3c2df935a6b8fb8ab0ba3ac54aaab771b2ba689c714fc967ec7",
+        "ea789599a3ca42b4c4bf05f81c0405144241ff6716d709b62c9a2c32345584f1": "63535f30522babf4f7cbb2d7fd7dcd0ee70014f32bc8576838e5c3b3c9159fe0",
+        "02fe1308adb8bb68165fb32e955f1e48611ef50f96cc9d295458887751ec73a2": "15a16a201264a0593293d11b8b8ec9010d032781e7f2a1e0c34dafdec8895074",
+        "4e2abcfc2a519e79c1e23e49d272ed1182c7a4ce7b386fa974c7b6d0db6ece04": "54a0426a3f10d49871602f8512f686d943ce246866c6b4e7910739a621b352f4"
+      }
     }
-  ],
+  },
+  "privacy": "Raw Drive file lists, IDs, access links, names and timestamps are omitted from this public monitoring checkpoint; compare locally recomputed opaque hashes. Earlier reports retain authorized analysis provenance. Schema2 replaces identifiable source manifests with irreversible fingerprints.",
   "processed_sessions": [
     "231408",
     "231902",
@@ -1425,452 +1034,40 @@
     "092315_phoneWeak_negative0p4_to2p7_changedXminus40",
     "092315_rangeExclusions_udEntirelyOutside45",
     "092315_frozen7_half_height151percent_rmse2p40_baseline2p18",
-    "092315_webmDrive_localOnlyFlagMismatch"
+    "092315_webmDrive_localOnlyFlagMismatch",
+    "092315_visionFull4393_derived_notNewSession",
+    "v15_eightTraining092315_gate1_tau0p1",
+    "v15_heightExtraMatched1p331_spring2_softlimit",
+    "reextract092315_timing2808of2809_firstPreVideo_handMismatch4",
+    "v15_broadcastOtherTabWarning_added_unvalidatedRates"
   ],
-  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports. Run10: root81/teach35; new completed082736 teacher session, including WAV, analyzed without modifying originals. Frozen five-session model, laptop four paths only, no new fitting or display filters: half displacement RMSE cm x3.645/y1.349/z2.762 versus zero-motion x2.799/y1.786/z3.461. Exploratory within-session block intervals, not participant generalization. No overhead-phone benefit inferred. Published scale_loso.js has indirect outer-test leakage in scale fitting; embedded table provenance must be checked before attributing bias. Report0908 and holdout-082736.json contain reproduction and limits. Run11: root81/teach47, two new completed teacher sessions090503 and092315. New7-session calibration trains on082736+090503 so prior082736 holdout remains historical5-session only. Frozen7 diagnostic092315:635 overlapping in-range windows half RMSE x5.165/y2.397/z3.864cm; height amplification1.513, zero-motion2.178. Camera proxy outside45cm1664/2633; allUD present140 outside. 17kHz phone heard=false at x−40/h45/z30; no interference cause established. WEBM92.6MB present in Drive despite local_only metadata; contents not fetched/decoded. scale_loso indirect fold leak unchanged, embedded-table provenance unconfirmed. Report0932 and holdout-092315.json preserve results, hashes and limits.",
-  "duplicate_groups": [
-    {
-      "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
-      "duplicate": "batears_2026-11-15T07-40-04-429Z_p1.json",
-      "sha256": "224c6da6d1fd68d3ef3f83e031f008976d8116519bcc023ac133df640d7f1058"
-    },
-    {
-      "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.csv",
-      "duplicate": "batears_2026-11-15T07-40-04-429Z_p1.csv",
-      "sha256": "8215b1916d81f272caa59ab26a4339b1b22c5d40a64302d0844abd704cccdc81"
-    }
-  ],
-  "auth_seen_attempts": [
-    [
-      "2026-11-15T08:29:27.891Z",
-      "seojin",
-      "seojin"
-    ],
-    [
-      "2026-11-15T08:29:47.231Z",
-      "seojin",
-      "seojin"
-    ],
-    [
-      "2026-11-15T08:30:06.184Z",
-      "seojin",
-      "seojin"
-    ],
-    [
-      "2026-11-15T08:30:36.687Z",
-      "seojin",
-      "seojin"
-    ],
-    [
-      "2026-11-15T08:40:56.891Z",
-      "seojin",
-      "seojin"
-    ]
-  ],
-  "watched_drive_subfolders": [
-    {
-      "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
-      "path": "nhng/ml/data/teach",
-      "files": [
-        {
-          "id": "15Vg4EtRzqIE2OvYT_UflhXJ0Rc19qx8I",
-          "name": "batears_20261115_092315_teach_61f5_frames.csv",
-          "mime": "text/csv",
-          "size": "135641",
-          "modified": "2026-11-15T15:25:49.207Z",
-          "url": "https://drive.google.com/file/d/15Vg4EtRzqIE2OvYT_UflhXJ0Rc19qx8I/view?usp=drivesdk"
-        },
-        {
-          "id": "1tAYrRpp8qq4hUYBn8CrpFRzTeyvsZQAU",
-          "name": "batears_20261115_092315_teach_61f5.webm",
-          "mime": "video/webm",
-          "size": "92608956",
-          "modified": "2026-11-15T15:25:46.864Z",
-          "url": "https://drive.google.com/file/d/1tAYrRpp8qq4hUYBn8CrpFRzTeyvsZQAU/view?usp=drivesdk"
-        },
-        {
-          "id": "1G4t1Mn2F4OArA7TLXAcc8eD7egmWUmQr",
-          "name": "batears_20261115_092315_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28327980",
-          "modified": "2026-11-15T15:25:44.858Z",
-          "url": "https://drive.google.com/file/d/1G4t1Mn2F4OArA7TLXAcc8eD7egmWUmQr/view?usp=drivesdk"
-        },
-        {
-          "id": "1lAb3rLiqV6LWnb5DuMBhxRN0ianqzF3g",
-          "name": "batears_20261115_092315_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "661483",
-          "modified": "2026-11-15T15:25:44.416Z",
-          "url": "https://drive.google.com/file/d/1lAb3rLiqV6LWnb5DuMBhxRN0ianqzF3g/view?usp=drivesdk"
-        },
-        {
-          "id": "1Tqd0u85th6NJVQoL92UsaTtQg4C0eBet",
-          "name": "batears_20261115_092315_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1502460",
-          "modified": "2026-11-15T15:25:44.191Z",
-          "url": "https://drive.google.com/file/d/1Tqd0u85th6NJVQoL92UsaTtQg4C0eBet/view?usp=drivesdk"
-        },
-        {
-          "id": "19PGUFMBuma7phKbEo4Yh4dKGuM5JSyqh",
-          "name": "batears_20261115_092315_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "2708960",
-          "modified": "2026-11-15T15:25:43.973Z",
-          "url": "https://drive.google.com/file/d/19PGUFMBuma7phKbEo4Yh4dKGuM5JSyqh/view?usp=drivesdk"
-        },
-        {
-          "id": "16KfuXnTbwENyFtftGpB1RQT9vIorNQhP",
-          "name": "batears_20261115_092315_teach_61f5.json",
-          "mime": "application/json",
-          "size": "96330",
-          "modified": "2026-11-15T15:25:43.765Z",
-          "url": "https://drive.google.com/file/d/16KfuXnTbwENyFtftGpB1RQT9vIorNQhP/view?usp=drivesdk"
-        },
-        {
-          "id": "165gltHDpXEceJa2SlYxbxcjX5RzYGWxl",
-          "name": "batears_20261115_090503_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28325932",
-          "modified": "2026-11-15T15:07:32.865Z",
-          "url": "https://drive.google.com/file/d/165gltHDpXEceJa2SlYxbxcjX5RzYGWxl/view?usp=drivesdk"
-        },
-        {
-          "id": "1wtIJXmhwO2kmbIzTEomc5s5O9NEyRXO_",
-          "name": "batears_20261115_090503_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "659394",
-          "modified": "2026-11-15T15:07:32.490Z",
-          "url": "https://drive.google.com/file/d/1wtIJXmhwO2kmbIzTEomc5s5O9NEyRXO_/view?usp=drivesdk"
-        },
-        {
-          "id": "1OErsl_Q8ww1BO0_HdQbBG7ofqhtWwuVp",
-          "name": "batears_20261115_090503_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1220103",
-          "modified": "2026-11-15T15:07:32.277Z",
-          "url": "https://drive.google.com/file/d/1OErsl_Q8ww1BO0_HdQbBG7ofqhtWwuVp/view?usp=drivesdk"
-        },
-        {
-          "id": "1QjbUXZp-BmOWaWFg20WjBShH6PC7CIGo",
-          "name": "batears_20261115_090503_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "3033451",
-          "modified": "2026-11-15T15:07:31.911Z",
-          "url": "https://drive.google.com/file/d/1QjbUXZp-BmOWaWFg20WjBShH6PC7CIGo/view?usp=drivesdk"
-        },
-        {
-          "id": "1t-MtmU-dfEBnbgPl5UbfMpHJhiV1tXzE",
-          "name": "batears_20261115_090503_teach_61f5.json",
-          "mime": "application/json",
-          "size": "95437",
-          "modified": "2026-11-15T15:07:31.510Z",
-          "url": "https://drive.google.com/file/d/1t-MtmU-dfEBnbgPl5UbfMpHJhiV1tXzE/view?usp=drivesdk"
-        },
-        {
-          "id": "1U-E38rPw-CoU0aziEBMFrB5jQJO8AQzp",
-          "name": "batears_20261115_082736_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28325420",
-          "modified": "2026-11-15T14:30:05.229Z",
-          "url": "https://drive.google.com/file/d/1U-E38rPw-CoU0aziEBMFrB5jQJO8AQzp/view?usp=drivesdk"
-        },
-        {
-          "id": "1-hNguXRgzUCByMBtqbXFFeNXurmF4W8t",
-          "name": "batears_20261115_082736_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "688728",
-          "modified": "2026-11-15T14:30:04.879Z",
-          "url": "https://drive.google.com/file/d/1-hNguXRgzUCByMBtqbXFFeNXurmF4W8t/view?usp=drivesdk"
-        },
-        {
-          "id": "1FM0DMzGuyxsyVpylBsSwu1C655HxNSRX",
-          "name": "batears_20261115_082736_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1072736",
-          "modified": "2026-11-15T14:30:04.708Z",
-          "url": "https://drive.google.com/file/d/1FM0DMzGuyxsyVpylBsSwu1C655HxNSRX/view?usp=drivesdk"
-        },
-        {
-          "id": "1SBeDqfcRdeWQEGFMrX6PN8dl-R18Ptjs",
-          "name": "batears_20261115_082736_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "3257042",
-          "modified": "2026-11-15T14:30:04.457Z",
-          "url": "https://drive.google.com/file/d/1SBeDqfcRdeWQEGFMrX6PN8dl-R18Ptjs/view?usp=drivesdk"
-        },
-        {
-          "id": "14lyZKwSIyOF_tCW5tOyByjP6zUwn0Qw1",
-          "name": "batears_20261115_082736_teach_61f5.json",
-          "mime": "application/json",
-          "size": "69436",
-          "modified": "2026-11-15T14:30:04.194Z",
-          "url": "https://drive.google.com/file/d/14lyZKwSIyOF_tCW5tOyByjP6zUwn0Qw1/view?usp=drivesdk"
-        },
-        {
-          "id": "19t07WhWPOuSVYEgRkA_VD6C7cTJmP0qF",
-          "name": "batears_20261115_044652_teach_61f5.calib.json",
-          "mime": "application/json",
-          "size": "3488",
-          "modified": "2026-11-15T10:50:43.006Z",
-          "url": "https://drive.google.com/file/d/19t07WhWPOuSVYEgRkA_VD6C7cTJmP0qF/view?usp=drivesdk"
-        },
-        {
-          "id": "1BrMlEbwnqHZ8a9-WbbChwSRDOShAyQS5",
-          "name": "batears_20261115_044652_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28323884",
-          "modified": "2026-11-15T10:49:22.788Z",
-          "url": "https://drive.google.com/file/d/1BrMlEbwnqHZ8a9-WbbChwSRDOShAyQS5/view?usp=drivesdk"
-        },
-        {
-          "id": "1huHfuu7EXdfJ364ZWKbbTkOuHeSvyf2k",
-          "name": "batears_20261115_044652_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "678999",
-          "modified": "2026-11-15T10:49:21.584Z",
-          "url": "https://drive.google.com/file/d/1huHfuu7EXdfJ364ZWKbbTkOuHeSvyf2k/view?usp=drivesdk"
-        },
-        {
-          "id": "1ayV4NPcs0L2lik8tpcSzKwA6vPtN2Zan",
-          "name": "batears_20261115_044652_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1619753",
-          "modified": "2026-11-15T10:49:21.305Z",
-          "url": "https://drive.google.com/file/d/1ayV4NPcs0L2lik8tpcSzKwA6vPtN2Zan/view?usp=drivesdk"
-        },
-        {
-          "id": "1_CPaBQ78T0jHMPk4zjVjzILnz3DfeKMG",
-          "name": "batears_20261115_044652_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "3047132",
-          "modified": "2026-11-15T10:49:21.012Z",
-          "url": "https://drive.google.com/file/d/1_CPaBQ78T0jHMPk4zjVjzILnz3DfeKMG/view?usp=drivesdk"
-        },
-        {
-          "id": "1lco3GcKsZiDYDZ3SM6qaxBMvqwLR6tGx",
-          "name": "batears_20261115_044652_teach_61f5.json",
-          "mime": "application/json",
-          "size": "92852",
-          "modified": "2026-11-15T10:49:20.739Z",
-          "url": "https://drive.google.com/file/d/1lco3GcKsZiDYDZ3SM6qaxBMvqwLR6tGx/view?usp=drivesdk"
-        },
-        {
-          "id": "1pCvxdLPgEmLr51rl0ORqKKCzzVbA3Eao",
-          "name": "batears_20261115_043301_teach_61f5.calib.json",
-          "mime": "application/json",
-          "size": "3937",
-          "modified": "2026-11-15T10:37:55.082Z",
-          "url": "https://drive.google.com/file/d/1pCvxdLPgEmLr51rl0ORqKKCzzVbA3Eao/view?usp=drivesdk"
-        },
-        {
-          "id": "1mWr1jQtQwLwwH5eXV2doCf8XrW3E7RN-",
-          "name": "batears_20261115_043301_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28325420",
-          "modified": "2026-11-15T10:35:31.975Z",
-          "url": "https://drive.google.com/file/d/1mWr1jQtQwLwwH5eXV2doCf8XrW3E7RN-/view?usp=drivesdk"
-        },
-        {
-          "id": "1g_1Z1QQCqyVfLXYDWXAPDr8bwc3gcyYB",
-          "name": "batears_20261115_043301_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "673039",
-          "modified": "2026-11-15T10:35:30.970Z",
-          "url": "https://drive.google.com/file/d/1g_1Z1QQCqyVfLXYDWXAPDr8bwc3gcyYB/view?usp=drivesdk"
-        },
-        {
-          "id": "1wy5HBhBQJ4Mqz3QkId5MZvPnsdgch8d6",
-          "name": "batears_20261115_043301_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1591439",
-          "modified": "2026-11-15T10:35:30.286Z",
-          "url": "https://drive.google.com/file/d/1wy5HBhBQJ4Mqz3QkId5MZvPnsdgch8d6/view?usp=drivesdk"
-        },
-        {
-          "id": "1YvnWsZV9bUDyppLVnoCDtyb8-D4XQjfW",
-          "name": "batears_20261115_043301_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "3341565",
-          "modified": "2026-11-15T10:35:29.763Z",
-          "url": "https://drive.google.com/file/d/1YvnWsZV9bUDyppLVnoCDtyb8-D4XQjfW/view?usp=drivesdk"
-        },
-        {
-          "id": "1ZifHu7yWSdU8hOifRaGj0-Uxdzd7mnwP",
-          "name": "batears_20261115_043301_teach_61f5.json",
-          "mime": "application/json",
-          "size": "110908",
-          "modified": "2026-11-15T10:35:29.409Z",
-          "url": "https://drive.google.com/file/d/1ZifHu7yWSdU8hOifRaGj0-Uxdzd7mnwP/view?usp=drivesdk"
-        },
-        {
-          "id": "1ldlztyqYKoUeib8AhsJwn2FsGZBldKHW",
-          "name": "batears_20261115_040721_teach_61f5.calib.json",
-          "mime": "application/json",
-          "size": "3920",
-          "modified": "2026-11-15T10:12:18.338Z",
-          "url": "https://drive.google.com/file/d/1ldlztyqYKoUeib8AhsJwn2FsGZBldKHW/view?usp=drivesdk"
-        },
-        {
-          "id": "16REuPpopbURxNXCoKwpowrK3GmpP9mW0",
-          "name": "batears_20261115_040721_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28321836",
-          "modified": "2026-11-15T10:09:53.418Z",
-          "url": "https://drive.google.com/file/d/16REuPpopbURxNXCoKwpowrK3GmpP9mW0/view?usp=drivesdk"
-        },
-        {
-          "id": "1hCYd8Ra-m8brRLc9wGxOgsEO9ZbEPLD_",
-          "name": "batears_20261115_040721_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "653871",
-          "modified": "2026-11-15T10:09:51.862Z",
-          "url": "https://drive.google.com/file/d/1hCYd8Ra-m8brRLc9wGxOgsEO9ZbEPLD_/view?usp=drivesdk"
-        },
-        {
-          "id": "1HyIcaOu7ovtn1dzOJdu4y5d4yuuM9ZX8",
-          "name": "batears_20261115_040721_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1594090",
-          "modified": "2026-11-15T10:09:50.841Z",
-          "url": "https://drive.google.com/file/d/1HyIcaOu7ovtn1dzOJdu4y5d4yuuM9ZX8/view?usp=drivesdk"
-        },
-        {
-          "id": "1BSqR5vDFhHTQFz_F_vnil7wR1i4zde9v",
-          "name": "batears_20261115_040721_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "2992716",
-          "modified": "2026-11-15T10:09:49.945Z",
-          "url": "https://drive.google.com/file/d/1BSqR5vDFhHTQFz_F_vnil7wR1i4zde9v/view?usp=drivesdk"
-        },
-        {
-          "id": "15atqUhHkj8sMmKb_2eMB3fpXdyHzfw8k",
-          "name": "batears_20261115_040721_teach_61f5.json",
-          "mime": "application/json",
-          "size": "99493",
-          "modified": "2026-11-15T10:09:49.549Z",
-          "url": "https://drive.google.com/file/d/15atqUhHkj8sMmKb_2eMB3fpXdyHzfw8k/view?usp=drivesdk"
-        },
-        {
-          "id": "1JoFKOBjPAzSuwNVMwsEQY0-5BsAPjMWI",
-          "name": "batears_20261115_040340_teach_61f5.calib.json",
-          "mime": "application/json",
-          "size": "3998",
-          "modified": "2026-11-15T10:07:59.244Z",
-          "url": "https://drive.google.com/file/d/1JoFKOBjPAzSuwNVMwsEQY0-5BsAPjMWI/view?usp=drivesdk"
-        },
-        {
-          "id": "1Dkismxxc3dJqaOMzDrPT98uoGCQ6ynkh",
-          "name": "batears_20261115_040340_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "2789011",
-          "modified": "2026-11-15T10:07:20.278Z",
-          "url": "https://drive.google.com/file/d/1Dkismxxc3dJqaOMzDrPT98uoGCQ6ynkh/view?usp=drivesdk"
-        },
-        {
-          "id": "1fZoSJn4ryIzGwj6wkU4e678fBgGOlJY7",
-          "name": "batears_20261115_040340_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1586787",
-          "modified": "2026-11-15T10:07:19.994Z",
-          "url": "https://drive.google.com/file/d/1fZoSJn4ryIzGwj6wkU4e678fBgGOlJY7/view?usp=drivesdk"
-        },
-        {
-          "id": "1KbUa25kthQwH6uRDU_gkhpQxr6khDUkL",
-          "name": "batears_20261115_040340_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "662874",
-          "modified": "2026-11-15T10:07:19.917Z",
-          "url": "https://drive.google.com/file/d/1KbUa25kthQwH6uRDU_gkhpQxr6khDUkL/view?usp=drivesdk"
-        },
-        {
-          "id": "1YHQRy1WNTi0W0KjIA1jcNIYWNIvGF4re",
-          "name": "batears_20261115_040340_teach_61f5.json",
-          "mime": "application/json",
-          "size": "110261",
-          "modified": "2026-11-15T10:07:18.498Z",
-          "url": "https://drive.google.com/file/d/1YHQRy1WNTi0W0KjIA1jcNIYWNIvGF4re/view?usp=drivesdk"
-        },
-        {
-          "id": "1_pjiH7IFWmGVA9QUOWpxWYO0R80ktuCN",
-          "name": "batears_20261115_040340_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28320300",
-          "modified": "2026-11-15T10:07:16.278Z",
-          "url": "https://drive.google.com/file/d/1_pjiH7IFWmGVA9QUOWpxWYO0R80ktuCN/view?usp=drivesdk"
-        },
-        {
-          "id": "1QSuyfLCzmPZt6H8Cx-WxPn6W6qQqKyy1",
-          "name": "batears_20261115_035336_teach_61f5.calib.json",
-          "mime": "application/json",
-          "size": "2125",
-          "modified": "2026-11-15T10:00:43.277Z",
-          "url": "https://drive.google.com/file/d/1QSuyfLCzmPZt6H8Cx-WxPn6W6qQqKyy1/view?usp=drivesdk"
-        },
-        {
-          "id": "1fF1f1XVbhIwbUapaMfXvbpgzxST7-afb",
-          "name": "batears_20261115_035336_teach_61f5.wav",
-          "mime": "audio/x-wav",
-          "size": "28321836",
-          "modified": "2026-11-15T09:56:33.133Z",
-          "url": "https://drive.google.com/file/d/1fF1f1XVbhIwbUapaMfXvbpgzxST7-afb/view?usp=drivesdk"
-        },
-        {
-          "id": "1wkYXzfLdSD8VxXJXT0bFTZnoq73jh02c",
-          "name": "batears_20261115_035336_teach_61f5_iq.csv",
-          "mime": "text/csv",
-          "size": "653402",
-          "modified": "2026-11-15T09:56:05.844Z",
-          "url": "https://drive.google.com/file/d/1wkYXzfLdSD8VxXJXT0bFTZnoq73jh02c/view?usp=drivesdk"
-        },
-        {
-          "id": "1kmI52uDTobFjSjXUm14Ie5V9j9F4QJUr",
-          "name": "batears_20261115_035336_teach_61f5_audio.csv",
-          "mime": "text/csv",
-          "size": "1473973",
-          "modified": "2026-11-15T09:56:05.337Z",
-          "url": "https://drive.google.com/file/d/1kmI52uDTobFjSjXUm14Ie5V9j9F4QJUr/view?usp=drivesdk"
-        },
-        {
-          "id": "1z0iWe4xTX0-G9UGzt4RmABB2GSh6aENB",
-          "name": "batears_20261115_035336_teach_61f5_vision.csv",
-          "mime": "text/csv",
-          "size": "2846894",
-          "modified": "2026-11-15T09:56:04.829Z",
-          "url": "https://drive.google.com/file/d/1z0iWe4xTX0-G9UGzt4RmABB2GSh6aENB/view?usp=drivesdk"
-        },
-        {
-          "id": "1sOfYqTRTjO5Ii213lljYrLyp4qNsO9Fa",
-          "name": "batears_20261115_035336_teach_61f5.json",
-          "mime": "application/json",
-          "size": "113278",
-          "modified": "2026-11-15T09:56:04.514Z",
-          "url": "https://drive.google.com/file/d/1sOfYqTRTjO5Ii213lljYrLyp4qNsO9Fa/view?usp=drivesdk"
-        }
-      ]
-    }
-  ],
+  "notes": "No new independent sessions. Existing092315 video re-extracted to4393 rows4219 present.8-session v15 now trains on092315; prior7-model holdout historical only. Tracker gate1.0/tau0.1, spring2s and additional height1.331x. No new categorical accuracy or false-trigger rate observation. Full t_res/speeds/auto blank, do not convert to idle/zero. Full/live same-session alternatives, never independent or concatenated. Prior duplicate/auth/protocol caveats in experiments reports remain; re-read previous reports when needed rather than storing identifiable Drive manifests here. Compare sha256(id) keys with payload fingerprints specified in each manifest.",
   "latest_3d_stored_metrics": {
-    "source_main_sha": "7f2a9d4aa53eccfdde5044377a8b08d9d0db5ba6",
-    "training_sessions": 7,
-    "mode": "half",
-    "rmse_cm": [
-      4.13,
-      2.58,
-      4.32
+    "training_sessions": 8,
+    "tracker": {
+      "gate": 1,
+      "tauS": 0.1
+    },
+    "engine_half_rmse_cm": [
+      3.76,
+      2.48,
+      4.26
     ],
-    "motion_rms_cm": [
-      5.49,
-      2.98,
-      5.74
+    "display_mixed_rmse_cm": [
+      3.76,
+      2.74,
+      4.26
     ],
-    "size_ratio": [
-      0.76,
-      0.72,
-      0.81
-    ],
-    "status": "embedded claimed LOSO numbers; independent computation not reproduced; scale_loso leakage concern remains"
+    "status": "embedded LOSO claim, not independently reproduced; scale fold leakage unresolved"
+  },
+  "latest_reextract_summary": {
+    "session": "20261115_092315_teach_61f5",
+    "artifact": "experiments/reextract-092315-audit.json",
+    "derived_not_new_session": true,
+    "full_rows": 4393,
+    "present": 4219,
+    "hand_mismatch_pairs": 4,
+    "source_hash": "8fc6fb4e3a974f5b64cce09f7762bdac2bae2e11d597bc001ba0477ad97078b1"
   },
   "latest_holdout_summary": {
     "session": "20261115_092315_teach_61f5",
@@ -1890,6 +1087,8 @@
     "overlapping_windows": 635,
     "independent_sessions": 1,
     "full_display_pipeline": false,
-    "range_exclusion_warning": "All UD prompt present frames outside assumed 45cm range"
-  }
+    "range_exclusion_warning": "All UD prompt present frames outside assumed 45cm range",
+    "current_model_holdout": false
+  },
+  "historical_report": "experiments/monitor-2026-11-15-0932.md"
 }
