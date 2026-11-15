@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T05:49:30Z",
-  "main_sha": "b39a4655212bff33024db9348f6669e040e6ae63",
-  "exp_sha_before_run": "fda62bf87f95ab0bd2b86ea65bddbe1cdffac864",
-  "report": "experiments/monitor-2026-11-14-2349.md",
+  "checked_at_utc": "2026-11-15T06:13:31Z",
+  "main_sha": "6873dd2bbe367d1c428a0204b441be34f861cace",
+  "exp_sha_before_run": "af345c2e9333bad793212f724bc74dce4ec44e88",
+  "report": "experiments/monitor-2026-11-15-0013.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -22,32 +22,32 @@
     },
     {
       "path": "TEAM.md",
-      "sha": "5a2efc1a7d0521955a39250c1001389312449b9f",
-      "size": 6581
+      "sha": "df9a8cb98e1e38d251bbf3feae7ef360ea8fb683",
+      "size": 6790
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "b5403955a1e41d56c3996e84847571c32e03908b",
-      "size": 2647
+      "sha": "60126999e764cda62c9de4d52728fccb3519c515",
+      "size": 2653
     },
     {
       "path": "docs/devpost.md",
-      "sha": "a4896433e116a894724a89dc4ef46a23375a59e1",
-      "size": 11168
+      "sha": "dd50880fa87183ebed6048f6d3b77c5009cf69a3",
+      "size": 11189
     },
     {
       "path": "docs/judge-qa.md",
-      "sha": "dfe213009c138a3af190ca4d7a56532c01fdcfc5",
-      "size": 3859
+      "sha": "43e3b824051ae0f2118df0abce3b763c80f4f764",
+      "size": 3842
     },
     {
       "path": "docs/pitch.md",
-      "sha": "9926d972b28a5a298461035e9226496ac285e39b",
-      "size": 7044
+      "sha": "a96dab38686aeec2baa902fd3a517658a12f5e19",
+      "size": 7077
     },
     {
       "path": "docs/slides.md",
-      "sha": "8a793e2d4b4f8c9499ff328ea83fc7ee2fd8b5e0",
+      "sha": "7654a460cc18ffb023c72f514d534f5e2981cf81",
       "size": 1272
     },
     {
@@ -281,6 +281,16 @@
       "size": 4458
     },
     {
+      "path": "ml/data/batears_20261114_235001_1_d60_noisy_n0c4.csv",
+      "sha": "57b7abb5d29f3b14e3b87580e45b0a48d18e8768",
+      "size": 1188823
+    },
+    {
+      "path": "ml/data/batears_20261114_235001_1_d60_noisy_n0c4.json",
+      "sha": "9c5c795499c9daac8bb1577d52612064ac9f2aa3",
+      "size": 4430
+    },
+    {
       "path": "ml/features.py",
       "sha": "c862fd8381fe5327c5d8fcaaa114a140c09869b1",
       "size": 6484
@@ -442,6 +452,38 @@
     }
   ],
   "drive_files": [
+    {
+      "id": "1bRbnG6xv6at1gIUTtLTLYhRqj7ohbUHR",
+      "name": "batears_20261114_235151_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "151166",
+      "modified": "2026-11-15T05:52:05.051Z",
+      "url": "https://drive.google.com/file/d/1bRbnG6xv6at1gIUTtLTLYhRqj7ohbUHR/view?usp=drivesdk"
+    },
+    {
+      "id": "10KNtOwMhDdrKiarkMGefCIyaaxTXJeX3",
+      "name": "batears_20261114_235151_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "1885",
+      "modified": "2026-11-15T05:52:05.051Z",
+      "url": "https://drive.google.com/file/d/10KNtOwMhDdrKiarkMGefCIyaaxTXJeX3/view?usp=drivesdk"
+    },
+    {
+      "id": "14ZGtx-gIBuVdBUwguHozS83tycTHeHfX",
+      "name": "batears_20261114_235001_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1188823",
+      "modified": "2026-11-15T05:51:47.001Z",
+      "url": "https://drive.google.com/file/d/14ZGtx-gIBuVdBUwguHozS83tycTHeHfX/view?usp=drivesdk"
+    },
+    {
+      "id": "14acISAITWxR_sfppmTTMA1Raobs2yKp0",
+      "name": "batears_20261114_235001_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "4430",
+      "modified": "2026-11-15T05:51:46.999Z",
+      "url": "https://drive.google.com/file/d/14acISAITWxR_sfppmTTMA1Raobs2yKp0/view?usp=drivesdk"
+    },
     {
       "id": "1HbHKgh_k5Xo2MGRuRYyenoT1qlnLgxDv",
       "name": "batears_20261114_234730_1_d60_noisy_n0c4.json",
@@ -945,13 +987,17 @@
     "233820",
     "234041",
     "234303",
-    "234730"
+    "234730",
+    "235001",
+    "235151"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
     "234303_noisy_manual_ambient_matches_quiet_foreign22.8",
     "234730_aborted_3trials",
-    "milz_LR0_live_despite_LOO65_67"
+    "milz_LR0_live_despite_LOO65_67",
+    "235001_completed90_autoNoise_differs_from_manual_loudMusic",
+    "235151_aborted2trials"
   ],
-  "notes": "First baseline: previously reviewed sessions remain in earlier reports. Future runs compare Drive ID+modified+size and GitHub path+blob SHA, then verify completion; do not notify for own exp report commits alone."
+  "notes": "Compare Drive ID+modified+size and GitHub path+blob SHA. Do not notify for own exp report commits alone. Prior reports hold older baseline analyses. 235001 noisy is automatic, not confirmed same iPhone loud-music condition."
 }
