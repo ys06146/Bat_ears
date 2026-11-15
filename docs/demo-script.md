@@ -10,7 +10,7 @@ Before judging (once):
 
 Live (30 s per judge):
 1. Tape over the webcam. Open `web/3d.html` and press ▶ 마이크로 시작 (기본 보정 and 학습 지도 are on by default).
-2. Hand over the tape mark: move left/right, up/down, toward/away. The dot follows.
+2. Hand over the tape mark, press ◎ 원점, then move left/right and toward/away (keep up/down small). The dot follows. It adds up 250 ms movements, so it slowly drifts: bring the hand back to the mark and press ◎ 원점 again.
 3. Honest numbers on screen: x ±4.2 · y ±3.5 · z ±4.8 cm. That's the RMS error of the hand's 250 ms movement on a sitting the model never saw (laptop speakers only, hand 25-45 cm from the webcam). For scale, the movements themselves were 7.3 / 3.9 / 6.8 cm RMS. Left-right (r 0.82) and depth (0.71) track well; height (0.46) is still weak with the laptop speakers alone. With the phones it needs that session's calibration file (📥), otherwise it falls back to the physics solver.
 4. Fallback: the Force Push game below.
 
