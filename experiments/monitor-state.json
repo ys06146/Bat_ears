@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T13:22:33Z",
-  "main_sha": "7b3a4cacd2fb3f61f67202b28752731d619673fa",
-  "exp_sha_before_run": "d8486a358e627aa31cfbc1f200a47a59ee241c87",
-  "report": "experiments/monitor-2026-11-15-0722.md",
+  "checked_at_utc": "2026-11-15T15:11:07Z",
+  "main_sha": "70a73c47632601c42e34512a14ae4312c4b1bc0b",
+  "exp_sha_before_run": "5c83370d3abef466387f738067299f576600e20d",
+  "report": "experiments/monitor-2026-11-15-0908.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -27,28 +27,28 @@
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "b2233c916dedf872729ca0c1b09f13d1a030313c",
-      "size": 5284
+      "sha": "ec1491a989cecf656b81b549804cb460eee9e355",
+      "size": 7106
     },
     {
       "path": "docs/devpost.md",
-      "sha": "dd50880fa87183ebed6048f6d3b77c5009cf69a3",
-      "size": 11189
+      "sha": "e53594f091786eb2d33448e74606321e9424f4f8",
+      "size": 10106
     },
     {
       "path": "docs/judge-qa.md",
-      "sha": "43e3b824051ae0f2118df0abce3b763c80f4f764",
-      "size": 3842
+      "sha": "3f416b67052679d381ae740cbc57507038de6aed",
+      "size": 5128
     },
     {
       "path": "docs/pitch.md",
-      "sha": "a96dab38686aeec2baa902fd3a517658a12f5e19",
-      "size": 7077
+      "sha": "4b496ff3734781d6f5a7ed04c2b800a2d70622ea",
+      "size": 2236
     },
     {
       "path": "docs/slides.md",
-      "sha": "7654a460cc18ffb023c72f514d534f5e2981cf81",
-      "size": 1272
+      "sha": "586c187f656ead7a77a559d0e2d2d787373c4ecf",
+      "size": 1513
     },
     {
       "path": "ml/README.md",
@@ -374,6 +374,161 @@
       "path": "tools/auth-tests/test.js",
       "sha": "d55410b103f6fdcee9f403ea034653ec65fef79d",
       "size": 3766
+    },
+    {
+      "path": "tools/bravo/agree.js",
+      "sha": "98a294737246890ea223245143b0127754ff0040",
+      "size": 4156
+    },
+    {
+      "path": "tools/bravo/chagree.js",
+      "sha": "fea82b7dcc8e610fd9ad2e3a1689b4ca495b3cd7",
+      "size": 1961
+    },
+    {
+      "path": "tools/bravo/chan.js",
+      "sha": "029c25cf28ef13b39e225bfa4ec32b7b18daa546",
+      "size": 1749
+    },
+    {
+      "path": "tools/bravo/circfit.js",
+      "sha": "a3233df14a1028bc432ee8d0f1aefaf25b803989",
+      "size": 3923
+    },
+    {
+      "path": "tools/bravo/circle_eval.js",
+      "sha": "8063fd37ffd1a4593efcd4178207198b5e68dad7",
+      "size": 8265
+    },
+    {
+      "path": "tools/bravo/circle_scan.js",
+      "sha": "732d07affdfb5794ee1bf087c3dd3a6153bc0511",
+      "size": 3546
+    },
+    {
+      "path": "tools/bravo/diag3.js",
+      "sha": "9ecf4ad7d1582c7710eca32e716413df081b4304",
+      "size": 2120
+    },
+    {
+      "path": "tools/bravo/drift.js",
+      "sha": "1468606b51454f638c6dbb06414ef6cea556900c",
+      "size": 5409
+    },
+    {
+      "path": "tools/bravo/holo_check.js",
+      "sha": "088af50f31de1badd2bb1b76939431b22e566121",
+      "size": 6864
+    },
+    {
+      "path": "tools/bravo/ldaeval.js",
+      "sha": "4f582e0e7fa2c90d83b7c37485d35256b528fb5c",
+      "size": 3379
+    },
+    {
+      "path": "tools/bravo/loso.js",
+      "sha": "2a737aa9565486876d902f6221f896cc2c018e95",
+      "size": 6905
+    },
+    {
+      "path": "tools/bravo/phase.js",
+      "sha": "25a1e1d2cc787ed3c0e53494e358beea87cf73eb",
+      "size": 10388
+    },
+    {
+      "path": "tools/bravo/phone.js",
+      "sha": "3566fe127554bae9f3cf1985d1d5e75fa54a42c8",
+      "size": 3745
+    },
+    {
+      "path": "tools/bravo/phones2.js",
+      "sha": "95765a3b81df23945334d4e25ab70cb04f286474",
+      "size": 2064
+    },
+    {
+      "path": "tools/bravo/phones3.js",
+      "sha": "b1fdfd7cbe1c6805727e6442649bd3768e165a1a",
+      "size": 1967
+    },
+    {
+      "path": "tools/bravo/real.js",
+      "sha": "03dec259a53c3c64e41651eff407903d9ef9f4e7",
+      "size": 4788
+    },
+    {
+      "path": "tools/bravo/refamp.js",
+      "sha": "3c83c35e5edf5f47c35c1dd62fe02b36fc49f6fb",
+      "size": 1521
+    },
+    {
+      "path": "tools/bravo/scale_loso.js",
+      "sha": "7d061f3fdec695bea1993d3753d544e96f12b2a3",
+      "size": 7471
+    },
+    {
+      "path": "tools/bravo/sim2d.js",
+      "sha": "d0a81782035a2ca1236fda496ff2ba1aaf5b20bc",
+      "size": 9731
+    },
+    {
+      "path": "tools/bravo/synth3.js",
+      "sha": "fe400699ee72ccfe9d9fa7e7059a1c2871d3e105",
+      "size": 4689
+    },
+    {
+      "path": "tools/bravo/teach_fit.js",
+      "sha": "2b7288844172e28157908bf26c9607805fd2a492",
+      "size": 19571
+    },
+    {
+      "path": "tools/bravo/teachsynth2.js",
+      "sha": "48057094315a4a88ed0ea46e365bd0905a42d6bd",
+      "size": 7347
+    },
+    {
+      "path": "tools/bravo/test3d.js",
+      "sha": "96e310701994ab551e25cd2ad04b59cfa5519957",
+      "size": 4991
+    },
+    {
+      "path": "tools/bravo/test3d_teach.js",
+      "sha": "bfcb7b91a0072a2723d21c4a95275d98454879dc",
+      "size": 8077
+    },
+    {
+      "path": "tools/bravo/test_bat3d.js",
+      "sha": "ca8eb11ac153b061a23755d4107b079ed19745bf",
+      "size": 4286
+    },
+    {
+      "path": "tools/bravo/track4.js",
+      "sha": "3743c7e77dce451dd18fee2962bf2ede1119d1b1",
+      "size": 9715
+    },
+    {
+      "path": "tools/bravo/track6.js",
+      "sha": "024e9793dcc37cbda9193f0fe53c0a7a527c5702",
+      "size": 7858
+    },
+    {
+      "path": "tools/bravo/vision3d.js",
+      "sha": "c273922ea4fd61bc6110e4a64828405728673af4",
+      "size": 3699
+    },
+    {
+      "path": "tools/bravo/vision_labels.js",
+      "sha": "b252d66494f630a85c4fb0aeebd9b515943ba8b7",
+      "size": 6445
+    },
+    {
+      "path": "tools/bravo/xfer.js",
+      "sha": "3814aef57b7dfca19fed980c8c81a48d378fa1f7",
+      "size": 7104
+    },
+    {
+      "path": "tools/bravo/xsess.js",
+      "sha": "e70f05389491c30cc21fb76d0772e2ef6b8b678d",
+      "size": 2866
     },
     {
       "path": "tools/lr-tests/physics.js",
@@ -1229,7 +1384,8 @@
     "20261115_040340_teach_61f5",
     "20261115_040721_teach_61f5",
     "20261115_043301_teach_61f5",
-    "20261115_044652_teach_61f5"
+    "20261115_044652_teach_61f5",
+    "20261115_082736_teach_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1259,9 +1415,12 @@
     "all5sittings_training_filterTuning_noUntouchedHoldout",
     "amp_modes_sizeVsRMSE_halfDefault",
     "3d_volume_matchedTeach_noNewLiveValidation",
-    "overheadPresets_added_noNamedCalibrationInCurrentEngine"
+    "overheadPresets_added_noNamedCalibrationInCurrentEngine",
+    "overhead082736_complete_labelFixed97presence_highPhoneLevel",
+    "frozen5map082736_half_x3.65_vs_zero2.80_singleSessionDiagnostic",
+    "scale_loso_outerFoldIndirectLeakage_requiresTrueNested_reprovenance"
   ],
-  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports.",
+  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports. Run10: root81/teach35; new completed082736 teacher session, including WAV, analyzed without modifying originals. Frozen five-session model, laptop four paths only, no new fitting or display filters: half displacement RMSE cm x3.645/y1.349/z2.762 versus zero-motion x2.799/y1.786/z3.461. Exploratory within-session block intervals, not participant generalization. No overhead-phone benefit inferred. Published scale_loso.js has indirect outer-test leakage in scale fitting; embedded table provenance must be checked before attributing bias. Report0908 and holdout-082736.json contain reproduction and limits.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1306,6 +1465,46 @@
       "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
       "path": "nhng/ml/data/teach",
       "files": [
+        {
+          "id": "1U-E38rPw-CoU0aziEBMFrB5jQJO8AQzp",
+          "name": "batears_20261115_082736_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28325420",
+          "modified": "2026-11-15T14:30:05.229Z",
+          "url": "https://drive.google.com/file/d/1U-E38rPw-CoU0aziEBMFrB5jQJO8AQzp/view?usp=drivesdk"
+        },
+        {
+          "id": "1-hNguXRgzUCByMBtqbXFFeNXurmF4W8t",
+          "name": "batears_20261115_082736_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "688728",
+          "modified": "2026-11-15T14:30:04.879Z",
+          "url": "https://drive.google.com/file/d/1-hNguXRgzUCByMBtqbXFFeNXurmF4W8t/view?usp=drivesdk"
+        },
+        {
+          "id": "1FM0DMzGuyxsyVpylBsSwu1C655HxNSRX",
+          "name": "batears_20261115_082736_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1072736",
+          "modified": "2026-11-15T14:30:04.708Z",
+          "url": "https://drive.google.com/file/d/1FM0DMzGuyxsyVpylBsSwu1C655HxNSRX/view?usp=drivesdk"
+        },
+        {
+          "id": "1SBeDqfcRdeWQEGFMrX6PN8dl-R18Ptjs",
+          "name": "batears_20261115_082736_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "3257042",
+          "modified": "2026-11-15T14:30:04.457Z",
+          "url": "https://drive.google.com/file/d/1SBeDqfcRdeWQEGFMrX6PN8dl-R18Ptjs/view?usp=drivesdk"
+        },
+        {
+          "id": "14lyZKwSIyOF_tCW5tOyByjP6zUwn0Qw1",
+          "name": "batears_20261115_082736_teach_61f5.json",
+          "mime": "application/json",
+          "size": "69436",
+          "modified": "2026-11-15T14:30:04.194Z",
+          "url": "https://drive.google.com/file/d/14lyZKwSIyOF_tCW5tOyByjP6zUwn0Qw1/view?usp=drivesdk"
+        },
         {
           "id": "19t07WhWPOuSVYEgRkA_VD6C7cTJmP0qF",
           "name": "batears_20261115_044652_teach_61f5.calib.json",
@@ -1614,5 +1813,24 @@
         ]
       }
     }
+  },
+  "latest_holdout_summary": {
+    "session": "20261115_082736_teach_61f5",
+    "source_main_sha": "70a73c47632601c42e34512a14ae4312c4b1bc0b",
+    "artifact": "experiments/holdout-082736.json",
+    "mode": "half",
+    "rmse_cm": [
+      3.64546,
+      1.34907,
+      2.76167
+    ],
+    "zero_motion_rmse_cm": [
+      2.7989,
+      1.78582,
+      3.46126
+    ],
+    "overlapping_windows": 2660,
+    "independent_sessions": 1,
+    "full_display_pipeline": false
   }
 }
