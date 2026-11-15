@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T06:13:31Z",
-  "main_sha": "6873dd2bbe367d1c428a0204b441be34f861cace",
-  "exp_sha_before_run": "af345c2e9333bad793212f724bc74dce4ec44e88",
-  "report": "experiments/monitor-2026-11-15-0013.md",
+  "checked_at_utc": "2026-11-15T07:12:04Z",
+  "main_sha": "5b6890be0651f4a44b28360c52cefd84c3b34a45",
+  "exp_sha_before_run": "d3a26897d16872bfc584c15faf2e5212ebd87039",
+  "report": "experiments/monitor-2026-11-15-0112.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -22,8 +22,8 @@
     },
     {
       "path": "TEAM.md",
-      "sha": "df9a8cb98e1e38d251bbf3feae7ef360ea8fb683",
-      "size": 6790
+      "sha": "c2128c631d0ecc918b9fb620cd1e4c6179f07025",
+      "size": 8319
     },
     {
       "path": "docs/demo-script.md",
@@ -302,8 +302,8 @@
     },
     {
       "path": "ml/replay_burst.py",
-      "sha": "8c0363390e263da71261cf9bdf30375f2048c20b",
-      "size": 12807
+      "sha": "a21bcb981790739bada9796644cceef403b83048",
+      "size": 13414
     },
     {
       "path": "ml/report.py",
@@ -352,8 +352,8 @@
     },
     {
       "path": "tools/robust-tests/test.js",
-      "sha": "15709d04fd5b5da83fc2825fb2398b907fe3d934",
-      "size": 8328
+      "sha": "946d185a6122e2ea6a53151a259cacd11bbf7839",
+      "size": 9617
     },
     {
       "path": "tools/selftest/make_wav.py",
@@ -362,13 +362,13 @@
     },
     {
       "path": "tools/stamp.py",
-      "sha": "326a15069feac4fde617bbb6d90b39c753e90e35",
-      "size": 817
+      "sha": "60cbe002dac84eb732f5db01258ce2fc04a54b30",
+      "size": 925
     },
     {
       "path": "web/app.js",
-      "sha": "2d4b08a9d5f73d0d7fc2cad2c6c2bce704698990",
-      "size": 20104
+      "sha": "3060dc9b3e81767dd21fa4433bcd62dbc719f1ea",
+      "size": 20302
     },
     {
       "path": "web/batears.html",
@@ -387,8 +387,13 @@
     },
     {
       "path": "web/dsp.js",
-      "sha": "ca87b254586c83a57a9c6d397f82fc1014d1390f",
-      "size": 53329
+      "sha": "007b56fd19b1241a67abb7a6e637ae10482da2d0",
+      "size": 61043
+    },
+    {
+      "path": "web/experiment-live.html",
+      "sha": "3e40011994c62063dd8bb1c412033baee7dccf64",
+      "size": 19389
     },
     {
       "path": "web/explog.js",
@@ -402,13 +407,13 @@
     },
     {
       "path": "web/index.html",
-      "sha": "043eb0917e7a59c22a530e75553e1efe786fdb6c",
-      "size": 9774
+      "sha": "2492c824d207ec2bd7760ed79d61a8b12829cec1",
+      "size": 9921
     },
     {
       "path": "web/iq.js",
-      "sha": "d73917f234496abe72b7ab0fae36c29603de5b45",
-      "size": 7684
+      "sha": "1fbd7c347c01636c5a1ae4bdb0da5bc975040017",
+      "size": 7850
     },
     {
       "path": "web/lr.js",
@@ -422,8 +427,8 @@
     },
     {
       "path": "web/robust.js",
-      "sha": "16dc78bd43c12bdfc8457ae697ea1561b75a7552",
-      "size": 17129
+      "sha": "9c0a8797804b83cee1765c83bdb760359b2529e3",
+      "size": 18345
     },
     {
       "path": "web/sonar.js",
@@ -997,7 +1002,8 @@
     "234730_aborted_3trials",
     "milz_LR0_live_despite_LOO65_67",
     "235001_completed90_autoNoise_differs_from_manual_loudMusic",
-    "235151_aborted2trials"
+    "235151_aborted2trials",
+    "main5b6890_continuousPull_autoTune_new_freeExperiment_schema_27tests"
   ],
-  "notes": "Compare Drive ID+modified+size and GitHub path+blob SHA. Do not notify for own exp report commits alone. Prior reports hold older baseline analyses. 235001 noisy is automatic, not confirmed same iPhone loud-music condition."
+  "notes": "No new Drive files this run. New experiment-live exports nested session+events/marked_pairs and event CSV, NOT legacy frame CSV; detect schema before analysis. continuousPull/IQ/masks are not replayed by legacy replay_burst.py. Compare condition flags and actual tone/volume; own exp commits alone are not notification reasons."
 }
