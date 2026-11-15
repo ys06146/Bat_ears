@@ -55,10 +55,13 @@ The speaker plays a sine (Web Audio `OscillatorNode`) and the mic feeds an `Anal
 - `web/game.js`, `speed.js`, `sonar.js`, `lr.js`: the game, speed gun, sonar view and left/right test tab
 - `web/collect.js`, `coach.js`, `recorder.js`, `explog.js`: guided collection, the motion guide, the CSV logger and the experiment log
 - `web/index.html`, `style.css`, `app.js`: the page and UI glue
+- `web/bat3d.js` (bravo's 3D engine), `web/hologram.html`, `web/3d.html`, `web/teach.html`, `web/vision3d.browser.js`: the 3D tracker, its pages, the webcam teacher and the webcam-to-laptop geometry
 - `ml/`: real recordings (`ml/data/`) and the Python tools
   - `python ml/report.py`: per-session accuracy table
   - `python ml/replay_burst.py`: replays the live rule on every recording
   - `python ml/train.py`: the learned classifier with leave-one-session-out scoring
 - `tools/selftest/`: synthetic microphone input for headless Chrome tests. `tools/robust-tests/` and `tools/lr-tests/` hold unit tests for the detectors, and `tools/reference/` holds the early Python prototypes.
+- `tools/bravo/`: the offline 3D analysis (calibration fits, leave-one-sitting-out tests).
+- `tools/vision_full/`: every-frame hand labels from a teach session's local video (WebCodecs and MediaPipe in headless Chrome).
 - `tools/stamp.py`: run it after changing any `.js` or `.css` file, so GitHub Pages visitors get the new version.
 - `docs/`: the Devpost draft, demo script, slides and judge Q&A. [TEAM.md](TEAM.md) has roles and status.
