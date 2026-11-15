@@ -66,6 +66,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
 </header>
 <main>
 <section>
+  <div class="card hidden" id="newVersion" style="border-color:#ffca28"><b>🔄 teach.html 새 버전이 올라왔어요.</b> <button id="reloadBtn" class="go">새로고침</button> <span class="muted">세션이 끝난 뒤에 눌러요</span></div>
   <div class="card" id="setup">
     <h2>1. 준비</h2>
     <ul class="tips">
@@ -1084,6 +1085,20 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   });
   window.addEventListener('beforeunload', (e) => { if (sess && !sess.done) { e.preventDefault(); e.returnValue = ''; } });
 
+  // we redeploy often: when the site has a newer teach.html (its ETag changed), offer a reload, never during a session
+  let etag0 = null;
+  async function checkNew() {
+    try {
+      const r = await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' });
+      const e = r.headers.get('ETag') || r.headers.get('Last-Modified');
+      if (!e) return;
+      if (etag0 == null) { etag0 = e; return; }
+      if (e !== etag0 && !(sess && !sess.done)) $('newVersion').classList.remove('hidden');
+    } catch (err) { /* offline */ }
+  }
+  checkNew();
+  setInterval(checkNew, 60000);
+  $('reloadBtn').addEventListener('click', () => location.reload());
   renderPhones();
   if (movedOld || freqMoved) {
     savePhones();
