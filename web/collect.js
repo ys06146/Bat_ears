@@ -27,7 +27,7 @@
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  let S = null, ui = null, beepCtx = null, lastMeta = null;
+  let S = null, ui = null, beepCtx = null, lastMeta = null, lastWav = null;
 
   function deviceId() {
     try {
@@ -231,6 +231,8 @@
       BatRecorder.setLabel('idle');
       BatRecorder.start();
       S.session = BatRecorder.session;
+      // stereo sessions also keep the raw mic signal (WAV next to the CSV) so left/right ideas can be tested offline
+      if (opt.swipe && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
       if (opt.swipeOnly) {
         say('손을 키보드 위 10~15cm에 두세요', BatEars.hasLrModel ? '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm)'
           : '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm). 처음엔 기록만 하고, 끝나면 이 노트북에서 좌우가 되는지 알려 드려요');
@@ -302,6 +304,7 @@
       off();
       if (BatRecorder.recording) BatRecorder.stop();
       BatRecorder.setLabel('idle');
+      if (BatEars.capturing) { try { S.wav = await BatEars.captureStop(); } catch (e) { console.error('[collect] capture', e); } }
       result = finish();
       if (opt.speed && opt.speed < 1) await sleep(300);
       else await waitClose(120000); // keep the summary up until closed (button, Esc or Enter)
@@ -377,6 +380,9 @@
       freq: BatEars.freq, stereo: BatEars.stereo,
       ...(BatEars.stereo ? { stereoDetector: BatEars.config.stereoDetector, stereoPair: BatEars.stereoPair, lrCheck: S.lrCheck || null, lrModel: BatEars.config.lrModel } : {}),
       foreignTones: [...S.foreign].sort((a, b) => a - b),
+      // raw mic WAV of this session (stereo sessions): t0 = performance.now() ms of its first sample (same clock as
+      // the CSV t_ms column and the trials' tStart/tEnd)
+      wav: S.wav ? { file: `batears_${S.session}.wav`, rate: S.wav.rate, channels: S.wav.channels, seconds: S.wav.seconds, t0: S.wav.t0, capped: S.wav.capped, bytes: S.wav.blob.size, via: S.wav.via } : null,
       client: {
         ua: navigator.userAgent, platform: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform,
         lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -385,10 +391,12 @@
       trials: S.trials,
     };
     lastMeta = meta;
+    lastWav = S.wav ? S.wav.blob : null;
     const rows = BatRecorder.toCsv(S.session).split('\n').length - 1;
     if (!S.opt.noDownload || BatRecorder.folderName) {
       if (!BatRecorder.folderName) BatRecorder.download(S.session);
       BatRecorder.saveJson(`batears_${S.session}.json`, meta);
+      if (S.wav) BatRecorder.saveFile(meta.wav.file, S.wav.blob);
     }
     say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
     const lr = S.lrCheck;
@@ -418,5 +426,5 @@
     else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undo(); }
   });
 
-  window.BatCollect = { start, stop, undo, get active() { return !!S; }, get lastMeta() { return lastMeta; } };
+  window.BatCollect = { start, stop, undo, get active() { return !!S; }, get lastMeta() { return lastMeta; }, get lastWav() { return lastWav; } };
 })();

@@ -16,7 +16,7 @@ Bat Ears turns the laptop's own speaker and microphone into a gesture sensor:
 - We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars, and wave for a shockwave. The webcam can stay taped over the whole time.
 - A guided 2-minute **data collection** mode prompts you ("Push!") and labels everything automatically. We used it to measure accuracy and train a classifier.
 
-Everything runs inside the browser on the device. Nothing to install and no server; the audio is analysed on the device and never recorded or sent anywhere.
+Everything runs inside the browser on the device. Nothing to install and no server; the audio is analysed on the device and never sent anywhere. Only the data-collection mode, which you start yourself, saves anything, and only to a folder you pick.
 
 Try it: https://ys06146.github.io/nhng/web/ (Chrome on a laptop, built-in speaker and mic)
 

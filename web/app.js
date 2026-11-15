@@ -323,7 +323,22 @@
       const meta = {
         noise: m.noise, noiseSource: m.noiseSource, room: m.room, sessionIndex: m.sessionIndex, fpsKeys: Object.keys(m.client || {}), burst: !!m.burst,
         stereoPair: m.stereoPair, lrCheck: m.lrCheck, swipeFeats: (m.trials || []).filter((t) => t.swipe).length, foreignTones: m.foreignTones,
+        wav: m.wav, tStart0: m.trials && m.trials[0] && m.trials[0].tStart, csvT0: lines[1] ? Number(lines[1].split(',')[1]) : null,
       };
+      // the raw WAV holds the real mic signal: tone power (Goertzel) at the stereo tones vs. off-tone, channel 0, 1 s
+      if (BatCollect.lastWav) {
+        try {
+          const dv = new DataView(await BatCollect.lastWav.arrayBuffer());
+          const C = dv.getUint16(22, true), rate = dv.getUint32(24, true), n = Math.min(rate, (dv.byteLength - 44) / 2 / C - rate);
+          const pow = (f) => {
+            const w = 2 * Math.cos(2 * Math.PI * f / rate);
+            let s1 = 0, s2 = 0;
+            for (let i = 0; i < n; i++) { const s0 = dv.getInt16(44 + ((rate + i) * C) * 2, true) / 32768 + w * s1 - s2; s2 = s1; s1 = s0; }
+            return +(10 * Math.log10((s1 * s1 + s2 * s2 - w * s1 * s2) / n / n + 1e-20)).toFixed(1);
+          };
+          meta.wavCheck = { C, rate, bytes: dv.byteLength, db18k: pow(18000), db19k5: pow(19500), db17k: pow(17000) };
+        } catch (e) { meta.wavCheck = { error: String(e) }; }
+      }
       console.log('BATEARS ' + JSON.stringify({ type: 'collect-test', res, byLabel, cues, stereoRows, stereo: BatEars.stereo, meta, gameRunning: ForcePush.state.running }));
       document.title = 'DONE';
     })();

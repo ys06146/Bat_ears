@@ -7,7 +7,7 @@ Short answers to say out loud. [TBD] = fill in from our measurements (`python ml
 2. **Does it work in a loud room like this one?**
    Speech and music sit mostly far below 20 kHz, and we only look a few hundred Hz around our tone. For loud broadband noise like claps, we subtract the rise of the noise floor measured farther away, because a hand echo only lifts the bands right next to the tone. Thresholds also adapt to how noisy the room is at start-up.
 3. **What about privacy?**
-   There's no camera, and nothing is recorded or sent anywhere: the page analyses the microphone signal in memory, in the browser. It does need microphone permission, and we say so.
+   There's no camera, and nothing is sent anywhere: the page analyses the microphone signal in memory, in the browser. Only the guided data-collection mode, which you start yourself, saves recordings, and only to a folder you choose. It does need microphone permission, and we say so.
 4. **Why not just use the camera?**
    It works in the dark, it never captures faces, it's computationally light, and it works with the webcam taped over. It complements cameras rather than replacing them.
 5. **Is the tone safe or annoying?**

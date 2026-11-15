@@ -6,6 +6,8 @@
  *                          'left' / 'right' swipe gestures (experimental; depends on the laptop's speakers)
  *   stop()                 -> Promise<object>   stop and return a summary
  *   bandCheck()            -> Promise<Array>    short sweep, SNR per frequency
+ *   captureStart() -> Promise<boolean>; captureStop() -> Promise<{ blob, rate, channels, seconds, t0, capped } | null>
+ *                          raw mic recording (16-bit WAV, every mic channel; t0 = performance.now() of sample 0)
  *   setFreq(hz), setVolume(0..1)
  *   on(type, fn) -> unsubscribe;  off(type, fn)
  *   config                 tunables (threshold, margin, minSnr, ...)
@@ -275,8 +277,9 @@
     try { await ctx.resume(); } catch (_) { /* ignore */ }
     let stream;
     try {
+      // stereo (experimental) asks for both mics of a dual-mic laptop, for the raw capture; the analyser mixes them
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: !raw, noiseSuppression: !raw, autoGainControl: !raw, channelCount: { ideal: 1 } },
+        audio: { echoCancellation: !raw, noiseSuppression: !raw, autoGainControl: !raw, channelCount: { ideal: stereo ? 2 : 1 } },
         video: false,
       });
     } catch (e) {
@@ -288,7 +291,8 @@
     const analyser = ctx.createAnalyser();
     analyser.fftSize = config.fftSize;
     analyser.smoothingTimeConstant = 0.2;
-    ctx.createMediaStreamSource(stream).connect(analyser);
+    const src = ctx.createMediaStreamSource(stream);
+    src.connect(analyser);
     const osc = ctx.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = f0;
@@ -311,7 +315,7 @@
     oscR.start();
     const binHz = ctx.sampleRate / analyser.fftSize;
     Object.assign(st, {
-      ctx, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount),
+      ctx, src, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount), tapLoaded: false, cap: null,
       stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0, scandSince: 0, prevStereoT: 0,
       running: true, tone: false, busy: false, raw, f0, binHz,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
@@ -331,6 +335,114 @@
     setTone(true);
     st.raf = requestAnimationFrame(loop);
     return true;
+  }
+
+  // ---- raw microphone capture: a 16-bit WAV of every mic channel, for offline work on left/right (phase tracking
+  // of each tone, the second mic). t0 = performance.now() time of the first sample, so the WAV lines up with the
+  // CSV rows and the trial times (tStart/tEnd) in the session JSON. Capped at CAPTURE_MAX_S.
+  const CAPTURE_MAX_S = 420;
+  const TAP_SRC = `class BatTap extends AudioWorkletProcessor {
+  constructor() { super(); this.on = true; this.buf = null; this.n = 0; this.start = 0;
+    this.port.onmessage = (e) => { if (e.data === 'stop') { this.flush(); this.on = false; } }; }
+  flush() { if (this.buf && this.n) { const C = this.C; this.port.postMessage({ C, frame: this.start, data: this.buf.slice(0, this.n * C) }); } this.buf = null; this.n = 0; }
+  process(inputs) {
+    if (!this.on) return false;
+    const ch = inputs[0];
+    if (!ch || !ch.length) return true;
+    const C = ch.length, N = ch[0].length;
+    if (this.buf && C !== this.C) this.flush();
+    if (!this.buf) { this.C = C; this.buf = new Float32Array(4096 * C); this.n = 0; this.start = currentFrame; }
+    const b = this.buf, o = this.n * C;
+    for (let c = 0; c < C; c++) { const x = ch[c]; for (let i = 0; i < N; i++) b[o + i * C + c] = x[i]; }
+    this.n += N;
+    if (this.n + N > 4096) { this.port.postMessage({ C, frame: this.start, data: b.subarray(0, this.n * C) }, [b.buffer]); this.buf = null; this.n = 0; }
+    return true;
+  }
+}
+registerProcessor('bat-tap', BatTap);`;
+
+  // The worklet module comes from a blob: URL (https pages) or a data: URL; a page opened from a file:// path can
+  // load neither, so it falls back to a ScriptProcessorNode (deprecated but still in Chrome).
+  async function loadTap(ctx) {
+    if (!ctx.audioWorklet) return false;
+    const blobUrl = URL.createObjectURL(new Blob([TAP_SRC], { type: 'application/javascript' }));
+    for (const u of [blobUrl, 'data:application/javascript;charset=utf-8,' + encodeURIComponent(TAP_SRC)]) {
+      try { await ctx.audioWorklet.addModule(u); URL.revokeObjectURL(blobUrl); return true; } catch (_) { /* next */ }
+    }
+    URL.revokeObjectURL(blobUrl);
+    return false;
+  }
+
+  async function captureStart() {
+    if (!st.running || st.cap) return false;
+    const ctx = st.ctx;
+    try {
+      if (st.tapLoaded === false) st.tapLoaded = (await loadTap(ctx)) ? true : 'no';
+      const mute = ctx.createGain();
+      mute.gain.value = 0;
+      const cap = { node: null, mute, chunks: [], frames: 0, C: 0, rate: ctx.sampleRate, t0: null, full: false, via: '' };
+      // one chunk of interleaved samples; frame = context frame of its first sample (null if unknown)
+      const take = (C, frame, data) => {
+        if (!cap.C) cap.C = C;
+        if (C !== cap.C || cap.full || !st.cap) return;
+        if (cap.t0 == null) {
+          const ts = frame != null && ctx.getOutputTimestamp ? ctx.getOutputTimestamp() : null;
+          cap.t0 = ts && ts.performanceTime > 0 ? ts.performanceTime + (frame / ctx.sampleRate - ts.contextTime) * 1000
+            : performance.now() - (data.length / C / ctx.sampleRate) * 1000;
+        }
+        const out = new Int16Array(data.length);
+        for (let i = 0; i < data.length; i++) { const x = data[i] < -1 ? -1 : data[i] > 1 ? 1 : data[i]; out[i] = x < 0 ? x * 0x8000 : x * 0x7fff; }
+        cap.chunks.push(out);
+        cap.frames += data.length / C;
+        if (cap.frames >= CAPTURE_MAX_S * cap.rate) cap.full = true;
+      };
+      if (st.tapLoaded === true) {
+        // channelCountMode 'max' + 'discrete': as many channels as the mic delivers, never mixed
+        cap.node = new AudioWorkletNode(ctx, 'bat-tap', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: 'max', channelInterpretation: 'discrete' });
+        cap.node.port.onmessage = (e) => take(e.data.C, e.data.frame, e.data.data);
+        cap.via = 'worklet';
+      } else {
+        const C = Math.max(1, Math.min(2, Number(api.info && api.info.ch) || 1));
+        cap.node = ctx.createScriptProcessor(4096, C, 1);
+        cap.node.channelInterpretation = 'discrete';
+        cap.node.onaudioprocess = (e) => {
+          const ib = e.inputBuffer, n = ib.length, k = ib.numberOfChannels, buf = new Float32Array(n * k);
+          for (let c = 0; c < k; c++) { const x = ib.getChannelData(c); for (let i = 0; i < n; i++) buf[i * k + c] = x[i]; }
+          take(k, null, buf);
+        };
+        cap.via = 'script';
+      }
+      st.src.connect(cap.node);
+      cap.node.connect(mute).connect(ctx.destination); // keeps the tap pulled by the graph; it outputs silence
+      st.cap = cap;
+      return true;
+    } catch (e) {
+      emit('error', { where: 'capture', name: e.name, message: e.message });
+      return false;
+    }
+  }
+
+  // -> { blob (audio/wav), rate, channels, seconds, t0, capped } | null
+  async function captureStop() {
+    const cap = st.cap;
+    if (!cap) return null;
+    try { if (cap.node.port) cap.node.port.postMessage('stop'); } catch (_) { /* ignore */ }
+    await sleep(120); // let the last partial chunk arrive
+    st.cap = null;
+    try { st.src && st.src.disconnect(cap.node); } catch (_) { /* ignore */ }
+    try { cap.node.disconnect(); cap.mute.disconnect(); } catch (_) { /* ignore */ }
+    if (!cap.frames || !cap.C) return null;
+    const bytes = cap.frames * cap.C * 2;
+    const h = new DataView(new ArrayBuffer(44));
+    const tag = (o, s) => { for (let i = 0; i < 4; i++) h.setUint8(o + i, s.charCodeAt(i)); };
+    tag(0, 'RIFF'); h.setUint32(4, 36 + bytes, true); tag(8, 'WAVE'); tag(12, 'fmt ');
+    h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, cap.C, true); h.setUint32(24, cap.rate, true);
+    h.setUint32(28, cap.rate * cap.C * 2, true); h.setUint16(32, cap.C * 2, true); h.setUint16(34, 16, true);
+    tag(36, 'data'); h.setUint32(40, bytes, true);
+    return {
+      blob: new Blob([h.buffer, ...cap.chunks], { type: 'audio/wav' }), rate: cap.rate, channels: cap.C,
+      seconds: +(cap.frames / cap.rate).toFixed(2), t0: cap.t0 == null ? null : +cap.t0.toFixed(1), capped: cap.full, via: cap.via,
+    };
   }
 
   async function stop() {
@@ -824,6 +936,7 @@
   const api = {
     config, info: null, lastBandCheck: null, foreign: [],
     start, stop, bandCheck, on, off, summary, drawZoom, drawWide,
+    captureStart, captureStop,                      // raw mic WAV (all channels) for offline analysis
     setFreq(hz) { if (st.running && !st.busy) setTone(st.tone, Number(hz)); else st.f0 = Number(hz); },
     setVolume(v) {
       config.volume = Number(v);
@@ -846,6 +959,7 @@
     get stereo() { return st.stereo; },
     get stereoPair() { return st.stereo && st.sch ? [st.sch.L.f, st.sch.R.f] : null; }, // tones playing now
     get hasLrModel() { return !!lrModelNow(); },     // left/right usable with the tone pair playing now
+    get capturing() { return !!st.cap; },
     get freq() { return st.f0; },
     get counts() { return { ...st.counts }; },
   };

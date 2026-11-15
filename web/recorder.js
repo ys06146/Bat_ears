@@ -169,6 +169,20 @@
       downloadBlob(new Blob([text], { type: 'application/json' }), name);
       return false;
     },
+    // any other file next to the CSV (e.g. the raw WAV of a left/right session): into the folder, otherwise downloaded
+    async saveFile(name, blob) {
+      if (dir) {
+        try {
+          const fh = await dir.getFileHandle(name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(blob);
+          await w.close();
+          return true;
+        } catch (e) { lastError = e.message || String(e); notify(); }
+      }
+      downloadBlob(blob, name);
+      return false;
+    },
     toCsv,
   };
 
