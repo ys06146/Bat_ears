@@ -101,12 +101,16 @@ registerProcessor('bat-iq', BatIQ);
     return {
       node,
       peaksBetween(ta, tb) {
-        let x = 0, y = 0, xp = 0, yp = 0, n = 0;
+        let x = 0, y = 0, xp = 0, yp = 0, n = 0, xmin = 0, xmax = 0, imin = -1, imax = -1;
         for (let i = h; i < T.length; i++) if (T[i] >= ta && T[i] <= tb) {
           x += (R[i] - L[i]) / 2; y += -(R[i] + L[i]) / 2; n++;
           if (Math.abs(x) > Math.abs(xp)) xp = x; if (Math.abs(y) > Math.abs(yp)) yp = y;
+          if (x < xmin) { xmin = x; imin = i; } if (x > xmax) { xmax = x; imax = i; }
         }
-        return { pPk: xp, pDPk: yp, n };
+        // pStroke: the last big sideways move, from the earlier extreme to the later one (a wind-up or a return
+        // stroke can't flip it; the peak pPk can). 231408 MacBook: time split [pStroke, pDPk] 11/0/1 vs pPk 6/2/4
+        const pStroke = imax > imin ? xmax - xmin : xmin - xmax;
+        return { pPk: xp, pDPk: yp, pStroke, n };
       },
       pathBetween(ta, tb) { let dL = 0, dR = 0, n = 0; for (let i = h; i < T.length; i++) if (T[i] >= ta && T[i] <= tb) { dL += L[i]; dR += R[i]; n++; } return { dL, dR, n }; },
       stop() { try { src.disconnect(node); node.disconnect(); mute.disconnect(); } catch (_) { /* ignore */ } },

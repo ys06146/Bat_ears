@@ -190,7 +190,9 @@
   // time split fft 4/3/5 (33%) vs phase [pPk, pDPk] 8/1/3 (67%), phaseFft [pPk, idep, bip] 9/2/1 (75%); push/pull read
   // as left/right 0-1/10. Checks: fft refused (reversed 0.25), phase OK (LOO 0.83/0.08/0.08, fp 0.1), phaseFft refused (fp 0.2).
   // 205859 Galaxy Book: fft 16/0/4 (80%), 0/20 (phase not recorded there yet).
-  const KEYSETS = { fft: KEYS, phase: ['pPk', 'pDPk'], phaseFft: ['pPk', 'idep', 'bip'] };
+  // 231408 MacBook (2nd WAV check): pPk was fooled by wind-ups / returns (split 6/2/4); pStroke = the last big sideways
+  // move (iq.js) 11/0/1, push/pull 1/10; check OK. 'stroke' first so it wins ties.
+  const KEYSETS = { stroke: ['pStroke', 'pDPk'], fft: KEYS, phase: ['pPk', 'pDPk'], phaseFft: ['pPk', 'idep', 'bip'] };
   // run the check with every key set the trials support; keep the best passing one (else the best failing one, for the
   // reason text). score = hit - 2 x reversed - false left/right (all leave-one-out).
   function bestCheck(items, opt = {}, keySets = KEYSETS) {

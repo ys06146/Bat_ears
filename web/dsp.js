@@ -828,7 +828,8 @@ registerProcessor('bat-tap', BatTap);`;
         // signed peaks of the running sideways / depth path change: return strokes cancel the net change, not the
         // peak (bravo, 214602 MacBook WAV). From 300 ms before the burst: the FFT burst starts late
         const pk = st.iq.peaksBetween ? st.iq.peaksBetween(ev.start - 300, now) : null;
-        if (pk && pk.n > 20) { feat.pPk = pk.pPk; feat.pDPk = pk.pDPk; }
+        // pStroke = the last big sideways move (earlier extreme -> later one): wind-ups and return strokes can't flip it
+        if (pk && pk.n > 20) { feat.pPk = pk.pPk; feat.pDPk = pk.pDPk; if (Number.isFinite(pk.pStroke)) feat.pStroke = pk.pStroke; }
       }
       emit('burst', { t: now, start: ev.start, feat, capped });
       if (!ev.fired && !(B.rejectCapped && capped)) {
