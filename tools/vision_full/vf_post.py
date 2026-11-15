@@ -79,6 +79,19 @@ near = np.abs(mt - (pts[kn] + o)) < step / 2
 oc = float(np.median(ct[near] - pts[kn[near]]))
 resid = ct[near] - (pts[kn[near]] + oc)
 print(f'capture = pts + {oc:.2f} ms: residual std {resid.std():.2f} ms, {np.mean(np.abs(resid) < 3):.1%} of {near.sum()} callback rows within 3 ms')
+# variable-rate video (a dim room: 13.6 fps with bursts) breaks the regular media grid. Direct check: the constant c that
+# puts the most capture times on some pts + c within 3 ms; use it when it explains most callbacks (more robust than the grid)
+_best = None
+for _j in range(min(40, len(ct))):
+    for _k in range(min(150, len(pts))):
+        _c = ct[_j] - pts[_k]
+        _n = int((np.abs((pts[None, :] + _c) - ct[:, None]).min(axis=1) < 3).sum())
+        if _best is None or _n > _best[0]: _best = (_n, _c)
+if _best and _best[0] > 0.6 * len(ct):
+    _m = np.abs((pts[None, :] + _best[1]) - ct[:, None]); _k = _m.argmin(axis=1); _ok = _m.min(axis=1) < 3
+    _oc = float(np.median(ct[_ok] - pts[_k[_ok]]))
+    if abs(_oc - oc) > 1: print(f'direct capture match: capture = pts + {_oc:.2f} ms ({_best[0]} of {len(ct)} callbacks within 3 ms) replaces the grid estimate {oc:.2f}')
+    oc = _oc
 corder = np.argsort(ct)
 def cmatch(tol=3.0):
     m = pts + oc
