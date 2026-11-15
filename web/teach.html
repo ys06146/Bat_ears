@@ -545,9 +545,10 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const wl = res.worldLandmarks && res.worldLandmarks[0];
     const hd = res.handedness || res.handednesses;
     const cat = hd && hd[0] && hd[0][0];
-    // MediaPipe names the hand as if the picture were mirrored (selfie). Ours is the raw camera image, so swap it
+    // tasks-vision names the hand correctly for the raw (unmirrored) webcam picture. Checked on 5 sittings: 서진's right hand
+    // (thumb side + fingertips curling toward the palm normal) is 'Right' in 95-99% of frames. Earlier sessions swapped it
     const handMp = cat ? cat.categoryName || '' : '';
-    const hand = handMp === 'Left' ? 'Right' : handMp === 'Right' ? 'Left' : '';
+    const hand = handMp;
     const asp = cam.w / cam.h;
     const L = new Float32Array(63);
     let minx = 1, maxx = 0, miny = 1, maxy = 0;
@@ -1029,7 +1030,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
         minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5, delegate: vis ? vis.delegate : '', smoothing: false,
         mirrored: false,
         coords: 'lm: raw (not mirrored) camera image, x 0..1 left->right of the camera picture (= toward the person\'s left), y 0..1 top->bottom, z MediaPipe relative depth (smaller = nearer the camera); wlm: MediaPipe world landmarks in m, hand-centred',
-        hand: "hand = the person's own hand (MediaPipe's label swapped, because it assumes a mirrored picture); hand_mp = MediaPipe's raw label",
+        hand: "hand = MediaPipe's label, which is the person's own hand for the raw camera picture (checked by palm geometry); hand_mp = the same raw label. Sessions saved before 11/15 05:30 have hand swapped: use hand_mp",
         t_cap: 'requestVideoFrameCallback metadata.captureTime (cap_src c) or expectedDisplayTime (e) or performance.now() (r)',
         derived: `palm = mean of landmarks 0,5,9,13,17; scale = mean side of the 0-5-17 triangle in image heights; v_right/v_up/v_screen = centred-difference speeds in hand sizes per second in the person's frame (depth from d ln(scale)/dt with an assumed ${HFOV_DEG} deg horizontal FOV); auto = still / left / right / up / down / push / pull (blank = slow move)`,
         frames: rows.length, present: present.length, present_ratio: rows.length ? rd(present.length / rows.length, 3) : null,
