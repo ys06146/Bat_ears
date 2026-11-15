@@ -37,6 +37,10 @@
     if (!info) return;
     const mark = (v) => (v === false ? '꺼짐 ✅' : v === true ? '켜짐 ⚠️' : '?');
     $('settings').textContent = `마이크 ${info.micRate || '?'}Hz · 처리 ${info.ctxRate}Hz · 에코 제거 ${mark(info.ec)} · 잡음 억제 ${mark(info.ns)} · 자동 음량 ${mark(info.agc)}`;
+    if (info.autoTune) {
+      $('settings').textContent += ` · 사용 톤 ${info.f0}Hz`;
+      if (info.autoTune.occupied) $('settings').textContent += ' · 대체 대역을 찾지 못함';
+    }
     if (info.micRate && info.micRate < 40000) warn(`마이크가 ${info.micRate}Hz라서 ${info.micRate / 2}Hz 위는 못 받아요. 다른 마이크를 고르거나 소리 설정에서 마이크 형식을 48000Hz로 바꿔 주세요.`);
   }
 

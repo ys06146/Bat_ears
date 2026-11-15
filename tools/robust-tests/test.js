@@ -113,6 +113,31 @@ const okDv = dv1.dir === 1 && dv1.agree && dv2.dir === 0 && dv3.dir === 1;
 console.log(`${okDv ? 'PASS' : 'FAIL'}  dualVote both=${JSON.stringify(dv1)} conflict=${JSON.stringify(dv2)} oneStrong=${JSON.stringify(dv3)}`);
 res.push({ pass: okDv });
 
+// A confirmed push can be followed immediately by a pull without an idle gap.
+function followPullTest(v, phase, { blockedAt, from = 60, to = 260 } = {}) {
+  const detector = new R.PullAfterPush();
+  detector.arm(20);
+  const hits = [];
+  for (let t = from; t <= to; t += 16) {
+    const hit = detector.update({ t, v, up: 2, down: 13, blocked: t === blockedAt }, () => phase);
+    if (hit) hits.push(hit.source);
+  }
+  return hits.join(',');
+}
+for (const [label, actual, expected] of [
+  ['strong pull after push without phase', followPullTest(-1.05, null), 'fft'],
+  ['weaker pull with valid phase travel', followPullTest(-0.53, 0.12), 'fft+phase'],
+  ['slow return ignored without phase evidence', followPullTest(-0.53, null), ''],
+  ['opposite phase travel cannot boost a weak pull', followPullTest(-0.53, -0.12), ''],
+  ['short reversal ignored', followPullTest(-1.05, 0.12, { to: 124 }), ''],
+  ['wave or interference cancels pending pull', followPullTest(-1.05, 0.12, { blockedAt: 108 }), ''],
+  ['follow-up expires before the next separate gesture', followPullTest(-1.05, 0.12, { from: 700, to: 920 }), ''],
+]) {
+  const pass = actual === expected;
+  console.log(`${pass ? 'PASS' : 'FAIL'}  ${label}`);
+  res.push({ pass });
+}
+
 // ---- auto volume (fake SNR curve: 20*log10(vol) + 50)
 (async () => {
   let vol = 1;
@@ -125,4 +150,5 @@ res.push({ pass: okDv });
   console.log(`${okAgc ? 'PASS' : 'FAIL'}  agcSuspect ramp=true / steady=false`);
   res.push({ pass: okAgc });
   console.log(`\n${res.filter((r) => r.pass).length}/${res.length} passed`);
+  if (res.some((r) => !r.pass)) process.exitCode = 1;
 })();
