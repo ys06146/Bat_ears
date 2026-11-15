@@ -6,7 +6,7 @@ Your laptop hears where your hand is, in 3D, with no camera. Its two speakers pl
 - 🦇 main demo, the sound-only hologram: https://ys06146.github.io/nhng/web/hologram.html
 - 🎮 Force Push and the gesture pages: https://ys06146.github.io/nhng/web/
 
-**Honest numbers:** on sittings the model never saw (8 webcam-taught sittings, leave-one-sitting-out, laptop speakers only, hand within about 45 cm of the webcam), the RMS error of the hand's 250 ms movement is left-right 3.8 / toward-away 4.3 / up-down 2.5 cm, against movements of 5.5 / 5.8 / 3.0 cm (correlation 0.73 / 0.70 / 0.57). Height is the weak axis. One person, one laptop so far.
+**Honest numbers:** on sittings the model never saw (13 webcam-taught sittings: 8 guided teach sessions and 5 live comparison sessions; leave-one-sitting-out, laptop speakers only, hand within about 45 cm of the webcam), the RMS error of the hand's 250 ms movement is left-right 3.4 / toward-away 4.2 / up-down 2.8 cm, against movements of 5.3 / 5.8 / 3.6 cm (correlation 0.78 / 0.70 / 0.60). The default engine is a small gated neural map; the linear map it replaced scored 0.75 / 0.70 / 0.57 on the same sittings (`?model=learned` shows it). Height is the weak axis. One person, one laptop so far.
 
 ## Run
 

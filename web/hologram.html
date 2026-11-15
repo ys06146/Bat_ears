@@ -586,6 +586,13 @@ function filmCaption(s) {
   el.textContent = `${scope} · 250 ms movement error: left-right ±${f1(r[0])} · toward-away ±${f1(r[2])} · height ±${f1(r[1])}cm (height is weak)`;
 }
 // height at its true size: the engine runs the 'half' size, so y gets matched k / half k more (1.77 / 1.33 on the 8-sitting calib)
+// which sittings the gated net's numbers come from (bravo: a different set than the linear map's 8 teach sittings)
+function gatedSet() {
+  const B = window.Bat3D || {}, c = calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)), g = c && c.gated, L = g && Array.isArray(g.sittings) ? g.sittings : null;
+  if (!L) return '';
+  const cmp = L.filter((x) => /c$/.test(String(x))).length;
+  return `, held out over ${L.length} sittings: ${L.length - cmp} teach + ${cmp} compare`;
+}
 let curModel = '';   // info().model of the engine shown on the card ('gated', 'learned', 'physics')
 function ampTable() {
   const B = window.Bat3D || {}, cn = $('calibSel').value;
@@ -617,7 +624,7 @@ function renderAcc(s) {
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
   $('accNums').innerHTML = `Accuracy (${scope}, RMS error of the 250 ms movement):<br><b>left-right ±${f1(r[0])}cm</b> · <b>toward-away ±${f1(r[2])}cm</b> · height ±${f1(r[1])}cm<br>`
     + (sz ? `Drawn size, as a share of the real movement: left-right ${Math.round(100 * sz[0])}% · toward-away ${Math.round(100 * sz[2])}% · height ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.model ? ' · model: ' + (s.model === 'gated' ? 'gated (neural)' : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
+    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.model ? ' · model: ' + (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
