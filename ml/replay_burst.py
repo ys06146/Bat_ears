@@ -46,30 +46,43 @@ def impulse_vetoes(fr, window_ms=4000, rise_db=6.0, k=3.0, hold_ms=250, snr_max=
 
 def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, wave_flips=3, lock_ms=150,
                  onset_db=0.0, onset_ms=150, peak_min=0.0, reject_capped=True, wave_vmin=None,
-                 asym_db=None, cap_lock=True, veto_snr=50.0):
+                 asym_db=None, cap_lock=True, veto_snr=50.0, slow_guard=(15.0, 0.3, 0.4)):
     """Return [(t, kind)] fired by the burst rule.
     Optional robust.js-style filters: onset_db (energy must have risen this much within onset_ms before the
     burst: slow body sway fails), peak_min (minimum peak energy before firing), reject_capped (a push/pull
-    decided only because the burst hit max_ms is dropped: long = body motion)."""
+    decided only because the burst hit max_ms is dropped: long = body motion).
+    slow_guard = (peak dB, prior activity, energy-weighted |v|), as in dsp.js config.burst.slowGuard (bravo): a
+    push/pull decided only at the end of a weak burst (peak < peak dB) needs a quiet second before it (share of
+    active frames < prior activity) and the bulk of the echo moving (energy-weighted |v| >= the third value).
+    None turns it off."""
     out, ev, lock_until, hist = [], None, -1e9, []
+    act = []  # (t, active) over the last second, every frame (vetoed ones too), for slow_guard
     vetoed = impulse_vetoes(fr, snr_max=veto_snr)
     for x, vet in zip(fr, vetoed):
         t, a = x['t'], max(x['up'], x['dn'])
         active = a > a_on
         hist = [(ht, ha) for (ht, ha) in hist if ht >= t - onset_ms] + [(t, a)]
+        act.append((t, active))
+        while act and act[0][0] < t - 1000:
+            act.pop(0)
         if vet:
             if ev is not None:
                 ev, lock_until = None, t + lock_ms
             continue
         if ev is None:
             if active and t >= lock_until and a - min(h for _, h in hist) >= onset_db:
+                pre = act[:-1]
                 ev = {'start': t, 'last': t, 'vmax': x['v'], 'vmin': x['v'], 'fired': False, 'waved': False, 'flips': 0,
-                      'sign': 0, 'peak': a, 'pu': x['up'], 'pd': x['dn']}
+                      'sign': 0, 'peak': a, 'pu': x['up'], 'pd': x['dn'],
+                      'pre_act': sum(1 for _, on in pre if on) / len(pre) if pre else 0.0, 'wvn': 0.0, 'wvd': 0.0}
             else:
                 continue
         if active:
             ev['last'] = t
         ev['peak'] = max(ev['peak'], a)
+        w = 10 ** (max(0.0, a - a_on) / 10) - 1
+        ev['wvn'] += w * abs(x['v'])
+        ev['wvd'] += w
         ev['pu'], ev['pd'] = max(ev['pu'], x['up']), max(ev['pd'], x['dn'])
         ev['vmax'], ev['vmin'] = max(ev['vmax'], x['v']), min(ev['vmin'], x['v'])
         wv = v_min if wave_vmin is None else wave_vmin  # speed that counts toward a wave's direction flips
@@ -91,7 +104,9 @@ def burst_detect(fr, a_on=12.0, v_fire=1.3, v_min=0.9, gap_ms=120, max_ms=900, w
         capped = t - ev['start'] > cap
         ended = (t - ev['last'] > gap_ms) or capped
         if ended:
-            if not ev['fired'] and strong and not (reject_capped and capped):
+            weak_ok = (slow_guard is None or ev['peak'] >= slow_guard[0]
+                       or (ev['pre_act'] < slow_guard[1] and ev['wvd'] > 0 and ev['wvn'] / ev['wvd'] >= slow_guard[2]))
+            if not ev['fired'] and strong and not (reject_capped and capped) and weak_ok:
                 if max(ev['vmax'], -ev['vmin']) >= v_min:
                     out.append((t, 'push' if ev['vmax'] >= -ev['vmin'] else 'pull'))
                 elif asym_db is not None and abs(ev['pu'] - ev['pd']) >= asym_db:

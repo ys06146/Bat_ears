@@ -44,7 +44,16 @@
     // vetoSnrDb: robust.js's impulse veto only counts while the far band is within this many dB of the tone. In a
     //   very quiet room the far band sits 60-80 dB under the tone and a fast hand's own spill "lifts" it 6 dB, which
     //   vetoed real gestures (a 35 cm session: 0/20 -> 17/20 without it; all sessions 52% -> 73%, ml/replay_burst.py)
-    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150, rejectCapped: true, vetoSnrDb: 50 },
+    // slowGuard (bravo): a push/pull decided only at the end of a WEAK burst (peak < peak dB) fires only if the echo was
+    //   quiet in the second before (activity < preAct; typing keeps it busy) and the bulk of the echo moved (energy-weighted
+    //   |v| >= wv). Recordings: false triggers 2.0 -> 1.2 per minute, hits and wrong unchanged (ml/replay_burst.py)
+    burst: { aOn: 12, vFire: 1.3, vMin: 0.9, gapMs: 120, maxMs: 900, waveFlips: 3, lockMs: 150, rejectCapped: true, vetoSnrDb: 50,
+      slowGuard: { peak: 15, preAct: 0.3, wv: 0.4 } },
+    // wave: bravo's BatWave.WaveDetector (wave.js) when loaded: 4 alternating fast lobes (|v| >= 0.8, peaks <= 300 ms
+    //   apart) within 1.2 s. It replaces the burst rule's 3-flips wave; push/pull while waving are its own strokes and are
+    //   dropped. Recordings: 3/3 wave episodes (was 2/3), 0 false waves on 135 push/pulls, 44 swipes, 2.5 quiet min.
+    //   null = BatWave.DEFAULTS
+    wave: null,
     threshold: 6,        // dB above baseline that counts as motion (floor; see autoK)
     autoK: 4,            // the threshold also rises to autoK x the measured idle wobble (noisy rooms)
     waveFlips: 4,        // direction flips within waveWindowMs that count as a wave (repeated pushes are slower)
@@ -259,6 +268,8 @@
       st.vetoSeen = null;
       st.sburst = null;
       st.sburstLock = 0;
+      st.wave = null;
+      st.act = null;
       st.wasCalibrating = true;
       emit('state', snapshot());
     }
@@ -518,9 +529,12 @@ registerProcessor('bat-tap', BatTap);`;
               if (!(m.snr >= config.burst.vetoSnrDb)) st.burstVetoUntil = st.robust.vetoUntil;
             }
             const vetoed = now < st.burstVetoUntil;
+            trackAct(st, now, Math.max(dUp, dDown));
             if (vetoed && st.burst) { st.burst = null; st.burstLock = now + config.burst.lockMs; }
+            const waving = waveStep(now, Math.max(dUp, dDown), v, vetoed || !(m.snr >= config.minSnr), peak);
             const b = !vetoed && m.snr >= config.minSnr ? burstStep(now, dUp, dDown, v) : null;
-            if (b) b.kinds.forEach((k) => fire(k, { speed: b.speed, strength: Math.max(dUp, dDown), simulated: false }));
+            if (b && !waving) b.kinds.filter((k) => !(st.wave && k === 'wave'))
+              .forEach((k) => fire(k, { speed: b.speed, strength: Math.max(dUp, dDown), simulated: false }));
           } else if (g) {
             fire(g.kind, { speed: peak, strength: g.strength != null ? g.strength : Math.max(dUp, dDown), simulated: false });
           }
@@ -623,9 +637,10 @@ registerProcessor('bat-tap', BatTap);`;
     let ev = st.burst;
     if (!ev) {
       if (!active || now < st.burstLock) return null;
-      ev = st.burst = { start: now, last: now, vmax: v, vmin: v, fired: false, waved: false, flips: 0, sign: 0 };
+      ev = st.burst = { start: now, last: now, vmax: v, vmin: v, fired: false, waved: false, flips: 0, sign: 0, ...guardStart(st) };
     }
     if (active) ev.last = now;
+    guardFrame(ev, Math.max(up, dn), v);
     ev.vmax = Math.max(ev.vmax, v);
     ev.vmin = Math.min(ev.vmin, v);
     const s = v > B.vMin ? 1 : v < -B.vMin ? -1 : 0;
@@ -638,13 +653,42 @@ registerProcessor('bat-tap', BatTap);`;
     const maxMs = ev.flips >= 2 ? 3000 : B.maxMs; // a wave keeps going; don't chop it into extra pushes/pulls
     const capped = now - ev.start > maxMs;
     if (now - ev.last > B.gapMs || capped) {
-      if (!ev.fired && !(B.rejectCapped && capped) && Math.max(ev.vmax, -ev.vmin) >= B.vMin) {
+      if (!ev.fired && !(B.rejectCapped && capped) && Math.max(ev.vmax, -ev.vmin) >= B.vMin && guardOk(ev)) {
         kinds.push(ev.vmax >= -ev.vmin ? 'push' : 'pull');
       }
       st.burst = null;
       st.burstLock = now + B.lockMs;
     }
     return kinds.length ? { kinds, speed: Math.max(ev.vmax, -ev.vmin) } : null;
+  }
+
+  // ---- bravo's slow-burst guard (see config.burst.slowGuard); same logic in ml/replay_burst.py
+  // echo activity (a > aOn) over the last second, recorded every frame (vetoed ones too)
+  function trackAct(o, now, a) {
+    const act = o.act || (o.act = []);
+    act.push([now, a > config.burst.aOn]);
+    while (act.length && act[0][0] < now - 1000) act.shift();
+  }
+  function guardStart(o) {
+    const pre = o.act ? o.act.slice(0, -1) : [];
+    return { peak: -Infinity, preAct: pre.length ? pre.filter((p) => p[1]).length / pre.length : 0, wvN: 0, wvD: 0 };
+  }
+  function guardFrame(ev, a, v) {
+    ev.peak = Math.max(ev.peak, a);
+    const w = Math.pow(10, Math.max(0, a - config.burst.aOn) / 10) - 1;
+    ev.wvN += w * Math.abs(v); ev.wvD += w;
+  }
+  function guardOk(ev) {
+    const g = config.burst.slowGuard;
+    return !g || ev.peak >= g.peak || (ev.preAct < g.preAct && ev.wvD > 0 && ev.wvN / ev.wvD >= g.wv);
+  }
+  // bravo's wave detector (wave.js), fed every frame; returns true while a wave is going on
+  function waveStep(now, a, v, vetoed, speed) {
+    if (!window.BatWave) return false;
+    if (!st.wave) st.wave = new window.BatWave.WaveDetector(config.wave || {});
+    const we = st.wave.push({ t: now, a, v, vetoed });
+    if (we) fire('wave', { speed, strength: a, simulated: false, t0: we.t0 }); // t0 = its first stroke
+    return st.wave.waving(now);
   }
 
   // Peak |v| over the last 150 ms (time-based, so 60 / 120 / 144 Hz screens behave the same).
@@ -691,9 +735,13 @@ registerProcessor('bat-tap', BatTap);`;
     }
     const ready = st.tone && !calibrating && st.sch.L.base && st.sch.R.base;
     if (ready) detectStereo(res, now); // energy rule (fires only in 'energy' mode) + baseline drift
-    if (ready && config.stereoDetector === 'velocity' && res.L.m.snr >= config.minSnr && res.R.m.snr >= config.minSnr) {
-      const b = stereoBurst(now, res.L, res.R);
-      if (b) fire(b.kind, { speed: b.speed, strength: Math.max(res.L.dUp, res.L.dDown, res.R.dUp, res.R.dDown), simulated: false });
+    if (ready && config.stereoDetector === 'velocity') {
+      const a4 = Math.max(res.L.dUp, res.L.dDown, res.R.dUp, res.R.dDown), ok = res.L.m.snr >= config.minSnr && res.R.m.snr >= config.minSnr;
+      trackAct(st.sch, now, a4);
+      const dep = (res.L.v + res.R.v) / 2;
+      const waving = waveStep(now, a4, dep, !ok, Math.abs(dep));
+      const b = ok ? stereoBurst(now, res.L, res.R) : null;
+      if (b && !(waving && (b.kind === 'push' || b.kind === 'pull'))) fire(b.kind, { speed: b.speed, strength: a4, simulated: false });
     }
     if (st.wasCalibrating && !calibrating) { st.wasCalibrating = false; emit('state', snapshot(now)); }
     const L = res.L, R = res.R, thL = chanThresholds(st.sch.L);
@@ -731,9 +779,10 @@ registerProcessor('bat-tap', BatTap);`;
     let ev = st.sburst;
     if (!ev) {
       if (!active || now < st.sburstLock) return null;
-      ev = st.sburst = { start: now, last: now, latMax: lat, latMin: lat, depMax: dep, depMin: dep, fired: false, sb: SW ? new SW.SwipeBurst() : null };
+      ev = st.sburst = { start: now, last: now, latMax: lat, latMin: lat, depMax: dep, depMin: dep, fired: false, sb: SW ? new SW.SwipeBurst() : null, ...guardStart(st.sch) };
     }
     if (active) ev.last = now;
+    guardFrame(ev, Math.max(L.dUp, L.dDown, R.dUp, R.dDown), dep);
     ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
     ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
     if (ev.sb) ev.sb.push({ t: now, vL: L.v, vR: R.v, eL: SW.excessDb(L.dUp, L.dDown), eR: SW.excessDb(R.dUp, R.dDown) });
@@ -752,7 +801,7 @@ registerProcessor('bat-tap', BatTap);`;
         }
         if (!kind) {
           const depPk = ev.depMax >= -ev.depMin ? ev.depMax : ev.depMin;
-          if (Math.abs(depPk) >= B.vMin) kind = depPk > 0 ? 'push' : 'pull';
+          if (Math.abs(depPk) >= B.vMin && guardOk(ev)) kind = depPk > 0 ? 'push' : 'pull';
         }
       }
       st.sburst = null;
