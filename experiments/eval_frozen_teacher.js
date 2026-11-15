@@ -3,7 +3,7 @@
 const fs=require('fs'),path=require('path'),ROOT=process.env.BAT_EVAL_REPO||path.resolve(__dirname,'..'),P=require(ROOT+'/tools/bravo/phase.js'),V=require(ROOT+'/tools/bravo/vision3d.js'),B=require(ROOT+'/web/bat3d.js');
 const base=process.argv[2],J=JSON.parse(fs.readFileSync(base+'.json')),cal=B.DEFAULT_CALIB.galaxy;
 const defaultModel=(B.create().info().model||'learned');
-if(defaultModel==='gated'&&process.env.BAT_EVAL_LINEAR_ONLY!=='1') throw new Error('This diagnostic evaluates only the fixed linear map, not the deployed gated model. Set BAT_EVAL_LINEAR_ONLY=1 only for an explicitly labeled linear-only diagnostic.');
+if(defaultModel!=='learned'&&process.env.BAT_EVAL_LINEAR_ONLY!=='1') throw new Error('This diagnostic evaluates only the fixed linear map, not the deployed non-linear/sequence model. Set BAT_EVAL_LINEAR_ONLY=1 only for an explicitly labeled linear-only diagnostic.');
 const historical=/default \([57] sittings/.test(cal.session);
 if (!historical && (!process.env.BAT_EVAL_GATE || !process.env.BAT_EVAL_TAU_S)) throw new Error('Explicit BAT_EVAL_GATE and BAT_EVAL_TAU_S required: match the source engine tracker, not historical defaults.');
 const tracker={gate:Number(process.env.BAT_EVAL_GATE ?? 1.5),tauS:Number(process.env.BAT_EVAL_TAU_S ?? 0.25)};
