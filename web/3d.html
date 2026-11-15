@@ -80,7 +80,7 @@
     <div class="panel">
       <h2>원 판정 (원이 끝난 뒤)</h2>
       <div id="circle">–</div>
-      <div class="note" id="circleInfo">원을 1바퀴 반 그리세요</div>
+      <div class="note" id="circleInfo">원을 1바퀴 반 그리세요 (지름 12~15cm, 웹캠에서 25~45cm)</div>
     </div>
     <div class="panel">
       <h2>경로 품질 (소리원 → 손 → 마이크)</h2>
@@ -350,7 +350,9 @@ async function startAudio(mode, file) {
     const merger = ctx.createChannelMerger(2); gainNode = ctx.createGain(); gainNode.gain.value = Number($('vol').value);
     [18000, 19500].forEach((f, i) => { const o = ctx.createOscillator(); o.frequency.value = f; const g = ctx.createGain(); g.gain.value = 0.5; o.connect(g).connect(merger, 0, i); o.start(); oscs.push(o); });
     merger.connect(gainNode).connect(ctx.destination);
-    $('status').textContent = '듣는 중 (마이크) · 손을 키보드 가운데 위 10~15cm에' + (cfg.phone ? ` · 폰 ${cfg.freqs[2]}Hz 기다리는 중` : '');
+    // the built-in calibration was learned with the hand 25-45 cm from the webcam (in front of the laptop's front edge,
+    // 18-25 cm above the desk); the laptop-only circle tokens (circle WAVs) were drawn lower, over the keyboard
+    $('status').textContent = (solver.cal ? '듣는 중 · 손은 노트북 앞 모서리 위, 책상에서 18~25cm, 웹캠에서 25~45cm(보정 범위)' : '듣는 중 · 손은 키보드 가운데~앞쪽 위 10~25cm') + (cfg.phone ? ` · 폰 ${cfg.freqs.slice(2).join('/')}Hz` : '');
   } else {
     const buf = await ctx.decodeAudioData(await file.arrayBuffer());
     src = ctx.createBufferSource(); src.buffer = buf; src.connect(node); src.start();
