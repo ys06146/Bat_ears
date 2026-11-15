@@ -14,7 +14,7 @@
   else root.AirKey = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 4;   // 2: drift removed; 3: height trusted least; 4: height gain of the running model, as the hologram (older keys must be set again)
+  const VERSION = 5;   // 3: height trusted least; 4: the running model's height gain; 5: the hologram's own position chain, spring included (older keys must be set again)
   const N = 48, M = 32;
   // shape: RMS point distance between unit-size paths; size / duration: |ln ratio|; rhythm: RMS gap between speed profiles
   const TOL = { shape: 0.45, size: Math.log(1.7), duration: Math.log(1.7), rhythm: 0.55 };

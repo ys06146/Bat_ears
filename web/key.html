@@ -3,7 +3,7 @@
 <title>Bat Ears | Air Password</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115135121">
+<link rel="stylesheet" href="style.css?v=20261115135402">
 <style>
 /* Same look as the game: style.css (zinc + Badger Red) for type, buttons, cards and the header; below, only this page's parts */
 :root{--teal:#e0464c;--ok:#4ade80;--red:#f87171;--gold:#fbbf24;--dim:#71717a;--line:#27272a}
@@ -62,7 +62,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}td,th{padd
 @media(max-width:950px){.keygrid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<script src="sitenav.js?v=20261115135121"></script>
+<script src="sitenav.js?v=20261115135402"></script>
 <span id="status" class="chip" data-nav-slot>Off</span>
 <div class="keygrid">
     <section class="card drawcard">
@@ -71,7 +71,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}td,th{padd
     <li class="step" id="st-set2"><i>3</i>Confirm</li><li class="step" id="st-unlock"><i>4</i>Unlock</li>
   </ol>
       <div class="say" id="say" role="status" aria-live="polite">Press ▶ Start</div>
-      <div class="sub" id="sub">Keep your hand about 20 cm above the keyboard, in front of the screen.</div>
+      <div class="sub" id="sub">Hand 25–35 cm above the keyboard, as for the hologram.</div>
       <div class="canvas"><span class="lbl">Hand path from above (left-right · toward-away) · screen at the top</span><div class="speed" aria-hidden="true"><span id="spdTxt">Hand speed —</span><div class="sbar"><i id="spdBar"></i><em class="m1"></em><em class="m2"></em></div></div><svg id="vFront" viewBox="-1.6 -1 3.2 2" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
         <div class="legend"><b class="k">┄ Password</b><b class="a">━ Last gesture</b><b class="l">━ Your hand now</b></div>
         <div class="inset"><span class="lbl">From the front (height)</span><svg id="vTop" viewBox="-1 -1 2 2" aria-hidden="true"></svg></div></div>
@@ -104,7 +104,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}td,th{padd
     <p class="hint">Stored only in this browser. Same engine and filter as the hologram; the limits are first estimates.</p>
   </details>
 </div></div>
-<script src="bat3d.js?v=20261115135121"></script><script src="airkey.js?v=20261115135121"></script>
+<script src="bat3d.js?v=20261115135402"></script><script src="airkey.js?v=20261115135402"></script>
 <script>
 (() => {
 'use strict';
@@ -135,25 +135,25 @@ class OneEuro {
 }
 const euro = [new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1)];
 const vadd = (a, b) => a.map((v, i) => v + b[i]), vsub = (a, b) => a.map((v, i) => v - b[i]);
-const disp = { cont: null, off: [0, 0, 0], last: null, pos: null, levelDb: null, trail: [] };
+// ---- the hand position, exactly as hologram.html draws it (its onFrame display chain): engine raw -> continuity ->
+// height gain on each step -> spring back to the centre (tau 2 s; 2 s once the hand has been still for 1 s) -> One Euro
+const HOME = [0, 0.19, -0.15];   // hologram.html HOME0: where the drawn hand rests
+const TAU = 2;                   // hologram.html 'Return to center' default
+const disp = { pos: HOME.slice(), cont: null, off: [0, 0, 0], spring: [0, 0, 0], last: null, still: 0, levelDb: null, trail: [] };
+function resetDisplay() { Object.assign(disp, { pos: HOME.slice(), cont: null, off: [0, 0, 0], spring: [0, 0, 0], last: null, still: 0, trail: [] }); euro.forEach((f) => f.reset()); }
 
-// ---- capture: still -> move -> still again
-// speeds in m/s of the drawn (half-size) position. Rest jitter after the One-Euro filter is ~2 mm per 50 ms, and over a
-// 150 ms window it mostly cancels; a deliberate air stroke draws at 15-40 cm/s. First guesses: check the speed readout
-// start point: the hand slow (< STOP_SPEED) for 1 s and within 4 cm (axis-weighted; tolerates ~3 cm/s of drift). ZONE = hologram.html's taught zone around the hand spot (half-widths, m)
-const HOLD_MS = 1000, HOLD_R = 0.04, ZONE = [0.18, 0.12, 0.15];
-// hologram.html default 'draw height at its true size': the engine runs the 'half' size, height gets matched k / half k (1.77 / 1.33)
-// as hologram.html's ampTable()/yBoost(): the gated model has its own size table (1.402 / 1.184), the linear one 1.77 / 1.33
+// ---- capture: hold still 2 s (the hologram's spring has brought the hand to the centre: that is the start point),
+// draw, then hold still again. Still = the engine's own still signal, as the hologram uses; the hand's speed is a fallback
+const HOLD_MS = 2000, STILL_AFTER = 600, MAX_REC = 5000, WAIT_MOVE = 10000, SPEED_WIN = 150, GO_SPEED = 0.12, STOP_SPEED = 0.06;
+const ZONE = [0.18, 0.12, 0.15];   // hologram.html's taught zone around the hand spot (half-widths, m)
+// as hologram.html's ampTable()/yBoost() with 'Draw height at true size' on: the gated model 1.402 / 1.184, the linear one 1.77 / 1.33
 function heightGain(model) {
   const c = (((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy) || {};
   const src = model === 'gated' && c.gated && c.gated.amp ? c.gated : c, M = src.amp && src.amp.modes;
   return M && M.matched && M.half ? M.matched.k[1] / M.half.k[1] : 1;
 }
 let Y_GAIN = 1;   // set when the engine starts, from the model it runs
-const AXIS_W = K.AXIS;   // left-right and depth are noisier than height: they count less in speed and in the match
-const MAX_DRIFT = 0.02;  // m/s: drift seen while the hand was held still, removed from the stroke (hologram hides it with its spring)
-const STILL_AFTER = 600, MAX_REC = 5000, WAIT_MOVE = 10000, SPEED_WIN = 150, GO_SPEED = 0.12, STOP_SPEED = 0.06;
-const cap = { phase: 'off', purpose: null, t0: 0, pts: [], still: 0, lastMove: 0, anchor: null, holdAt: null, out: false };
+const cap = { phase: 'off', purpose: null, t0: 0, pts: [], still: 0, slow: 0, lastMove: 0, anchor: null, out: false };
 let engine = null, running = false, first = null, timer = 0, confirmFails = 0;
 
 function onFrame(f) {
@@ -162,55 +162,54 @@ function onFrame(f) {
   disp.last = t;
   let cont = vadd(f.raw, disp.off);
   if (f.reset && disp.cont) { disp.off = vsub(disp.cont, f.raw); cont = disp.cont.slice(); }
+  const stepv = disp.cont ? vsub(cont, disp.cont) : [0, 0, 0];
+  stepv[1] *= Y_GAIN;
   disp.cont = cont;
-  const p = cont.map((v, i) => euro[i].filter(i === 1 ? v * Y_GAIN : v, dt, 1));
+  disp.still = f.moving === false ? (f.still || disp.still + dt * 1000) : 0;
+  const tau = disp.still > 1000 ? Math.min(2, TAU) : TAU, k = Math.exp(-dt / tau);
+  disp.spring = disp.spring.map((s, i) => (s + stepv[i]) * k);
+  const target = HOME.map((h, i) => h + disp.spring[i]);
+  const p = target.map((v, i) => euro[i].filter(v, dt, 1));
   disp.pos = p;
   if (f.levelDb != null) disp.levelDb = 0.9 * (disp.levelDb ?? f.levelDb) + 0.1 * f.levelDb;
   disp.trail.push({ t, p }); while (disp.trail.length && disp.trail[0].t < t - 2500) disp.trail.shift();
-  // hand speed from the drawn position: net displacement over 150 ms (rest jitter mostly cancels; the engine's own
-  // 'moving' flag fires on 4 mm of path change per 100 ms, which room noise alone can hold on)
-  let k = disp.trail.length - 1; while (k > 0 && disp.trail[k].t > t - SPEED_WIN) k--;
-  const back = disp.trail[k], span = (t - back.t) / 1000;
-  disp.speed = span > 0.05 ? Math.hypot(...vsub(p, back.p).map((v, i) => v * AXIS_W[i])) / span : 0;
-  disp.engMoving = !!f.moving;
+  let j = disp.trail.length - 1; while (j > 0 && disp.trail[j].t > t - SPEED_WIN) j--;
+  const back = disp.trail[j], span = (t - back.t) / 1000;
+  disp.speed = span > 0.05 ? Math.hypot(...vsub(p, back.p)) / span : 0;
   step(t, p, disp.speed, dt * 1000);
 }
 
 function step(t, p, speed, dtMs) {
+  cap.slow = speed < STOP_SPEED ? cap.slow + dtMs : 0;
+  const stillMs = Math.max(disp.still, cap.slow);   // the engine's still time, or the hand's own (fallback)
   if (cap.phase === 'wait-still') {
-    // hold: slow AND still near where the hold began (slow drift does not count)
-    if (speed < STOP_SPEED && cap.holdAt && Math.hypot(...vsub(p, cap.holdAt).map((v, i) => v * AXIS_W[i])) < HOLD_R) cap.still += dtMs;
-    else { cap.still = 0; cap.holdAt = speed < STOP_SPEED ? p.slice() : null; cap.holdT = t; }
-    if (cap.still >= HOLD_MS) {
-      const span = Math.max(0.2, (t - cap.holdT) / 1000);
-      cap.drift = vsub(p, cap.holdAt).map((v) => Math.max(-MAX_DRIFT, Math.min(MAX_DRIFT, v / span)));
-      cap.phase = 'ready'; cap.t0 = t; cap.tA = t; cap.anchor = p.slice(); cap.out = false; cap.lo = cap.hi = null;
-      say('📍 Start point set · draw now', purposeText());
+    cap.still = stillMs;
+    if (stillMs >= HOLD_MS) {
+      cap.phase = 'ready'; cap.t0 = t; cap.anchor = HOME.slice(); cap.out = false; cap.lo = cap.hi = null;
+      say('📍 Centred · draw now', purposeText());
     }
-    else if (t - cap.t0 > 3000) sub('Your hand still looks like it is moving. Hold still, and ask people nearby to pause too. (Hand speed needs to drop below ' + STOP_SPEED * 100 + ' cm/s)');
+    else if (t - cap.t0 > 4000) sub('Your hand still looks like it is moving. Hold still, and ask people nearby to pause too.');
   } else if (cap.phase === 'ready') {
     if (speed > GO_SPEED) {
       cap.phase = 'rec'; cap.t0 = t; cap.still = 0;
-      cap.pts = disp.trail.filter((s) => s.t >= t - SPEED_WIN).map((s) => ({ t: s.t, p: undrift(s.p, s.t) })); cap.lastMove = cap.pts.length;   // keep the start of the move
+      cap.pts = disp.trail.filter((s) => s.t >= t - SPEED_WIN); cap.lastMove = cap.pts.length;   // keep the start of the move
       say('👀 Drawing…', 'When you are done, hold still or press ✓ Done drawing'); $('doneBtn').disabled = false;
     } else if (t - cap.t0 > WAIT_MOVE) end({ error: 'none' });
   } else if (cap.phase === 'rec') {
-    p = undrift(p, t);
     cap.pts.push({ t, p });
     // the hologram's zone is the size the sound map is good for: the whole drawing should fit in it (box follows the drawing)
     cap.lo = cap.lo ? cap.lo.map((v, i) => Math.min(v, p[i])) : p.slice(); cap.hi = cap.hi ? cap.hi.map((v, i) => Math.max(v, p[i])) : p.slice();
     const out = cap.hi.some((v, i) => v - cap.lo[i] > 2 * ZONE[i]);
     if (out !== cap.out) { cap.out = out; sub(out ? '⚠️ Too big to read accurately. Keep it within 36 cm across, 24 cm high and 30 cm deep' : 'When you are done, hold still or press ✓ Done drawing'); }
-    if (speed >= STOP_SPEED) { cap.still = 0; cap.lastMove = cap.pts.length; } else cap.still += dtMs;
-    if (cap.still >= STILL_AFTER || t - cap.t0 > MAX_REC) end(null);
+    if (speed >= STOP_SPEED) cap.lastMove = cap.pts.length;
+    if (stillMs >= STILL_AFTER || t - cap.t0 > MAX_REC) end(null);
   }
 }
 
-function undrift(p, t) { const d = cap.drift || [0, 0, 0], s = (t - (cap.tA || t)) / 1000; return p.map((v, i) => v - d[i] * s); }
 function begin(purpose) {
-  cap.phase = 'wait-still'; cap.purpose = purpose; cap.pts = []; cap.t0 = disp.last || 0; cap.still = 0; cap.holdAt = null; cap.anchor = null; cap.out = false; cap.drift = null; cap.holdT = 0;
+  cap.phase = 'wait-still'; cap.purpose = purpose; cap.pts = []; cap.t0 = disp.last || 0; cap.still = 0; cap.slow = 0; cap.anchor = null; cap.out = false;
   stepUi(purpose);
-  say('✋ Hold your hand still for 1 second', 'About 20 cm above the keyboard, centred in front of the screen. When the ring fills, that spot is your start point');
+  say('✋ Hold your hand still for 2 seconds', '25–35 cm above the keyboard, like the hologram. When the ring fills, the hand is centred and you can draw');
   $('cancelBtn').disabled = false; $('tryBtn').disabled = true; $('resetBtn').disabled = true;
   if (purpose === 'unlock') setVault(null);
 }
@@ -361,7 +360,7 @@ function startErrMsg(e) {
 }
 // the hologram's engine choice: its default model (gated neural), or ?model= / ?engine=v15 like hologram.html
 const QS = new URLSearchParams(location.search), MODEL_OPT = QS.get('engine') === 'v15' ? { model: 'learned' } : QS.get('model') ? { model: QS.get('model') } : {};
-// ?sim=1: a fake hand for checking the screen without a microphone, drawing on the table plane (rest 1.8 s, a circle, rest; every 4th one a zigzag; after saving it keeps trying to unlock)
+// ?sim=1: a fake hand for checking the screen without a microphone, drawing on the table plane (rest 2.6 s, a circle, rest; every 4th one a zigzag; after saving it keeps trying to unlock)
 const SIM = /[?&]sim=1/.test(location.search);
 function makeSim() {
   let id = 0, cb = null;
@@ -370,7 +369,7 @@ function makeSim() {
     async start() {
       const t0 = performance.now(); let still = 0, last = 0;
       id = setInterval(() => {
-        const t = performance.now() - t0, c = Math.floor(t / 3800), u = (t % 3800 - 1800) / 1500, mv = u > 0 && u < 1;
+        const t = performance.now() - t0, c = Math.floor(t / 4600), u = (t % 4600 - 2600) / 1500, mv = u > 0 && u < 1;
         const zig = c % 4 === 3, q = !mv ? (u <= 0 ? [0, 0] : zig ? [0.14, 0] : [0, 0]) : zig ? [0.14 * u, 0.05 * Math.sin(6 * Math.PI * u)] : [0.07 * Math.sin(2 * Math.PI * u), 0.07 - 0.07 * Math.cos(2 * Math.PI * u)];
         still = mv ? 0 : still + (t - last); last = t;
         cb && cb({ t, raw: [q[0] + (Math.random() - 0.5) * 0.003, 0.12 + 0.02 * Math.sin(Math.PI * Math.max(0, Math.min(1, u))), q[1]], moving: mv, still, levelDb: 0 });
@@ -383,7 +382,7 @@ async function start() {
   if (running) return;
   if (!window.Bat3D) { say('⚠️ Could not load the sound engine (bat3d.js)', ''); return; }
   $('startBtn').disabled = true;
-  euro.forEach((f) => f.reset()); Object.assign(disp, { cont: null, off: [0, 0, 0], last: null, trail: [] });
+  resetDisplay();
   engine = SIM ? makeSim() : window.Bat3D.create({ geom: 'galaxy', phones: [], calib: null, ...MODEL_OPT, autoReset: false, amp: 'half' });
   engine.on('frame', onFrame);
   engine.on('status', (t) => { if (t) $('status').textContent = t; });

@@ -81,7 +81,7 @@
 </head>
 <body>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<script src="sitenav.js?v=20261115135121" data-overlay></script>
+<script src="sitenav.js?v=20261115135402" data-overlay></script>
 <div id="stage"></div>
 <div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 Sound only · 📷 Webcam off<small id="filmAcc"></small></div>
 <div class="hud" id="intro">
@@ -185,12 +185,12 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115135121" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115135402" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115135121"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115135402"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115135121"></script>
+<script src="vision3d.browser.js?v=20261115135402"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
