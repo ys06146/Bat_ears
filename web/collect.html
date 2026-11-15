@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bat Ears | Collect data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="style.css?v=20261115115915">
+</head>
+<body class="page-collect">
+<script src="sitenav.js?v=20261115115915"></script>
+<header>
+  <h1>🎯 Collect data <span>Push · pull · wave recordings with a 3·2·1 guide · no camera</span></h1>
+  <div id="status" class="chip">Idle</div>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="tabs only-game">
+      <button id="tabGame" class="tab sel">🎮 Game</button>
+      <a href="experiment-live.html" class="tab" style="text-decoration:none;display:inline-flex;align-items:center">🧪 Free experiment mode</a>
+      <button id="tabSonar" class="tab">🛰️ Sonar view</button>
+      <button id="tabSpeed" class="tab">🎯 Speed gun</button>
+      <button id="tabLR" class="tab">↔ Left/right test</button>
+      <button id="presentBtn" class="tab">⛶ Presentation mode</button>
+      <button id="camBtn" class="tab" hidden>📷 Compare with real hand</button>
+    </div>
+    <canvas id="game" class="only-game"></canvas>
+    <canvas id="sonar" hidden></canvas>
+    <div id="speed" class="speedgun" hidden></div>
+    <div id="lr" class="lrtest" hidden></div>
+    <form id="nameBox" class="namebox" hidden>
+      <b id="nameTitle">🏆 You made the leaderboard!</b>
+      <div class="row center">
+        <input id="nameInput" maxlength="12" placeholder="Name (up to 12 characters)" autocomplete="off">
+        <button type="submit">Save</button>
+        <button type="button" id="nameSkip" class="secondary">Skip</button>
+      </div>
+    </form>
+    <div id="camBox" hidden><video id="cam" autoplay muted playsinline></video><span>📷 Real hand (for comparison)</span></div>
+    <div id="gesture">–</div>
+    <div class="collect-start only-collect">
+      <div class="panel">
+        <h2>🎯 Collect gesture data</h2>
+        <p class="lead">A guide shows each gesture with a 3·2·1 countdown. Do it on the cue and each one is scored ✅/❌ and saved automatically.</p>
+        <ol class="steps">
+          <li><b>📷 Cover the webcam.</b> It is not used.</li>
+          <li><b>🔊 Built-in speakers and mic</b>, volume 50% or more. Unplug headphones and Bluetooth.</li>
+          <li><b>On the right</b>, set your name, distance and reps, and pick the save folder once.</li>
+          <li><b>Press 🎯 Start (S)</b>, keep your hand away while it measures the background, then follow the cues. U undoes the last one, Esc stops.</li>
+        </ol>
+        <div class="row center"><button type="button" onclick="document.getElementById('collect').click()">🎯 Start collecting</button></div>
+        <p class="hint center">Each run adds a row to the experiment log on the right.</p>
+      </div>
+    </div>
+
+    <div id="intro" class="overlay only-game">
+      <div class="panel" id="introSteps">
+        <h2>🦇 Push meteors away with your hand</h2>
+        <p class="lead">No camera: it senses your hand from the echo of an inaudible 20 kHz tone played by the laptop speakers.</p>
+        <ol class="steps">
+          <li><b>📷 Please cover the webcam.</b>  A sticky note or a finger will do. The camera isn’t used at all.
+            <label class="check"><input id="camCovered" type="checkbox"> Covered</label></li>
+          <li><b>🔊 Built-in speakers and mic</b> only, volume 50% or more. Unplug headphones and Bluetooth.</li>
+          <li><b>✋ When you press Start</b>  allow the microphone, then keep your hand away from the screen for 1.5 s while it measures the background sound.</li>
+          <li><b>🎮 10–20 cm in front of the screen</b>, push your palm to blast a meteor 💥, pull to grab a star ⭐, wave for a shockwave 〰 (8 s recharge).</li>
+        </ol>
+        <div class="row center">
+          <button id="introStart">▶ Turn on the mic and start</button>
+          <button id="introKeys" class="secondary">⌨ Try with the keyboard only</button>
+        </div>
+        <p class="hint center">Keyboard: ↑ push · ↓ pull · W wave · M mute</p>
+      </div>
+      <div class="panel" id="introCal" hidden>
+        <h2>✋ Please move your hand away</h2>
+        <p class="lead">Quietly measuring the baseline…</p>
+        <div class="progress"><div id="calBar"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card only-collect">
+      <div class="row"><b>🎯 Data collection</b><span class="hint">Gesture on the 3·2·1 cue → ✅/❌ right away → saved automatically</span></div>
+      <div class="row">
+        <label>Name <input id="who" type="text" maxlength="16" size="8" placeholder="seojin"></label>
+        <label>Distance <input id="dist" type="number" min="1" max="150" step="1" value="20" style="width:64px">cm</label>
+        <label>Noise <select id="noise"><option value="auto" selected>Auto-measure</option><option value="quiet">Quiet</option><option value="noisy">Noisy</option></select></label>
+      </div>
+      <div class="row">
+        <label>Reps <select id="perGesture"><option>5</option><option selected>10</option><option>20</option></select> each</label>
+        <label><input id="incWave" type="checkbox"> Wave</label>
+        <label><input id="incSwipe" type="checkbox"> Left/right swipe</label>
+        <label><input id="incTyping" type="checkbox" checked> Typing 15 s (false-trigger test)</label>
+      </div>
+      <div class="row">
+        <button id="collect">🎯 Start (S)</button>
+        <button id="collectLR" class="secondary" title="6 swipes each way + 5 pushes and 5 pulls: checks and learns whether left/right works right here (stereo, redo each time you sit down)">↔ Left/right only (check)</button>
+        <button id="pickDir" class="secondary">📁 Save folder</button>
+      </div>
+      <div id="saveStatus" class="hint">Pick the save folder (Drive nhng/ml/data) once and it’s automatic after that. If you don’t, files download when you finish.</div>
+      <p class="hint">Name is optional (letters and digits; blank means anon). Noise, device, mic, screen refresh rate and detector settings are recorded automatically. During a run, U = undo the last one, Esc = stop.</p>
+    </div>
+
+    <div class="card only-collect" id="explog"></div>
+
+    <div class="card">
+      <div class="row">
+        <button id="start">▶ Start</button>
+        <button id="stop" class="secondary" disabled>■ Stop</button>
+        <button id="check" class="secondary" disabled>Band check</button>
+      </div>
+      <label class="wide">Frequency <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"> <b id="freqLabel">20.0 kHz</b></label>
+      <label class="wide">Volume <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"></label>
+      <div class="row">
+        <label>Sensitivity <input id="th" type="number" value="6" min="2" max="20" step="0.5"> dB</label>
+        <label><input id="raw" type="checkbox" checked> Turn off the 3 mic processing filters</label>
+      </div>
+      <label><input id="stereo" type="checkbox"> Left/right swipe (stereo · experimental): 18 kHz left, 19.5 kHz right</label>
+      <div id="settings" class="hint"></div>
+      <div id="warn"></div>
+    </div>
+
+    <div class="card stats">
+      <div class="stat">Push<b id="nPush">0</b></div>
+      <div class="stat">Pull<b id="nPull">0</b></div>
+      <div class="stat">SNR<b id="snr">–</b></div>
+      <div class="stat">Hand speed<b id="vel">–</b></div>
+    </div>
+
+    <div class="card">
+      <div class="bars">
+        <span>Higher (push)</span><div class="bar"><div id="barUp" class="up"></div></div><span id="vUp">–</span>
+        <span>Lower (pull)</span><div class="bar"><div id="barDown" class="down"></div></div><span id="vDown">–</span>
+      </div>
+      <canvas id="zoom" class="spec"></canvas>
+      <canvas id="wide" class="spec"></canvas>
+      <p class="hint">Top: ±600 Hz around the tone (blue = push, orange = pull). Bottom: everything above 10 kHz.</p>
+    </div>
+
+    <div class="card only-game">
+      <div class="row between">
+        <b>🏆 Leaderboard</b>
+        <span class="row">
+          <button id="mute" class="secondary small">🔊 Sound effects</button>
+          <button id="resetScores" class="secondary small">Clear</button>
+        </span>
+      </div>
+      <ol id="scores" class="scores"></ol>
+    </div>
+
+    <details class="card only-collect" id="recBox">
+      <summary>Data recording (for classification and experiments)</summary>
+      <div class="row" id="labels"></div>
+      <div class="row">
+        <button id="rec" class="secondary">● Start recording</button>
+        <button id="save" class="secondary">Save CSV</button>
+        <button id="clear" class="secondary">Empty</button>
+        <span id="recCount" class="hint">0 rows</span>
+      </div>
+      <p class="hint">Number keys 1–5 change the label (1 still, 2 push, 3 pull, 4 wave, 5 other). Pick the label first, then do that gesture.</p>
+    </details>
+
+    <details class="card only-game">
+      <summary>How to use</summary>
+      <ol class="hint">
+        <li>Use the laptop’s built-in speakers and mic (no headphones or Bluetooth), volume 50% or more.</li>
+        <li>▶ Start → allow the mic → keep your hand away for 1.5 s (baseline).</li>
+        <li>10–20 cm in front of the screen, push your palm toward the screen to send a meteor flying. Pull to grab a star. Hit several quickly in a row for a combo multiplier.</li>
+        <li>Wave your hand quickly back and forth for a shockwave (destroys every meteor on screen, 8 s recharge).</li>
+        <li>'Left/right swipe' switched on, sweep your hand left or right to slice meteors on that side (the laptop needs speakers on both sides).</li>
+        <li>To just watch the game without a mic, use the keyboard: ↑ (push), ↓ (pull), ← → (swipe), W (wave), M (mute sound effects). After touching a slider, click an empty spot once.</li>
+      </ol>
+    </details>
+  </aside>
+</main>
+
+<script src="robust.js?v=20261115115915"></script>
+<script src="swipe.js?v=20261115115915"></script>
+<script src="wave.js?v=20261115115915"></script>
+<script src="iq.js?v=20261115115915"></script>
+<script src="dsp.js?v=20261115115915"></script>
+<script src="recorder.js?v=20261115115915"></script>
+<script src="game.js?v=20261115115915"></script>
+<script src="coach.js?v=20261115115915"></script>
+<script src="collect.js?v=20261115115915"></script>
+<script src="sonar.js?v=20261115115915"></script>
+<script src="speed.js?v=20261115115915"></script>
+<script src="lr.js?v=20261115115915"></script>
+<script src="explog.js?v=20261115115915"></script>
+<script src="app.js?v=20261115115915"></script>
+</body>
+</html>

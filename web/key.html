@@ -16,6 +16,7 @@ nav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;bo
 .eyebrow{font-size:11px;letter-spacing:.2em;color:var(--teal);font-weight:700}
 .hero h1{font-size:clamp(26px,3.4vw,40px);letter-spacing:-.04em;margin:8px 0 6px;line-height:1.15}
 .hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:14px}@media(max-width:900px){.side{align-items:flex-start;margin-top:16px}}
 .steps{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none}
 .step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);white-space:nowrap}
 .step i{width:26px;height:26px;border-radius:50%;border:1.5px solid #2c3748;display:grid;place-content:center;font-style:normal;font-size:12px;font-weight:700}
@@ -80,17 +81,16 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}td,t
 @media(max-width:560px){.step{font-size:12px}.step+.step:before{width:14px;margin:0 6px}.bar button{flex:1 1 auto}.stage,.vault{padding:18px}.canvas{min-height:240px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<header><span class="brand">🦇 Bat Ears</span>
-<nav aria-label="Pages"><a href="index.html">Game</a><a href="hologram.html">Hologram</a><a class="sel" href="key.html" aria-current="page">Air password</a><a href="key-lab.html">Sequence key (lab)</a><a href="tone.html">Tone player</a></nav>
-<span id="status" class="chip">Off</span></header>
+<script src="sitenav.js?v=20261115115915"></script>
 <div class="wrap">
   <div class="hero">
     <div><div class="eyebrow">AIR PASSWORD · NO CAMERA</div><h1>Draw your password in the air</h1>
       <p>The laptop's own speakers and mic follow your hand in 3D. Same sound engine as the hologram.</p></div>
+    <div class="side"><span id="status" class="chip">Off</span>
     <ol class="steps" aria-label="Steps">
       <li class="step" id="st-start"><i>1</i>Start</li><li class="step" id="st-set1"><i>2</i>Set gesture</li>
       <li class="step" id="st-set2"><i>3</i>Confirm</li><li class="step" id="st-unlock"><i>4</i>Unlock</li>
-    </ol>
+    </ol></div>
   </div>
   <div class="grid">
     <section class="card stage">
@@ -129,7 +129,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}td,t
     <p class="hint" style="margin-bottom:16px">The password and the log stay in this browser. Tracking uses the hologram's engine (bat3d.js), its built-in laptop calibration and the same filter. The limits are first estimates; we will retune them from exported logs.</p>
   </details>
 </div>
-<script src="bat3d.js?v=20261115101840"></script><script src="airkey.js?v=20261115101840"></script>
+<script src="bat3d.js?v=20261115115915"></script><script src="airkey.js?v=20261115115915"></script>
 <script>
 (() => {
 'use strict';
@@ -379,6 +379,8 @@ function startErrMsg(e) {
   if (n === 'NotReadableError' || n === 'AbortError') return '🎙️ Another app is using the mic: close Zoom, Teams or other Bat Ears tabs and start again';
   return '⚠️ Could not start: ' + m;
 }
+// the hologram's engine choice: its default model (gated neural), or ?model= / ?engine=v15 like hologram.html
+const QS = new URLSearchParams(location.search), MODEL_OPT = QS.get('engine') === 'v15' ? { model: 'learned' } : QS.get('model') ? { model: QS.get('model') } : {};
 // ?sim=1: a fake hand for checking the screen without a microphone, drawing on the table plane (rest 1.8 s, a circle, rest; every 4th one a zigzag; after saving it keeps trying to unlock)
 const SIM = /[?&]sim=1/.test(location.search);
 function makeSim() {
@@ -402,7 +404,7 @@ async function start() {
   if (!window.Bat3D) { say('⚠️ Could not load the sound engine (bat3d.js)', ''); return; }
   $('startBtn').disabled = true;
   euro.forEach((f) => f.reset()); Object.assign(disp, { cont: null, off: [0, 0, 0], last: null, trail: [] });
-  engine = SIM ? makeSim() : window.Bat3D.create({ geom: 'galaxy', phones: [], calib: null, model: 'learned', autoReset: false, amp: 'half' });
+  engine = SIM ? makeSim() : window.Bat3D.create({ geom: 'galaxy', phones: [], calib: null, ...MODEL_OPT, autoReset: false, amp: 'half' });
   engine.on('frame', onFrame);
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
   try { await engine.start({ mode: 'mic', volume: 1.2 }); } catch (e) { say(startErrMsg(e), ''); engine = null; $('startBtn').disabled = false; return; }

@@ -195,7 +195,7 @@
   $('collectLR').onclick = () => startCollect(true);
   window.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
-    if ((e.key === 's' || e.key === 'S') && !BatCollect.active && !document.body.classList.contains('speed-on') && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+    if ((e.key === 's' || e.key === 'S') && !document.body.classList.contains('page-game') && !BatCollect.active && !document.body.classList.contains('speed-on') && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
       e.preventDefault();
       startCollect();
     }
