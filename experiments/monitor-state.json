@@ -1,0 +1,957 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-11-15T05:49:30Z",
+  "main_sha": "b39a4655212bff33024db9348f6669e040e6ae63",
+  "exp_sha_before_run": "fda62bf87f95ab0bd2b86ea65bddbe1cdffac864",
+  "report": "experiments/monitor-2026-11-14-2349.md",
+  "github_files": [
+    {
+      "path": ".gitignore",
+      "sha": "9fade0b7f56eb800c614f591a89648c933188006",
+      "size": 366
+    },
+    {
+      "path": ".nojekyll",
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size": 0
+    },
+    {
+      "path": "README.md",
+      "sha": "0fd8b8a413f7035f46a0596bfa6ba0e2fb4ef844",
+      "size": 4581
+    },
+    {
+      "path": "TEAM.md",
+      "sha": "5a2efc1a7d0521955a39250c1001389312449b9f",
+      "size": 6581
+    },
+    {
+      "path": "docs/demo-script.md",
+      "sha": "b5403955a1e41d56c3996e84847571c32e03908b",
+      "size": 2647
+    },
+    {
+      "path": "docs/devpost.md",
+      "sha": "a4896433e116a894724a89dc4ef46a23375a59e1",
+      "size": 11168
+    },
+    {
+      "path": "docs/judge-qa.md",
+      "sha": "dfe213009c138a3af190ca4d7a56532c01fdcfc5",
+      "size": 3859
+    },
+    {
+      "path": "docs/pitch.md",
+      "sha": "9926d972b28a5a298461035e9226496ac285e39b",
+      "size": 7044
+    },
+    {
+      "path": "docs/slides.md",
+      "sha": "8a793e2d4b4f8c9499ff328ea83fc7ee2fd8b5e0",
+      "size": 1272
+    },
+    {
+      "path": "ml/README.md",
+      "sha": "91f8d5d164c7b9a77ca5e0760175dc0ae5b5a749",
+      "size": 1796
+    },
+    {
+      "path": "ml/data/batears_20261114_153352_d20_p1.csv",
+      "sha": "0bf42f4bd8dec33e873db284305fb107abacba7e",
+      "size": 1098389
+    },
+    {
+      "path": "ml/data/batears_20261114_153615_d20_p1.csv",
+      "sha": "0f33f43ee58881bf4a150ad780d536d6ad5eff3f",
+      "size": 18125
+    },
+    {
+      "path": "ml/data/batears_20261114_160233_d20_p1.csv",
+      "sha": "b56eac8a1def7a76a97034abcade907304d3d2ad",
+      "size": 1104063
+    },
+    {
+      "path": "ml/data/batears_20261114_163007_anon_d30_quiet_61f5.csv",
+      "sha": "84382907abdcca94a75e0063142b237924af35fd",
+      "size": 608067
+    },
+    {
+      "path": "ml/data/batears_20261114_163007_anon_d30_quiet_61f5.json",
+      "sha": "bc56d7368e3c2d8daba81e846a3532ed32645192",
+      "size": 4352
+    },
+    {
+      "path": "ml/data/batears_20261114_164218_1_d35_quiet_n0c4.csv",
+      "sha": "06b94cf7fa8f1b709857bc7d9b84f257b6265733",
+      "size": 1186805
+    },
+    {
+      "path": "ml/data/batears_20261114_164218_1_d35_quiet_n0c4.json",
+      "sha": "8d17450a5fe63abf5ed03262f072d39d9fba578d",
+      "size": 4262
+    },
+    {
+      "path": "ml/data/batears_20261114_164302_anon_d30_quiet_61f5.csv",
+      "sha": "d0a11a899d11aa2a03dd77af4781b699f17d31ef",
+      "size": 114388
+    },
+    {
+      "path": "ml/data/batears_20261114_164412_anon_d30_quiet_61f5.csv",
+      "sha": "7f3814b5314f892fa3352226e512d22b854d8fbd",
+      "size": 820007
+    },
+    {
+      "path": "ml/data/batears_20261114_164412_anon_d30_quiet_61f5.json",
+      "sha": "cf06d912f7cb41872c623d89725653782b3c9cdc",
+      "size": 4318
+    },
+    {
+      "path": "ml/data/batears_20261114_164738_anon_d30_quiet_61f5.csv",
+      "sha": "fd728f5a0439bd8d7df87045b606cf397aca4703",
+      "size": 1017113
+    },
+    {
+      "path": "ml/data/batears_20261114_164738_anon_d30_quiet_61f5.json",
+      "sha": "e456e8ed3bb0fb37ab6c4c1e37411b1442a1c5cd",
+      "size": 5365
+    },
+    {
+      "path": "ml/data/batears_20261114_171130_anon_d30_quiet_lr_61f5.csv",
+      "sha": "0e944290c30a5c6403f45fe8d0a14c7dcafc89ec",
+      "size": 549561
+    },
+    {
+      "path": "ml/data/batears_20261114_171130_anon_d30_quiet_lr_61f5.json",
+      "sha": "e7b6cfda3ed29d03b861bf30df8ee631e1734ced",
+      "size": 5686
+    },
+    {
+      "path": "ml/data/batears_20261114_205859_anon_d30_quiet_61f5.csv",
+      "sha": "ef6fe3f82c4426fc6dc788c01a5e7d8fc93b5e10",
+      "size": 2568254
+    },
+    {
+      "path": "ml/data/batears_20261114_205859_anon_d30_quiet_61f5.json",
+      "sha": "d7193377b3346d09a50b0c70ac0862812e57df6f",
+      "size": 17676
+    },
+    {
+      "path": "ml/data/batears_20261114_211226_anon_d20_quiet_naiz.csv",
+      "sha": "b3c7d83e15b49eddd07f7b7caba2045c12ab3e25",
+      "size": 2422942
+    },
+    {
+      "path": "ml/data/batears_20261114_211226_anon_d20_quiet_naiz.json",
+      "sha": "2422eab23a939597590c0ea452ddcb5300b6cf7b",
+      "size": 4406
+    },
+    {
+      "path": "ml/data/batears_20261114_211820_anon_d20_quiet_naiz.csv",
+      "sha": "49300cf96d7710bf0a5800f2fd83d2294bf08c19",
+      "size": 5166112
+    },
+    {
+      "path": "ml/data/batears_20261114_211820_anon_d20_quiet_naiz.json",
+      "sha": "b91f3d08061c2a014de505d55e080d72eb6d000f",
+      "size": 17138
+    },
+    {
+      "path": "ml/data/batears_20261114_212242_anon_d20_quiet_lr_naiz.csv",
+      "sha": "20a36ccd7804771eb269e468c77e9df2a3d52f7c",
+      "size": 2016335
+    },
+    {
+      "path": "ml/data/batears_20261114_212242_anon_d20_quiet_lr_naiz.json",
+      "sha": "8b6b42f525c7626be540159984abdd4645f74dd8",
+      "size": 8207
+    },
+    {
+      "path": "ml/data/batears_20261114_212413_anon_d20_quiet_naiz.csv",
+      "sha": "c4c1f874fa2d51297ea6e2a2062d9f23ee6b5959",
+      "size": 4824022
+    },
+    {
+      "path": "ml/data/batears_20261114_212758_anon_d20_quiet_milz.csv",
+      "sha": "cdb52e01b8d188835a2285fd0c54ebe76fd48886",
+      "size": 2416096
+    },
+    {
+      "path": "ml/data/batears_20261114_212758_anon_d20_quiet_milz.json",
+      "sha": "5a3f7abd0f240be911cb52db0bca6a48049282ed",
+      "size": 4408
+    },
+    {
+      "path": "ml/data/batears_20261114_214602_anon_d20_quiet_lr_milz.csv",
+      "sha": "c1ca1ac93f9f23ae590a4428431392ec57192257",
+      "size": 2716126
+    },
+    {
+      "path": "ml/data/batears_20261114_214602_anon_d20_quiet_lr_milz.json",
+      "sha": "63f9c4eaa755efda811da7ea31ae52abe056612b",
+      "size": 13408
+    },
+    {
+      "path": "ml/data/batears_20261114_224220_1_d55_quiet_n0c4.csv",
+      "sha": "f8a9c65c1c6ab724eabd16723991d6dd79eb1ea5",
+      "size": 1187189
+    },
+    {
+      "path": "ml/data/batears_20261114_224220_1_d55_quiet_n0c4.json",
+      "sha": "85b54217f76423aee9e09fabd412d78465eb6a76",
+      "size": 4420
+    },
+    {
+      "path": "ml/data/batears_20261114_224420_1_d55_quiet_lr_n0c4.csv",
+      "sha": "8e22d29a013e693a9be35a4812a54dda16719816",
+      "size": 1335291
+    },
+    {
+      "path": "ml/data/batears_20261114_224420_1_d55_quiet_lr_n0c4.json",
+      "sha": "a69550520f7c77201cc038f073a40fb268d1937b",
+      "size": 14912
+    },
+    {
+      "path": "ml/data/batears_20261114_231408_anon_d20_quiet_lr_milz.csv",
+      "sha": "de274740d20feec9b8e789a1df520fb13d103bb3",
+      "size": 2691943
+    },
+    {
+      "path": "ml/data/batears_20261114_231408_anon_d20_quiet_lr_milz.json",
+      "sha": "3820237a05b2ff252b946ba8bd7d5159aa43144b",
+      "size": 15407
+    },
+    {
+      "path": "ml/data/batears_20261114_231902_seohee_d20_quiet_milz.csv",
+      "sha": "32df37e729f38649f0ee0114b1ae4703ea81e2b6",
+      "size": 5174268
+    },
+    {
+      "path": "ml/data/batears_20261114_231902_seohee_d20_quiet_milz.json",
+      "sha": "c3b84bc21cb5309065ee281551aaf7fec10d64f4",
+      "size": 25807
+    },
+    {
+      "path": "ml/data/batears_20261114_232505_1_d60_noisy_n0c4.csv",
+      "sha": "96dd38a70c328deff57be4ef591c83306149a33c",
+      "size": 1189200
+    },
+    {
+      "path": "ml/data/batears_20261114_232505_1_d60_noisy_n0c4.json",
+      "sha": "8475f4da91a3d369bf6be504458593816a4296c3",
+      "size": 4441
+    },
+    {
+      "path": "ml/data/batears_20261114_232830_1_d60_noisy_lr_n0c4.csv",
+      "sha": "715362be62ad6e4735a201f7a3e9aaa52dcbbeec",
+      "size": 1352965
+    },
+    {
+      "path": "ml/data/batears_20261114_232830_1_d60_noisy_lr_n0c4.json",
+      "sha": "03c8596f02ce31aeb0d0ce2758f8a6f794854662",
+      "size": 16067
+    },
+    {
+      "path": "ml/data/batears_20261114_233820_1_d60_quiet_n0c4.csv",
+      "sha": "a25c10d48c4f169de81ee5c0f347818b3b5e4841",
+      "size": 1185158
+    },
+    {
+      "path": "ml/data/batears_20261114_233820_1_d60_quiet_n0c4.json",
+      "sha": "f04fbeebc25c6ff4d447b5c00d7148e9a6f21847",
+      "size": 4387
+    },
+    {
+      "path": "ml/data/batears_20261114_234041_1_d60_noisy_n0c4.csv",
+      "sha": "328c36e3449a35d507b3cc56614d3c3c320539b4",
+      "size": 1188795
+    },
+    {
+      "path": "ml/data/batears_20261114_234041_1_d60_noisy_n0c4.json",
+      "sha": "575ea610059df5650ff384cc48141ec21b2c3fd4",
+      "size": 4450
+    },
+    {
+      "path": "ml/data/batears_20261114_234303_1_d60_noisy_n0c4.csv",
+      "sha": "a4d8a8e73588d41e085da7de2bf52a8e28f4b630",
+      "size": 1190625
+    },
+    {
+      "path": "ml/data/batears_20261114_234303_1_d60_noisy_n0c4.json",
+      "sha": "74193fb08a90725bf1a970bd9a0816f664a588d8",
+      "size": 4458
+    },
+    {
+      "path": "ml/features.py",
+      "sha": "c862fd8381fe5327c5d8fcaaa114a140c09869b1",
+      "size": 6484
+    },
+    {
+      "path": "ml/make_fake_data.py",
+      "sha": "29105d072c455ddf789f5506741ea1e07396cd08",
+      "size": 5487
+    },
+    {
+      "path": "ml/replay_burst.py",
+      "sha": "8c0363390e263da71261cf9bdf30375f2048c20b",
+      "size": 12807
+    },
+    {
+      "path": "ml/report.py",
+      "sha": "53f4b6c300af7f7e95498572f885ef4fa587f7a5",
+      "size": 13315
+    },
+    {
+      "path": "ml/train.py",
+      "sha": "6f98715a1cde91925b525201b8fac6c14a9f2526",
+      "size": 9947
+    },
+    {
+      "path": "tools/lr-tests/physics.js",
+      "sha": "0735fcb11b0eb1f8a20236c0dbc5de811593e358",
+      "size": 2957
+    },
+    {
+      "path": "tools/lr-tests/test-lr.js",
+      "sha": "b6012c95ecaa1ac32fd78eb8363228f932a0f62b",
+      "size": 9064
+    },
+    {
+      "path": "tools/reference/bravo/analyze.py",
+      "sha": "e33450289e99a44cde76dfd868ba89e3c5ac2de4",
+      "size": 1511
+    },
+    {
+      "path": "tools/reference/bravo/batears.py",
+      "sha": "9a50f8878554b25c6d5f2aa33e9385849029df6f",
+      "size": 13194
+    },
+    {
+      "path": "tools/reference/bravo/run_134835_15000.csv",
+      "sha": "c45e598bb371231c350f14e1ab67394910528a6b",
+      "size": 144425
+    },
+    {
+      "path": "tools/reference/charlie/sweep.py",
+      "sha": "d896ca4598f6faff89df9edac406ad827867ba1a",
+      "size": 3043
+    },
+    {
+      "path": "tools/robust-tests/compare.js",
+      "sha": "ee8fa8cee93b4dca4c29f3b161be914a65f8e0a5",
+      "size": 7067
+    },
+    {
+      "path": "tools/robust-tests/test.js",
+      "sha": "15709d04fd5b5da83fc2825fb2398b907fe3d934",
+      "size": 8328
+    },
+    {
+      "path": "tools/selftest/make_wav.py",
+      "sha": "3771602d8997a234f5c145c79ec53d129afad1be",
+      "size": 2631
+    },
+    {
+      "path": "tools/stamp.py",
+      "sha": "326a15069feac4fde617bbb6d90b39c753e90e35",
+      "size": 817
+    },
+    {
+      "path": "web/app.js",
+      "sha": "2d4b08a9d5f73d0d7fc2cad2c6c2bce704698990",
+      "size": 20104
+    },
+    {
+      "path": "web/batears.html",
+      "sha": "dddf7fc022d7f59d4226692a390403d9c81d5fe8",
+      "size": 21837
+    },
+    {
+      "path": "web/coach.js",
+      "sha": "84ac64a0bede27c8eeaec22fd77fc7582606eae1",
+      "size": 11253
+    },
+    {
+      "path": "web/collect.js",
+      "sha": "52a3de6e00d09f5442099441427665111f2c26d4",
+      "size": 26125
+    },
+    {
+      "path": "web/dsp.js",
+      "sha": "ca87b254586c83a57a9c6d397f82fc1014d1390f",
+      "size": 53329
+    },
+    {
+      "path": "web/explog.js",
+      "sha": "b6521e316eb30784d6f0c013a92b321acc6e64a8",
+      "size": 10869
+    },
+    {
+      "path": "web/game.js",
+      "sha": "b5704299cd57b971aa76e2b663d67d10852af0d5",
+      "size": 17699
+    },
+    {
+      "path": "web/index.html",
+      "sha": "043eb0917e7a59c22a530e75553e1efe786fdb6c",
+      "size": 9774
+    },
+    {
+      "path": "web/iq.js",
+      "sha": "d73917f234496abe72b7ab0fae36c29603de5b45",
+      "size": 7684
+    },
+    {
+      "path": "web/lr.js",
+      "sha": "66568439a585811c10ee5ce0c6baae46d54cc0c6",
+      "size": 9537
+    },
+    {
+      "path": "web/recorder.js",
+      "sha": "b480cf70b98eec8306432c3e0ede1b69f4afd23b",
+      "size": 9441
+    },
+    {
+      "path": "web/robust.js",
+      "sha": "16dc78bd43c12bdfc8457ae697ea1561b75a7552",
+      "size": 17129
+    },
+    {
+      "path": "web/sonar.js",
+      "sha": "e604acb9053682d49b67cf7f56c69faa10d117be",
+      "size": 11587
+    },
+    {
+      "path": "web/speed.js",
+      "sha": "c449182cc596ace92e0fcbe9e69cb36d993a6698",
+      "size": 14916
+    },
+    {
+      "path": "web/style.css",
+      "sha": "e433cb06635d6135c961d8a5b393c89a102a26a9",
+      "size": 15939
+    },
+    {
+      "path": "web/swipe.js",
+      "sha": "6bf939fee7a878c480a8cca4e18491a044786ca2",
+      "size": 13997
+    },
+    {
+      "path": "web/wave.js",
+      "sha": "77957ab0383bf1a82e09103979d840e83461996e",
+      "size": 3699
+    }
+  ],
+  "drive_files": [
+    {
+      "id": "1HbHKgh_k5Xo2MGRuRYyenoT1qlnLgxDv",
+      "name": "batears_20261114_234730_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "2022",
+      "modified": "2026-11-15T05:47:47.545Z",
+      "url": "https://drive.google.com/file/d/1HbHKgh_k5Xo2MGRuRYyenoT1qlnLgxDv/view?usp=drivesdk"
+    },
+    {
+      "id": "1QPOV9jorN95uCWWXPS08KEk4ZhWJfgvw",
+      "name": "batears_20261114_234730_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "194216",
+      "modified": "2026-11-15T05:47:47.541Z",
+      "url": "https://drive.google.com/file/d/1QPOV9jorN95uCWWXPS08KEk4ZhWJfgvw/view?usp=drivesdk"
+    },
+    {
+      "id": "1U7psPyqgXPxK3rKfGotP3Umkxb7vl-tZ",
+      "name": "batears_20261114_234303_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1190625",
+      "modified": "2026-11-15T05:44:49.163Z",
+      "url": "https://drive.google.com/file/d/1U7psPyqgXPxK3rKfGotP3Umkxb7vl-tZ/view?usp=drivesdk"
+    },
+    {
+      "id": "1VV71kpKfRNWld3L0rt8UA9y4lgboE_6H",
+      "name": "batears_20261114_234303_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "4458",
+      "modified": "2026-11-15T05:44:49.161Z",
+      "url": "https://drive.google.com/file/d/1VV71kpKfRNWld3L0rt8UA9y4lgboE_6H/view?usp=drivesdk"
+    },
+    {
+      "id": "1DbriAVKCP_082VvKnWvaJVoH4khvsOv7",
+      "name": "batears_20261114_234041_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1188795",
+      "modified": "2026-11-15T05:42:26.214Z",
+      "url": "https://drive.google.com/file/d/1DbriAVKCP_082VvKnWvaJVoH4khvsOv7/view?usp=drivesdk"
+    },
+    {
+      "id": "1fa99AXgalTRm0MauNmldVBkCn9lQxQhB",
+      "name": "batears_20261114_234041_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "4450",
+      "modified": "2026-11-15T05:42:26.213Z",
+      "url": "https://drive.google.com/file/d/1fa99AXgalTRm0MauNmldVBkCn9lQxQhB/view?usp=drivesdk"
+    },
+    {
+      "id": "1roGOV44Jht5kcC0fo7-dlACFGlBMqwq2",
+      "name": "batears_20261114_233820_1_d60_quiet_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1185158",
+      "modified": "2026-11-15T05:40:06.117Z",
+      "url": "https://drive.google.com/file/d/1roGOV44Jht5kcC0fo7-dlACFGlBMqwq2/view?usp=drivesdk"
+    },
+    {
+      "id": "1vco1sMBGPAejQVkudEJzTfCJRMhNKkYF",
+      "name": "batears_20261114_233820_1_d60_quiet_n0c4.json",
+      "mime": "application/json",
+      "size": "4387",
+      "modified": "2026-11-15T05:40:06.115Z",
+      "url": "https://drive.google.com/file/d/1vco1sMBGPAejQVkudEJzTfCJRMhNKkYF/view?usp=drivesdk"
+    },
+    {
+      "id": "1pXiClKPzqq2SD8Pe8YTYHKLf-NCnaBFB",
+      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.wav",
+      "mime": "audio/x-wav",
+      "size": "19633196",
+      "modified": "2026-11-15T05:30:13.340Z",
+      "url": "https://drive.google.com/file/d/1pXiClKPzqq2SD8Pe8YTYHKLf-NCnaBFB/view?usp=drivesdk"
+    },
+    {
+      "id": "1o0c3q8JQ2O2TJl21JRBCxZvRhEO7lXmI",
+      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.json",
+      "mime": "application/json",
+      "size": "16067",
+      "modified": "2026-11-15T05:30:13.323Z",
+      "url": "https://drive.google.com/file/d/1o0c3q8JQ2O2TJl21JRBCxZvRhEO7lXmI/view?usp=drivesdk"
+    },
+    {
+      "id": "1IdSwlcd5kkYUfcEavakxBYuyBEhq1kFC",
+      "name": "batears_20261114_232830_1_d60_noisy_lr_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1352965",
+      "modified": "2026-11-15T05:30:13.187Z",
+      "url": "https://drive.google.com/file/d/1IdSwlcd5kkYUfcEavakxBYuyBEhq1kFC/view?usp=drivesdk"
+    },
+    {
+      "id": "1xqUDm3qt88zBjeJnNXy8bxs8dbHppiOv",
+      "name": "batears_20261114_232505_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1189200",
+      "modified": "2026-11-15T05:27:07.972Z",
+      "url": "https://drive.google.com/file/d/1xqUDm3qt88zBjeJnNXy8bxs8dbHppiOv/view?usp=drivesdk"
+    },
+    {
+      "id": "1U25TCSzWq5wW_0cQiXoaPbsff9gzmxd2",
+      "name": "batears_20261114_232505_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "4441",
+      "modified": "2026-11-15T05:26:50.733Z",
+      "url": "https://drive.google.com/file/d/1U25TCSzWq5wW_0cQiXoaPbsff9gzmxd2/view?usp=drivesdk"
+    },
+    {
+      "id": "1WSadLaVykOcMQNvBQ7C4Ddivg-MB5NvA",
+      "name": "batears_20261114_232432_1_d60_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "82793",
+      "modified": "2026-11-15T05:24:40.096Z",
+      "url": "https://drive.google.com/file/d/1WSadLaVykOcMQNvBQ7C4Ddivg-MB5NvA/view?usp=drivesdk"
+    },
+    {
+      "id": "1y7VKXrAwHu2NRqBq7Nr8VkjvQLXEUw57",
+      "name": "batears_20261114_232432_1_d60_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "1744",
+      "modified": "2026-11-15T05:24:40.096Z",
+      "url": "https://drive.google.com/file/d/1y7VKXrAwHu2NRqBq7Nr8VkjvQLXEUw57/view?usp=drivesdk"
+    },
+    {
+      "id": "1dMN6ey4F0MI-TWA6MLTwX6c6PVTbaMc4",
+      "name": "batears_20261114_231902_seohee_d20_quiet_milz.json",
+      "mime": "application/json",
+      "size": "25807",
+      "modified": "2026-11-15T05:22:15.149Z",
+      "url": "https://drive.google.com/file/d/1dMN6ey4F0MI-TWA6MLTwX6c6PVTbaMc4/view?usp=drivesdk"
+    },
+    {
+      "id": "1xtHMHqtVrOyE7D4WsC85NXGvoR5e9yie",
+      "name": "batears_20261114_231902_seohee_d20_quiet_milz.csv",
+      "mime": "text/csv",
+      "size": "5174268",
+      "modified": "2026-11-15T05:22:15.028Z",
+      "url": "https://drive.google.com/file/d/1xtHMHqtVrOyE7D4WsC85NXGvoR5e9yie/view?usp=drivesdk"
+    },
+    {
+      "id": "1drScNu_AQOnns5Ca8MHy1gTohcghHs7Y",
+      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.wav",
+      "mime": "audio/wav",
+      "size": "19249196",
+      "modified": "2026-11-15T05:15:48.997Z",
+      "url": "https://drive.google.com/file/d/1drScNu_AQOnns5Ca8MHy1gTohcghHs7Y/view?usp=drivesdk"
+    },
+    {
+      "id": "1YPH3IORKVVcpPPHO-NYv8SWN7R1uNRwW",
+      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.json",
+      "mime": "application/json",
+      "size": "15407",
+      "modified": "2026-11-15T05:15:48.979Z",
+      "url": "https://drive.google.com/file/d/1YPH3IORKVVcpPPHO-NYv8SWN7R1uNRwW/view?usp=drivesdk"
+    },
+    {
+      "id": "1DKGxDVbkJTrlH-sMbvx875XIipoQtvs3",
+      "name": "batears_20261114_231408_anon_d20_quiet_lr_milz.csv",
+      "mime": "text/csv",
+      "size": "2691943",
+      "modified": "2026-11-15T05:15:48.852Z",
+      "url": "https://drive.google.com/file/d/1DKGxDVbkJTrlH-sMbvx875XIipoQtvs3/view?usp=drivesdk"
+    },
+    {
+      "id": "16m3F7i5f3AGJozE_zLbPNaAo5uWSb-8G",
+      "name": "batears_20261114_231413_1_d55_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "34038",
+      "modified": "2026-11-15T05:14:16.976Z",
+      "url": "https://drive.google.com/file/d/16m3F7i5f3AGJozE_zLbPNaAo5uWSb-8G/view?usp=drivesdk"
+    },
+    {
+      "id": "1O5y533TKnqpJDnBJ8C2IuVopssxPiZad",
+      "name": "batears_20261114_231413_1_d55_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "1601",
+      "modified": "2026-11-15T05:14:16.976Z",
+      "url": "https://drive.google.com/file/d/1O5y533TKnqpJDnBJ8C2IuVopssxPiZad/view?usp=drivesdk"
+    },
+    {
+      "id": "15SwtDxyZ7uyTbIEV4MLacJ8Okxi00Qj-",
+      "name": "batears_20261114_231349_1_d55_noisy_n0c4.csv",
+      "mime": "text/csv",
+      "size": "132497",
+      "modified": "2026-11-15T05:14:01.551Z",
+      "url": "https://drive.google.com/file/d/15SwtDxyZ7uyTbIEV4MLacJ8Okxi00Qj-/view?usp=drivesdk"
+    },
+    {
+      "id": "1ol3CqFEdGulBnoIMRg4vclGP5fkTCLkz",
+      "name": "batears_20261114_231349_1_d55_noisy_n0c4.json",
+      "mime": "application/json",
+      "size": "1733",
+      "modified": "2026-11-15T05:14:01.551Z",
+      "url": "https://drive.google.com/file/d/1ol3CqFEdGulBnoIMRg4vclGP5fkTCLkz/view?usp=drivesdk"
+    },
+    {
+      "id": "11uvWSKhYyRBgwCmijHiWVUnzXs0OzPx9",
+      "name": "batears_20261114_224838_1_d55_quiet_n0c4.csv",
+      "mime": "text/csv",
+      "size": "132536",
+      "modified": "2026-11-15T04:48:50.433Z",
+      "url": "https://drive.google.com/file/d/11uvWSKhYyRBgwCmijHiWVUnzXs0OzPx9/view?usp=drivesdk"
+    },
+    {
+      "id": "1-GtXEqA_Fal2ItVHARBaaZy18JSCj0la",
+      "name": "batears_20261114_224838_1_d55_quiet_n0c4.json",
+      "mime": "application/json",
+      "size": "1743",
+      "modified": "2026-11-15T04:48:50.433Z",
+      "url": "https://drive.google.com/file/d/1-GtXEqA_Fal2ItVHARBaaZy18JSCj0la/view?usp=drivesdk"
+    },
+    {
+      "id": "1xcoQBNoLPmJWSBjOqYgpdi3OP0TJVPQz",
+      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.wav",
+      "mime": "audio/x-wav",
+      "size": "768044",
+      "modified": "2026-11-15T04:46:16.693Z",
+      "url": "https://drive.google.com/file/d/1xcoQBNoLPmJWSBjOqYgpdi3OP0TJVPQz/view?usp=drivesdk"
+    },
+    {
+      "id": "1c3lrvxyPy1F72KkKckfLoRbF4Ak59b1E",
+      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.json",
+      "mime": "application/json",
+      "size": "2064",
+      "modified": "2026-11-15T04:46:16.691Z",
+      "url": "https://drive.google.com/file/d/1c3lrvxyPy1F72KkKckfLoRbF4Ak59b1E/view?usp=drivesdk"
+    },
+    {
+      "id": "10zkWRW3DpzeNqVKFLIZOwGXSWEf5ZsdZ",
+      "name": "batears_20261114_224612_1_d55_quiet_lr_n0c4.csv",
+      "mime": "text/csv",
+      "size": "53055",
+      "modified": "2026-11-15T04:46:16.568Z",
+      "url": "https://drive.google.com/file/d/10zkWRW3DpzeNqVKFLIZOwGXSWEf5ZsdZ/view?usp=drivesdk"
+    },
+    {
+      "id": "1_3cii_oSN0GB_yrgopoI3ho3Gwezb-VZ",
+      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.wav",
+      "mime": "audio/x-wav",
+      "size": "19253292",
+      "modified": "2026-11-15T04:46:00.686Z",
+      "url": "https://drive.google.com/file/d/1_3cii_oSN0GB_yrgopoI3ho3Gwezb-VZ/view?usp=drivesdk"
+    },
+    {
+      "id": "1X3DkwQcdq1uFyqFwFT-kosaDTSqVU1M8",
+      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.json",
+      "mime": "application/json",
+      "size": "14912",
+      "modified": "2026-11-15T04:46:00.665Z",
+      "url": "https://drive.google.com/file/d/1X3DkwQcdq1uFyqFwFT-kosaDTSqVU1M8/view?usp=drivesdk"
+    },
+    {
+      "id": "1FNbQGWNp3RYxCTUp9BcpeTNDeSFNAZtw",
+      "name": "batears_20261114_224420_1_d55_quiet_lr_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1335291",
+      "modified": "2026-11-15T04:46:00.539Z",
+      "url": "https://drive.google.com/file/d/1FNbQGWNp3RYxCTUp9BcpeTNDeSFNAZtw/view?usp=drivesdk"
+    },
+    {
+      "id": "1ZO9Qhur7mXn4uHjA6iMva8YKL7ktFGBE",
+      "name": "batears_20261114_224220_1_d55_quiet_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1187189",
+      "modified": "2026-11-15T04:44:23.399Z",
+      "url": "https://drive.google.com/file/d/1ZO9Qhur7mXn4uHjA6iMva8YKL7ktFGBE/view?usp=drivesdk"
+    },
+    {
+      "id": "1hCaACAJiYD9YlAHubGq7v5FenaVwiLtH",
+      "name": "batears_20261114_224220_1_d55_quiet_n0c4.json",
+      "mime": "application/json",
+      "size": "4420",
+      "modified": "2026-11-15T04:44:05.922Z",
+      "url": "https://drive.google.com/file/d/1hCaACAJiYD9YlAHubGq7v5FenaVwiLtH/view?usp=drivesdk"
+    },
+    {
+      "id": "1qfZDx5u253GfwTQ40LrmJ2ZZ7PdLLpCX",
+      "name": "batears_20261114_214602_anon_d20_quiet_lr_milz.json",
+      "mime": "application/json",
+      "size": "13408",
+      "modified": "2026-11-15T03:47:42.677Z",
+      "url": "https://drive.google.com/file/d/1qfZDx5u253GfwTQ40LrmJ2ZZ7PdLLpCX/view?usp=drivesdk"
+    },
+    {
+      "id": "1gV-E6vHwwWe0Cb6QDKrKqzRrQn9_IyZo",
+      "name": "batears_20261114_214602_anon_d20_quiet_lr_milz.csv",
+      "mime": "text/csv",
+      "size": "2716126",
+      "modified": "2026-11-15T03:47:42.551Z",
+      "url": "https://drive.google.com/file/d/1gV-E6vHwwWe0Cb6QDKrKqzRrQn9_IyZo/view?usp=drivesdk"
+    },
+    {
+      "id": "19XUdCIyNIyj2EA20rdV9mIbqLLVdienj",
+      "name": "batears_20261114_212758_anon_d20_quiet_milz.csv",
+      "mime": "text/csv",
+      "size": "2416096",
+      "modified": "2026-11-15T03:29:43.811Z",
+      "url": "https://drive.google.com/file/d/19XUdCIyNIyj2EA20rdV9mIbqLLVdienj/view?usp=drivesdk"
+    },
+    {
+      "id": "1b8XdTfV7kVeNGZs1hiVeYKJ1ng2RfSDN",
+      "name": "batears_20261114_212758_anon_d20_quiet_milz.json",
+      "mime": "application/json",
+      "size": "4408",
+      "modified": "2026-11-15T03:29:43.809Z",
+      "url": "https://drive.google.com/file/d/1b8XdTfV7kVeNGZs1hiVeYKJ1ng2RfSDN/view?usp=drivesdk"
+    },
+    {
+      "id": "1BEEDjXC3r3VcvwwkmOSnU6McZ0HGt2bM",
+      "name": "batears_20261114_212413_anon_d20_quiet_naiz.csv",
+      "mime": "text/csv",
+      "size": "4824022",
+      "modified": "2026-11-15T03:27:13.430Z",
+      "url": "https://drive.google.com/file/d/1BEEDjXC3r3VcvwwkmOSnU6McZ0HGt2bM/view?usp=drivesdk"
+    },
+    {
+      "id": "1luzLpuRxrx4tN_QZ80PcAaMO164UilKo",
+      "name": "batears_20261114_212242_anon_d20_quiet_lr_naiz.csv",
+      "mime": "text/csv",
+      "size": "2016335",
+      "modified": "2026-11-15T03:23:57.111Z",
+      "url": "https://drive.google.com/file/d/1luzLpuRxrx4tN_QZ80PcAaMO164UilKo/view?usp=drivesdk"
+    },
+    {
+      "id": "1-0SIgBiamSQNioxRVXuoFYaO_pKOgrYz",
+      "name": "batears_20261114_212242_anon_d20_quiet_lr_naiz.json",
+      "mime": "application/json",
+      "size": "8207",
+      "modified": "2026-11-15T03:23:57.110Z",
+      "url": "https://drive.google.com/file/d/1-0SIgBiamSQNioxRVXuoFYaO_pKOgrYz/view?usp=drivesdk"
+    },
+    {
+      "id": "1bYDbiQj7JOj5Kb2DZCpdpnwAEQlUptRU",
+      "name": "batears_20261114_211820_anon_d20_quiet_naiz.csv",
+      "mime": "text/csv",
+      "size": "5166112",
+      "modified": "2026-11-15T03:21:33.066Z",
+      "url": "https://drive.google.com/file/d/1bYDbiQj7JOj5Kb2DZCpdpnwAEQlUptRU/view?usp=drivesdk"
+    },
+    {
+      "id": "1NToRSKeL5ymPeSpZySb4XqZMp2J08SFH",
+      "name": "batears_20261114_211820_anon_d20_quiet_naiz.json",
+      "mime": "application/json",
+      "size": "17138",
+      "modified": "2026-11-15T03:21:33.061Z",
+      "url": "https://drive.google.com/file/d/1NToRSKeL5ymPeSpZySb4XqZMp2J08SFH/view?usp=drivesdk"
+    },
+    {
+      "id": "1vCUmO9sBaMKlPI328ot9LbxBjWq1hZIU",
+      "name": "batears_20261114_211226_anon_d20_quiet_naiz.csv",
+      "mime": "text/csv",
+      "size": "2422942",
+      "modified": "2026-11-15T03:14:11.252Z",
+      "url": "https://drive.google.com/file/d/1vCUmO9sBaMKlPI328ot9LbxBjWq1hZIU/view?usp=drivesdk"
+    },
+    {
+      "id": "1eXTfakcV37Sk19XTWIqidWx0HpzNUcQa",
+      "name": "batears_20261114_211226_anon_d20_quiet_naiz.json",
+      "mime": "application/json",
+      "size": "4406",
+      "modified": "2026-11-15T03:14:11.248Z",
+      "url": "https://drive.google.com/file/d/1eXTfakcV37Sk19XTWIqidWx0HpzNUcQa/view?usp=drivesdk"
+    },
+    {
+      "id": "1W2kjEZkf4PQKCDYZKllnwivPWrPfOQWl",
+      "name": "batears_20261114_205859_anon_d30_quiet_61f5.csv",
+      "mime": "text/csv",
+      "size": "2568254",
+      "modified": "2026-11-15T03:02:13.305Z",
+      "url": "https://drive.google.com/file/d/1W2kjEZkf4PQKCDYZKllnwivPWrPfOQWl/view?usp=drivesdk"
+    },
+    {
+      "id": "1XAoK4wsdJdoOsqJpvOVpOX3FWqgiDJji",
+      "name": "batears_20261114_205859_anon_d30_quiet_61f5.json",
+      "mime": "application/json",
+      "size": "17676",
+      "modified": "2026-11-15T03:02:13.152Z",
+      "url": "https://drive.google.com/file/d/1XAoK4wsdJdoOsqJpvOVpOX3FWqgiDJji/view?usp=drivesdk"
+    },
+    {
+      "id": "1OUDPrhIAdOqRxf74DKvf7NiriOE-dSmI",
+      "name": "batears_20261114_171130_anon_d30_quiet_lr_61f5.csv",
+      "mime": "text/csv",
+      "size": "552005",
+      "modified": "2026-11-14T23:13:27.180Z",
+      "url": "https://drive.google.com/file/d/1OUDPrhIAdOqRxf74DKvf7NiriOE-dSmI/view?usp=drivesdk"
+    },
+    {
+      "id": "1J4z54EARbviYNVureyWxr7-0AFeXIcQ7",
+      "name": "batears_20261114_171130_anon_d30_quiet_lr_61f5.json",
+      "mime": "application/json",
+      "size": "5975",
+      "modified": "2026-11-14T23:13:27.119Z",
+      "url": "https://drive.google.com/file/d/1J4z54EARbviYNVureyWxr7-0AFeXIcQ7/view?usp=drivesdk"
+    },
+    {
+      "id": "1Lxq9zWP8jwI0nNjnqjoUTscBjX7QxlEn",
+      "name": "batears_20261114_164738_anon_d30_quiet_61f5.json",
+      "mime": "application/json",
+      "size": "5667",
+      "modified": "2026-11-14T22:53:34.280Z",
+      "url": "https://drive.google.com/file/d/1Lxq9zWP8jwI0nNjnqjoUTscBjX7QxlEn/view?usp=drivesdk"
+    },
+    {
+      "id": "1Q0QyBeg0_BC7MHjJ8KlMVFAMWSaRvVIu",
+      "name": "batears_20261114_164412_anon_d30_quiet_61f5.csv",
+      "mime": "text/csv",
+      "size": "824304",
+      "modified": "2026-11-14T22:53:33.309Z",
+      "url": "https://drive.google.com/file/d/1Q0QyBeg0_BC7MHjJ8KlMVFAMWSaRvVIu/view?usp=drivesdk"
+    },
+    {
+      "id": "12p0yWfsMamOOCH2CGfOGYH0Xe4pUAsEf",
+      "name": "batears_20261114_164218_1_d35_quiet_n0c4.csv",
+      "mime": "text/csv",
+      "size": "1193116",
+      "modified": "2026-11-14T22:53:33.077Z",
+      "url": "https://drive.google.com/file/d/12p0yWfsMamOOCH2CGfOGYH0Xe4pUAsEf/view?usp=drivesdk"
+    },
+    {
+      "id": "1vyg0y4kA4NCJJ7vXw9YiwdAeptmd4mtK",
+      "name": "batears_20261114_164302_anon_d30_quiet_61f5.csv",
+      "mime": "text/csv",
+      "size": "114988",
+      "modified": "2026-11-14T22:53:32.833Z",
+      "url": "https://drive.google.com/file/d/1vyg0y4kA4NCJJ7vXw9YiwdAeptmd4mtK/view?usp=drivesdk"
+    },
+    {
+      "id": "1kH47tBBTx09mnOiRK-E6g2dhW82x-wRY",
+      "name": "batears_20261114_164412_anon_d30_quiet_61f5.json",
+      "mime": "application/json",
+      "size": "4557",
+      "modified": "2026-11-14T22:53:32.576Z",
+      "url": "https://drive.google.com/file/d/1kH47tBBTx09mnOiRK-E6g2dhW82x-wRY/view?usp=drivesdk"
+    },
+    {
+      "id": "1MY4e4-tiuqM4DTwAn5EmNiczhwV6nvwV",
+      "name": "batears_20261114_164218_1_d35_quiet_n0c4.json",
+      "mime": "application/json",
+      "size": "4501",
+      "modified": "2026-11-14T22:53:32.283Z",
+      "url": "https://drive.google.com/file/d/1MY4e4-tiuqM4DTwAn5EmNiczhwV6nvwV/view?usp=drivesdk"
+    },
+    {
+      "id": "1C8b1oxzl_kx6Dl0hJBa-_MxTD2CUSPah",
+      "name": "batears_20261114_164738_anon_d30_quiet_61f5.csv",
+      "mime": "text/csv",
+      "size": "1021688",
+      "modified": "2026-11-14T22:53:32.203Z",
+      "url": "https://drive.google.com/file/d/1C8b1oxzl_kx6Dl0hJBa-_MxTD2CUSPah/view?usp=drivesdk"
+    },
+    {
+      "id": "1oh72yhEHeRhvf9hyLvlGkha9DlWaXlfd",
+      "name": "batears_20261114_163007_anon_d30_quiet_61f5.json",
+      "mime": "application/json",
+      "size": "4591",
+      "modified": "2026-11-14T22:35:42.285Z",
+      "url": "https://drive.google.com/file/d/1oh72yhEHeRhvf9hyLvlGkha9DlWaXlfd/view?usp=drivesdk"
+    },
+    {
+      "id": "1enHLrv-iIHTo7k2t09annhE-T5hLnq6L",
+      "name": "batears_20261114_163007_anon_d30_quiet_61f5.csv",
+      "mime": "text/csv",
+      "size": "611249",
+      "modified": "2026-11-14T22:35:42.279Z",
+      "url": "https://drive.google.com/file/d/1enHLrv-iIHTo7k2t09annhE-T5hLnq6L/view?usp=drivesdk"
+    },
+    {
+      "id": "1SFWx_Fg9pEqTJvMpSC-HqacDw5Kwg8Bl",
+      "name": "batears_20261114_160233_d20_p1.csv",
+      "mime": "text/csv",
+      "size": "1110458",
+      "modified": "2026-11-14T22:10:54.237Z",
+      "url": "https://drive.google.com/file/d/1SFWx_Fg9pEqTJvMpSC-HqacDw5Kwg8Bl/view?usp=drivesdk"
+    },
+    {
+      "id": "1wBrQhYvRvF4gyHgbiFgLfBTbZTRlag7l",
+      "name": "batears_20261114_153352_d20_p1.csv",
+      "mime": "text/csv",
+      "size": "1104792",
+      "modified": "2026-11-14T21:46:21.423Z",
+      "url": "https://drive.google.com/file/d/1wBrQhYvRvF4gyHgbiFgLfBTbZTRlag7l/view?usp=drivesdk"
+    },
+    {
+      "id": "1z5BK0M-2F9uSuI8nKw6KdJPxx0ngaLUg",
+      "name": "batears_20261114_153615_d20_p1.csv",
+      "mime": "text/csv",
+      "size": "18229",
+      "modified": "2026-11-14T21:46:19.665Z",
+      "url": "https://drive.google.com/file/d/1z5BK0M-2F9uSuI8nKw6KdJPxx0ngaLUg/view?usp=drivesdk"
+    },
+    {
+      "id": "1nzzRB4y967nHtnYP8-7NiD3mHpdYOfA5",
+      "name": "fake",
+      "mime": "application/vnd.google-apps.folder",
+      "size": null,
+      "modified": "2026-11-14T20:22:47.152Z",
+      "url": "https://drive.google.com/drive/folders/1nzzRB4y967nHtnYP8-7NiD3mHpdYOfA5"
+    }
+  ],
+  "processed_sessions": [
+    "231408",
+    "231902",
+    "233820",
+    "234041",
+    "234303",
+    "234730"
+  ],
+  "notified_findings": [
+    "quiet85_noisy95_original_verified",
+    "234303_noisy_manual_ambient_matches_quiet_foreign22.8",
+    "234730_aborted_3trials",
+    "milz_LR0_live_despite_LOO65_67"
+  ],
+  "notes": "First baseline: previously reviewed sessions remain in earlier reports. Future runs compare Drive ID+modified+size and GitHub path+blob SHA, then verify completion; do not notify for own exp report commits alone."
+}
