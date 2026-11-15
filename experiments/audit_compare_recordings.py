@@ -1,6 +1,6 @@
 import csv,json,pathlib,numpy as np,hashlib
 import argparse
-ap=argparse.ArgumentParser();ap.add_argument('data_dir');ap.add_argument('output');args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('data_dir');ap.add_argument('output');ap.add_argument('--source-main-sha',default='25d4aaad29113cdae4e7cb5ad45fa48b0c7c4a98');args=ap.parse_args()
 root=pathlib.Path(args.data_dir);results=[];rng=np.random.default_rng(20261115)
 def pct(x):return np.percentile(x,[50,95,100]).tolist() if len(x) else []
 def metrics(y,p):
@@ -38,6 +38,6 @@ for q in results:
 raw=[]
 for f in sorted(root.glob('*_holo_*.json')):
  j=json.load(open(f));log=j['log'];raw.append({'session':j['session'],'seconds':j['seconds'],'build':j.get('build'),'yReal':j.get('yReal'),'yGain':j.get('yGain'),'tau':j.get('tau'),'log_rows':len(log),'log_widths':sorted(set(map(len,log))),'has_performance_clock':all(len(r)>=22 for r in log),'levelDb_median':float(np.median([r[8] for r in log if len(r)>8 and r[8] is not None])),'category':'sound-only recording; no hand truth, no prompted gesture accuracy'})
-out={'source_main_sha':'25d4aaad29113cdae4e7cb5ad45fa48b0c7c4a98','axes':'x left-right, y height, z depth','scope':'offline recorded display coordinates before soft limit; fixed final camera scale; not exact live panel; no WAV replay, no lag tuning, no fitting; overlapping windows and exploratory single-session block intervals','sessions':results,'holo_sessions':raw,'no_new_categorical_scores':True}
+out={'source_main_sha':args.source_main_sha,'axes':'x left-right, y height, z depth','scope':'offline recorded display coordinates before soft limit; fixed final camera scale; not exact live panel; no WAV replay, no lag tuning, no fitting; overlapping windows and exploratory single-session block intervals','sessions':results,'holo_sessions':raw,'no_new_categorical_scores':True}
 pathlib.Path(args.output).write_text(json.dumps(out,indent=2,allow_nan=False)+'\n')
 for q in results:print(q['session'],q['wav_seconds'],'vis',round(q['present_pct'],1),'fps',round(q['vision_fps'],1),'rangeOut',round(q['outside45_present_pct'],1),'windows',q['in_range_windows'],'err',q.get('in_range',{}).get('rmse_cm'),'corr',q.get('in_range',{}).get('pearson'),'baseline',q.get('in_range',{}).get('zero_motion_rmse_cm'))
