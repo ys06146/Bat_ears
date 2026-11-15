@@ -601,7 +601,7 @@ function gatedSet() {
   const B = window.Bat3D || {}, c = calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)), g = c && c.gated, L = g && Array.isArray(g.sittings) ? g.sittings : null;
   if (!L) return '';
   const cmp = L.filter((x) => /c$/.test(String(x))).length;
-  return `, held out over ${L.length} sittings: ${L.length - cmp} teach + ${cmp} compare`;
+  return `, weights trained on ${L.length} sittings (${L.length - cmp} teach + ${cmp} compare)`;
 }
 let curModel = '';   // info().model of the engine shown on the card ('gated', 'learned', 'physics')
 function ampTable() {
