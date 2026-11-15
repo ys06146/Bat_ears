@@ -1,0 +1,399 @@
+{
+ "session": "20261114_212242_anon_d20_quiet_lr_naiz",
+ "who": "anon",
+ "dist": 20,
+ "noise": "quiet",
+ "noiseSource": "auto",
+ "device": "naiz",
+ "sessionIndex": 3,
+ "room": {
+  "ambientDb": -109.90501167710266,
+  "noiseDb": -139.62295532226562,
+  "snrDb": 100.613525390625,
+  "fps": 120
+ },
+ "perGesture": 5,
+ "wave": false,
+ "swipe": true,
+ "swipeOnly": true,
+ "typing": false,
+ "startedAt": "2026-11-15T03:22:40.983Z",
+ "finishedAt": "2026-11-15T03:23:57.087Z",
+ "aborted": false,
+ "live": {
+  "trials": 16,
+  "hits": 5,
+  "accuracy": 0.313,
+  "byGesture": {
+   "push": {
+    "n": 3,
+    "hit": 2,
+    "wrong": 0,
+    "miss": 1
+   },
+   "pull": {
+    "n": 3,
+    "hit": 3,
+    "wrong": 0,
+    "miss": 0
+   },
+   "left": {
+    "n": 5,
+    "hit": 0,
+    "wrong": 5,
+    "miss": 0
+   },
+   "right": {
+    "n": 5,
+    "hit": 0,
+    "wrong": 5,
+    "miss": 0
+   }
+  },
+  "typingFalseTriggers": null
+ },
+ "engine": {
+  "f0": 20000,
+  "raw": true,
+  "stereo": true,
+  "stereoFreqs": [
+   18000,
+   19500
+  ],
+  "ctxRate": 48000,
+  "micRate": 48000,
+  "ec": false,
+  "ns": false,
+  "agc": false,
+  "ch": 1,
+  "fft": 8192,
+  "binHz": 5.86,
+  "mic": "MacBook Pro Microphone (Built-in)"
+ },
+ "detector": "burst",
+ "burst": {
+  "aOn": 12,
+  "vFire": 1.3,
+  "vMin": 0.9,
+  "gapMs": 120,
+  "maxMs": 900,
+  "waveFlips": 3,
+  "lockMs": 150,
+  "rejectCapped": true,
+  "vetoSnrDb": 50
+ },
+ "volume": 0.6,
+ "freq": 20100,
+ "stereo": true,
+ "stereoDetector": "velocity",
+ "stereoPair": [
+  18000,
+  19500
+ ],
+ "lrCheck": {
+  "ok": false,
+  "looAcc": 0,
+  "looWrong": 0.1,
+  "looUndecided": 0.9,
+  "fpRate": 0,
+  "dComb": 0,
+  "dprime": {
+   "ilat": -0.18,
+   "balDelta": -0.57
+  },
+  "reason": "no left/right signal (speakers too close, mono downmix or audio effects?)",
+  "why": "좌우 신호가 없어요 (스피커 간격·소리 효과 탓일 수 있어요)",
+  "nL": 5,
+  "nR": 5,
+  "nPushPull": 6,
+  "hadModel": false,
+  "pair": [
+   18000,
+   19500
+  ],
+  "version": 2
+ },
+ "lrModel": null,
+ "foreignTones": [],
+ "client": {
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "platform": "macOS",
+  "lang": "ko-KR",
+  "tz": "America/Chicago",
+  "screen": "1512x982@2"
+ },
+ "trials": [
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 1.03,
+   "tStart": 707009,
+   "tEnd": 711065.5,
+   "swipe": {
+    "ilat": -0.011380503021607874,
+    "balDelta": -25.163845692136423,
+    "balSlope": -144.04033024529775,
+    "latPk": -0.2105189745343007,
+    "depPk": 1.031309347646494,
+    "n": 22,
+    "ms": 174.69999998807907
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.03,
+   "tStart": 711366.599999994,
+   "tEnd": 715421,
+   "swipe": {
+    "ilat": -0.051701894616434166,
+    "balDelta": 5.66365518200932,
+    "balSlope": 8.602149425817204,
+    "latPk": -0.17553466291838865,
+    "depPk": 0.27100634803995927,
+    "n": 80,
+    "ms": 658.4000000059605
+   }
+  },
+  {
+   "kind": "push",
+   "result": "miss",
+   "got": null,
+   "speed": null,
+   "tStart": 715722.099999994,
+   "tEnd": 719775.799999997,
+   "swipe": {
+    "ilat": 0.010174071674328725,
+    "balDelta": -11.209965938643963,
+    "balSlope": -35.38499349186282,
+    "latPk": 0.4146379986958463,
+    "depPk": 0.6401430449028198,
+    "n": 39,
+    "ms": 316.80000001192093
+   }
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.32,
+   "tStart": 720077.299999997,
+   "tEnd": 724132.299999997,
+   "swipe": {
+    "ilat": -0.018185562054524727,
+    "balDelta": -1.0229340117118864,
+    "balSlope": -2.0499679593424576,
+    "latPk": -0.13731524321290273,
+    "depPk": 0.4570104217903696,
+    "n": 61,
+    "ms": 499
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.31,
+   "tStart": 724433.1999999881,
+   "tEnd": 728488.099999994,
+   "swipe": {
+    "ilat": -0.018159031355866884,
+    "balDelta": 6.9540822575026775,
+    "balSlope": 17.02762550783836,
+    "latPk": -0.14184631902876776,
+    "depPk": 0.3259459292498632,
+    "n": 50,
+    "ms": 408.40000000596046
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "push",
+   "speed": 1.15,
+   "tStart": 728790.6999999881,
+   "tEnd": 732845.299999997,
+   "swipe": {
+    "ilat": 0.08369179562632079,
+    "balDelta": 6.558446830145605,
+    "balSlope": 13.119517563647541,
+    "latPk": 0.30110490061595196,
+    "depPk": -0.23602480964007652,
+    "n": 61,
+    "ms": 499.90000000596046
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.2,
+   "tStart": 733146.1999999881,
+   "tEnd": 737201,
+   "swipe": {
+    "ilat": 0.0919700283465297,
+    "balDelta": -32.496699434381945,
+    "balSlope": -52.69450208241431,
+    "latPk": 1.1149651782431749,
+    "depPk": -1.1997547929608159,
+    "n": 75,
+    "ms": 616.7000000029802
+   }
+  },
+  {
+   "kind": "push",
+   "result": "hit",
+   "got": "push",
+   "speed": 0.97,
+   "tStart": 737502.299999997,
+   "tEnd": 741558.3999999911,
+   "swipe": {
+    "ilat": 0.008120922903764807,
+    "balDelta": 21.66664204172998,
+    "balSlope": 35.08767941980563,
+    "latPk": 0.07709420118531335,
+    "depPk": -0.39257329775686095,
+    "n": 75,
+    "ms": 617.5
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.16,
+   "tStart": 741859.099999994,
+   "tEnd": 745913.8999999911,
+   "swipe": {
+    "ilat": -0.03759025982231723,
+    "balDelta": 11.616310775616228,
+    "balSlope": 24.0403782606469,
+    "latPk": -0.2778186781548127,
+    "depPk": 0.60895204320461,
+    "n": 59,
+    "ms": 483.20000000298023
+   }
+  },
+  {
+   "kind": "right",
+   "result": "wrong",
+   "got": "pull",
+   "speed": 1.35,
+   "tStart": 746214.6999999881,
+   "tEnd": 750267.299999997,
+   "swipe": {
+    "ilat": -0.04572506457430097,
+    "balDelta": 20.66117156828156,
+    "balSlope": 39.36211005533805,
+    "latPk": -0.20589716985242512,
+    "depPk": 0.3580283526865229,
+    "n": 64,
+    "ms": 524.9000000059605
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "push",
+   "speed": 1.36,
+   "tStart": 750568.1999999881,
+   "tEnd": 754623.1999999881,
+   "swipe": {
+    "ilat": -0.15947498246598044,
+    "balDelta": 18.319747184761194,
+    "balSlope": 34.37745765538805,
+    "latPk": -1.223733386906552,
+    "depPk": 1.5475101163681875,
+    "n": 65,
+    "ms": 532.9000000059605
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "push",
+   "speed": 1.48,
+   "tStart": 754923.5,
+   "tEnd": 758978.1999999881,
+   "swipe": {
+    "ilat": 0.08457156445837018,
+    "balDelta": 33.26124264483163,
+    "balSlope": 62.368728004908135,
+    "latPk": 0.43711047202330844,
+    "depPk": -0.37349874674377237,
+    "n": 65,
+    "ms": 533.2999999970198
+   }
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.35,
+   "tStart": 759279,
+   "tEnd": 763333.299999997,
+   "swipe": {
+    "ilat": -0.016558747373934504,
+    "balDelta": 12.90166846892197,
+    "balSlope": 34.40444925045859,
+    "latPk": -0.1301078525746899,
+    "depPk": 0.5325319952302401,
+    "n": 46,
+    "ms": 375
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "push",
+   "speed": 1.3,
+   "tStart": 763634.299999997,
+   "tEnd": 767688.6999999881,
+   "swipe": {
+    "ilat": -0.09399973745105755,
+    "balDelta": -16.66586895750302,
+    "balSlope": -18.517632175003353,
+    "latPk": -0.8256422662169739,
+    "depPk": 1.7765531580170635,
+    "n": 109,
+    "ms": 900
+   }
+  },
+  {
+   "kind": "pull",
+   "result": "hit",
+   "got": "pull",
+   "speed": 1.33,
+   "tStart": 767990.1999999881,
+   "tEnd": 772043.8999999911,
+   "swipe": {
+    "ilat": -0.012387834706711691,
+    "balDelta": -4.49389001213708,
+    "balSlope": -10.368920194346527,
+    "latPk": -0.08075807106989336,
+    "depPk": 0.4027454836207564,
+    "n": 53,
+    "ms": 433.3999999910593
+   }
+  },
+  {
+   "kind": "left",
+   "result": "wrong",
+   "got": "push",
+   "speed": 1.31,
+   "tStart": 772344.6999999881,
+   "tEnd": 776399.799999997,
+   "swipe": {
+    "ilat": 0.10914760554114515,
+    "balDelta": 29.139704075413423,
+    "balSlope": 61.34674542192299,
+    "latPk": 0.5079054640548952,
+    "depPk": 0.463966734704065,
+    "n": 58,
+    "ms": 475
+   }
+  }
+ ]
+}

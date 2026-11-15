@@ -2,7 +2,7 @@
 
 Push/pull rows: prompts hit by the browser as recorded (live) and by the current burst rule replayed offline
 (replay_burst.py), wrong direction, missed, and false triggers per minute while typing / idle at the ends.
-Left/right check sessions (_lr) show the swipe.js v2 check from the session JSON instead.
+Left/right rows rescore the session JSON's per-trial swipe features with the swipe.js rule they were recorded for (v2 or v3).
 
 usage: python ml/report.py [folder]          (default ml/data; copy the table into docs/devpost.md or experiments/)
 """
@@ -35,16 +35,13 @@ def pct(a, b):
 SPOILED = {'20261114_164412': 'spoiled: a second laptop was running Bat Ears (suspected)'}
 
 
-# ---- left/right: a mirror of web/swipe.js v2 (fit, classify, the leave-one-out check) ----
-KEYS = ('ilat', 'balDelta')
-
-
+# ---- left/right: mirrors of web/swipe.js v2 (2 cues, push/pull not modelled) and v3 (3-class discriminant) ----
 def _ok(x):
     return isinstance(x, (int, float)) and x == x and abs(x) != float('inf')
 
 
 def lr_feats(meta):
-    """[(kind, feat)] for trials that carry swipe features; balDelta = balSlope x ms for v1 files."""
+    """[(kind, feat)] in trial order for trials that carry swipe features; balDelta = balSlope x ms for v1 files."""
     out = []
     for t in meta.get('trials') or []:
         f = dict(t.get('swipe') or {})
@@ -56,40 +53,152 @@ def lr_feats(meta):
     return out
 
 
-def lr_fit(L, R):
-    m = {}
-    for k in KEYS:
-        a = [x[k] for x in L if _ok(x.get(k))]
-        b = [x[k] for x in R if _ok(x.get(k))]
-        if not a or not b:
-            continue
-        ma, mb = sum(a) / len(a), sum(b) / len(b)
-        var = sum((x - ma) ** 2 for x in a) + sum((x - mb) ** 2 for x in b)
-        sd = max(1e-6, (var / max(1, len(a) + len(b) - 2)) ** 0.5)
-        m[k] = {'mid': (ma + mb) / 2, 'half': (mb - ma) / 2, 'sd': sd, 'd': (mb - ma) / sd}
-    return m
+class V2:
+    """swipe.js v2: d'-weighted ilat + balDelta, push/pull judged against the left/right model only."""
+    name = 'v2'
+    KEYS = ('ilat', 'balDelta')
+
+    @classmethod
+    def fit(cls, items):
+        L = [f for k, f in items if k == 'left']
+        R = [f for k, f in items if k == 'right']
+        m = {}
+        for k in cls.KEYS:
+            a = [x[k] for x in L if _ok(x.get(k))]
+            b = [x[k] for x in R if _ok(x.get(k))]
+            if not a or not b:
+                continue
+            ma, mb = sum(a) / len(a), sum(b) / len(b)
+            var = sum((x - ma) ** 2 for x in a) + sum((x - mb) ** 2 for x in b)
+            sd = max(1e-6, (var / max(1, len(a) + len(b) - 2)) ** 0.5)
+            m[k] = {'mid': (ma + mb) / 2, 'half': (mb - ma) / 2, 'sd': sd, 'd': (mb - ma) / sd}
+        return m
+
+    @classmethod
+    def classify(cls, f, m, z_min=0.6, min_ms=350):
+        s = d2 = 0.0
+        for k in cls.KEYS:
+            p = (m or {}).get(k)
+            if not p or abs(p['d']) < 1 or not _ok(f.get(k)):
+                continue
+            sign = (p['half'] > 0) - (p['half'] < 0)
+            s += abs(p['d']) * sign * (f[k] - p['mid']) / p['sd']
+            d2 += p['d'] ** 2
+        if not d2 or not (f.get('ms', 0) >= min_ms):
+            return None
+        z = s / (d2 / 2)
+        return 'right' if z >= z_min else 'left' if z <= -z_min else None
+
+    @classmethod
+    def loo(cls, items):
+        """LRCheck v2: leave-one-out for swipes; push/pull against the full model."""
+        sw = [(k, f) for k, f in items if k in ('left', 'right')]
+        r = {'n': 0, 'hit': 0, 'wrong': 0}
+        for i, (kind, f) in enumerate(sw):
+            rest = [x for j, x in enumerate(sw) if j != i]
+            if not any(k == 'left' for k, _ in rest) or not any(k == 'right' for k, _ in rest):
+                continue
+            d = cls.classify(f, cls.fit(rest))
+            r['n'] += 1
+            r['hit'] += d == kind
+            r['wrong'] += bool(d) and d != kind
+        full = lr_score(cls, items, cls.fit(sw))
+        r['pp'], r['pp_fp'] = full['pp'], full['pp_fp']
+        return r
 
 
-def lr_classify(f, m, z_min=0.6, min_ms=350):
-    s = d2 = 0.0
-    for k in KEYS:
-        p = m.get(k)
-        if not p or abs(p['d']) < 1 or not _ok(f.get(k)):
-            continue
-        sign = (p['half'] > 0) - (p['half'] < 0)
-        s += abs(p['d']) * sign * (f[k] - p['mid']) / p['sd']
-        d2 += p['d'] ** 2
-    if not d2 or not (f.get('ms', 0) >= min_ms):
-        return None
-    z = s / (d2 / 2)
-    return 'right' if z >= z_min else 'left' if z <= -z_min else None
+class V3:
+    """swipe.js v3: 3-class (left / right / push-pull) linear discriminant on ilatC, idep, bip, covariance shrunk 0.3."""
+    name = 'v3'
+    KEYS = ('ilatC', 'idep', 'bip')
+    CLS = ('left', 'right', 'pp')
+
+    @staticmethod
+    def _cls(kind):
+        return kind if kind in ('left', 'right') else 'pp'
+
+    @staticmethod
+    def _inv(A):
+        n = len(A)
+        M = [list(r) + [1.0 if i == j else 0.0 for j in range(n)] for i, r in enumerate(A)]
+        for c in range(n):
+            p = max(range(c, n), key=lambda r: abs(M[r][c]))
+            M[c], M[p] = M[p], M[c]
+            d = M[c][c] or 1e-12
+            M[c] = [x / d for x in M[c]]
+            for r in range(n):
+                if r != c:
+                    k = M[r][c]
+                    M[r] = [x - k * y for x, y in zip(M[r], M[c])]
+        return [r[n:] for r in M]
+
+    @staticmethod
+    def _maha(m, a, b):
+        d = [x - y for x, y in zip(a, b)]
+        return sum(d[i] * m['P'][i][j] * d[j] for i in range(len(d)) for j in range(len(d)))
+
+    @classmethod
+    def fit(cls, items, lam=0.3):
+        by = {c: [] for c in cls.CLS}
+        for kind, f in items:
+            x = [f.get(k) for k in cls.KEYS]
+            if all(_ok(v) for v in x):
+                by[cls._cls(kind)].append(x)
+        if any(len(by[c]) < 2 for c in cls.CLS):
+            return None
+        n = len(cls.KEYS)
+        mu = {c: [sum(x[j] for x in by[c]) / len(by[c]) for j in range(n)] for c in cls.CLS}
+        S = [[0.0] * n for _ in range(n)]
+        dof = -len(cls.CLS)
+        for c in cls.CLS:
+            for x in by[c]:
+                dof += 1
+                for i in range(n):
+                    for j in range(n):
+                        S[i][j] += (x[i] - mu[c][i]) * (x[j] - mu[c][j])
+        S = [[S[i][j] / max(1, dof) * (1 if i == j else 1 - lam) + (1e-12 if i == j else 0) for j in range(n)] for i in range(n)]
+        return {'mu': mu, 'P': cls._inv(S)}
+
+    @classmethod
+    def classify(cls, f, m, margin=0.5, min_ms=350):
+        if not m:
+            return None
+        x = [f.get(k) for k in cls.KEYS]
+        if not all(_ok(v) for v in x):
+            return None
+        s = {c: -0.5 * cls._maha(m, x, m['mu'][c]) for c in cls.CLS}
+        best = sorted(cls.CLS, key=lambda c: -s[c])[0]
+        lead = s[best] - max(s[c] for c in cls.CLS if c != best)
+        return best if best != 'pp' and lead >= margin and f.get('ms', 0) >= min_ms else None
+
+    @classmethod
+    def loo(cls, items):
+        """LRCheck v3: every trial (swipes and push/pull) scored leave-one-out."""
+        r = {'n': 0, 'hit': 0, 'wrong': 0, 'pp': 0, 'pp_fp': 0}
+        for i, (kind, f) in enumerate(items):
+            m = cls.fit([x for j, x in enumerate(items) if j != i])
+            if not m:
+                continue
+            d = cls.classify(f, m)
+            if kind in ('left', 'right'):
+                r['n'] += 1
+                r['hit'] += d == kind
+                r['wrong'] += bool(d) and d != kind
+            else:
+                r['pp'] += 1
+                r['pp_fp'] += bool(d)
+        return r
 
 
-def lr_score(test, model):
+def lr_rule(feats):
+    return V3 if any('ilatC' in f for _, f in feats) else V2
+
+
+def lr_score(rule, test, model):
     """swipes: hit / reversed / undecided; push/pull: how many the model would call left or right."""
     r = {'n': 0, 'hit': 0, 'wrong': 0, 'pp': 0, 'pp_fp': 0}
     for kind, f in test:
-        d = lr_classify(f, model)
+        d = rule.classify(f, model) if model else None
         if kind in ('left', 'right'):
             r['n'] += 1
             r['hit'] += d == kind
@@ -100,45 +209,38 @@ def lr_score(test, model):
     return r
 
 
-def lr_fit_all(feats):
-    return lr_fit([f for k, f in feats if k == 'left'], [f for k, f in feats if k == 'right'])
+def lr_halves(rule, feats):
+    """Unseen data within a sitting: learn on the first half of the trials, score the second half, and back."""
+    h = len(feats) // 2
+    tot = {'n': 0, 'hit': 0, 'wrong': 0, 'pp': 0, 'pp_fp': 0}
+    for tr, te in ((feats[:h], feats[h:]), (feats[h:], feats[:h])):
+        r = lr_score(rule, te, rule.fit(tr))
+        for k in tot:
+            tot[k] += r[k]
+    return tot
 
 
-def lr_loo(feats):
-    """The in-session check, scored like LRCheck: leave-one-out for swipes, push/pull against the full model."""
-    sw = [(k, f) for k, f in feats if k in ('left', 'right')]
-    hit = wrong = n = 0
-    for i, (kind, f) in enumerate(sw):
-        rest = [x for j, x in enumerate(sw) if j != i]
-        if not any(k == 'left' for k, _ in rest) or not any(k == 'right' for k, _ in rest):
-            continue
-        n += 1
-        d = lr_classify(f, lr_fit_all(rest))
-        hit += d == kind
-        wrong += bool(d) and d != kind
-    full = lr_score(feats, lr_fit_all(sw))
-    return {'n': n, 'hit': hit, 'wrong': wrong, 'pp': full['pp'], 'pp_fp': full['pp_fp']}
+def _fmt(r):
+    s = f"{r['hit']}/{r['n']} ({pct(r['hit'], r['n'])}), {r['wrong']} reversed"
+    return s + (f", push/pull {r['pp_fp']}/{r['pp']}" if r['pp'] else '')
 
 
 def lr_row(name, dev, dist, m, feats, seen):
-    """One table row; 'unseen data' = the model fitted on earlier sessions of the same device and tones."""
+    """One table row. halves = learn on one half of the session, score the other (both ways);
+    earlier sessions = the model fitted on earlier sessions of the same device and tones."""
+    rule = lr_rule(feats)
     pair = tuple(m.get('stereoPair') or ())
     tones = '/'.join(f'{f / 1000:g}' for f in pair) + 'k' if pair else '–'
     nl = sum(k == 'left' for k, _ in feats)
     nr = sum(k == 'right' for k, _ in feats)
-    c = lr_loo(feats)
+    c = rule.loo(feats)
     ok = bool(c['n']) and c['hit'] / c['n'] >= 0.6 and c['wrong'] / c['n'] <= 0.1 and (not c['pp'] or c['pp_fp'] / c['pp'] <= 0.15)
-    prev = [f for key, fs in seen if key == (dev, pair) for f in fs]
-    unseen = '–'
-    if prev:
-        u = lr_score(feats, lr_fit_all(prev))
-        unseen = f"{u['hit']}/{u['n']} ({pct(u['hit'], u['n'])}), {u['wrong']} reversed"
-        if u['pp']:
-            unseen += f", push/pull {u['pp_fp']}/{u['pp']}"
-    seen.append(((dev, pair), feats))
+    prev = [f for key, r_name, fs in seen if key == (dev, pair) and r_name == rule.name for f in fs]
+    earlier = _fmt(lr_score(rule, feats, rule.fit(prev))) if prev else '–'
+    seen.append(((dev, pair), rule.name, feats))
     pp = f"{c['pp_fp']}/{c['pp']}" if c['pp'] else '–'
-    return (f"| {name[:15]} | {dev} | {dist} | {tones} | {nl}+{nr} | {c['hit']}/{c['n']} ({pct(c['hit'], c['n'])}) "
-            f"| {c['wrong']} | {c['n'] - c['hit'] - c['wrong']} | {pp} | {unseen} | {'✅' if ok else '❌'} |")
+    return (f"| {name[:15]} | {rule.name} | {dev} | {dist} | {tones} | {nl}+{nr} | {c['hit']}/{c['n']} ({pct(c['hit'], c['n'])}) "
+            f"| {c['wrong']} | {c['n'] - c['hit'] - c['wrong']} | {pp} | {_fmt(lr_halves(rule, feats))} | {earlier} | {'✅' if ok else '❌'} |")
 
 
 def main():
@@ -198,9 +300,10 @@ def main():
         print(f"| **{label}** | | | {t['cues']} | {t['live']}/{t['live_n']} | **{t['hit']}/{t['cues']} ({pct(t['hit'], t['cues'])})** "
               f"| {t['wrong']} | {t['cues'] - t['hit'] - t['wrong']} | {fpm:.1f} | |")
     if lr_rows:
-        print('\n### Left / right (web/swipe.js v2 rule; in-session = leave-one-out, unseen data = model from earlier sessions)\n')
-        print('| session | device | cm | tones | swipes L+R | in-session hit | reversed | undecided | push/pull read as swipe | unseen data | check |')
-        print('|---|---|---|---|---|---|---|---|---|---|---|')
+        print('\n### Left / right (web/swipe.js rule named per row; check = leave-one-out like the live check;'
+              ' halves = learn on one half of the session, score the other; earlier = model from earlier sessions)\n')
+        print('| session | rule | device | cm | tones | swipes L+R | check hit | reversed | undecided | push/pull read as swipe | halves | earlier sessions | check |')
+        print('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
         for r in lr_rows:
             print(r)
 
