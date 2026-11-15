@@ -880,7 +880,7 @@ async function recStop() {
   rec.chunks = [];
   const where = await saveFiles(files, sub);
   $('recInfo').textContent = `Saved (${where}): ${base}.wav · .json, ${meta.seconds}s. Let Bravo know`;
-  bigNote(/\/(holo|compare)\/$/.test(where) ? `✅ Saved: ${base} (${meta.seconds}s, ${where})` : `⬇️ ${base}: ${where}`, 7000);
+  bigNote(saveFiles.toFolder ? `✅ Saved: ${base} (${meta.seconds}s, ${where})` : `⬇️ ${base}: ${where}`, 7000);
 }
 // data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its holo/
 let dir = null;
@@ -900,10 +900,12 @@ async function saveFiles(files, subName = 'holo') {
     try {
       const sub = await root.getDirectoryHandle(subName, { create: true });
       for (const [name, blob] of files) { const h = await sub.getFileHandle(name, { create: true }), w = await h.createWritable(); await w.write(blob); await w.close(); }
+      saveFiles.toFolder = true;
       return `${root.name}/${subName}/`;
     } catch (e) { console.warn('[holo] folder save', e); }
   }
   for (const [name, blob] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
+  saveFiles.toFolder = false;
   return `Downloaded. Please move it to ml/data/${subName}/`;
 }
 const clock = new THREE.Clock();
