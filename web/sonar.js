@@ -15,7 +15,7 @@
 
   const HIST_MS = 5000;
   const TRAIL_MS = 1200;
-  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽' };
+  const NAMES = { push: 'Push', pull: 'Pull', wave: 'Wave', left: 'Left', right: 'Right' };
   const COLORS = { push: '#4fc3f7', pull: '#ffb74d', wave: '#b388ff', left: '#80deea', right: '#80deea' };
   const S = {
     cv: null, g: null, W: 0, H: 0, active: false, video: null, cam: null,
@@ -128,7 +128,7 @@
     g.fillStyle = '#7fe0c8';
     g.font = '11px system-ui';
     g.textAlign = 'center';
-    g.fillText('💻 노트북 스피커·마이크', lx, ly + 20);
+    g.fillText('💻 Laptop speakers and mic', lx, ly + 20);
 
     // trail
     for (let i = 1; i < S.trail.length; i++) {
@@ -155,20 +155,20 @@
       g.globalAlpha = 1;
       g.fillStyle = color;
       g.font = '800 26px system-ui';
-      g.fillText(`${NAMES[recent.kind] || recent.kind}${recent.sim ? ' (키보드)' : ''}  ${recent.speed ? recent.speed.toFixed(2) + ' m/s' : ''}`, p.px, Math.max(30, p.py - 70 * p.scale));
+      g.fillText(`${NAMES[recent.kind] || recent.kind}${recent.sim ? ' (keyboard)' : ''}  ${recent.speed ? recent.speed.toFixed(2) + ' m/s' : ''}`, p.px, Math.max(30, p.py - 70 * p.scale));
     }
 
     // HUD
     g.textAlign = 'left';
     g.fillStyle = '#7fe0c8';
     g.font = '700 15px system-ui';
-    g.fillText('🛰️ SONAR VIEW · 카메라 없이 소리로 본 손', 14, 66);
+    g.fillText('🛰️ SONAR VIEW · the hand seen through sound, no camera', 14, 66);
     g.font = '12px system-ui';
     g.fillStyle = '#9aa3b2';
     const f = S.last;
-    const status = !f ? '▶ 시작을 누르면 초음파가 켜져요'
-      : f.calibrating ? '기준값 잡는 중… 손 치우기'
-      : `SNR ${Number.isFinite(f.snr) ? f.snr.toFixed(0) : '–'} dB · 속도 ${(f.v || 0) >= 0 ? '+' : ''}${(f.v || 0).toFixed(2)} m/s${f.stereo ? ' · 스테레오' : ''}`;
+    const status = !f ? 'Press ▶ Start to turn the ultrasound on'
+      : f.calibrating ? 'Measuring baseline… hand away'
+      : `SNR ${Number.isFinite(f.snr) ? f.snr.toFixed(0) : '–'} dB · speed ${(f.v || 0) >= 0 ? '+' : ''}${(f.v || 0).toFixed(2)} m/s${f.stereo ? ' · stereo' : ''}`;
     g.fillText(status, 14, 84);
     // depth gauge
     const gx = W - 26, gy0 = 30, gy1 = sceneH - 30;
@@ -179,8 +179,8 @@
     g.fillRect(gx - 3, gy - 2, 16, 4);
     g.textAlign = 'right';
     g.fillStyle = '#9aa3b2';
-    g.fillText('멀리', gx - 6, gy0 + 10);
-    g.fillText('가까이', gx - 6, gy1);
+    g.fillText('Far', gx - 6, gy0 + 10);
+    g.fillText('Near', gx - 6, gy1);
     g.restore();
   }
 
@@ -265,7 +265,7 @@
     }
     g.textAlign = 'left';
     g.fillStyle = '#9aa3b2';
-    g.fillText('지난 5초 · 파랑: 가까워지는 반사음 · 주황: 멀어지는 반사음 · 흰색: 손 속도 · 세로선: 감지된 동작', 10, y0 + H - 6);
+    g.fillText('Last 5 s · blue: approaching echo · orange: receding echo · white: hand speed · vertical lines: detected gestures', 10, y0 + H - 6);
   }
 
   // ------------------------------------------------------------------ optional webcam comparison

@@ -115,7 +115,7 @@ registerProcessor('bat-iq6', BatIQ6);
   };
   const H0 = [0, 0.12, 0.0];
   // built-in Galaxy Book calibration (laptop only): learned on 8 webcam-taught sittings; error = leave-one-sitting-out
-  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (8 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.707955,0.600407,-0.385781,-0.680277,0.000195],[0.101656,0.128168,0.14253,0.125858,0.001],[-0.163739,-0.281395,-0.309395,-0.410128,0.000068]]},"all":null},"errors":{"learned, laptop only":{"rms":[3.74,2.42,4.18],"motion":[5.48,2.95,5.81],"corr":[0.73,0.57,0.7]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652, 20261115_082736, 20261115_090503, 20261115_092315","amp":{"method":"leave-one-sitting-out over 8 sittings, scale estimated without the held-out sitting","corr":[0.73,0.57,0.7],"motion":[5.48,2.95,5.81],"modes":{"mse":{"k":[1,1,1],"rms":[3.74,2.42,4.18],"size":[0.68,0.57,0.69]},"half":{"k":[1.217,1.33,1.201],"rms":[3.76,2.48,4.26],"size":[0.83,0.75,0.83]},"matched":{"k":[1.481,1.77,1.442],"rms":[4.04,2.74,4.56],"size":[1.01,1,1]}}}} };
+  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (8 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.707955,0.600407,-0.385781,-0.680277,0.000195],[0.101656,0.128168,0.14253,0.125858,0.001],[-0.163739,-0.281395,-0.309395,-0.410128,0.000068]]},"all":null},"errors":{"learned, laptop only":{"rms":[3.74,2.42,4.18],"motion":[5.48,2.95,5.81],"corr":[0.73,0.57,0.7]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, Seojin, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652, 20261115_082736, 20261115_090503, 20261115_092315","amp":{"method":"leave-one-sitting-out over 8 sittings, scale estimated without the held-out sitting","corr":[0.73,0.57,0.7],"motion":[5.48,2.95,5.81],"modes":{"mse":{"k":[1,1,1],"rms":[3.74,2.42,4.18],"size":[0.68,0.57,0.69]},"half":{"k":[1.217,1.33,1.201],"rms":[3.76,2.48,4.26],"size":[0.83,0.75,0.83]},"matched":{"k":[1.481,1.77,1.442],"rms":[4.04,2.74,4.56],"size":[1.01,1,1]}}}} };
   // tone level the built-in calibration was learned at (worklet carrier amplitude per laptop stream, median of the teach
   // sittings, tones at 0.6 per channel). A quieter tone -> fewer phase steps pass the gate -> the map under-predicts motion.
   const REF_AMP = { galaxy: [0.0089, 0.0183, 0.0056, 0.0101] };
@@ -123,7 +123,7 @@ registerProcessor('bat-iq6', BatIQ6);
   // named calibrations: { calib, phones (the tone set it was learned with), label, scope } -- pass calib: CALIBS[name].calib
   // and phones: CALIBS[name].phones (or create({ calibName: name }) which sets both)
   const CALIBS = {
-    galaxy: { label: '노트북만 (여덟 앉음)', scope: 'leave-one-sitting-out over 8 sittings', phones: [], calib: DEFAULT_CALIB.galaxy },
+    galaxy: { label: 'Laptop only (eight sittings)', scope: 'leave-one-sitting-out over 8 sittings', phones: [], calib: DEFAULT_CALIB.galaxy },
   };
   const sub = (a, b) => a.map((v, i) => v - b[i]), nrm = (a) => Math.hypot(...a), unit = (a) => { const n = nrm(a) || 1; return a.map((v) => v / n); };
   function inv3(A) {
@@ -218,7 +218,7 @@ registerProcessor('bat-iq6', BatIQ6);
       return { turns: best, ru: rg(U), rw: rg(W), t0: T[b0], t1: T[b1], round };
     }
     function planeCoords(w) {
-      if (!solver.phone) return { U: w.map((q) => q.p[0]), W: w.map((q) => q.p[2]), name: '수평(x·z)' };
+      if (!solver.phone) return { U: w.map((q) => q.p[0]), W: w.map((q) => q.p[2]), name: 'horizontal (x·z)' };
       const m = [0, 1, 2].map((i) => w.reduce((s, q) => s + q.p[i], 0) / w.length);
       const S = [0, 1, 2].map((i) => [0, 1, 2].map((j) => w.reduce((s, q) => s + (q.p[i] - m[i]) * (q.p[j] - m[j]), 0) / w.length));
       const e = eig3(S), n = e.vec[2], vertical = Math.abs(n[2]) > Math.abs(n[1]);
@@ -227,7 +227,7 @@ registerProcessor('bat-iq6', BatIQ6);
       if (a[0] < 0) a = a.map((v) => -v);
       if ((vertical ? b[1] : b[2]) < 0) b = b.map((v) => -v);
       const pr = (q, ax) => ax.reduce((s, v, i) => s + v * (q.p[i] - m[i]), 0);
-      return { U: w.map((q) => pr(q, a)), W: w.map((q) => pr(q, b)), name: vertical ? '수직(화면과 나란히)' : '수평' };
+      return { U: w.map((q) => pr(q, a)), W: w.map((q) => pr(q, b)), name: vertical ? 'vertical (parallel to the screen)' : 'horizontal' };
     }
     // ---------------------------------------------------------------- live state and per-batch processing
     const live = { D: [], q: [], act: [], amp: [], off: [], identical: 1, mono: false, t: 0, still: 0, lastAct: [] };
@@ -299,12 +299,12 @@ registerProcessor('bat-iq6', BatIQ6);
         const merger = ctx.createChannelMerger(2); gainNode = ctx.createGain(); gainNode.gain.value = vol;
         [18000, 19500].forEach((f, i) => { const osc = ctx.createOscillator(); osc.frequency.value = f; const g = ctx.createGain(); g.gain.value = 0.5; osc.connect(g).connect(merger, 0, i); osc.start(); oscs.push(osc); });
         merger.connect(gainNode).connect(ctx.destination);
-        status((solver.cal ? '듣는 중 · 손은 노트북 앞 모서리 위, 책상에서 18~25cm, 웹캠에서 25~45cm(보정 범위)' : '듣는 중 · 손은 키보드 가운데~앞쪽 위 10~25cm') + (cfg.phone ? ` · 폰 ${cfg.freqs.slice(2).join('/')}Hz` : ''));
+        status((solver.cal ? 'Listening · hand above the laptop’s front edge, 18–25 cm above the desk, 25–45 cm from the webcam (the calibrated range)' : 'Listening · hand 10–25 cm above the middle-to-front of the keyboard') + (cfg.phone ? ` · phones ${cfg.freqs.slice(2).join('/')}Hz` : ''));
       } else {
         const buf = await ctx.decodeAudioData(arrayBuffer);
         src = ctx.createBufferSource(); src.buffer = buf; src.connect(node); src.start();
-        src.onended = () => status('WAV 재생 끝');
-        status(`WAV 재생 중: ${name} (${buf.numberOfChannels}채널, ${buf.duration.toFixed(0)}초)`);
+        src.onended = () => status('WAV playback finished');
+        status(`Playing WAV: ${name} (${buf.numberOfChannels} channels, ${buf.duration.toFixed(0)}s)`);
       }
       originReset();
       return { ctx, source: src };
@@ -315,7 +315,7 @@ registerProcessor('bat-iq6', BatIQ6);
       if (stream) stream.getTracks().forEach((t) => t.stop());
       if (ctx) ctx.close();
       ctx = node = src = stream = gainNode = null;
-      status('멈춤');
+      status('Stopped');
     }
     buildSolver(); resetLive();
     return {

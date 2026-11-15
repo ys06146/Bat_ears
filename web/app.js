@@ -27,7 +27,7 @@
     ForcePush.setReady(!(s.running && (s.calibrating || s.busy)));
     const chip = $('status');
     chip.className = 'chip' + (s.running ? (s.calibrating ? ' cal' : ' on') : '');
-    chip.textContent = !s.running ? '정지' : s.busy ? '대역 점검 중' : s.calibrating ? '기준값 잡는 중 · 손 치우기' : '듣는 중';
+    chip.textContent = !s.running ? 'Stopped' : s.busy ? 'Checking bands' : s.calibrating ? 'Measuring baseline · keep your hand away' : 'Listening';
     $('start').disabled = s.running;
     $('stop').disabled = !s.running;
     $('check').disabled = !s.running || s.busy;
@@ -35,27 +35,27 @@
 
   function showSettings(info) {
     if (!info) return;
-    const mark = (v) => (v === false ? '꺼짐 ✅' : v === true ? '켜짐 ⚠️' : '?');
-    $('settings').textContent = `마이크 ${info.micRate || '?'}Hz · 처리 ${info.ctxRate}Hz · 에코 제거 ${mark(info.ec)} · 잡음 억제 ${mark(info.ns)} · 자동 음량 ${mark(info.agc)}`;
+    const mark = (v) => (v === false ? 'off ✅' : v === true ? 'on ⚠️' : '?');
+    $('settings').textContent = `Mic ${info.micRate || '?'}Hz · processing ${info.ctxRate}Hz · echo cancellation ${mark(info.ec)} · noise suppression ${mark(info.ns)} · auto gain ${mark(info.agc)}`;
     if (info.autoTune) {
-      $('settings').textContent += ` · 사용 톤 ${info.f0}Hz`;
-      if (info.autoTune.occupied) $('settings').textContent += ' · 대체 대역을 찾지 못함';
+      $('settings').textContent += ` · tone in use ${info.f0}Hz`;
+      if (info.autoTune.occupied) $('settings').textContent += ' · no substitute band found';
     }
-    if (info.micRate && info.micRate < 40000) warn(`마이크가 ${info.micRate}Hz라서 ${info.micRate / 2}Hz 위는 못 받아요. 다른 마이크를 고르거나 소리 설정에서 마이크 형식을 48000Hz로 바꿔 주세요.`);
+    if (info.micRate && info.micRate < 40000) warn(`The mic runs at ${info.micRate}Hz, so it can’t hear above ${info.micRate / 2}Hz. Pick another mic, or set the mic format to 48000 Hz in Sound settings.`);
   }
 
   // ---- engine events
   BatEars.on('state', setStatus);
-  BatEars.on('error', (e) => warn(`마이크를 열 수 없어요 (${e.name}). 주소창 왼쪽 아이콘 → 마이크 허용 → 새로고침.`));
-  // the left/right model learned by an earlier "↔ 좌우만" check on this laptop (used only with the same tone pair)
+  BatEars.on('error', (e) => warn(`Can’t open the microphone (${e.name}). Click the icon left of the address bar → allow the microphone → reload.`));
+  // the left/right model learned by an earlier "↔ Left/right only" check on this laptop (used only with the same tone pair)
   // left/right model from this sitting's 🧭 check (sessionStorage: gone with the tab); models from older sittings
   // (localStorage, before v3) are dropped because they don't carry over
   try { localStorage.removeItem('batears-lr-model'); } catch (_) { /* none */ }
   try { const m = JSON.parse(sessionStorage.getItem('batears-lr-model')); if (m && m.model && m.pair) BatEars.config.lrModel = m; } catch (_) { /* none */ }
   // another laptop running Bat Ears (or any ultrasonic beacon) nearby spoils both devices' detection
-  const FOREIGN = '⚠️ 다른 초음파';
+  const FOREIGN = '⚠️ Foreign ultrasound';
   BatEars.on('foreign', (e) => {
-    if (e.tones.length) warn(`${FOREIGN} 소리가 들려요 (${e.tones.map((k) => k.toFixed(1)).join(', ')} kHz). 다른 노트북에서 Bat Ears를 켜 두었다면 꺼 주세요. 같이 켜면 서로 감지를 망쳐요.`);
+    if (e.tones.length) warn(`${FOREIGN} heard (${e.tones.map((k) => k.toFixed(1)).join(', ')} kHz). If Bat Ears is running on another laptop, please turn it off. Running both spoils detection on each.`);
     else if ($('warn').textContent.startsWith(FOREIGN)) warn('');
   });
   BatEars.on('gesture', (e) => {
@@ -63,7 +63,7 @@
     $('nPush').textContent = c.push || 0;
     $('nPull').textContent = c.pull || 0;
     const g = $('gesture');
-    const names = { push: '밀기 ⟶', pull: '⟵ 당기기', wave: '〰 흔들기', left: '◀ 왼쪽', right: '오른쪽 ▶' };
+    const names = { push: 'Push ⟶', pull: '⟵ Pull', wave: '〰 Wave', left: '◀ Left', right: 'Right ▶' };
     g.textContent = names[e.kind] || e.kind;
     g.className = e.kind;
     clearAt = performance.now() + 600;
@@ -77,7 +77,7 @@
     $('vUp').textContent = f.calibrating ? '…' : f.dUp.toFixed(1);
     $('vDown').textContent = f.calibrating ? '…' : f.dDown.toFixed(1);
     if (f.tone && !f.calibrating && !(f.snr >= BatEars.config.minSnr)) {
-      warn('반사 신호가 약해요 (SNR 15dB 미만). 음량을 올리거나, 헤드폰을 빼거나, 주파수를 낮춰 보세요.', true);
+      warn('The reflected signal is weak (SNR below 15 dB). Turn the volume up, unplug headphones, or try a lower frequency.', true);
     } else if ($('warn').dataset.auto === '1') warn('');
     if (calStart) {
       const total = (BatEars.config.settleMs || 0) + (BatEars.config.calibMs || 1500);
@@ -105,7 +105,7 @@
   $('stop').onclick = () => BatEars.stop();
   $('check').onclick = async () => {
     const sweep = await BatEars.bandCheck();
-    if (sweep) $('settings').textContent += ' · 대역 점검: ' + sweep.map((s) => `${(s.f / 1000).toFixed(1)}k ${s.snr.toFixed(0)}dB`).join(', ');
+    if (sweep) $('settings').textContent += ' · band check: ' + sweep.map((s) => `${(s.f / 1000).toFixed(1)}k ${s.snr.toFixed(0)}dB`).join(', ');
   };
   $('freq').oninput = () => {
     const f = Number($('freq').value);
@@ -114,10 +114,10 @@
   };
   $('vol').oninput = () => BatEars.setVolume($('vol').value);
   $('th').onchange = () => { BatEars.config.threshold = Number($('th').value) || 6; };
-  $('raw').onchange = () => { if (BatEars.running) warn('보정 설정은 정지 후 다시 시작해야 적용돼요.'); };
+  $('raw').onchange = () => { if (BatEars.running) warn('Calibration settings apply after you stop and start again.'); };
 
   // ---- recorder UI
-  const labelNames = { idle: '1 가만히', push: '2 밀기', pull: '3 당기기', wave: '4 흔들기', other: '5 기타' };
+  const labelNames = { idle: '1 Still', push: '2 Push', pull: '3 Pull', wave: '4 Wave', other: '5 Other' };
   BatRecorder.labels.forEach((name) => {
     const b = document.createElement('button');
     b.className = 'secondary';
@@ -128,15 +128,15 @@
   });
   function renderRecorder() {
     document.querySelectorAll('#labels button').forEach((b) => b.classList.toggle('sel', b.dataset.label === BatRecorder.label));
-    $('rec').textContent = BatRecorder.recording ? '■ 기록 정지' : '● 기록 시작';
-    $('recCount').textContent = `${BatRecorder.count}줄`;
+    $('rec').textContent = BatRecorder.recording ? '■ Stop recording' : '● Start recording';
+    $('recCount').textContent = `${BatRecorder.count} rows`;
     if (!BatRecorder.canPickFolder) {
       $('pickDir').disabled = true;
-      $('saveStatus').textContent = '이 브라우저는 자동 저장을 지원하지 않아요. CSV 저장 버튼을 쓰세요.';
+      $('saveStatus').textContent = 'This browser doesn’t support auto-save. Use the Save CSV button.';
     } else if (BatRecorder.lastError) {
-      $('saveStatus').textContent = `⚠️ 자동 저장 실패: ${BatRecorder.lastError}`;
+      $('saveStatus').textContent = `⚠️ Auto-save failed: ${BatRecorder.lastError}`;
     } else if (BatRecorder.folderName) {
-      $('saveStatus').textContent = `✅ 자동 저장: ${BatRecorder.folderName}` + (BatRecorder.lastSaved ? ` · 마지막 ${BatRecorder.lastSaved}` : '');
+      $('saveStatus').textContent = `✅ Auto-save: ${BatRecorder.folderName}` + (BatRecorder.lastSaved ? ` · last ${BatRecorder.lastSaved}` : '');
     }
   }
   BatRecorder.onChange(renderRecorder);
@@ -165,7 +165,7 @@
     } catch (_) { /* ignore */ }
   }
   SETTINGS.forEach((id) => { $(id).onchange = saveSettings; });
-  // lrOnly: the "↔ 좌우만" button = a short left/right-only stereo session (no push/pull, no typing block)
+  // lrOnly: the "↔ Left/right only" button = a short left/right-only stereo session (no push/pull, no typing block)
   async function startCollect(lrOnly = false) {
     if (BatCollect.active) return;
     const circleOnly = lrOnly === 'circle'; // the 🌀 circle session (2D spike)
@@ -245,13 +245,13 @@
     const list = ForcePush.scores();
     const ol = $('scores');
     ol.innerHTML = '';
-    if (!list.length) { ol.innerHTML = '<li>아직 기록이 없어요</li>'; return; }
+    if (!list.length) { ol.innerHTML = '<li>No records yet</li>'; return; }
     list.forEach((e) => {
       const li = document.createElement('li');
       if (e.t === newScoreAt) li.className = 'new';
       const d = new Date(e.t);
-      li.innerHTML = `<b></b><span>콤보 ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
-      li.querySelector('b').textContent = `${e.name || '익명'} · ${e.score}점`;
+      li.innerHTML = `<b></b><span>Combo ${e.combo || 0} · ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}</span>`;
+      li.querySelector('b').textContent = `${e.name || 'Anonymous'} · ${e.score} pts`;
       ol.appendChild(li);
     });
   }
@@ -262,7 +262,7 @@
     renderScores();
     if (r.rank < 0) return;
     nameFor = r.t;
-    $('nameTitle').textContent = r.record ? `🏆 신기록! ${r.score}점 · 이름을 남겨 주세요` : `🏆 ${r.rank + 1}등! ${r.score}점 · 이름을 남겨 주세요`;
+    $('nameTitle').textContent = r.record ? `🏆 New record! ${r.score} pts · please leave your name` : `🏆 ${r.rank + 1}! ${r.score} pts · please leave your name`;
     $('nameInput').value = '';
     $('nameBox').hidden = false;
     setTimeout(() => $('nameInput').focus(), 50);
@@ -281,7 +281,7 @@
   // presentation mode: fullscreen, no side panel, bigger text
   function setPresent(on) {
     document.body.classList.toggle('present', on);
-    $('presentBtn').textContent = on ? '✕ 발표 모드 끄기' : '⛶ 발표 모드';
+    $('presentBtn').textContent = on ? '✕ Exit presentation mode' : '⛶ Presentation mode';
     $('presentBtn').blur();
   }
   $('presentBtn').onclick = async () => {
@@ -295,14 +295,14 @@
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) setPresent(false); });
   if (params.get('present') === '1') setPresent(true);
   renderScores();
-  const renderMute = () => { $('mute').textContent = ForcePush.muted ? '🔇 효과음' : '🔊 효과음'; };
+  const renderMute = () => { $('mute').textContent = ForcePush.muted ? '🔇 Sound effects' : '🔊 Sound effects'; };
   $('mute').onclick = () => { ForcePush.setMuted(!ForcePush.muted); renderMute(); $('mute').blur(); };
   window.addEventListener('keydown', (e) => { if (e.key === 'm' || e.key === 'M') setTimeout(renderMute, 0); });
   $('resetScores').onclick = () => {
     const b = $('resetScores');
-    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = '정말 지울까요?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '지우기'; }, 3000); return; }
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Really clear it?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = 'Clear'; }, 3000); return; }
     try { localStorage.removeItem('batears.scores'); } catch (_) { /* ignore */ }
-    b.dataset.armed = ''; b.textContent = '지우기';
+    b.dataset.armed = ''; b.textContent = 'Clear';
     renderScores();
   };
 
@@ -314,7 +314,7 @@
       const res = await BatCollect.start({
         speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: params.get('noise') || 'auto',
         perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: params.get('lr') !== '1', noDownload: true,
-        swipeOnly: params.get('lr') === '1', // &lr=1: the "↔ 좌우만" session
+        swipeOnly: params.get('lr') === '1', // &lr=1: the "↔ Left/right only" session
         circleOnly: params.get('circle') === '1', // &circle=1: the 🌀 circle session
       });
       const session = res && res.session;

@@ -36,13 +36,13 @@
     wave: [[214, 140], [202, 100]],
   };
   const LABEL = {
-    left: '◀ 약 50cm를 0.4초에 한 번 · 돌아올 땐 천천히',
-    right: '약 50cm를 0.4초에 한 번 ▶ · 돌아올 땐 천천히',
-    push: '화면 쪽으로 15cm 빠르게 ⟶ · 돌아올 땐 천천히',
-    pull: '⟵ 내 쪽으로 15cm 빠르게 · 돌아올 땐 천천히',
-    wave: '화면 쪽으로 앞뒤 빠르게 3번 〰',
-    cw: '↻ 시계 방향: 화면 쪽→오른쪽→내 쪽→왼쪽, 1바퀴 반',
-    ccw: '↺ 반시계 방향: 화면 쪽→왼쪽→내 쪽→오른쪽, 1바퀴 반',
+    left: '◀ About 50 cm in 0.4 s · come back slowly',
+    right: 'About 50 cm in 0.4 s ▶ · come back slowly',
+    push: '15 cm quickly toward the screen ⟶ · come back slowly',
+    pull: '⟵ 15 cm quickly toward you · come back slowly',
+    wave: 'Quickly back and forth toward the screen, 3 times 〰',
+    cw: '↻ Clockwise: screen side → right → your side → left, one and a half turns',
+    ccw: '↺ Counter-clockwise: screen side → left → your side → right, one and a half turns',
   };
   const COLOR = { push: '#4fc3f7', pull: '#ffb74d', wave: '#b388ff', left: '#80deea', right: '#80deea', cw: '#a5d6a7', ccw: '#f48fb1' };
   const STROKE_MS = { left: 400, right: 400, push: 320, pull: 320, wave: 1100, cw: 1500, ccw: 1500 };
@@ -77,7 +77,7 @@
   }
 
   function create(container) {
-    const svg = el('svg', { viewBox: '0 0 360 226', class: 'coach', role: 'img', 'aria-label': '동작 안내' });
+    const svg = el('svg', { viewBox: '0 0 360 226', class: 'coach', role: 'img', 'aria-label': 'Gesture guide' });
     container.appendChild(svg);
     // laptop: screen, deck, the two speakers (left/right swipes use one tone per speaker)
     el('rect', { x: 110, y: 6, width: 140, height: 82, rx: 6, fill: '#1b2330', stroke: '#3a4558', 'stroke-width': 2 }, svg);

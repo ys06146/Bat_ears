@@ -18,9 +18,9 @@
   const VMAX = 2;               // gauge range, m/s
   const WAIT_MS = 9000;         // time to make the gesture
   const ROUNDS = [
-    { id: 'max', name: '최고 속도', kind: 'push', icon: '⚡', text: '최대한 빠르게 손바닥을 화면 쪽으로 미세요!' },
-    { id: 'aim', name: '정밀 도전', kind: 'pull', icon: '🎯', text: '목표 속도에 맞춰 손을 당기세요' },
-    { id: 'dark', name: '어둠 속에서', kind: 'push', icon: '🌑', text: '불이 꺼져요. 카메라라면 아무것도 못 봐요. 목표 속도로 미세요' },
+    { id: 'max', name: 'Top speed', kind: 'push', icon: '⚡', text: 'Push your palm toward the screen as fast as you can!' },
+    { id: 'aim', name: 'Precision challenge', kind: 'pull', icon: '🎯', text: 'Pull your hand at the target speed' },
+    { id: 'dark', name: 'In the dark', kind: 'push', icon: '🌑', text: 'The lights go out. A camera would see nothing. Push at the target speed' },
   ];
 
   const S = {
@@ -86,7 +86,7 @@
     }
     if (S.phase !== 'wait') return;
     const r = ROUNDS[S.round];
-    if (e.kind !== r.kind) { flash(`${e.kind === 'push' ? '밀기' : e.kind === 'pull' ? '당기기' : '다른 동작'}가 감지됐어요. 이번엔 ${r.kind === 'push' ? '밀기' : '당기기'}예요!`); return; }
+    if (e.kind !== r.kind) { flash(`${e.kind === 'push' ? 'Push' : e.kind === 'pull' ? 'Pull' : 'Another gesture'} detected. This time it’s ${r.kind === 'push' ? 'Push' : 'Pull'}!`); return; }
     finishRound(Math.max(0, e.speed || 0), !!e.simulated);
   }
 
@@ -183,7 +183,7 @@
   function physics(v, kind) {
     const d = shift(v), sign = kind === 'pull' ? -1 : 1, base = f0();
     const echo = Math.round(base + sign * d);
-    return `반사음 ${base.toLocaleString()} → ${echo.toLocaleString()} Hz (${sign > 0 ? '+' : '−'}${d.toFixed(0)} Hz) ⇒ v = Δf·c / 2f₀ = ${v.toFixed(2)} m/s`;
+    return `Echo ${base.toLocaleString()} → ${echo.toLocaleString()} Hz (${sign > 0 ? '+' : '−'}${d.toFixed(0)} Hz) ⇒ v = Δf·c / 2f₀ = ${v.toFixed(2)} m/s`;
   }
 
   function render() {
@@ -191,40 +191,40 @@
     e.dots.innerHTML = ROUNDS.map((x, i) => {
       const res = S.results[i];
       const cls = res ? 'done' : i === S.round && S.phase !== 'ready' && S.phase !== 'final' ? 'now' : '';
-      return `<span class="${cls}">${x.icon} ${x.name}${res ? ` · ${res.score}점` : ''}</span>`;
+      return `<span class="${cls}">${x.icon} ${x.name}${res ? ` · ${res.score} pts` : ''}</span>`;
     }).join('');
     e.timerWrap.hidden = S.phase !== 'wait';
     e.final.hidden = S.phase !== 'final';
     e.main.hidden = S.phase === 'final';
 
     if (S.phase === 'ready') {
-      e.title.textContent = '🎯 도플러 스피드건';
-      e.sub.textContent = '카메라 없이 소리의 메아리만으로 손 속도를 재요. 손바닥을 밀면 시작!';
+      e.title.textContent = '🎯 Doppler speed gun';
+      e.sub.textContent = 'Measures hand speed from the sound’s echo alone, no camera. Push your palm to start!';
       e.big.textContent = '–';
       e.unit.textContent = 'm/s';
-      e.phys.textContent = `노트북이 ${f0().toLocaleString()} Hz 소리를 내고, 움직이는 손의 메아리가 몇 Hz 바뀌는지로 속도를 계산해요.`;
+      e.phys.textContent = `The laptop plays a ${f0().toLocaleString()} Hz tone and works out the speed from how many Hz the moving hand’s echo shifts.`;
       e.target.textContent = '';
     } else if (S.phase === 'intro' || S.phase === 'wait') {
       e.title.textContent = `${r.icon} ${S.round + 1}/3 · ${r.name}`;
-      e.sub.textContent = S.phase === 'intro' ? '준비…' : r.text;
-      e.big.textContent = S.phase === 'intro' ? (r.kind === 'push' ? '밀기!' : '당기기!') : '…';
+      e.sub.textContent = S.phase === 'intro' ? 'Ready…' : r.text;
+      e.big.textContent = S.phase === 'intro' ? (r.kind === 'push' ? 'Push!' : 'Pull!') : '…';
       e.unit.textContent = S.phase === 'intro' ? '' : 'm/s';
-      e.target.textContent = S.target ? `목표 ${S.target.toFixed(2)} m/s (±0.06 안이면 만점 근처)` : '';
-      e.phys.textContent = S.phase === 'wait' ? `${r.kind === 'push' ? '밀면 메아리가 높아지고' : '당기면 메아리가 낮아지고'}, 빠를수록 더 많이 바뀌어요.` : '';
+      e.target.textContent = S.target ? `Target ${S.target.toFixed(2)} m/s (within ±0.06 is close to full marks)` : '';
+      e.phys.textContent = S.phase === 'wait' ? `${r.kind === 'push' ? 'Pushing raises the echo' : 'Pulling lowers the echo'}, and the faster you move, the bigger the shift.` : '';
     } else if (S.phase === 'result') {
       const res = S.results[S.results.length - 1];
-      e.title.textContent = `${r.icon} ${r.name} · ${res.score}점`;
-      e.big.textContent = res.v ? res.v.toFixed(2) : '놓침';
+      e.title.textContent = `${r.icon} ${r.name} · ${res.score} pts`;
+      e.big.textContent = res.v ? res.v.toFixed(2) : 'Missed';
       e.unit.textContent = res.v ? `m/s · ${kmh(res.v).toFixed(1)} km/h` : '';
-      e.target.textContent = res.target ? `목표 ${res.target.toFixed(2)} m/s · 차이 ${Math.abs(res.v - res.target).toFixed(2)} m/s` : '';
+      e.target.textContent = res.target ? `Target ${res.target.toFixed(2)} m/s · off by ${Math.abs(res.v - res.target).toFixed(2)} m/s` : '';
       e.sub.textContent = r.id === 'dark' && res.v
-        ? '📷 카메라: 깜깜해서 아무것도 못 봤어요 · 🦇 Bat Ears: 소리로 정확히 잡았어요'
-        : res.v ? (res.score >= 90 ? '완벽해요! 🔥' : res.score >= 60 ? '좋아요!' : '조금 더!') : '시간 안에 동작이 없었어요';
-      e.phys.textContent = res.v ? physics(res.v, r.kind) + (res.simulated ? ' (키보드 시뮬레이션)' : '') : '';
+        ? '📷 Camera: too dark, saw nothing · 🦇 Bat Ears: caught it precisely with sound'
+        : res.v ? (res.score >= 90 ? 'Perfect! 🔥' : res.score >= 60 ? 'Nice!' : 'A bit more!') : 'No gesture in time';
+      e.phys.textContent = res.v ? physics(res.v, r.kind) + (res.simulated ? ' (keyboard simulation)' : '') : '';
     } else if (S.phase === 'final') {
       const sum = total();
-      e.finalScore.textContent = `${sum}점`;
-      e.finalLines.innerHTML = S.results.map((x, i) => `<li>${ROUNDS[i].icon} ${ROUNDS[i].name}: <b>${x.v ? x.v.toFixed(2) + ' m/s' : '놓침'}</b>${x.target ? ` (목표 ${x.target.toFixed(2)})` : ''} · ${x.score}점</li>`).join('');
+      e.finalScore.textContent = `${sum} pts`;
+      e.finalLines.innerHTML = S.results.map((x, i) => `<li>${ROUNDS[i].icon} ${ROUNDS[i].name}: <b>${x.v ? x.v.toFixed(2) + ' m/s' : 'Missed'}</b>${x.target ? ` (target ${x.target.toFixed(2)})` : ''} · ${x.score} pts</li>`).join('');
       e.saveRow.hidden = S.lastSaved >= 0;
       renderTop();
     }
@@ -233,14 +233,14 @@
   function renderTop() {
     const list = loadTop();
     S.el.top.innerHTML = list.length
-      ? list.map((x, i) => `<li class="${i === S.lastSaved ? 'new' : ''}"><span>${i + 1}. ${escapeHtml(x.name)}</span><b>${x.score}점</b><span class="hint">최고 ${x.vmax.toFixed(2)} m/s</span></li>`).join('')
-      : '<li class="hint">아직 기록이 없어요. 첫 번째가 되어 보세요!</li>';
+      ? list.map((x, i) => `<li class="${i === S.lastSaved ? 'new' : ''}"><span>${i + 1}. ${escapeHtml(x.name)}</span><b>${x.score} pts</b><span class="hint">best ${x.vmax.toFixed(2)} m/s</span></li>`).join('')
+      : '<li class="hint">No records yet. Be the first!</li>';
   }
 
   const escapeHtml = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   function save() {
-    const name = (S.el.name.value || '').trim().slice(0, 12) || '익명';
+    const name = (S.el.name.value || '').trim().slice(0, 12) || 'Anonymous';
     const vmax = Math.max(0, ...S.results.map((x) => x.v));
     S.lastSaved = saveTop({ name, score: total(), vmax, t: Date.now() });
     render();
@@ -263,16 +263,16 @@
         <div class="sg-flash" data-k="flash" hidden></div>
       </div>
       <div class="sg-final" data-k="final" hidden>
-        <div class="sg-title">🏁 총점</div>
+        <div class="sg-title">🏁 Total</div>
         <div class="sg-big" data-k="finalScore"></div>
         <ul class="sg-lines" data-k="finalLines"></ul>
         <div class="row center" data-k="saveRow">
-          <input data-k="name" maxlength="12" placeholder="이름 (12자까지)">
-          <button data-k="saveBtn">순위표에 올리기</button>
+          <input data-k="name" maxlength="12" placeholder="Name (up to 12 characters)">
+          <button data-k="saveBtn">Add to leaderboard</button>
         </div>
-        <div class="sg-top-title">🏆 상위 10</div>
+        <div class="sg-top-title">🏆 Top 10</div>
         <ol class="sg-top" data-k="top"></ol>
-        <div class="row center"><button class="secondary" data-k="again">↻ 다시 하기 (밀기)</button></div>
+        <div class="row center"><button class="secondary" data-k="again">↻ Play again (push)</button></div>
       </div>`;
     root.querySelectorAll('[data-k]').forEach((n) => { S.el[n.dataset.k] = n; });
     S.el.saveBtn.onclick = save;

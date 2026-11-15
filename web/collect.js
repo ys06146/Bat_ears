@@ -1,4 +1,4 @@
-/* Guided trials: "3, 2, 1, 밀기!" with a beep. Every trial is labelled, scored live and saved automatically.
+/* Guided trials: "3, 2, 1, push!" with a beep. Every trial is labelled, scored live and saved automatically.
  *
  * window.BatCollect
  *   start(settings)  { who, dist, noise, perGesture, wave, swipe, typing, freq, speed, noDownload }
@@ -17,13 +17,13 @@
 (function () {
   'use strict';
 
-  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽', cw: '시계 방향 원', ccw: '반시계 방향 원' };
+  const NAMES = { push: 'Push', pull: 'Pull', wave: 'Wave', left: 'Left', right: 'Right', cw: 'Clockwise circle', ccw: 'Counter-clockwise circle' };
   const HOW = {
-    push: '손바닥을 화면 쪽으로 빠르게 ⟶ (돌아올 땐 천천히)',
-    pull: '손을 내 쪽으로 빠르게 ⟵ (돌아올 땐 천천히)',
-    wave: '손바닥을 앞뒤로 빠르게 〰',
-    left: '키보드 위 10~15cm에서 손을 왼쪽 끝까지 빠르게 쓸기 ◀ (돌아올 땐 천천히)',
-    right: '키보드 위 10~15cm에서 손을 오른쪽 끝까지 빠르게 쓸기 ▶ (돌아올 땐 천천히)',
+    push: 'Palm quickly toward the screen ⟶ (come back slowly)',
+    pull: 'Hand quickly toward you ⟵ (come back slowly)',
+    wave: 'Palm quickly back and forth 〰',
+    left: '10–15 cm above the keyboard, sweep your hand quickly all the way left ◀ (come back slowly)',
+    right: '10–15 cm above the keyboard, sweep your hand quickly all the way right ▶ (come back slowly)',
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
   const CIRCLE_WINDOW_MS = 3000; // a circle (1.5 turns, ~1 s per turn) needs a longer window (bravo)
@@ -69,8 +69,8 @@
       <div class="c-progress"></div>
       <div class="c-bar"><div></div></div>
       <div class="row c-buttons">
-        <button class="secondary c-undo">↩ 방금 거 취소 (U)</button>
-        <button class="secondary c-stop">■ 그만 (Esc)</button>
+        <button class="secondary c-undo">↩ Undo the last one (U)</button>
+        <button class="secondary c-stop">■ Stop (Esc)</button>
       </div>`;
     document.querySelector('.stage').appendChild(el);
     el.querySelector('.c-undo').onclick = () => undo();
@@ -102,10 +102,10 @@
     const parts = Object.keys(S.target).map((k) => {
       const done = S.trials.filter((t) => t.kind === k);
       const hit = done.filter((t) => t.result === 'hit').length;
-      return `${NAMES[k]} ${done.length}/${S.target[k]} (맞힘 ${hit})`;
+      return `${NAMES[k]} ${done.length}/${S.target[k]} (hit ${hit})`;
     });
     const all = S.trials.length, hits = S.trials.filter((t) => t.result === 'hit').length;
-    ui.progress.textContent = parts.join(' · ') + (all ? ` · 실시간 정확도 ${Math.round((hits / all) * 100)}%` : '');
+    ui.progress.textContent = parts.join(' · ') + (all ? ` · live accuracy ${Math.round((hits / all) * 100)}%` : '');
     const total = Object.values(S.target).reduce((a, b) => a + b, 0);
     ui.bar.style.width = `${Math.round((all / total) * 100)}%`;
   }
@@ -214,7 +214,7 @@
     };
     show(true);
     feedback('');
-    const headText = () => `${who} · ${dist}cm · ${{ noisy: '시끄러움', quiet: '조용함', auto: '소음 재는 중' }[noise]}${stereo ? ' · 스테레오' : ''} · 기기 ${S.device}`;
+    const headText = () => `${who} · ${dist}cm · ${{ noisy: 'noisy', quiet: 'quiet', auto: 'measuring noise' }[noise]}${stereo ? ' · stereo' : ''} · device ${S.device}`;
     ui.head.textContent = headText();
     renderProgress();
     let result = null;
@@ -231,15 +231,15 @@
     });
     const off = () => { offG(); offF(); offB(); };
     try {
-      say('준비', '마이크를 켜는 중이에요. 손을 치워 주세요');
+      say('Get ready', 'Turning on the mic. Please move your hand away');
       if (BatEars.running && BatEars.stereo !== stereo) await BatEars.stop(); // switch mono <-> stereo
       if (!BatEars.running) {
         const ok = await BatEars.start({ freq: opt.freq, raw: true, stereo });
-        if (!ok) { say('마이크를 열 수 없어요', '주소창 왼쪽에서 마이크를 허용하고 다시 눌러 주세요'); await sleep(3000); return null; }
+        if (!ok) { say('Can’t open the microphone', 'Allow the microphone left of the address bar and press again'); await sleep(3000); return null; }
       }
-      say('준비', '기준값을 잡는 중이에요. 손을 치우고 가만히');
+      say('Get ready', 'Measuring the baseline. Hand away, stay still');
       await waitReady(5000);
-      say('준비', '주변 소리를 재는 중이에요 (2초)');
+      say('Get ready', 'Measuring the background sound (2 s)');
       S.room = await measureRoom(2000 * speed);
       S.noiseSource = noise === 'auto' ? 'auto' : 'manual';
       if (noise === 'auto') noise = classifyNoise(S.room);
@@ -252,19 +252,19 @@
       BatRecorder.start();
       S.session = BatRecorder.session;
       // stereo sessions also keep the raw mic signal (WAV next to the CSV) so left/right ideas can be tested offline
-      if (stereo && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
+      if (stereo && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ saving raw audio';
       if (opt.circleOnly) {
-        say('손을 키보드 가운데~앞쪽 위 10~15cm에 두세요', '원은 책상과 나란하게, 지름 15~20cm로 1바퀴 반 (화면 경첩 쪽으로 넘어가지 않게). 시계 방향 = 화면을 마주 보고 봤을 때 화면 쪽(위)→오른쪽→내 쪽(아래)→왼쪽. 기록만 해요');
+        say('Hold your hand 10–15 cm above the middle-to-front of the keyboard', 'Draw the circle parallel to the desk, 15–20 cm across, one and a half turns (don’t go past the screen hinge). Clockwise = facing the screen: screen side (top) → right → your side (bottom) → left. Recorded only');
         await sleep(5000 * speed);
       } else if (opt.swipeOnly) {
         // left/right needs the hand close: at 55 cm the swipe echo was 7 dB weaker and the check failed (224420)
         const far = dist > 25;
-        say(far ? `⚠️ 거리 칸이 ${dist}cm예요. 좌우는 손을 키보드 위 10~15cm에 두고 해요` : '손을 키보드 위 10~15cm에 두세요',
-          BatEars.hasLrModel ? '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm)'
-            : '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm). 처음엔 기록만 하고, 끝나면 이 노트북에서 좌우가 되는지 알려 드려요');
+        say(far ? `⚠️ The distance field says ${dist}cm. For left/right, hold your hand 10–15 cm above the keyboard` : 'Hold your hand 10–15 cm above the keyboard',
+          BatEars.hasLrModel ? 'Sweep wide and fast, all the way left and right (about 50 cm)'
+            : 'Sweep wide and fast, all the way left and right (about 50 cm). At first it only records; when it finishes it tells you whether left/right works on this laptop');
         await sleep((far ? 4500 : 2500) * speed);
       } else {
-        say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
+        say('Hold your hand about 15 cm in front of the screen', 'Tip: hit fast, return slowly');
         await sleep(1500 * speed);
       }
 
@@ -274,7 +274,7 @@
         const tStart = performance.now();
         for (const n of ['3', '2', '1']) {
           if (S.aborted) break;
-          say(n, `다음: ${NAMES[kind]}`, `${S.trials.length + 1}번째`);
+          say(n, `Next: ${NAMES[kind]}`, `${S.trials.length + 1}th`);
           // 3: start pose and path, 2: slow ghost run, 1: ready again
           if (ui.coach) { if (n === '2') ui.coach.preview(kind, 500 * speed); else ui.coach.ready(kind); }
           beep(660, 90);
@@ -301,13 +301,13 @@
         S.win = null;
         const learning = ((kind === 'left' || kind === 'right') && !BatEars.hasLrModel) || kind === 'cw' || kind === 'ccw';
         const weak = learning && trial.swipe && trial.swipe.ePk < WEAK_ECHO_DB;
-        if (weak) feedback(`📏 에코가 약해요 (${trial.swipe.ePk.toFixed(0)}dB): 손을 키보드 위 10~15cm로 더 가까이 두고 쓸어 주세요`, 'miss');
-        else if (learning) feedback(kind === 'cw' || kind === 'ccw' ? `📝 ${NAMES[kind]} 기록했어요` : `📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
-        else if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
-        else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind}(으)로 잡혔어요 · 빠르게 치고 천천히 돌아오기`, 'bad');
-        else feedback('⚪ 못 잡았어요 · 조금 더 빠르고 크게', 'miss');
+        if (weak) feedback(`📏 The echo is weak (${trial.swipe.ePk.toFixed(0)}dB): bring your hand closer, 10–15 cm above the keyboard, and sweep again`, 'miss');
+        else if (learning) feedback(kind === 'cw' || kind === 'ccw' ? `📝 ${NAMES[kind]} Recorded` : `📝 ${NAMES[kind]} Recorded (during the left/right check, results come at the end)`, 'ok');
+        else if (res === 'hit') feedback(`✅ ${NAMES[kind]} Got it! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
+        else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind} was detected instead · hit fast, return slowly`, 'bad');
+        else feedback('⚪ Missed · a bit faster and bigger', 'miss');
         renderProgress();
-        say('', '쉬는 중…');
+        say('', 'Resting…');
         await sleep(900 * speed);
       }
 
@@ -317,16 +317,16 @@
         S.lrCheck = runLrCheck();
       }
       if (opt.typing && !S.aborted) {
-        say('⌨️ 평소처럼 타자 치기', '손짓은 하지 말고 15초 동안 아무 글이나 쳐 주세요 (오작동 측정)');
+        say('⌨️ Type as usual', 'No gestures: type anything for 15 s (false-trigger test)');
         feedback('');
         BatRecorder.setLabel('other');
         S.typingFrom = performance.now();
-        for (let i = 15; i > 0 && !S.aborted; i--) { ui.count.textContent = `${i}초`; await sleep(1000 * speed); }
+        for (let i = 15; i > 0 && !S.aborted; i--) { ui.count.textContent = `${i}s`; await sleep(1000 * speed); }
         S.typingTo = performance.now();
         S.typingFrom = 0;
         BatRecorder.setLabel('idle');
       }
-      say('끝! 손을 치우고 가만히', '', '');
+      say('Done! Hand away, stay still', '', '');
       await sleep(1500 * speed);
     } finally {
       off();
@@ -346,13 +346,13 @@
     S.closing = true;
     ui.el.querySelector('.c-undo').style.display = 'none';
     const btn = ui.el.querySelector('.c-stop');
-    btn.textContent = '✓ 닫기 (Enter)';
+    btn.textContent = '✓ Close (Enter)';
     return new Promise((resolve) => {
       const done = () => {
         clearTimeout(timer);
         window.removeEventListener('keydown', onKey);
         btn.onclick = () => stop();
-        btn.textContent = '■ 그만 (Esc)';
+        btn.textContent = '■ Stop (Esc)';
         ui.el.querySelector('.c-undo').style.display = '';
         resolve();
       };
@@ -366,13 +366,13 @@
   // The cued swipes decide whether this laptop can do left/right at all (bravo's swipe.js LRCheck: leave-one-out
   // accuracy >= 0.8 and d' >= 1.5). A pass stores the model for this tone pair; it is used from the next swipe on.
   const LR_REASON = {
-    no: '좌우 신호가 없어요 (스피커 간격·소리 효과 탓일 수 있어요)',
-    pp: '밀기·당기기가 좌우로 잘못 읽혀요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
-    rev: '좌우가 자주 반대로 나와요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
-    weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
-    fewpp: '밀기·당기기가 너무 적게 잡혔어요',
-    far: '📏 손이 멀거나 쓸기가 작아요: 키보드 위 10~15cm에서 노트북 폭보다 넓게 쓸고 다시 점검해 주세요',
-    not: '쓸기가 너무 적게 잡혔어요',
+    no: 'No left/right signal (speaker spacing or sound effects may be the cause)',
+    pp: 'Pushes and pulls are misread as left/right: sweep wider, 10–15 cm above the keyboard',
+    rev: 'Left/right often comes out reversed: sweep wider, 10–15 cm above the keyboard',
+    weak: 'The signal is weak: sweep wider, 10–15 cm above the keyboard',
+    fewpp: 'Too few pushes and pulls were caught',
+    far: '📏 Hand too far or sweeps too small: sweep wider than the laptop, 10–15 cm above the keyboard, and check again',
+    not: 'Too few sweeps were caught',
   };
   function runLrCheck() {
     // left/right + push/pull (false-swipe rate). bestCheck (swipe.js) runs the check with each cue set the trials
@@ -442,16 +442,16 @@
     if (!S.opt.noDownload || BatRecorder.folderName) {
       if (!BatRecorder.folderName) BatRecorder.download(S.session);
       BatRecorder.saveJson(`batears_${S.session}.json`, meta);
-      if (S.wav) BatRecorder.saveFile(meta.wav.file, S.wav.blob).then((ok) => { if (!ok && BatRecorder.folderName) feedback('⚠️ WAV를 폴더에 못 써서 다운로드 폴더로 보냈어요. ml/data로 옮겨 주세요', 'bad'); });
+      if (S.wav) BatRecorder.saveFile(meta.wav.file, S.wav.blob).then((ok) => { if (!ok && BatRecorder.folderName) feedback('⚠️ Couldn’t write the WAV to the folder, so it went to Downloads. Please move it to ml/data', 'bad'); });
     }
-    say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
+    say(S.aborted ? 'Stopped' : 'Done 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" folder: saved automatically` : 'Downloaded the CSV and JSON. Please put them in Drive nhng/ml/data', `${rows} rows`);
     const lr = S.lrCheck;
     const pc = (x) => (x == null ? '–' : `${Math.round(x * 100)}%`);
     const lrText = !lr ? '' : lr.ok
-      ? `↔ 좌우 쓸 수 있어요! (점검: 맞음 ${pc(lr.looAcc)} · 반대 ${pc(lr.looWrong)} · 밀기·당기기 오인 ${pc(lr.fpRate)}) 이제부터 좌우가 잡혀요`
-      : `↔ 이 노트북은 좌우 구분이 어려워요: ${lr.why} (맞음 ${pc(lr.looAcc)} · 반대 ${pc(lr.looWrong)} · 밀기·당기기 오인 ${pc(lr.fpRate)})`;
+      ? `↔ Left/right works! (check: correct ${pc(lr.looAcc)} · reversed ${pc(lr.looWrong)} · push/pull misread ${pc(lr.fpRate)}) Left/right is detected from now on`
+      : `↔ Left/right is hard on this laptop: ${lr.why} (correct ${pc(lr.looAcc)} · reversed ${pc(lr.looWrong)} · push/pull misread ${pc(lr.fpRate)})`;
     if (S.opt.swipeOnly && lr && !lr.hadModel) feedback(lrText, lr.ok ? 'ok' : 'bad'); // a learning run: no live verdicts to show
-    else feedback((n ? `실시간 정확도 ${Math.round((hits / n) * 100)}% (${hits}/${n})` : '') + (S.opt.typing ? ` · 타자 중 오작동 ${S.typingFalse}번` : '') + (lrText ? ` · ${lrText}` : ''), 'ok');
+    else feedback((n ? `Live accuracy ${Math.round((hits / n) * 100)}% (${hits}/${n})` : '') + (S.opt.typing ? ` · false triggers while typing ${S.typingFalse}` : '') + (lrText ? ` · ${lrText}` : ''), 'ok');
     return { session: S.session, rows, ...meta.live };
   }
 
@@ -460,7 +460,7 @@
     const last = S.trials.pop();
     BatRecorder.relabel(last.tStart, last.tEnd, 'skip');
     S.queue.push(last.kind);
-    feedback(`↩ 방금 ${NAMES[last.kind]} 취소. 나중에 다시 할게요`, 'miss');
+    feedback(`↩ Undid the last ${NAMES[last.kind]} . We’ll redo it later`, 'miss');
     renderProgress();
   }
 

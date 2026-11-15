@@ -91,7 +91,7 @@
     noiseFarHz: 1200,
     fftSize: 8192,
     foreignDb: 30,       // a narrow peak this far above the 15-23 kHz floor that isn't ours = another device's tone
-    // Startup interference handling (이재윤). Off on the main/demo page until it has been checked on real laptops; the
+    // Startup interference handling (Jaeyun Lee). Off on the main/demo page until it has been checked on real laptops; the
     // free experiment page (experiment-live.html) turns both on. maskForeignTones: listen 300 ms with the tone silent
     // and leave other devices' tones out of the Doppler bands. autoTune 'interference' (mono only): when the requested
     // band is occupied, move to a free tone and set the volume automatically.

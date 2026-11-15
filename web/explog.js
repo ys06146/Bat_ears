@@ -12,7 +12,7 @@
 (function () {
   'use strict';
   const KEY = 'batears.explog';
-  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽' };
+  const NAMES = { push: 'Push', pull: 'Pull', wave: 'Wave', left: 'Left', right: 'Right' };
   const S = { root: null, el: {}, rows: [] };
 
   const load = () => { try { const a = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (_) { return []; } };
@@ -64,33 +64,33 @@
     const g = r.by && r.by[k];
     if (!g || !g.n) return '<td class="dim">–</td>';
     const p = pct(g.hit, g.n);
-    return `<td class="${cls(p)}" title="맞힘 ${g.hit} · 틀림 ${g.wrong} · 놓침 ${g.miss}">${g.hit}/${g.n}</td>`;
+    return `<td class="${cls(p)}" title="Hit ${g.hit} · wrong ${g.wrong} · missed ${g.miss}">${g.hit}/${g.n}</td>`;
   }
 
   function render() {
     const rows = S.rows.slice().reverse();
     const e = S.el;
-    e.count.textContent = `${S.rows.length}회`;
+    e.count.textContent = `${S.rows.length} runs`;
     if (!rows.length) {
-      e.table.innerHTML = '<tr><td class="dim">아직 기록이 없어요. 위에서 🎯 시작으로 실험하면 끝날 때 자동으로 한 줄 추가돼요.</td></tr>';
+      e.table.innerHTML = '<tr><td class="dim">No records yet. Run an experiment with 🎯 Start above and a row is added automatically when it ends.</td></tr>';
       e.summary.innerHTML = '';
       return;
     }
     e.table.innerHTML = `
-      <tr><th>시각</th><th>사람</th><th>거리</th><th>소음</th><th>민감도</th><th>정확도</th><th>밀기</th><th>당기기</th><th>흔들기</th><th>틀림</th><th>놓침</th><th>타자 오작동</th><th>평균 속도</th><th>메모</th><th></th></tr>` +
+      <tr><th>Time</th><th>Person</th><th>Distance</th><th>Noise</th><th>Sensitivity</th><th>Accuracy</th><th>Push</th><th>Pull</th><th>Wave</th><th>Wrong</th><th>Missed</th><th>Typing false triggers</th><th>Mean speed</th><th>Memo</th><th></th></tr>` +
       rows.map((r) => {
         const p = pct(r.hits, r.trials);
         const conf = Object.entries(r.confusions || {}).map(([k, v]) => `${k} ${v}`).join(', ');
         return `<tr data-id="${esc(r.id)}">
-          <td>${new Date(r.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${r.aborted ? ' <span class="dim">(중단)</span>' : ''}</td>
+          <td>${new Date(r.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${r.aborted ? ' <span class="dim">(stopped)</span>' : ''}</td>
           <td>${esc(r.who)}</td><td>${esc(r.dist)}cm</td><td>${esc(r.noise)}</td><td>${esc(r.threshold)}dB</td>
           <td class="${cls(p)}"><b>${p}%</b> <span class="dim">${r.hits}/${r.trials}</span></td>
           ${gestureCell(r, 'push')}${gestureCell(r, 'pull')}${gestureCell(r, 'wave')}
           <td title="${esc(conf)}">${r.wrong}${conf ? ' <span class="dim">ⓘ</span>' : ''}</td><td>${r.miss}</td>
           <td>${r.typingFalse == null ? '–' : r.typingFalse}</td>
           <td>${r.avgSpeed == null ? '–' : r.avgSpeed + ' m/s'}</td>
-          <td><input class="xl-note" value="${esc(r.note)}" placeholder="메모"></td>
-          <td><button class="secondary small xl-del" title="이 줄 지우기">✕</button></td>
+          <td><input class="xl-note" value="${esc(r.note)}" placeholder="Memo"></td>
+          <td><button class="secondary small xl-del" title="Delete this row">✕</button></td>
         </tr>`;
       }).join('');
     // summary by distance (all people pooled)
@@ -102,7 +102,7 @@
     });
     e.summary.innerHTML = Object.keys(groups).sort((a, b) => a - b).map((d) => {
       const g = groups[d], p = pct(g.hits, g.trials);
-      return `<span class="xl-chip ${cls(p)}">${esc(d)}cm · <b>${p}%</b> (${g.hits}/${g.trials}, ${g.runs}회) · 틀림 ${g.wrong}${g.typingRuns ? ` · 타자 오작동 평균 ${(g.typing / g.typingRuns).toFixed(1)}` : ''}</span>`;
+      return `<span class="xl-chip ${cls(p)}">${esc(d)}cm · <b>${p}%</b> (${g.hits}/${g.trials}, ${g.runs} runs) · wrong ${g.wrong}${g.typingRuns ? ` · mean typing false triggers ${(g.typing / g.typingRuns).toFixed(1)}` : ''}</span>`;
     }).join('');
   }
 
@@ -126,13 +126,13 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
   async function copyMarkdown() {
-    const head = ['시각', '사람', '거리', '소음', '민감도', '정확도', '밀기', '당기기', '흔들기', '틀림', '놓침', '타자 오작동', '메모'];
+    const head = ['Time', 'Person', 'Distance', 'Noise', 'Sensitivity', 'Accuracy', 'Push', 'Pull', 'Wave', 'Wrong', 'Missed', 'Typing false triggers', 'Memo'];
     const lines = [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`].concat(S.rows.map((r) => {
       const g = (k) => (r.by && r.by[k] && r.by[k].n ? `${r.by[k].hit}/${r.by[k].n}` : '–');
       return `| ${new Date(r.t).toLocaleString()} | ${r.who} | ${r.dist}cm | ${r.noise} | ${r.threshold}dB | ${pct(r.hits, r.trials)}% (${r.hits}/${r.trials}) | ${g('push')} | ${g('pull')} | ${g('wave')} | ${r.wrong} | ${r.miss} | ${r.typingFalse == null ? '–' : r.typingFalse} | ${(r.note || '').replace(/\|/g, '/')} |`;
     }));
     const text = lines.join('\n');
-    try { await navigator.clipboard.writeText(text); flash('📋 마크다운 표를 복사했어요 (experiments/results.md에 붙여 넣기)'); } catch (_) { flash('복사가 막혔어요. CSV로 내보내 주세요'); }
+    try { await navigator.clipboard.writeText(text); flash('📋 Copied the Markdown table (paste into experiments/results.md)'); } catch (_) { flash('Copy was blocked. Please export as CSV'); }
   }
   let flashT = 0;
   function flash(msg) { S.el.msg.textContent = msg; clearTimeout(flashT); flashT = setTimeout(() => { S.el.msg.textContent = ''; }, 4000); }
@@ -142,15 +142,15 @@
     S.root = root;
     S.rows = load();
     root.innerHTML = `
-      <div class="row between"><b>📒 실험 기록장</b><span class="hint" data-k="count"></span></div>
-      <label class="wide">이번 조건 메모 <input data-k="note" class="grow" maxlength="80" placeholder="예: 천천히 밀기, 비스듬히, 볼륨 70%"></label>
-      <p class="hint">🎯 시작으로 한 번 실험이 끝날 때마다 결과가 아래 표에 자동으로 쌓여요. 위 메모도 같이 저장돼요. 표의 메모는 나중에 고칠 수 있어요.</p>
+      <div class="row between"><b>📒 Experiment log</b><span class="hint" data-k="count"></span></div>
+      <label class="wide">Memo for these conditions <input data-k="note" class="grow" maxlength="80" placeholder="e.g. slow push, at an angle, volume 70%"></label>
+      <p class="hint">Each time an experiment started with 🎯 Start finishes, its result is added to the table below automatically, along with the memo above. Memos in the table can be edited later.</p>
       <div class="xl-summary" data-k="summary"></div>
       <div class="xl-wrap"><table class="xl-table" data-k="table"></table></div>
       <div class="row">
-        <button class="secondary small" data-k="csv">CSV 내보내기</button>
-        <button class="secondary small" data-k="md">표 복사 (마크다운)</button>
-        <button class="secondary small" data-k="clear">전체 지우기</button>
+        <button class="secondary small" data-k="csv">Export CSV</button>
+        <button class="secondary small" data-k="md">Copy table (Markdown)</button>
+        <button class="secondary small" data-k="clear">Clear all</button>
         <span class="hint" data-k="msg"></span>
       </div>`;
     root.querySelectorAll('[data-k]').forEach((n) => { S.el[n.dataset.k] = n; });
@@ -160,8 +160,8 @@
     S.el.md.onclick = copyMarkdown;
     S.el.clear.onclick = () => {
       const b = S.el.clear;
-      if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = '정말 다 지울까요?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '전체 지우기'; }, 3000); return; }
-      S.rows = []; save(); render(); b.dataset.armed = ''; b.textContent = '전체 지우기';
+      if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Really clear everything?'; setTimeout(() => { b.dataset.armed = ''; b.textContent = 'Clear all'; }, 3000); return; }
+      S.rows = []; save(); render(); b.dataset.armed = ''; b.textContent = 'Clear all';
     };
     S.el.table.addEventListener('change', (e) => {
       const tr = e.target.closest('tr[data-id]');

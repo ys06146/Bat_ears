@@ -34,7 +34,7 @@
     const list = loadScores();
     const e = list.find((x) => x.t === t);
     if (!e) return;
-    e.name = String(name || '').trim().slice(0, 12) || '익명';
+    e.name = String(name || '').trim().slice(0, 12) || 'Anonymous';
     try { localStorage.setItem(SCORE_KEY, JSON.stringify(list)); } catch (_) { /* private mode */ }
   }
   function saveScore(entry) {
@@ -222,7 +222,7 @@
       say(`GRAB ★ +${25 * mult}`, '#ffe082');
       sfx.grab();
     } else if (e.kind === 'wave') {
-      if (now - S.lastShock < SHOCK_COOLDOWN_MS) { say('충격파 충전 중…', '#9aa3b2'); return; }
+      if (now - S.lastShock < SHOCK_COOLDOWN_MS) { say('Shockwave charging…', '#9aa3b2'); return; }
       S.lastShock = now;
       let n = 0;
       for (const o of S.objs) if (!o.dead && !o.star) { o.dead = true; burst(o, '#b388ff', 18, 1.2); n++; }
@@ -324,18 +324,18 @@
     g.fillStyle = '#e8e8e8';
     g.font = `600 ${Math.round(18 * S.k)}px Inter, system-ui`;
     g.textAlign = 'left';
-    g.fillText(`점수 ${S.score}`, 16, 28 * S.k);
+    g.fillText(`Score ${S.score}`, 16, 28 * S.k);
     g.fillStyle = '#ff6b6b';
     g.fillText('❤'.repeat(Math.max(0, S.lives)) + '♡'.repeat(Math.max(0, 3 - S.lives)), 16, 52 * S.k);
     if (S.running) {
       const left = Math.max(0, ROUND_MS - (now - S.t0)) / 1000;
       g.textAlign = 'right';
       g.fillStyle = left <= 5 ? '#fbbf24' : '#e8e8e8';
-      g.fillText(`${left.toFixed(1)}초`, W - 16, 28 * S.k);
+      g.fillText(`${left.toFixed(1)}s`, W - 16, 28 * S.k);
       const cd = Math.max(0, SHOCK_COOLDOWN_MS - (now - S.lastShock)) / 1000;
       g.font = `${Math.round(13 * S.k)}px Inter, system-ui`;
       g.fillStyle = cd > 0 ? '#9aa3b2' : '#b388ff';
-      g.fillText(cd > 0 ? `충격파 ${cd.toFixed(0)}초` : '〰 손 흔들면 충격파!', W - 16, 50 * S.k);
+      g.fillText(cd > 0 ? `Shockwave ${cd.toFixed(0)}s` : '〰 Wave your hand for a shockwave!', W - 16, 50 * S.k);
       // time bar
       g.fillStyle = '#ffffff22';
       g.fillRect(0, H - 4, W, 4);
@@ -345,7 +345,7 @@
         g.textAlign = 'left';
         g.font = `700 ${Math.round(15 * S.k)}px system-ui`;
         g.fillStyle = '#ff5a60';
-        g.fillText(`${S.combo} 콤보`, 16, 76 * S.k);
+        g.fillText(`${S.combo} Combo`, 16, 76 * S.k);
       }
     }
     g.textAlign = 'center';
@@ -368,31 +368,31 @@
     g.fillStyle = '#e8e8e8';
     g.font = `800 ${Math.round(34 * k)}px Inter, system-ui`;
     const top = S.over ? H / 2 - 170 * k : H / 2 - 30 * k;
-    g.fillText(S.over ? (S.rank === 0 ? `🏆 신기록! ${S.score}점` : `끝! 점수 ${S.score}`) : 'FORCE PUSH', W / 2, top);
+    g.fillText(S.over ? (S.rank === 0 ? `🏆 New record! ${S.score} pts` : `Game over! Score ${S.score}`) : 'FORCE PUSH', W / 2, top);
     g.font = `${Math.round(16 * k)}px system-ui`;
     g.fillStyle = '#9aa3b2';
-    const hint = !S.ready ? '기준값 잡는 중… 손을 화면에서 치워 주세요'
-      : S.over ? '손바닥을 밀면 다시 시작'
-        : '손바닥을 화면 쪽으로 밀면 시작 (키보드 ↑ 도 가능)';
+    const hint = !S.ready ? 'Measuring baseline… please move your hand away from the screen'
+      : S.over ? 'Push your palm to play again'
+        : 'Push your palm toward the screen to start (or press ↑)';
     g.fillText(hint, W / 2, top + 30 * k);
     if (!S.over) {
       g.font = `${Math.round(14 * k)}px system-ui`;
-      g.fillText('밀기 ⟶ 운석 부수기 · 당기기 ⟵ 별 잡기 · 흔들기 〰 충격파 (W)', W / 2, top + 56 * k);
+      g.fillText('Push ⟶ smash meteors · Pull ⟵ grab stars · Wave 〰 shockwave (W)', W / 2, top + 56 * k);
       return;
     }
     g.fillStyle = '#c8cdd6';
     g.font = `${Math.round(14 * k)}px system-ui`;
-    g.fillText(`맞힌 수 ${S.hits} · 최대 콤보 ${S.maxCombo} · 놓친 운석 ${S.misses}`, W / 2, top + 56 * k);
+    g.fillText(`Hits ${S.hits} · best combo ${S.maxCombo} · meteors missed ${S.misses}`, W / 2, top + 56 * k);
     // top 10
     const list = loadScores();
     g.font = `700 ${Math.round(15 * k)}px system-ui`;
     g.fillStyle = '#e8e8e8';
-    g.fillText('🏆 상위 10', W / 2, top + 90 * k);
+    g.fillText('🏆 Top 10', W / 2, top + 90 * k);
     g.font = `${Math.round(14 * k)}px ui-monospace, Menlo, monospace`;
     list.forEach((e, i) => {
       g.fillStyle = i === S.rank ? '#ff5a60' : '#9aa3b2';
-      const name = (e.name || (i === S.rank ? '이름 입력 중…' : '익명')).padEnd(8, ' ').slice(0, 10);
-      const line = `${String(i + 1).padStart(2)}. ${name} ${String(e.score).padStart(5)}점  콤보 ${String(e.combo || 0).padStart(2)}`;
+      const name = (e.name || (i === S.rank ? 'Entering name…' : 'Anonymous')).padEnd(8, ' ').slice(0, 10);
+      const line = `${String(i + 1).padStart(2)}. ${name} ${String(e.score).padStart(5)} pts  combo ${String(e.combo || 0).padStart(2)}`;
       g.fillText(line + (i === S.rank ? ' ◀' : '  '), W / 2, top + (112 + i * 20) * k);
     });
   }

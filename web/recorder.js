@@ -116,7 +116,7 @@
     clear() { rows.length = 0; notify(); },
     onChange(fn) { watchers.push(fn); },
     async pickFolder() {
-      if (!api.canPickFolder) throw new Error('이 브라우저는 폴더 저장을 지원하지 않아요. 크롬으로 열어 주세요.');
+      if (!api.canPickFolder) throw new Error('This browser doesn’t support saving to a folder. Please open it in Chrome.');
       dir = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' });
       idbSet('dataDir', dir).catch(() => {}); // remember it so next time needs no picking
       if (recording && !timer) timer = setInterval(() => saveToFolder(session), AUTOSAVE_MS);
