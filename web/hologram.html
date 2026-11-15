@@ -540,7 +540,9 @@ function stop() {
   running = false;
 }
 // ◎: the hand is at the centre now (live: the tape mark; replay: where the webcam sees it)
+const glide = { from: null, t0: 0, ms: 350 };   // ◎ eases the drawn hand to the new centre (Seojin 12:13: smaller re-centre jumps)
 function recenter() {
+  if (frame.lastDraw) { glide.from = frame.lastDraw.slice(); glide.t0 = performance.now(); }
   const g = CMP.on && CMP.pts ? CMP.pts : ghost.on ? ghostAt(disp.s) : null;
   HOME = g ? palmOf(g) : HOME0.slice();
   resetDisplay();
@@ -944,7 +946,14 @@ function frame() {
     frame.wasOut = out;
     boneMat.color.set(out ? 0xffb74d : 0x2bb8f0); jointMat.color.set(out ? 0xffd180 : 0x7fdcff); palmShader.uniforms.color.value.set(out ? 0xffb74d : CYAN);
   }
-  const P = T3(HOME.map((h, i) => h + softLimit(dOff[i], ZONE[i])));
+  let drawAt = HOME.map((h, i) => h + softLimit(dOff[i], ZONE[i]));
+  if (glide.from) {
+    const u = Math.min(1, (performance.now() - glide.t0) / glide.ms), e = u * u * (3 - 2 * u);   // smoothstep
+    drawAt = drawAt.map((v, i) => glide.from[i] + (v - glide.from[i]) * e);
+    if (u >= 1) glide.from = null;
+  }
+  frame.lastDraw = drawAt;
+  const P = T3(drawAt);
   hand.position.copy(P);
   // before ▶ the hand waits at the hand spot, dim and still (it is not tracking yet), instead of an empty stage
   hand.visible = true;
