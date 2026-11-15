@@ -658,15 +658,18 @@ function frame() {
   }
   const P = T3(HOME.map((h, i) => h + softLimit(dOff[i], ZONE[i])));
   hand.position.copy(P);
-  hand.visible = running || SIM;
+  // before ▶ the hand waits at the hand spot, dim and still (it is not tracking yet), instead of an empty stage
+  hand.visible = true;
+  const live = running || SIM;
   palmShader.uniforms.time.value = el;
-  boneMat.opacity = 0.62 + 0.08 * Math.sin(el * 7.3) * Math.sin(el * 3.1);   // a little hologram flicker
+  boneMat.opacity = (live ? 1 : 0.35) * (0.62 + 0.08 * Math.sin(el * 7.3) * Math.sin(el * 3.1));   // a little hologram flicker
+  jointMat.opacity = live ? 0.75 : 0.3;
   const r = errEl.userData.r || [0.04, 0.032, 0.045];
-  errEl.visible = $('showErr').checked && hand.visible;
+  errEl.visible = $('showErr').checked && live;
   errEl.position.copy(P); errEl.scale.set(r[0], r[1], r[2]);
   shadow.position.set(P.x, 0.001, P.z); shadow.visible = hand.visible;
   drop.geometry.setFromPoints([new THREE.Vector3(P.x, 0.001, P.z), P]); drop.computeLineDistances(); drop.visible = hand.visible;
-  rawDot.visible = $('showRaw').checked && hand.visible; rawDot.position.copy(T3(disp.raw));
+  rawDot.visible = $('showRaw').checked && live; rawDot.position.copy(T3(disp.raw));
   const g = ghost.on && running ? ghostAt(disp.s) : null;
   ghostLines.visible = ghostJoints.visible = !!g;
   if (g) {
