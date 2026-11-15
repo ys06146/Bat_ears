@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115023800">
+<link rel="stylesheet" href="style.css?v=20261115025047">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
@@ -66,7 +66,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <label>반복 <select id="reps"><option>5</option><option selected>6</option><option>7</option><option>8</option><option>10</option></select>번</label>
   <button id="enroll">📝 등록 시작</button>
   <div id="dots"></div>
-  <p class="hint">동작 3~6개를 골라 순서를 정하고, 내 리듬으로 반복해요. 반복이 고를수록 잠금이 단단해져요.</p></div>
+  <p class="hint">동작 3~6개를 골라 순서를 정하고, 내 리듬으로 반복해요. 첫 1번은 연습이라 기록하지 않아요. 반복이 고를수록 잠금이 단단해져요.</p></div>
 <div class="card"><h3>🔓 잠금 해제</h3>
   <label>잠금 <select id="tpl"></select></label>
   <label>지금 하는 사람 <input id="performer" type="text" maxlength="16" placeholder="같으면 비워 두기"></label>
@@ -79,7 +79,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115023800"></script><script src="swipe.js?v=20261115023800"></script><script src="wave.js?v=20261115023800"></script><script src="iq.js?v=20261115023800"></script><script src="dsp.js?v=20261115023800"></script><script src="circle.js?v=20261115023800"></script><script src="auth.js?v=20261115023800"></script>
+<script src="robust.js?v=20261115025047"></script><script src="swipe.js?v=20261115025047"></script><script src="wave.js?v=20261115025047"></script><script src="iq.js?v=20261115025047"></script><script src="dsp.js?v=20261115025047"></script><script src="circle.js?v=20261115025047"></script><script src="auth.js?v=20261115025047"></script>
 <script>
 (() => {
 'use strict';
@@ -302,24 +302,26 @@ async function enroll() {
   if (pick.length < 3 || pick.length > 6) { alert('동작을 3~6개 골라 주세요'); return; }
   const N = Number($('reps').value) || 6, want = pick.slice();
   busy = true; lock(true); meter(null);
-  $('dots').replaceChildren(...Array.from({ length: N }, () => document.createElement('span')));
+  // one practice repetition first (kept out of the template: real first reps ran far from the rest, bravo)
+  $('dots').replaceChildren(...Array.from({ length: N + 1 }, (_, i) => { const d = document.createElement('span'); if (!i) { d.title = '연습'; d.style.outline = '1px dashed #9aa3b2'; } return d; }));
   const reps = [];
-  let circleSign = null, circleVote = 0;
-  for (let tries = 0; reps.length < N && tries < N * 3; tries++) {
-    say('📝', `${reps.length + 1}/${N}번째`, seqText(want) + ' · 지금 해 주세요 (동작마다 빠르게, 사이에 잠깐 멈추기)');
+  let practice = null, circleSign = null, circleVote = 0;
+  for (let tries = 0; reps.length < N && tries < (N + 1) * 3; tries++) {
+    say('📝', practice ? `${reps.length + 1}/${N}번째` : '연습 1번 (기록 안 해요)', seqText(want) + ' · 지금 해 주세요 (동작마다 빠르게, 사이에 잠깐 멈추기)');
     showLive([]);
     const r = await capture(want.length, { want, sign: circleSign, vote: circleVote });
     circleVote = r.vote || 0;
     circleSign = Math.sign(circleVote) || null;
     const k = r.att.kinds, ok = k.length === want.length && k.every((x, i) => x === want[i]);
     showLive(k, want);
-    if (ok) { reps.push(r.att); $('dots').children[reps.length - 1].className = 'on'; say('✓', `${reps.length}/${N} 기록했어요`, `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
+    if (ok && !practice) { practice = r.att; $('dots').children[0].className = 'on'; say('✓', '연습 끝 · 이제 진짜예요', `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
+    else if (ok) { reps.push(r.att); $('dots').children[reps.length].className = 'on'; say('✓', `${reps.length}/${N} 기록했어요`, `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
     else say('↺', '다시 해 주세요', (k.length ? '잡힌 순서: ' + seqText(k) : '손짓이 안 잡혔어요') + ' · 원하는 순서: ' + seqText(want));
     await sleep(1100);
   }
   if (reps.length < 3) { say('❌', '등록하지 못했어요', '반복이 3번보다 적게 잡혔어요. 다시 해 주세요'); busy = false; lock(false); return; }
   const tpl = A.buildTemplate(reps);
-  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, circleVote: +circleVote.toFixed(2), stereo: STEREO });
+  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, circleVote: +circleVote.toFixed(2), stereo: STEREO, practice });
   templates[owner] = tpl;
   store.set('batears-auth-templates', templates);
   refreshTpl(owner);
