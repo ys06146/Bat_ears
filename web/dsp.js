@@ -75,6 +75,8 @@
     noiseFarHz: 1200,
     fftSize: 8192,
     foreignDb: 30,       // a narrow peak this far above the 15-23 kHz floor that isn't ours = another device's tone
+    maskForeignTones: true,
+    autoTune: false,     // opt-in mono startup sweep and volume calibration
     volume: 0.6,
     keyboard: true,      // ArrowUp / ArrowDown simulate gestures
   };
@@ -85,6 +87,7 @@
     raf: 0, running: false, tone: false, busy: false, raw: true,
     f0: 20000, binHz: 0, G: 0, W: 0,
     calibFrom: 0, calibUntil: 0, calib: null, base: null, noiseBase: null, wasCalibrating: false,
+    idleSpectra: [], mask: null, volume: 0,
     cand: null, candFrames: 0, lastFire: 0,
     wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
     last: null, agg: null, counts: { push: 0, pull: 0, wave: 0 },
@@ -103,7 +106,7 @@
     });
   }
 
-  function newChan(f) { return { f, ups: [], downs: [], noises: [], base: null, wobble: { up: 1, down: 1 }, noiseBase: null }; }
+  function newChan(f) { return { f, mask: toneMask(f), ups: [], downs: [], noises: [], base: null, wobble: { up: 1, down: 1 }, noiseBase: null }; }
   function chanThresholds(ch) {
     return { up: Math.max(config.threshold, config.autoK * ch.wobble.up), down: Math.max(config.threshold, config.autoK * ch.wobble.down) };
   }
@@ -203,8 +206,23 @@
     return toDb(p / Math.max(1, k2 - k1 + 1));
   }
 
+  // Detect persistent external tones with our oscillators silent. Use absolute FFT bins so the mask
+  // stays put if the measured carrier's peak moves by a bin.
+  function toneMask(f) {
+    if (!config.maskForeignTones || !window.BatRobust || !st.idleSpectra.length) return null;
+    const k = Math.round(f / st.binHz);
+    const offsets = window.BatRobust.foreignToneMask(st.idleSpectra, k, st.G, st.W);
+    const remaining = (sign) => {
+      let count = 0;
+      for (let i = st.G; i <= st.W; i++) if (!offsets.has(sign * i)) count++;
+      return count;
+    };
+    if (!remaining(1) || !remaining(-1)) return null;
+    return new Set([...offsets].map((offset) => k + offset));
+  }
+
   // Carrier level, noise floor, and echo energy just above / below the carrier (dB relative to the carrier).
-  function measure(a, f0) {
+  function measure(a, f0, mask = null) {
     const { binHz, G, W } = st;
     const kp = peakNear(a, Math.round(f0 / binHz), 3);
     const carrier = dbv(a, kp), noise = localNoise(a, kp);
@@ -213,7 +231,8 @@
     let upL = 0, dnL = 0, num = 0, den = 0;
     for (let i = G; i <= W; i++) {
       const hz = i * binHz;
-      const pu = lin(dbv(a, kp + i)), pd = lin(dbv(a, kp - i));
+      const pu = mask?.has(kp + i) ? 0 : lin(dbv(a, kp + i));
+      const pd = mask?.has(kp - i) ? 0 : lin(dbv(a, kp - i));
       upL += pu; dnL += pd; num += hz * (pu - pd); den += pu + pd;
       for (let b = 0; b < SUB_EDGES.length - 1; b++) {
         if (hz >= SUB_EDGES[b] && hz < SUB_EDGES[b + 1]) { subUp[b] += pu; subDn[b] += pd; break; }
@@ -238,7 +257,7 @@
     if (!ctx) return;
     const t = ctx.currentTime;
     if (f) { st.f0 = f; osc.frequency.setValueAtTime(f, t); }
-    const vol = on ? config.volume : 0;
+    const vol = on ? st.volume : 0;
     ramp(gain.gain, st.stereo ? 0 : vol, t);
     if (st.gainL) { ramp(st.gainL.gain, st.stereo ? vol : 0, t); ramp(st.gainR.gain, st.stereo ? vol : 0, t); }
     st.tone = on;
@@ -249,7 +268,8 @@
       st.calib = { ups: [], downs: [], noises: [] };
       st.noiseBase = null;
       st.base = null;
-      st.sch = { L: newChan(config.stereoFreqs[0]), R: newChan(config.stereoFreqs[1]) };
+      st.mask = st.stereo ? null : toneMask(st.f0);
+      st.sch = st.stereo ? { L: newChan(config.stereoFreqs[0]), R: newChan(config.stereoFreqs[1]) } : null;
       st.robust = makeRobust(); // fresh floors for every new calibration
       st.burst = null;
       st.burstLock = 0;
@@ -313,7 +333,8 @@
     Object.assign(st, {
       ctx, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount),
       stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0, scandSince: 0, prevStereoT: 0,
-      running: true, tone: false, busy: false, raw, f0, binHz,
+      running: true, tone: false, busy: true, raw, f0, binHz,
+      idleSpectra: [], mask: null, volume: config.volume,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
       base: null, cand: null, candFrames: 0, lastFire: 0, last: null,
       wobble: { up: 1, down: 1 }, vHist: [], flips: [], lastSign: 0, lastWave: 0,
@@ -328,23 +349,43 @@
       ctxRate: ctx.sampleRate, micRate: s.sampleRate, ec: s.echoCancellation, ns: s.noiseSuppression,
       agc: s.autoGainControl, ch: s.channelCount, fft: analyser.fftSize, binHz: +binHz.toFixed(2), mic: track.label,
     };
-    setTone(true);
+    const autoTune = !stereo && (opt.autoTune ?? config.autoTune) && window.BatRobust;
+    if (window.BatRobust && (config.maskForeignTones || autoTune)) {
+      emit('state', snapshot());
+      const spectra = await sampleSpectra(analyser, 300);
+      if (st.ctx !== ctx) return false;
+      st.idleSpectra = spectra;
+      if (autoTune) {
+        const requestedVolume = st.volume;
+        const tuned = await tuneMono(ctx, f0, spectra);
+        if (st.ctx !== ctx) return false;
+        if (tuned) {
+          st.f0 = tuned.f;
+          if (st.volume === requestedVolume) st.volume = tuned.volume;
+          Object.assign(api.info, { f0: tuned.f, autoTune: { ...tuned, volume: st.volume } });
+        }
+      }
+    }
+    st.busy = false;
+    setTone(true, st.f0);
     st.raf = requestAnimationFrame(loop);
     return true;
   }
 
   async function stop() {
     if (!st.running) return null;
+    const { ctx, osc, oscL, oscR, stream } = st;
+    const s = summary();
     setTone(false);
     st.running = false;
-    cancelAnimationFrame(st.raf);
-    await sleep(150);
-    try { st.osc.stop(); st.oscL.stop(); st.oscR.stop(); } catch (_) { /* ignore */ }
-    st.stream.getTracks().forEach((t) => t.stop());
-    try { await st.ctx.close(); } catch (_) { /* ignore */ }
+    st.busy = false;
     st.ctx = null;
-    const s = summary();
+    cancelAnimationFrame(st.raf);
     emit('state', snapshot());
+    await sleep(150);
+    try { osc.stop(); oscL.stop(); oscR.stop(); } catch (_) { /* ignore */ }
+    stream.getTracks().forEach((t) => t.stop());
+    try { await ctx.close(); } catch (_) { /* ignore */ }
     return s;
   }
 
@@ -371,7 +412,7 @@
     const tScan = performance.now();
     if (tScan - st.foreignT > 250) { st.foreignT = tScan; scanForeign(st.data, tScan); }
     if (st.stereo) { stereoStep(performance.now()); return; }
-    const m = measure(st.data, st.f0);
+    const m = measure(st.data, st.f0, st.mask);
     const now = performance.now();
     const calibrating = st.tone && now < st.calibUntil;
     let dUp = 0, dDown = 0;
@@ -553,7 +594,7 @@
     const res = {};
     for (const key of ['L', 'R']) {
       const ch = st.sch[key];
-      const m = measure(st.data, ch.f);
+      const m = measure(st.data, ch.f, ch.mask);
       let dUp = 0, dDown = 0;
       if (st.tone) {
         if (calibrating) {
@@ -689,41 +730,97 @@
   }
 
   // ---------------------------------------------------------------- band check
-  async function grab(ms) {
-    const n = st.analyser.frequencyBinCount, acc = new Float64Array(n), tmp = new Float32Array(n);
-    let frames = 0;
+  async function sampleSpectra(analyser, ms) {
+    const frames = [];
     const end = performance.now() + ms;
     while (performance.now() < end) {
-      st.analyser.getFloatFrequencyData(tmp);
-      for (let k = 0; k < n; k++) acc[k] += lin(Number.isFinite(tmp[k]) ? tmp[k] : -200);
-      frames++;
+      const frame = new Float32Array(analyser.frequencyBinCount);
+      analyser.getFloatFrequencyData(frame);
+      frames.push(frame);
       await sleep(30);
     }
-    const out = new Float32Array(n);
-    for (let k = 0; k < n; k++) out[k] = toDb(acc[k] / Math.max(1, frames));
+    return frames;
+  }
+
+  function averageSpectrum(frames, bins) {
+    const acc = new Float64Array(bins), out = new Float32Array(bins);
+    for (const frame of frames) {
+      for (let k = 0; k < bins; k++) acc[k] += lin(dbv(frame, k));
+    }
+    for (let k = 0; k < bins; k++) out[k] = toDb(acc[k] / Math.max(1, frames.length));
     return out;
+  }
+
+  async function tuneMono(ctx, requestedFreq, idleSpectra) {
+    const { analyser, osc, gain, binHz, volume } = st;
+    const robust = window.BatRobust, bins = analyser.frequencyBinCount;
+    const idle = averageSpectrum(idleSpectra, bins);
+    const freqs = [...new Set([requestedFreq, 18500, 19500, 20000, 20500, 21000])]
+      .filter((f) => f >= 17500 && f <= ctx.sampleRate / 2 - config.noiseFarHz);
+    const candidates = [];
+    const setVolume = (v) => {
+      if (st.ctx === ctx) ramp(gain.gain, v, ctx.currentTime);
+    };
+    const readFrames = async () => {
+      await sleep(config.settleMs);
+      if (st.ctx !== ctx) return [];
+      const frames = await sampleSpectra(analyser, 180);
+      return st.ctx === ctx ? frames : [];
+    };
+    setVolume(volume);
+    for (const f of freqs) {
+      if (st.ctx !== ctx) return null;
+      osc.frequency.setValueAtTime(f, ctx.currentTime);
+      const frames = await readFrames();
+      if (!frames.length) return null;
+      const snrs = frames.map((a) => measure(a, f).snr);
+      const k = Math.round(f / binHz), span = Math.ceil(700 / binHz);
+      const foreignDb = dbv(idle, peakNear(idle, k, span)) - localNoise(idle, k);
+      const snr = median(snrs);
+      const snrSd = Math.sqrt(snrs.reduce((sum, x) => sum + (x - snr) ** 2, 0) / snrs.length);
+      const leakDb = robust.audibleLeak(averageSpectrum(frames, bins), idle, binHz).worstDb;
+      candidates.push({ f, snr, snrSd, foreignDb, leakDb });
+    }
+    const choice = robust.chooseFrequency(candidates);
+    if (!choice.f) return { f: requestedFreq, volume, reason: choice.reason };
+    osc.frequency.setValueAtTime(choice.f, ctx.currentTime);
+    const target = 32;
+    let selectedVolume = volume;
+    if (volume > 0.05 && candidates.find((c) => c.f === choice.f).snr >= target) {
+      selectedVolume = await robust.autoVolume({
+        setVolume, readSnr: async () => median((await readFrames()).map((a) => measure(a, choice.f).snr)),
+        hi: volume, target,
+      });
+    }
+    return { f: choice.f, volume: selectedVolume, reason: choice.reason };
   }
 
   async function bandCheck() {
     if (!st.running || st.busy) return null;
     st.busy = true;
     emit('state', snapshot());
-    const keepF = st.f0, keepTone = st.tone, keepStereo = st.stereo, nyq = st.ctx.sampleRate / 2;
+    const { ctx, analyser } = st;
+    const keepF = st.f0, keepTone = st.tone, keepStereo = st.stereo, nyq = ctx.sampleRate / 2;
     setTone(false);
     st.stereo = false; // the sweep always uses the single (both-speaker) tone
     await sleep(250);
     const steps = [15000, 16000, 17000, 18000, 19000, 19500, 20000, 20500, 21000, 21500, 22000, 23000].filter((f) => f <= nyq - 500);
     const sweep = [];
     for (const f of steps) {
+      if (st.ctx !== ctx) return null;
       setTone(true, f);
       await sleep(220);
-      const spec = await grab(260);
+      if (st.ctx !== ctx) return null;
+      const frames = await sampleSpectra(analyser, 260);
+      if (st.ctx !== ctx) return null;
+      const spec = averageSpectrum(frames, analyser.frequencyBinCount);
       setTone(false);
       await sleep(60);
       const kp = peakNear(spec, Math.round(f / st.binHz), 3);
       const peak = dbv(spec, kp), noise = localNoise(spec, kp);
       sweep.push({ f, snr: +(peak - noise).toFixed(1), peak: +peak.toFixed(1) });
     }
+    if (st.ctx !== ctx) return null;
     setTone(false);
     st.stereo = keepStereo;
     setTone(keepTone, keepF);
@@ -824,10 +921,15 @@
   const api = {
     config, info: null, lastBandCheck: null, foreign: [],
     start, stop, bandCheck, on, off, summary, drawZoom, drawWide,
-    setFreq(hz) { if (st.running && !st.busy) setTone(st.tone, Number(hz)); else st.f0 = Number(hz); },
+    setFreq(hz) {
+      if (st.busy) return;
+      if (st.running) setTone(st.tone, Number(hz));
+      else st.f0 = Number(hz);
+    },
     setVolume(v) {
       config.volume = Number(v);
-      if (!st.ctx || !st.tone) return;
+      st.volume = config.volume;
+      if (!st.ctx || !st.tone || st.busy) return;
       const t = st.ctx.currentTime;
       if (st.stereo) { ramp(st.gainL.gain, config.volume, t); ramp(st.gainR.gain, config.volume, t); }
       else ramp(st.gain.gain, config.volume, t);

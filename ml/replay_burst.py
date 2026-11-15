@@ -6,11 +6,11 @@ side crosses a threshold first. This script tests that rule (and parameter varia
 
 usage: python replay_burst.py [csv or folder ...]   (default: ml/data, fake data excluded)
 """
+import argparse
 import csv
 import glob
 import itertools
 import os
-import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -170,9 +170,13 @@ def score(fr, fired, window_ms=1500):
 
 
 def main():
-    args = sys.argv[1:] or [os.path.join(HERE, 'data')]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('paths', nargs='*', help='guided-collection CSV files or directories')
+    parser.add_argument('--candidate', nargs=3, type=float, metavar=('A_ON', 'V_MIN', 'V_FIRE'),
+                        help='compare just these thresholds against the default on the selected sessions')
+    args = parser.parse_args()
     paths = []
-    for a in args:
+    for a in args.paths or [os.path.join(HERE, 'data')]:
         paths += sorted(glob.glob(os.path.join(a, '*.csv'))) if os.path.isdir(a) else [a]
     paths = [p for p in paths if os.sep + 'fake' not in p]
     sessions = [(os.path.basename(p), load(p)) for p in paths]
@@ -196,6 +200,11 @@ def main():
 
     show('browser (as recorded)', total(lambda fr: [(x['t'], x['g'].replace('_sim', '')) for x in fr if x['g'] in ('push', 'pull', 'wave')]))
     show('burst default', total(lambda fr: burst_detect(fr)))
+    if args.candidate:
+        a_on, v_min, v_fire = args.candidate
+        show(f'candidate {a_on:g} / {v_min:g} / {v_fire:g}',
+             total(lambda fr: burst_detect(fr, a_on=a_on, v_min=v_min, v_fire=v_fire)))
+        return
     show('burst, old veto (any far-band rise)', total(lambda fr: burst_detect(fr, veto_snr=None)))
     show('burst, no impulse veto', total(lambda fr: burst_detect(fr, veto_snr=-1e9)))
     print('\nrobust.js-style filters on top of the burst rule:')
