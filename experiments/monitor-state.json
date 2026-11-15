@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T10:21:00Z",
-  "main_sha": "3b36d879c1eb3e4514b957df6bcbf14775a2029e",
-  "exp_sha_before_run": "b7b53f2ee8cca585c408e8fcbf255420cb21e1d0",
-  "report": "experiments/monitor-2026-11-15-0421.md",
+  "checked_at_utc": "2026-11-15T11:14:58Z",
+  "main_sha": "cf22b894a21b07b36f09faf9560b7461dee679f5",
+  "exp_sha_before_run": "653f24786013e7b0d42b92e7ddcd564eabc26462",
+  "report": "experiments/monitor-2026-11-15-0515.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -27,8 +27,8 @@
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "4155228f11e2fb5128afd64f08a546d80f4f464d",
-      "size": 4394
+      "sha": "794ec885a933bf1a5ce7f64542041c0cf7617884",
+      "size": 4928
     },
     {
       "path": "docs/devpost.md",
@@ -427,8 +427,8 @@
     },
     {
       "path": "web/3d.html",
-      "sha": "d2ea83754e69822e68070e3c563436fce2194512",
-      "size": 41281
+      "sha": "d2135c95a9991b264640aeba52ef25949dfc955f",
+      "size": 41408
     },
     {
       "path": "web/app.js",
@@ -532,8 +532,8 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "5850b2936d6ec2b5ed396bdc988e2dff23469fdb",
-      "size": 67664
+      "sha": "be9dafaebd8da5205c8bcc59823c5521054b712d",
+      "size": 70773
     },
     {
       "path": "web/tone.html",
@@ -1212,7 +1212,9 @@
     "auth61f5_snapshot_5attempts_084056",
     "20261115_035336_teach_61f5",
     "20261115_040340_teach_61f5",
-    "20261115_040721_teach_61f5"
+    "20261115_040721_teach_61f5",
+    "20261115_043301_teach_61f5",
+    "20261115_044652_teach_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1233,9 +1235,13 @@
     "teach3sessions_presence83.6_88.2_95.2",
     "3d250msDisplacementNotAbsolutePosition_yWeakBaseline",
     "phoneB18750lowCalibrationR2_notJustHeard",
-    "featuresExcludesTeach_onlyPartialSchemaFix"
+    "featuresExcludesTeach_onlyPartialSchemaFix",
+    "hand_column_inverted_all5_use_hand_mp_without_rewriting_raw",
+    "teacher4_5_presence98.45_93.62",
+    "phoneA_r2_weak044652_layoutChanged_Babsent",
+    "builtIn4sittingDisplacementRMSE_4.03_3.15_4.46_distanceGuideChanged"
   ],
-  "notes": "Always list watched_drive_subfolders (teach) even when root folder metadata is unchanged. Teacher schema page=teach.html: early=false and complete trials; separate vision/audio/iq streams and WAV per session. 3D DEFAULT_CALIB metrics are 250ms displacement RMSE, not absolute position or 95%CI; stored model numbers not independently replayed. Phone heard indicator changed across teacher versions. Current authentication cumulative attempts unchanged; preserve prior dedup/ambiguous simulated handling.",
+  "notes": "Always inspect teach subfolder even if root unchanged. Raw five teacher sessions have hand opposite hand_mp on every present row; preserve raw, use hand_mp with provenance, do not assume all coordinate/auto labels inverted. New camera guide FOV78/palm-world fallback changes displayed distance. 044652 phone A only at x38,h31.5,z43 is not overhead layout. Latest built-in calibration already includes043301; seek new frozen-model holdout. Other protocol/duplicate/auth ambiguity restrictions remain in earlier reports.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1280,6 +1286,110 @@
       "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
       "path": "nhng/ml/data/teach",
       "files": [
+        {
+          "id": "19t07WhWPOuSVYEgRkA_VD6C7cTJmP0qF",
+          "name": "batears_20261115_044652_teach_61f5.calib.json",
+          "mime": "application/json",
+          "size": "3488",
+          "modified": "2026-11-15T10:50:43.006Z",
+          "url": "https://drive.google.com/file/d/19t07WhWPOuSVYEgRkA_VD6C7cTJmP0qF/view?usp=drivesdk"
+        },
+        {
+          "id": "1BrMlEbwnqHZ8a9-WbbChwSRDOShAyQS5",
+          "name": "batears_20261115_044652_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28323884",
+          "modified": "2026-11-15T10:49:22.788Z",
+          "url": "https://drive.google.com/file/d/1BrMlEbwnqHZ8a9-WbbChwSRDOShAyQS5/view?usp=drivesdk"
+        },
+        {
+          "id": "1huHfuu7EXdfJ364ZWKbbTkOuHeSvyf2k",
+          "name": "batears_20261115_044652_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "678999",
+          "modified": "2026-11-15T10:49:21.584Z",
+          "url": "https://drive.google.com/file/d/1huHfuu7EXdfJ364ZWKbbTkOuHeSvyf2k/view?usp=drivesdk"
+        },
+        {
+          "id": "1ayV4NPcs0L2lik8tpcSzKwA6vPtN2Zan",
+          "name": "batears_20261115_044652_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1619753",
+          "modified": "2026-11-15T10:49:21.305Z",
+          "url": "https://drive.google.com/file/d/1ayV4NPcs0L2lik8tpcSzKwA6vPtN2Zan/view?usp=drivesdk"
+        },
+        {
+          "id": "1_CPaBQ78T0jHMPk4zjVjzILnz3DfeKMG",
+          "name": "batears_20261115_044652_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "3047132",
+          "modified": "2026-11-15T10:49:21.012Z",
+          "url": "https://drive.google.com/file/d/1_CPaBQ78T0jHMPk4zjVjzILnz3DfeKMG/view?usp=drivesdk"
+        },
+        {
+          "id": "1lco3GcKsZiDYDZ3SM6qaxBMvqwLR6tGx",
+          "name": "batears_20261115_044652_teach_61f5.json",
+          "mime": "application/json",
+          "size": "92852",
+          "modified": "2026-11-15T10:49:20.739Z",
+          "url": "https://drive.google.com/file/d/1lco3GcKsZiDYDZ3SM6qaxBMvqwLR6tGx/view?usp=drivesdk"
+        },
+        {
+          "id": "1pCvxdLPgEmLr51rl0ORqKKCzzVbA3Eao",
+          "name": "batears_20261115_043301_teach_61f5.calib.json",
+          "mime": "application/json",
+          "size": "3937",
+          "modified": "2026-11-15T10:37:55.082Z",
+          "url": "https://drive.google.com/file/d/1pCvxdLPgEmLr51rl0ORqKKCzzVbA3Eao/view?usp=drivesdk"
+        },
+        {
+          "id": "1mWr1jQtQwLwwH5eXV2doCf8XrW3E7RN-",
+          "name": "batears_20261115_043301_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28325420",
+          "modified": "2026-11-15T10:35:31.975Z",
+          "url": "https://drive.google.com/file/d/1mWr1jQtQwLwwH5eXV2doCf8XrW3E7RN-/view?usp=drivesdk"
+        },
+        {
+          "id": "1g_1Z1QQCqyVfLXYDWXAPDr8bwc3gcyYB",
+          "name": "batears_20261115_043301_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "673039",
+          "modified": "2026-11-15T10:35:30.970Z",
+          "url": "https://drive.google.com/file/d/1g_1Z1QQCqyVfLXYDWXAPDr8bwc3gcyYB/view?usp=drivesdk"
+        },
+        {
+          "id": "1wy5HBhBQJ4Mqz3QkId5MZvPnsdgch8d6",
+          "name": "batears_20261115_043301_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1591439",
+          "modified": "2026-11-15T10:35:30.286Z",
+          "url": "https://drive.google.com/file/d/1wy5HBhBQJ4Mqz3QkId5MZvPnsdgch8d6/view?usp=drivesdk"
+        },
+        {
+          "id": "1YvnWsZV9bUDyppLVnoCDtyb8-D4XQjfW",
+          "name": "batears_20261115_043301_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "3341565",
+          "modified": "2026-11-15T10:35:29.763Z",
+          "url": "https://drive.google.com/file/d/1YvnWsZV9bUDyppLVnoCDtyb8-D4XQjfW/view?usp=drivesdk"
+        },
+        {
+          "id": "1ZifHu7yWSdU8hOifRaGj0-Uxdzd7mnwP",
+          "name": "batears_20261115_043301_teach_61f5.json",
+          "mime": "application/json",
+          "size": "110908",
+          "modified": "2026-11-15T10:35:29.409Z",
+          "url": "https://drive.google.com/file/d/1ZifHu7yWSdU8hOifRaGj0-Uxdzd7mnwP/view?usp=drivesdk"
+        },
+        {
+          "id": "1ldlztyqYKoUeib8AhsJwn2FsGZBldKHW",
+          "name": "batears_20261115_040721_teach_61f5.calib.json",
+          "mime": "application/json",
+          "size": "3920",
+          "modified": "2026-11-15T10:12:18.338Z",
+          "url": "https://drive.google.com/file/d/1ldlztyqYKoUeib8AhsJwn2FsGZBldKHW/view?usp=drivesdk"
+        },
         {
           "id": "16REuPpopbURxNXCoKwpowrK3GmpP9mW0",
           "name": "batears_20261115_040721_teach_61f5.wav",
