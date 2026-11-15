@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px;borde
 <script src="robust.js"></script><script src="swipe.js"></script><script src="wave.js"></script><script src="iq.js"></script><script src="dsp.js"></script>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementByIdById?document.getElementByIdById(id):document.getElementById(id);
+const $=id=>document.getElementById(id);
 const engine=window.BatEars, kinds=['push','pull','left','right','wave'],labels={push:'Push',pull:'Pull',left:'Left',right:'Right',wave:'Wave',idle:'Idle'};
 let events=[],pairs=[],current=null,running=false,unsubs=[],t0=0,session=null,seq=0,ended=false,actual=null;
 const detected=()=>events.filter(e=>e.type==='detected');
