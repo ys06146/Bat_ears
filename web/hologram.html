@@ -171,12 +171,12 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115124422" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115140230" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115124422"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115140230"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115124422"></script>
+<script src="vision3d.browser.js?v=20261115140230"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -603,11 +603,18 @@ function gatedSet() {
   const cmp = L.filter((x) => /c$/.test(String(x))).length;
   return `, weights trained on ${L.length} sittings (${L.length - cmp} teach + ${cmp} compare)`;
 }
+// alpha's sequence map: its numbers are held out over every sittings it lists (leave-one-sitting-out)
+function seqgSet() {
+  const B = window.Bat3D || {}, c = calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)), L = c && c.seqg && Array.isArray(c.seqg.sittings) ? c.seqg.sittings : null;
+  if (!L) return '';
+  const cmp = L.filter((x) => /c$/.test(String(x))).length;
+  return `, held out over ${L.length} sittings (${L.length - cmp} teach + ${cmp} compare)`;
+}
 let curModel = '';   // info().model of the engine shown on the card ('gated', 'learned', 'physics')
 function ampTable() {
   const B = window.Bat3D || {}, cn = $('calibSel').value;
   const c = calib || (cn && B.CALIBS && B.CALIBS[cn] && B.CALIBS[cn].calib) || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB));
-  const src = curModel === 'gated' && c && c.gated && c.gated.amp ? c.gated : c;
+  const src = curModel === 'seqg' && c && c.seqg && c.seqg.amp ? c.seqg : curModel === 'gated' && c && c.gated && c.gated.amp ? c.gated : c;
   return src && src.amp && src.amp.modes ? src.amp : null;
 }
 function yBoost() {
@@ -634,7 +641,7 @@ function renderAcc(s) {
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
   $('accNums').innerHTML = `Accuracy (${scope}, RMS error of the 250 ms movement):<br><b>left-right ±${f1(r[0])}cm</b> · <b>toward-away ±${f1(r[2])}cm</b> · height ±${f1(r[1])}cm<br>`
     + (sz ? `Drawn size, as a share of the real movement: left-right ${Math.round(100 * sz[0])}% · toward-away ${Math.round(100 * sz[2])}% · height ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.model ? ' · model: ' + (s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
+    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.model ? ' · model: ' + (s.model === 'seqg' ? 'seqg (1 s history)' + seqgSet() : s.model === 'gated' ? 'gated (neural)' + gatedSet() : s.model) : ''}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
