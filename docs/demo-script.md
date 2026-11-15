@@ -8,12 +8,12 @@ Before judging (once):
    - ↔ Side (first plan): 📱A 17000 Hz on the right (25 cm right, 25 cm high), 📱B 18750 Hz on the left (25 cm left, 40 cm high), both facing the hand, B at full volume.
 2. Close every other Bat Ears tab and laptop. A stray 20 kHz tone sat right next to the laptop's 19.5 kHz band in all three teach sessions.
 3. Open `web/teach.html`, press ①, and use the preview to find the hand spot: above the laptop's front edge, 18-25 cm above the desk, '📏 웹캠에서 25~45cm' green. **Mark it on the desk with tape.** The calibration was learned in that range.
-4. Re-teach (② session, about 2.5 min) only if the laptop or the room changed. The Galaxy Book calibration from four sittings is built into 3d.html.
+4. Re-teach (② session, about 2.5 min) only if the laptop or the room changed. The Galaxy Book calibration from five sittings is built into 3d.html and bat3d.js.
 
 Live (30 s per judge):
 1. Tape over the webcam. Open `web/3d.html` and press ▶ 마이크로 시작 (기본 보정 and 학습 지도 are on by default).
 2. Hand over the tape mark, press ◎ 원점, then move left/right and toward/away (keep up/down small). The dot follows. It adds up 250 ms movements, so it slowly drifts: bring the hand back to the mark and press ◎ 원점 again.
-3. Honest numbers on screen: x ±4.0 · y ±3.1 · z ±4.5 cm. That's the RMS error of the hand's 250 ms movement on a sitting the model never saw (four webcam-taught sittings, each left out once; laptop speakers only, hand 25-45 cm from the webcam). For scale, the movements themselves were 7.0 / 3.6 / 6.4 cm RMS. Left-right (r 0.82) and depth (0.72) track well; height (0.47) is still weak with the laptop speakers alone. With the phones it needs that session's calibration file (📥), otherwise it falls back to the physics solver.
+3. Honest numbers on screen: x ±4.4 · y ±3.0 · z ±4.3 cm. That's the RMS error of the hand's 250 ms movement on a sitting the model never saw (five webcam-taught sittings, each left out once; laptop speakers only, hand 25-45 cm from the webcam). For scale, the movements themselves were 7.0 / 3.4 / 6.3 cm RMS. Left-right (r 0.78) and depth (0.72) track well; height (0.48) is still weak with the laptop speakers alone. The same numbers show in `web/hologram.html`. With the phones it needs that session's calibration file (📥), otherwise it falls back to the physics solver.
 4. Fallback: the Force Push game below.
 
 ## Fallback: Force Push (`web/index.html`)

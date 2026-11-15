@@ -111,8 +111,8 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115035640" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
-<script src="vision3d.browser.js?v=20261115035640"></script>
+<script src="bat3d.js?v=20261115051954" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115051954"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -152,7 +152,8 @@ class OneEuro {
     return this.x;
   }
 }
-// tuned on teach session 044652 (not in the built-in calibration) against the webcam truth, 250 ms moves, hand < 45 cm:
+// tuned on teach session 044652 (outside the built-in calibration at the time; bravo added it at 05:20) against the
+// webcam truth, 250 ms moves, hand < 45 cm:
 // raw corr x/y/z 0.27/0.61/0.80, jitter at rest 2.9 mm per 50 ms; bravo's start (0.8/8, y 0.4/4) 0.23/0.29/0.72, 1.8 mm;
 // 0.8 Hz / beta 40 on all axes 0.28/0.53/0.79, 2.0 mm (a high beta keeps the moves, a low cutoff calms the rest).
 // The spring helps too: without it x drops to 0.20 (drift)
@@ -424,7 +425,9 @@ async function openRecording(files) {
   }
   await start('wav', wav);
   if (!running) return;
-  const info = engine && engine.info ? engine.info() : {}, inTrain = ghost.on && info.calName && ghost.name && info.calName.includes(ghost.name.replace(/^.*?(\d{8}_\d{6}).*$/, '$1'));
+  // was this sitting used to train the calibration in use? (bravo's calibrations list their sessions in .note)
+  const sid = (ghost.name.match(/\d{8}_\d{6}/) || [])[0], calText = calib ? `${calib.session || ''} ${calib.note || ''}` : (((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy || {}).note || '';
+  const inTrain = ghost.on && sid && calText.includes(sid);
   $('status').textContent = `녹음 재생: ${wav.name}` + (ghost.on ? ` · 🟩 웹캠 정답 겹침${ghost.calibOk ? '' : ' (calib 없음: 카메라 기본값)'}` : ' · 웹캠 정답 없음 (_vision.csv와 .json을 같이 고르면 겹쳐요)')
     + (inTrain ? ' · ⚠️ 이 세션은 기본 보정 학습에 쓰여서 실제보다 좋아 보일 수 있어요' : '');
 }
