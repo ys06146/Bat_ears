@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T08:22:17Z",
-  "main_sha": "21268df756552b1982e2fcf279234edfb95f4b46",
-  "exp_sha_before_run": "046ff3a87edfb6911ae9703666722a3ddf0b55a2",
-  "report": "experiments/monitor-2026-11-15-0222.md",
+  "checked_at_utc": "2026-11-15T09:15:00Z",
+  "main_sha": "175a455f58976822aecc01925d0b9a9328600f21",
+  "exp_sha_before_run": "30c83f5ccb37ee12ccbc657940147621b98aed58",
+  "report": "experiments/monitor-2026-11-15-0315.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -17,13 +17,13 @@
     },
     {
       "path": "README.md",
-      "sha": "0fd8b8a413f7035f46a0596bfa6ba0e2fb4ef844",
-      "size": 4581
+      "sha": "b44563dd5017413af11096df27f993a6b770258d",
+      "size": 5325
     },
     {
       "path": "TEAM.md",
-      "sha": "c2128c631d0ecc918b9fb620cd1e4c6179f07025",
-      "size": 8319
+      "sha": "32301b5c791bfe3af0537835d4e70a0882c80758",
+      "size": 9657
     },
     {
       "path": "docs/demo-script.md",
@@ -57,8 +57,8 @@
     },
     {
       "path": "ml/auth_report.py",
-      "sha": "7a13d2f5c0f6cd96bcf1b575dc3d25755e1a13cf",
-      "size": 4581
+      "sha": "3a4006c868834ca23b9a1012faa72fce6f3ced16",
+      "size": 5001
     },
     {
       "path": "ml/data/batears_2026-11-15T07-37-56-093Z_p1_interference_off.csv",
@@ -316,6 +316,36 @@
       "size": 4430
     },
     {
+      "path": "ml/data/batears_20261115_021834_anon_d30_quiet_circle_61f5.csv",
+      "sha": "a9259d841a138fd5d0d8685cae353a05ee8da83c",
+      "size": 1384472
+    },
+    {
+      "path": "ml/data/batears_20261115_021834_anon_d30_quiet_circle_61f5.json",
+      "sha": "398ebf56eae0b693d8b15991e4837e4a9115fb54",
+      "size": 18608
+    },
+    {
+      "path": "ml/data/batears_20261115_022153_anon_d30_quiet_circle_61f5.csv",
+      "sha": "65f8007e2223b1d77a81871227c22f3521fb2185",
+      "size": 1759663
+    },
+    {
+      "path": "ml/data/batears_20261115_022153_anon_d30_quiet_circle_61f5.json",
+      "sha": "4afbeb9f231eb40db404bdbee1e691aa604f0437",
+      "size": 18689
+    },
+    {
+      "path": "ml/data/batears_auth_61f5.csv",
+      "sha": "81f10dfa9d4f036abbeaf2bcc656ab7a309b625e",
+      "size": 803
+    },
+    {
+      "path": "ml/data/batears_auth_61f5.json",
+      "sha": "5c156aed7ea6869904ba6ba5815991370c53e0b6",
+      "size": 29866
+    },
+    {
       "path": "ml/features.py",
       "sha": "c862fd8381fe5327c5d8fcaaa114a140c09869b1",
       "size": 6484
@@ -396,19 +426,29 @@
       "size": 937
     },
     {
+      "path": "web/3d.html",
+      "sha": "80ce3b53460dd40b8699f5612efe4f02b527cd89",
+      "size": 32120
+    },
+    {
       "path": "web/app.js",
-      "sha": "4a97e1f2a952420e951f91f89dcf6f4b80e6037b",
-      "size": 20516
+      "sha": "06f262ffcf80d00bea5b65a5acf5c1324d6b344b",
+      "size": 20627
     },
     {
       "path": "web/auth.js",
-      "sha": "85a4b2c02a9bd966059d397473105a1a995e34b5",
-      "size": 8074
+      "sha": "ee42c5b1387c46af764ecd27b6155e7ccb19e857",
+      "size": 8942
     },
     {
       "path": "web/batears.html",
       "sha": "dddf7fc022d7f59d4226692a390403d9c81d5fe8",
       "size": 21837
+    },
+    {
+      "path": "web/circle.js",
+      "sha": "09b15703da0ac7522162b1617fe91819a6f6d11c",
+      "size": 4961
     },
     {
       "path": "web/coach.js",
@@ -422,13 +462,13 @@
     },
     {
       "path": "web/dsp.js",
-      "sha": "8e7c51687d2711ca5a77c012a47bff0f50ca6e2a",
-      "size": 61507
+      "sha": "a819d39ca9d925d7ab6210afad2b6f08a8ba41df",
+      "size": 62812
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "52b36eb837a154b611554949ce8484d0e68ae9de",
-      "size": 26757
+      "sha": "94dfb45dd9e96e08a49f491d146f36e1f510110e",
+      "size": 27246
     },
     {
       "path": "web/explog.js",
@@ -442,7 +482,7 @@
     },
     {
       "path": "web/index.html",
-      "sha": "1ebf17a744563a0f8485fdb13694b9feeca8e8e4",
+      "sha": "6806d53ecc7c30f3bff5a5887eed22debe1877fb",
       "size": 9921
     },
     {
@@ -452,8 +492,8 @@
     },
     {
       "path": "web/key.html",
-      "sha": "70dbe74ed035529477d18131bf9ea9f62eca0192",
-      "size": 22928
+      "sha": "400ab6d2f3bd2a48883cc7b16c43b0d85a0b2f0a",
+      "size": 28152
     },
     {
       "path": "web/lr.js",
@@ -491,12 +531,57 @@
       "size": 13997
     },
     {
+      "path": "web/tone.html",
+      "sha": "eaf20ccb7ccd0c106892954f5e4b770bb6d75e55",
+      "size": 6062
+    },
+    {
       "path": "web/wave.js",
       "sha": "77957ab0383bf1a82e09103979d840e83461996e",
       "size": 3699
     }
   ],
   "drive_files": [
+    {
+      "id": "1Ln49gbuaSWfvbg9rDCLOQp1Di-WXS7zj",
+      "name": "batears_auth_61f5.json",
+      "mime": "application/json",
+      "size": "29866",
+      "modified": "2026-11-15T08:41:08.549Z",
+      "url": "https://drive.google.com/file/d/1Ln49gbuaSWfvbg9rDCLOQp1Di-WXS7zj/view?usp=drivesdk"
+    },
+    {
+      "id": "1_oSG41WM-SdHblqIBg0rwEwbyNCwnMZO",
+      "name": "batears_auth_61f5.csv",
+      "mime": "text/csv",
+      "size": "803",
+      "modified": "2026-11-15T08:41:08.548Z",
+      "url": "https://drive.google.com/file/d/1_oSG41WM-SdHblqIBg0rwEwbyNCwnMZO/view?usp=drivesdk"
+    },
+    {
+      "id": "1GFV8SEWuELTaCnUarw_H37D-BqqYNkVT",
+      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.wav",
+      "mime": "audio/x-wav",
+      "size": "27717164",
+      "modified": "2026-11-15T08:24:18.514Z",
+      "url": "https://drive.google.com/file/d/1GFV8SEWuELTaCnUarw_H37D-BqqYNkVT/view?usp=drivesdk"
+    },
+    {
+      "id": "1Poi29xnH6bGFpQlHp2co3mClSxjpy_dl",
+      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.csv",
+      "mime": "text/csv",
+      "size": "1759663",
+      "modified": "2026-11-15T08:24:18.228Z",
+      "url": "https://drive.google.com/file/d/1Poi29xnH6bGFpQlHp2co3mClSxjpy_dl/view?usp=drivesdk"
+    },
+    {
+      "id": "1uoJPJBWYSdgU2FK--osBTMJfuKTPBonv",
+      "name": "batears_20261115_022153_anon_d30_quiet_circle_61f5.json",
+      "mime": "application/json",
+      "size": "18689",
+      "modified": "2026-11-15T08:24:18.149Z",
+      "url": "https://drive.google.com/file/d/1uoJPJBWYSdgU2FK--osBTMJfuKTPBonv/view?usp=drivesdk"
+    },
     {
       "id": "1LUDDb-MnlNOzLjjButSPstL6MTMwYoqq",
       "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.csv",
@@ -1109,7 +1194,9 @@
     "235151",
     "2026-11-15T07:37:56.093Z_p1_sequence",
     "2026-11-15T07:40:04.429Z_p1_sequence",
-    "20261115_021834_anon_d30_quiet_circle_61f5"
+    "20261115_021834_anon_d30_quiet_circle_61f5",
+    "20261115_022153_anon_d30_quiet_circle_61f5",
+    "auth61f5_snapshot_5attempts_084056"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1123,9 +1210,12 @@
     "event_counts_not_accuracy_OFF51_ON31_pairCoverage9_7",
     "duplicate_ON_export_sameSHA",
     "circle_complete_training_only_not_recognition_collapse",
-    "auth_prototype_added_synthetic7tests_no_realFAR"
+    "auth_prototype_added_synthetic7tests_no_realFAR",
+    "auth_first_real5_genuine3accept_ambiguousSim1_noImpostors",
+    "auth_sequence_rearm_keyOnly_practiceMADthreshold_changed",
+    "circle2_training_not_live_failure_pp2of6"
   ],
-  "notes": "Circle final CSV+JSON became complete during read; final 6077 rows/26 cues analyzed (initial partial 3789 rows not counted). New event schema must use audit_event_logs.py; marked-window coverage is not verified gesture accuracy. autoTune ON selected=false/occupied=true is failed avoidance, not a successful different-frequency treatment. Keep auth/circle protocols separate from PP.",
+  "notes": "Auth exports cumulative top-level attempts plus overlapping session.attempts: dedupe t/owner/performer, do not add nested duplicates. Historical pre02:35 simulated flag may mean missing motion rather than keyboard; report flagged included/excluded, preserve uncertainty. Auth matcher/template thresholds changed; no impostor trials yet so FAR/EER unavailable. Circle training live cw/ccw scores are not validated circle recognition metrics. Event schema via audit_event_logs.py; legacy train does not support new classes/schemas.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1137,5 +1227,32 @@
       "duplicate": "batears_2026-11-15T07-40-04-429Z_p1.csv",
       "sha256": "8215b1916d81f272caa59ab26a4339b1b22c5d40a64302d0844abd704cccdc81"
     }
+  ],
+  "auth_seen_attempts": [
+    [
+      "2026-11-15T08:29:27.891Z",
+      "seojin",
+      "seojin"
+    ],
+    [
+      "2026-11-15T08:29:47.231Z",
+      "seojin",
+      "seojin"
+    ],
+    [
+      "2026-11-15T08:30:06.184Z",
+      "seojin",
+      "seojin"
+    ],
+    [
+      "2026-11-15T08:30:36.687Z",
+      "seojin",
+      "seojin"
+    ],
+    [
+      "2026-11-15T08:40:56.891Z",
+      "seojin",
+      "seojin"
+    ]
   ]
 }
