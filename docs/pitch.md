@@ -14,7 +14,7 @@
 >
 > On top of that: gestures, a gesture key and a game. Try it at the link on our slide."
 
-**If a judge asks "how accurate?":** "Every quarter second we predict how far the hand moves, and test on a sitting the model never saw. Over seven sittings, with the laptop alone and the hand within about 45 centimetres of the webcam, the error is 4.1 cm left-right, 4.3 cm toward-away and 2.6 cm up-down, while the movements themselves were 5.5, 5.7 and 3.0 cm. One person, one laptop so far."
+**If a judge asks "how accurate?":** "Every quarter second we predict how far the hand moves, and test on a sitting the model never saw. Over eight sittings, with the laptop alone and the hand within about 45 centimetres of the webcam, the error is 4.1 cm left-right, 4.3 cm toward-away and 2.6 cm up-down, while the movements themselves were 5.5, 5.8 and 3.0 cm. One person, one laptop so far."
 
 ## Fallback pitch: gestures (if 3D misbehaves live)
 

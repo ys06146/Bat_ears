@@ -33,6 +33,13 @@
   #filmCap { left: 50%; bottom: 18px; transform: translateX(-50%); display: none; text-align: center; font-size: 18px; padding: 8px 18px; }
   body.film #filmCap { display: block; }
   #filmCap small { display: block; color: var(--dim); font-size: 13px; margin-top: 2px; }
+  #intro { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(580px, calc(100% - 32px)); font-size: 15px; padding: 18px 22px; }
+  #intro h2 { margin: 0 0 6px; font-size: 20px; }
+  #intro ol { margin: 6px 0 14px; padding-left: 22px; }
+  #intro li { margin: 5px 0; }
+  #intro .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #introErr { color: var(--bad); font-weight: 700; margin-top: 10px; }
+  #introErr:empty { display: none; }
   #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
   #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
@@ -58,6 +65,17 @@
 <body>
 <div id="stage"></div>
 <div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 소리만으로 · 📷 웹캠 꺼짐<small id="filmAcc"></small></div>
+<div class="hud" id="intro">
+  <h2>🦇 소리만으로 손을 3D로 따라가요</h2>
+  <ol>
+    <li>📷 웹캠을 테이프로 가려요. 이 페이지는 카메라를 켜지 않아요</li>
+    <li>🔊 노트북 내장 스피커와 마이크를 써요 (블루투스·이어폰은 빼요). 충전기를 꽂고 볼륨은 50% 이상</li>
+    <li>▶ 시작을 누르고 마이크를 허용해요</li>
+    <li>✋ 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에 두고 ◎ 가운데(스페이스)를 눌러요. 그다음 좌우·앞뒤로 또렷하게(1초에 20cm쯤) 움직여요</li>
+  </ol>
+  <div class="row"><button id="introStart" class="go">▶ 시작</button><button id="introClose">닫기</button><span class="note">소리는 이 브라우저 안에서만 분석하고 아무 데도 보내지 않아요</span></div>
+  <div id="introErr"></div>
+</div>
 <div class="hud" id="top">
   <h1>🦇 Bat Ears 홀로그램 <small>웹캠 없이 소리만으로 손 위치</small></h1>
   <button id="btnStart" class="go">▶ 시작</button>
@@ -136,8 +154,8 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115091200" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
-<script src="vision3d.browser.js?v=20261115091200"></script>
+<script src="bat3d.js?v=20261115092942" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115092942"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -419,12 +437,24 @@ async function start(m, file) {
   engine.on('frame', onFrame);
   engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
-  try { audioG = await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) { $('status').textContent = '⚠️ 시작하지 못했어요: ' + (e.message || e); engine = null; return; }
+  try { audioG = await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) {
+    const msg = startErrMsg(e);
+    $('status').textContent = msg; $('introErr').textContent = msg; $('intro').style.display = '';
+    engine = null; return;
+  }
   running = true;
+  $('intro').style.display = 'none'; $('introErr').textContent = '';
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
   if (m === 'mic') $('status').textContent = '듣는 중 · 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에서 움직여요';
+}
+function startErrMsg(e) {
+  const n = (e && e.name) || '', m = (e && e.message) || String(e);
+  if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ 마이크가 막혀 있어요: 주소창 왼쪽 🔒(사이트 설정)에서 마이크를 허용하고 새로고침해요';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '🎙️ 마이크를 찾지 못했어요: 노트북 내장 마이크가 켜져 있는지 확인해요 (Windows 설정 → 개인 정보 → 마이크)';
+  if (n === 'NotReadableError' || n === 'AbortError') return '🎙️ 다른 앱이 마이크를 쓰고 있어요: Zoom·Teams·다른 Bat Ears 탭을 닫고 다시 ▶ 시작';
+  return '⚠️ 시작하지 못했어요: ' + m;
 }
 function stop() {
   if (rec.on) recStop();
@@ -467,13 +497,15 @@ async function openRecording(files) {
   $('status').textContent = `녹음 재생: ${wav.name}` + (ghost.on ? ` · 🟩 웹캠 정답 겹침${ghost.calibOk ? '' : ' (calib 없음: 카메라 기본값)'}` : ' · 웹캠 정답 없음 (_vision.csv와 .json을 같이 고르면 겹쳐요)')
     + (inTrain ? ' · ⚠️ 이 세션은 기본 보정 학습에 쓰여서 실제보다 좋아 보일 수 있어요' : '');
 }
+// one decimal, half-up (toFixed would print 2.55 as 2.5)
+const f1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
 // 🎬 caption: the honest numbers in one line (same source as the accuracy card)
 function filmCaption(s) {
   const e = s && s.err, el = $('filmAcc');
   if (!el) return;
   if (!e || !e.rms) { el.textContent = s && s.sim ? '가상 움직임 (시험)' : '정확도 미확인 (보정 없음)'; return; }
   const r = e.rms, scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
-  el.textContent = `${scope} 기준 250ms 이동 오차: 좌우 ±${r[0].toFixed(1)} · 앞뒤 ±${r[2].toFixed(1)} · 높이 ±${r[1].toFixed(1)}cm (높이는 약해요)`;
+  el.textContent = `${scope} 기준 250ms 이동 오차: 좌우 ±${f1(r[0])} · 앞뒤 ±${f1(r[2])} · 높이 ±${f1(r[1])}cm (높이는 약해요)`;
 }
 function renderAcc(s) {
   filmCaption(s);
@@ -483,9 +515,9 @@ function renderAcc(s) {
   errEl.userData.r = r.map((v) => v / 100);
   const sz = e.size, AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
   const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
-  $('accNums').innerHTML = `정확도 (${scope}, 250ms 이동의 RMS 오차):<br><b>좌우 ±${r[0].toFixed(1)}cm</b> · <b>앞뒤 ±${r[2].toFixed(1)}cm</b> · 높이 ±${r[1].toFixed(1)}cm<br>`
+  $('accNums').innerHTML = `정확도 (${scope}, 250ms 이동의 RMS 오차):<br><b>좌우 ±${f1(r[0])}cm</b> · <b>앞뒤 ±${f1(r[2])}cm</b> · 높이 ±${f1(r[1])}cm<br>`
     + (sz ? `그리는 크기: 실제 움직임의 좌우 ${Math.round(100 * sz[0])}% · 앞뒤 ${Math.round(100 * sz[2])}% · 높이 ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">실제 움직임 ${mo.map((v) => v.toFixed(1)).join(' / ')}cm, 상관 ${c.map((v) => v.toFixed(2)).join(' / ')} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
+    + `<span class="note">실제 움직임 좌우 ${mo.length ? f1(mo[0]) : '–'} · 앞뒤 ${mo.length ? f1(mo[2]) : '–'} · 높이 ${mo.length ? f1(mo[1]) : '–'}cm, 상관 ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
@@ -510,10 +542,15 @@ function renderHud(now) {
 const REF = ((window.Bat3D || {}).REF_AMP || {}).galaxy || null;   // bravo: laptop carrier level, median of the five teach sittings
 function renderDebug() {
   const lv = disp.levelDb;
-  $('levelWarn').textContent = lv != null && running && mode === 'mic' && lv < -6 ? `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)` : '';
+  let warn = '';
+  if (lv != null && running && mode === 'mic') {
+    if (lv < -20) warn = `🔇 톤이 거의 안 들려요 (teach 때보다 ${(-lv).toFixed(0)}dB 작아요): 블루투스·이어폰을 빼고 내장 스피커·마이크로, 볼륨 50% 이상`;
+    else if (lv < -6) warn = `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
+  }
+  $('levelWarn').textContent = warn;
   if ($('debug').style.display !== 'block') return;
   const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k·마이크0', 'L 18k·마이크1', 'R 19.5k·마이크0', 'R 19.5k·마이크1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
-  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -4 ? 'ok' : lv > -6 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (teach 다섯 세션 기준, ±6dB는 보통)</div>`;
+  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -4 ? 'ok' : lv > -6 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (teach 세션 기준, ±6dB는 보통)</div>`;
   h += '<table style="width:100%;font-size:12px"><tr><th align="left">경로</th><th>톤 크기</th><th>teach 대비</th><th>품질</th><th>움직임</th></tr>';
   for (let i = 0; i < a.length; i++) {
     const db = 20 * Math.log10(a[i] || 1e-9), dd = REF && REF[i] ? 20 * Math.log10((a[i] || 1e-9) / REF[i]) : NaN;
@@ -647,6 +684,9 @@ requestAnimationFrame(frame);
 
 // ------------------------------------------------------------------ wiring
 $('btnStart').onclick = () => start('mic');
+$('introStart').onclick = () => start('mic');
+$('introClose').onclick = () => { $('intro').style.display = 'none'; };
+if (!window.chrome) $('introErr').textContent = '⚠️ Chrome(또는 Edge)에서 확인한 페이지예요. 다른 브라우저는 미확인이에요';
 $('btnStop').onclick = () => { stop(); $('status').textContent = '멈춤'; };
 $('btnCenter').onclick = () => { if (engine && engine.originReset) engine.originReset(); recenter(); };
 function setFilm(on) {
@@ -701,7 +741,7 @@ $('calibFile').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
   try { calib = JSON.parse(await f.text()); $('calibName').textContent = '불러옴: ' + (calib.session || f.name) + ' · 다시 시작하면 적용돼요'; } catch (er) { $('calibName').textContent = '⚠️ 읽을 수 없어요'; }
 };
-if (SIM) { $('sim').style.display = 'block'; start('sim'); }
+if (SIM) { $('sim').style.display = 'block'; $('intro').style.display = 'none'; start('sim'); }
 else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: $('ampMode').value }).info() : null);
 window.Holo = { REC, disp, onFrame, euro, start, stop, ghost, ghostAt: (t) => ghostAt(t), palmOf, get running() { return running; }, get engine() { return engine; } };   // for tests
 </script>
