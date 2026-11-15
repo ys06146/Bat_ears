@@ -48,7 +48,7 @@ The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Micr
 
 ## Accomplishments that we're proud of
 - Touchless gestures from a stock laptop, entirely in a web page, with no camera.
-- Push/pull from real recordings: 82 of 112 prompted gestures (73%) across 6 sessions on 2 laptops at 20–35 cm, or 83 of 132 (63%) if we also count the session spoiled by a second laptop. That's about 1.4 false triggers per minute while typing or idle (`python ml/report.py`), down from 2.4 after a guard against weak, slow bursts. The latest session got 17 of 20 live (85%), with no false triggers while typing. [TBD: more people and 10 cm.]
+- Push/pull from real recordings: 148 of 192 prompted gestures (77%) across 10 sessions at 20–35 cm, recorded on a Windows laptop and on teammates' MacBooks, or 149 of 212 (70%) if we also count the session spoiled by a second laptop. That's about 0.7 false triggers per minute while typing or idle (`python ml/report.py`). The four MacBook sessions at 20 cm got 15 to 18 of 20 each, with no push read as a pull or the other way round. [TBD: 10 cm.]
 - An honest classifier result: a 5-class learned model reached 66% leave-one-session-out. It is best at rejecting non-gestures, but the rule-based burst detector is better at push vs pull, so the live app keeps the rules.
 
 ## What we learned
