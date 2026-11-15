@@ -964,6 +964,8 @@ function frame() {
   const r = errEl.userData.r || [0.04, 0.032, 0.045];
   errEl.visible = $('showErr').checked && live;
   errEl.position.copy(P); errEl.scale.set(r[0], r[1], r[2]);
+  // the floor shadow tells height (Seojin 12:07: up-down matters): it grows and fades as the hand rises, shrinks and darkens as it drops
+  { const dyH = drawAt[1] - HOME[1]; shadow.scale.setScalar(Math.max(0.4, Math.min(2.2, 1 + dyH * 8))); shadow.material.opacity = Math.max(0.12, Math.min(0.55, 0.35 - dyH * 1.5)); }
   shadow.position.set(P.x, 0.001, P.z); shadow.visible = hand.visible;
   drop.geometry.setFromPoints([new THREE.Vector3(P.x, 0.001, P.z), P]); drop.computeLineDistances(); drop.visible = hand.visible;
   rawDot.visible = $('showRaw').checked && live; rawDot.position.copy(T3(disp.raw));
