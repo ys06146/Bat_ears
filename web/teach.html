@@ -24,6 +24,8 @@ th,td{padding:4px;text-align:left;border-bottom:1px solid #1e2738;white-space:no
 th{color:var(--muted);font-weight:500}
 td input{width:100%}
 td input.need{border-color:var(--bad)}
+.rule{font-size:14px;margin:4px 0 0;color:#cfd8e6;line-height:1.5}
+.rule b{color:var(--warn)}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
 button{font:inherit;font-size:14px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#1b2538;color:var(--fg);cursor:pointer}
 button:disabled{opacity:.45;cursor:default}
@@ -77,9 +79,16 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       <label class="f">메모 (선택)<input id="memo" type="text" maxlength="80" placeholder="예: 노트북만 / 폰 2대"></label>
       <label class="f">카메라<select id="camSel"><option value="">기본 카메라</option></select></label>
     </div>
-    <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰. 위치는 cm)</span></h2>
-    <div class="tbl"><table id="phones"><thead><tr><th>사용</th><th>ID</th><th>Hz</th><th>오른쪽+</th><th>높이</th><th>앞+</th><th>메모 (기종·방향)</th><th>들림</th><th></th></tr></thead><tbody></tbody></table></div>
-    <div class="row"><button id="addPhone">+ 폰 추가</button><button id="agreed" title="브라보 3d.html의 기본 배치">📐 약속 배치 넣기 (A 25/25/−2 · B −25/40/−2)</button><span class="muted">오른쪽 = 노트북 가운데에서 오른쪽(왼쪽은 −) · 높이 = 책상 위 · 앞 = 화면 선에서 내 쪽(뒤는 −). 실제로 놓은 자리를 적어 주세요. 폰 없이 하려면 '사용'을 끄세요</span></div>
+    <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰)</span></h2>
+    <div class="rule">📏 <b>키보드 H키 가운데 → 폰 스피커</b>까지 cm · 방향: <b>오른쪽 +</b> · <b>위 +</b> · <b>내 쪽 +</b> (왼쪽·아래·화면 쪽은 −)</div>
+    <div class="grid">
+      <label class="f">⌨️ H키: 경첩 선에서 내 쪽으로 (cm)<input id="hkz" type="number" step="0.5"></label>
+      <label class="f">⌨️ H키: 책상 위 높이 (cm)<input id="hkh" type="number" step="0.5"></label>
+      <label class="f">⌨️ H키: 노트북 가운데보다 오른쪽 (cm, 왼쪽이면 −)<input id="hkx" type="number" step="0.5"></label>
+    </div>
+    <div class="muted" style="margin-top:4px">H키 위치는 한 번만 재요. 경첩 선 = 화면과 키보드 몸체가 만나는 선이에요. 숫자 패드가 있는 노트북은 H키가 가운데보다 왼쪽이라 보통 −3~−5cm예요</div>
+    <div class="tbl"><table id="phones"><thead><tr><th>사용</th><th>ID</th><th>Hz</th><th>오른쪽+</th><th>위+</th><th>내 쪽+</th><th title="브라보 좌표: 노트북 가운데·책상 면·경첩 선 기준 (오른쪽 / 높이 / 앞)">경첩 기준</th><th>메모 (기종·방향)</th><th>들림</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button id="addPhone">+ 폰 추가</button><button id="agreed" title="브라보 3d.html의 기본 배치">📐 약속 배치 넣기</button><span class="muted">실제로 놓은 자리를 재서 적어 주세요. 폰 없이 하려면 '사용'을 끄세요</span></div>
     <div class="row">
       <button id="onBtn" class="big">① 소리·카메라 켜기</button>
       <button id="startBtn" class="big go" disabled>② 세션 시작 (약 2분 30초)</button>
@@ -188,16 +197,42 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   }
   $('startBtn').textContent = `② 세션 시작 (약 ${mmss(plan(0).slice(-1)[0].t1)})`;
 
-  // ---- phones (tone sources): id, Hz, position in cm relative to the laptop
-  let phones = store.get('batears-teach-phones', [
-    { on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' },
-    { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' },
-  ]);
-  const savePhones = () => store.set('batears-teach-phones', phones);
-  // bravo's starting layout in 3d.html (cm): the solver starts here when a position is left blank
-  const AGREED = { A: { x: 25, h: 25, z: -2 }, B: { x: -25, h: 40, z: -2 } };
-  const POS = ['x', 'h', 'z'];
+  // ---- phones (tone sources): Hz and the speaker position, measured from the keyboard's H key (서진: the easiest
+  // point to measure from). The metadata also gets bravo's hinge frame (laptop centre line, desk surface, hinge line):
+  // x_right_cm = H key's right offset + right, h_cm = H key's height + up, z_front_cm = H key's distance from the hinge + toward
+  const hk = Object.assign({ hx: 0, hz: 8, hh: 1.5 }, store.get('batears-teach-hkey', {}));
+  const AGREED = { A: { x: 25, h: 25, z: -2 }, B: { x: -25, h: 40, z: -2 } };   // bravo's starting layout, hinge frame (cm)
+  const POS = ['x', 'h', 'z'];   // H-key frame: right +, up +, toward the person +
+  const OFF = { x: 'hx', h: 'hh', z: 'hz' };
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const agreedH = (id) => { const a = AGREED[id]; return a ? { x: r1(a.x - hk.hx), h: r1(a.h - hk.hh), z: r1(a.z - hk.hz) } : null; };
+  let phones = store.get('batears-teach-phones-h', null);
+  if (!phones) {   // positions typed before the H-key change were in the hinge frame: convert them once
+    const old = store.get('batears-teach-phones', null);
+    phones = old ? old.map((p) => { const q = { ...p }; POS.forEach((k) => { const v = parseFloat(p[k]); q[k] = Number.isFinite(v) ? String(r1(v - hk[OFF[k]])) : ''; }); return q; })
+      : [{ on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' }, { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' }];
+  }
+  const savePhones = () => store.set('batears-teach-phones-h', phones);
+  const hingeOf = (p) => {
+    const v = POS.map((k) => parseFloat(p[k])), f = (i, o) => (Number.isFinite(v[i]) ? r1(o + v[i]) : null);
+    return { x_right_cm: f(0, hk.hx), h_cm: f(1, hk.hh), z_front_cm: f(2, hk.hz) };
+  };
   const blankPos = (p) => POS.some((k) => !Number.isFinite(parseFloat(p[k])));
+  function renderHinge() {
+    document.querySelectorAll('#phones tbody tr').forEach((tr) => {
+      const p = phones[Number(tr.dataset.i)], c = tr.querySelector('.hinge');
+      if (!p || !c) return;
+      const g = hingeOf(p), a = agreedH(p.id);
+      c.textContent = [g.x_right_cm, g.h_cm, g.z_front_cm].map((v) => (v == null ? '?' : v)).join(' / ');
+      POS.forEach((k) => { const el = tr.querySelector(`[data-k="${k}"]`); if (el) el.placeholder = a ? String(a[k]) : ''; });
+    });
+    const a = agreedH('A'), b = agreedH('B');
+    $('agreed').textContent = `📐 약속 배치 넣기 (H키 기준 A ${a.x} / ${a.h} / ${a.z} · B ${b.x} / ${b.h} / ${b.z})`;
+  }
+  [['hkx', 'hx'], ['hkz', 'hz'], ['hkh', 'hh']].forEach(([id, k]) => {
+    $(id).value = hk[k];
+    $(id).addEventListener('input', () => { const v = parseFloat($(id).value); if (Number.isFinite(v)) { hk[k] = v; store.set('batears-teach-hkey', hk); renderHinge(); } });
+  });
   function markNeed() {
     document.querySelectorAll('#phones tbody tr').forEach((tr) => {
       const p = phones[Number(tr.dataset.i)];
@@ -212,12 +247,14 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       <td><input type="checkbox" data-k="on" ${p.on ? 'checked' : ''}></td>
       <td><input data-k="id" value="${esc(p.id)}" maxlength="3" style="width:44px"></td>
       <td><input data-k="hz" type="number" step="100" min="15000" max="23000" value="${esc(p.hz)}" style="width:86px"></td>
-      ${POS.map((k) => `<td><input data-k="${k}" type="number" step="1" value="${esc(p[k])}" placeholder="${AGREED[p.id] ? AGREED[p.id][k] : ''}" style="width:62px"></td>`).join('')}
+      ${POS.map((k) => `<td><input data-k="${k}" type="number" step="0.5" value="${esc(p[k])}" style="width:62px"></td>`).join('')}
+      <td class="hinge muted">–</td>
       <td><input data-k="note" value="${esc(p.note)}" maxlength="60" placeholder="예: 아이폰 13, 노트북 쪽" style="min-width:150px"></td>
       <td class="heard">–</td>
       <td><button data-del="${i}" title="삭제">✕</button></td></tr>`).join('');
     renderHeard();
     markNeed();
+    renderHinge();
   }
   function renderHeard() {
     const on = !!audio.on;
@@ -239,9 +276,10 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     savePhones();
     renderHeard();
     markNeed();
+    renderHinge();
   });
   $('agreed').addEventListener('click', () => {
-    for (const p of phones) { const a = AGREED[p.id]; if (a) POS.forEach((k) => { if (!Number.isFinite(parseFloat(p[k]))) p[k] = String(a[k]); }); }
+    for (const p of phones) { const a = agreedH(p.id); if (a) POS.forEach((k) => { if (!Number.isFinite(parseFloat(p[k]))) p[k] = String(a[k]); }); }
     savePhones();
     renderPhones();
   });
@@ -260,8 +298,9 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     renderPhones();
   });
   const phoneMeta = () => phones.filter((p) => p.on).map((p) => ({
-    id: String(p.id), hz: numOr(p.hz), x_right_cm: numOr(p.x), h_cm: numOr(p.h), z_front_cm: numOr(p.z), note: String(p.note || ''),
-    heard: audio.on ? heardHz(p.hz) : null,
+    id: String(p.id), hz: numOr(p.hz), ...hingeOf(p),
+    from_h_key_cm: { right: numOr(p.x), up: numOr(p.h), toward_user: numOr(p.z) },
+    note: String(p.note || ''), heard: audio.on ? heardHz(p.hz) : null,
   }));
   ['angle', 'palm', 'memo'].forEach((k) => {
     const v = store.get('batears-teach-' + k, null);
@@ -878,6 +917,8 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       clock: 'performance.now() ms in every file (t_cap, t_res, t_ms, tGo, wav.t0)',
       ua: navigator.userAgent, note: $('memo').value || '',
       screen_angle_deg: numOr($('angle').value), palm_width_cm: numOr($('palm').value),
+      h_key: { front_of_hinge_cm: hk.hz, above_desk_cm: hk.hh, right_of_center_cm: hk.hx },
+      phone_position: 'measured from the centre of the H key to the phone speaker (from_h_key_cm: right +, up +, toward the person +); x_right_cm / h_cm / z_front_cm = the same point in the hinge frame (laptop centre line, desk surface, hinge line) = h_key offset + measurement',
       engine: E.info || null, stereoFreqs: (E.config.stereoFreqs || []).slice(), volume: E.config.volume,
       phones: phoneMeta(), phones_at_start: sess.phonesStart, foreign_at_start: sess.foreignStart, foreign_at_end: (E.foreign || []).slice(),
       camera: { label: cam.track ? cam.track.label : '', width: settings.width || cam.w, height: settings.height || cam.h, frameRate: settings.frameRate || null,
