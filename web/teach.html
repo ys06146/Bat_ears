@@ -147,7 +147,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
   // webcam horizontal field of view, as in bravo's teach_fit camera model (auto labels and the distance guide)
-  const HFOV_DEG = 60;
+  const HFOV_DEG = 78;   // bravo's fit picks ~78 deg for the Galaxy Book's OV02C10 (best vision-audio match in 3 of 4 sittings)
   const fH = () => (cam.w / cam.h) / (2 * Math.tan((HFOV_DEG / 2) * Math.PI / 180));   // focal length in image heights
   const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12],
     [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
@@ -586,8 +586,14 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     }
     $('edge').textContent = warn;
     cam.edgeWarn = !!warn && r.present;
-    // rough distance from the webcam: palm width (knuckles 5-17; 서진's, else 8 cm) over its size in the picture
-    if (r.present && r.pw > 0) { cam.dist.push((fH() * (numOr($('palm').value) || 8)) / r.pw); if (cam.dist.length > 9) cam.dist.shift(); }
+    // rough distance from the webcam: palm width (knuckles 5-17: the typed one, else MediaPipe's world landmarks, else 8 cm)
+    // over its size in the picture
+    if (r.present && r.pw > 0) {
+      const wp = r.W ? 100 * Math.hypot(r.W[15] - r.W[51], r.W[16] - r.W[52], r.W[17] - r.W[53]) : NaN;
+      const palmCm = numOr($('palm').value) || (wp >= 4 && wp <= 12 ? wp : 8);
+      cam.dist.push((fH() * palmCm) / r.pw);
+      if (cam.dist.length > 9) cam.dist.shift();
+    }
     if (!r.present) cam.dist.length = 0;
     const dm = cam.dist.length >= 3 ? cam.dist.slice().sort((x, y) => x - y)[cam.dist.length >> 1] : null;
     $('dist').innerHTML = dm == null ? '' : `📏 웹캠에서 약 <span class="${dm >= 25 && dm <= 45 ? 'ok' : dm >= 20 && dm <= 50 ? 'warn' : 'bad'}">${Math.round(dm)}cm</span>`
