@@ -19,7 +19,7 @@ Bat Ears turns a stock laptop into a camera-free 3D hand tracker, in a web page:
   - this is one person on one laptop (a Galaxy Book), hand within about 45 cm of the webcam. Other people and laptops: `[TBD]`.
 - Optional phones can add sources: a phone opens `tone.html` and plays its own tone (17 kHz; iPhones can't play above about 20 kHz). We measured them, and they didn't help yet: phones beside the laptop raised height correlation by 0.05 at most, and a phone above the hand, speaker down, gave an echo path that didn't follow the hand. The demo runs on the laptop alone.
 - On top of tracking: **push, pull and wave** gestures (the **Force Push** game), a **gesture key** (your sequence in your own rhythm), and an experimental left/right check.
-- No install, no server. The audio is analysed on the device and never sent anywhere.
+- No install, no server. The audio is analysed on the device and never sent anywhere. The hologram shows its honest error on screen, turns amber when the hand leaves the taught zone, and runs from a local server without internet.
 
 Try it (Chrome on a laptop, built-in speakers and mic):
 - 🦇 hologram: https://ys06146.github.io/nhng/web/hologram.html
@@ -70,7 +70,7 @@ What's new for us: **a web page on a stock laptop** (optional ordinary phones), 
 - **Uses:** cooking with messy hands, sterile rooms, accessibility, and privacy-first smart devices.
 
 ## Built with
-`javascript` · `web-audio-api` · `audioworklet` · `three.js` · `mediapipe` · `html5-canvas` · `python` · `signal-processing` · `machine-learning`
+`javascript` · `web-audio-api` · `audioworklet` · `three.js` · `mediapipe` · `webcodecs` · `html5-canvas` · `python` · `signal-processing` · `machine-learning`
 
 ## Team
 배서진 (data and classifier, lead and pitch) · 이재윤 (signal engine) · 최서희 (game and UI) · 강소연 (experiments and thresholds)
