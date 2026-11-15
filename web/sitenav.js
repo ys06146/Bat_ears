@@ -1,6 +1,7 @@
 /* Site menu shared by the main pages: HOLOGRAM (the main demo) · GAME · COLLECT DATA · AIR PASSWORD.
  * Include it right after <body>: <script src="sitenav.js"></script>. It inserts the bar first in <body>, marks the
  * current page, and sets --nav-h on <html> so a page can make room for it.
+ * Experimental controls marked class="lab-only" stay hidden unless the address has ?lab=1 (teammates' tools, kept off the demo).
  * data-overlay on the script tag (hologram.html): the bar floats over a full-screen page instead of taking a row. */
 (function () {
   'use strict';
@@ -25,7 +26,8 @@
 .site-nav a.item:hover{color:#e9eef7;background:#141c28}
 .site-nav a.item.sel{color:#e9eef7;background:#1a2433;box-shadow:inset 0 -2px 0 #72daca}
 .site-nav a:focus-visible{outline:2px solid #72daca;outline-offset:2px}
-body.present .site-nav,body.film .site-nav{display:none}`;
+body.present .site-nav,body.film .site-nav{display:none}
+body:not(.lab-mode) .lab-only{display:none!important}`;
   const style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
@@ -46,6 +48,7 @@ body.present .site-nav,body.film .site-nav{display:none}`;
   const put = () => {
     document.body.insertBefore(nav, document.body.firstChild);
     document.body.classList.add('has-nav');
+    if (/[?&]lab=1\b/.test(location.search)) document.body.classList.add('lab-mode');
   };
   if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
   document.documentElement.style.setProperty('--nav-h', H + 'px');

@@ -93,13 +93,13 @@
   <button id="btnStart" class="go">▶ Start</button>
   <button id="btnStop">■ Stop</button>
   <button id="btnCenter" title="Hold your hand at its spot (25–35 cm above the keyboard) and press this (space bar)">◎ Center</button>
-  <label class="file" title="Plays a teach session WAV instead of the mic. Pick the same session’s _vision.csv, .json and .calib.json too to overlay the webcam ground truth (green hand)">📂 Play recording<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
+  <label class="file lab-only" title="Plays a teach session WAV instead of the mic. Pick the same session’s _vision.csv, .json and .calib.json too to overlay the webcam ground truth (green hand)">📂 Play recording<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
   <button id="btnSettings">⚙ Settings</button>
   <button id="btnAbout">ⓘ Credits</button>
-  <button id="btnDebug">🔍 Diagnostics</button>
-  <button id="btnCmp" title="Draws the webcam hand (green, ground truth) and the sound hand together to compare them live. Used with ⏺, it saves training data (compare/). Turn it off for the demo">👁 Compare</button>
+  <button id="btnDebug" class="lab-only">🔍 Diagnostics</button>
+  <button id="btnCmp" class="lab-only" title="Draws the webcam hand (green, ground truth) and the sound hand together to compare them live. Used with ⏺, it saves training data (compare/). Turn it off for the demo">👁 Compare</button>
   <button id="btnFilm" title="Hide the panels and go full screen (H: panels, F: full screen, space: center)">🎬 Filming mode</button>
-  <button id="btnRec" title="Saves the raw mic audio and engine values (for Bravo’s analysis)">⏺ Record</button>
+  <button id="btnRec" class="lab-only" title="Saves the raw mic audio and engine values (for Bravo’s analysis)">⏺ Record</button>
   <span id="status" class="grow">Waiting · press ▶ Start and allow the microphone</span>
 </div>
 <div class="hud" id="sim">🧪 Simulated motion (not sound, for testing the screen)</div>
