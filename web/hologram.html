@@ -648,7 +648,7 @@ function renderHud(now) {
   hudT = now;
   const d = disp.pos.map((v, i) => 100 * (v - HOME[i]));
   $('pos').innerHTML = `<b>Left-right</b><span>${d[0] >= 0 ? '→' : '←'} ${Math.abs(d[0]).toFixed(1)} cm</span><b>Toward-away</b><span>${d[2] >= 0 ? 'toward screen' : 'toward body'} ${Math.abs(d[2]).toFixed(1)} cm</span>`
-    + `<b>height</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(weak)</span></span><b>Status</b><span>${!running ? 'Stopped' : disp.out ? '<span style="color:var(--warn);font-weight:700">Out of range · come back to the tape mark and press ◎ (space)</span>' : disp.moving ? 'Moving' : 'Stopped · returning to center'}</span>`
+    + `<b>height</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(weak)</span></span><b>Status</b><span>${!running ? 'Stopped' : disp.out ? '<span style="color:var(--warn);font-weight:700">Out of range · bring your hand back to its spot (25–35 cm above the keyboard) and press ◎ (space)</span>' : disp.moving ? 'Moving' : 'Stopped · returning to center'}</span>`
     + (ghost.on && ghost.errs.length > 20 ? (() => { const r = [0, 1, 2].map((i) => 100 * Math.sqrt(ghost.errs.reduce((a, q) => a + q.e[i] ** 2, 0) / ghost.errs.length)); return `<b>🟩 Difference from ground truth</b><span>left-right ${r[0].toFixed(1)} · toward-away ${r[2].toFixed(1)} · height ${r[1].toFixed(1)} cm <span class="note">(last 5 s RMS)</span></span>`; })() : '');
   const q = disp.q || [], nm = ['L 18k', 'R 19.5k', '📱A', '📱B'];
   let h = '';
