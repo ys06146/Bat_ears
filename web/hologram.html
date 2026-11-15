@@ -626,21 +626,21 @@ function renderDebug() {
   let warn = '';
   if (lv != null && running && mode === 'mic') {
     if (lv < -20) warn = `🔇 톤이 거의 안 들려요 (teach 때보다 ${(-lv).toFixed(0)}dB 작아요): 블루투스·이어폰을 빼고 내장 스피커·마이크로, 볼륨 50% 이상`;
-    else if (lv < -6) warn = `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
+    else if (lv < -12) warn = `🔈 소리가 가장 조용했던 teach보다도 작아요 (기준보다 ${(-lv).toFixed(0)}dB): 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
   }
   if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) warn = `🔊 다른 Bat Ears 탭(${tabs.other})도 초음파를 내고 있어요: 그 탭을 닫아요 (서로 방해해요)`;
   if (performance.now() - fx.t > 1000) { fx.t = performance.now(); foreignCheck(); }
   const alerts = [];
   if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) alerts.push(`🔊 다른 Bat Ears 탭(${tabs.other})이 초음파를 내고 있어요 → 그 탭을 닫아요`);
   if (fx.peak && running) alerts.push(`📡 다른 초음파가 들려요 (${(fx.peak.f / 1000).toFixed(2)}kHz, +${fx.peak.over.toFixed(0)}dB) → 다른 Bat Ears 탭·기기를 끄고 폰을 노트북에서 치워요`);
-  if (lv != null && running && mode === 'mic' && lv < -6) alerts.push(`🔈 톤이 teach 때보다 ${(-lv).toFixed(0)}dB 작아요 → 윈도우 볼륨을 teach 때만큼 올려요 (작으면 움직임을 작게 그려요)`);
+  if (lv != null && running && mode === 'mic' && lv < -12) alerts.push(`🔈 톤이 가장 조용했던 teach보다도 작아요 (기준보다 ${(-lv).toFixed(0)}dB) → 윈도우 볼륨을 올려요 (작으면 움직임을 작게 그려요)`);
   $('alert').textContent = alerts[0] || ''; $('alert').style.display = alerts.length ? 'block' : 'none';
   const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ 톤이 잘 들려요 (teach 때와 ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
   $('levelWarn').textContent = warn || okMsg;
   $('levelWarn').style.color = okMsg ? 'var(--ok)' : '';
   if ($('debug').style.display !== 'block') return;
   const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k·마이크0', 'L 18k·마이크1', 'R 19.5k·마이크0', 'R 19.5k·마이크1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
-  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -4 ? 'ok' : lv > -6 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (teach 세션 기준, ±6dB는 보통)</div>`;
+  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -9 ? 'ok' : lv > -12 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (처음 teach 다섯 앉음 기준. 최근 teach는 약 −8dB였고 잘 학습됐어요. −12dB 아래면 낮아요)</div>`;
   h += '<table style="width:100%;font-size:12px"><tr><th align="left">경로</th><th>톤 크기</th><th>teach 대비</th><th>품질</th><th>움직임</th></tr>';
   for (let i = 0; i < a.length; i++) {
     const db = 20 * Math.log10(a[i] || 1e-9), dd = REF && REF[i] ? 20 * Math.log10((a[i] || 1e-9) / REF[i]) : NaN;
