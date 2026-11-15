@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bat Ears | 소리 홀로그램</title>
+<style>
+  :root { --bg: #04070c; --fg: #e6f4ff; --dim: #8aa4b8; --acc: #4fd8ff; --ok: #66bb6a; --warn: #ffb74d; --bad: #ef5350; --glass: rgba(10, 22, 34, .72); --line: rgba(79, 216, 255, .28); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { display: block; }
+  .hud { position: fixed; z-index: 2; background: var(--glass); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(6px); }
+  #top { top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  #top h1 { margin: 0; font-size: 18px; letter-spacing: .5px; }
+  #top h1 small { color: var(--dim); font-weight: 400; font-size: 13px; }
+  .grow { flex: 1; }
+  button, select, label.file { background: rgba(20, 40, 58, .9); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: inherit; cursor: pointer; }
+  button:hover, label.file:hover { border-color: var(--acc); }
+  button.go { background: #0f4c3a; border-color: #2e7d32; font-weight: 700; }
+  input[type=file] { display: none; }
+  #status { color: var(--dim); min-width: 200px; }
+  #acc { left: 12px; bottom: 12px; max-width: 470px; font-size: 13px; }
+  #acc b { color: var(--acc); }
+  #acc .big { font-size: 15px; margin: 2px 0 4px; }
+  #live { right: 12px; bottom: 12px; min-width: 250px; font-size: 13px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+  .bar { display: grid; grid-template-columns: 92px 1fr; gap: 6px; align-items: center; margin: 3px 0; font-size: 12px; color: var(--dim); }
+  .track { height: 8px; background: rgba(255, 255, 255, .06); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--acc); transition: width .2s; }
+  #toast { left: 50%; top: 78px; transform: translateX(-50%); font-size: 26px; font-weight: 800; display: none; }
+  #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
+  #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
+  #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
+  #about { left: 12px; top: 74px; width: 520px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
+  #about ul { margin: 0; padding-left: 18px; }
+  #settings label { display: block; margin: 4px 0; }
+  #settings input[type=number] { width: 64px; background: #0c1722; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; }
+  #settings input[type=range] { width: 130px; vertical-align: middle; }
+  .note { color: var(--dim); font-size: 12px; }
+  .lab { color: #9fe8ff; font: 12px system-ui, sans-serif; text-shadow: 0 0 6px #00b8ff; pointer-events: none; }
+  @media (max-width: 760px) { #acc, #live { position: fixed; left: 8px; right: 8px; max-width: none; } #live { bottom: 140px; } #settings { left: 8px; right: 8px; width: auto; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="stage"></div>
+<div class="hud" id="top">
+  <h1>🦇 Bat Ears 홀로그램 <small>웹캠 없이 소리만으로 손 위치</small></h1>
+  <button id="btnStart" class="go">▶ 시작</button>
+  <button id="btnStop">■ 멈춤</button>
+  <button id="btnCenter" title="손을 테이프 자리에 두고 누르세요 (스페이스바)">◎ 가운데</button>
+  <label class="file" title="teach 세션 WAV를 소리 대신 재생해요. 같은 세션의 _vision.csv, .json, .calib.json을 함께 고르면 웹캠 정답(초록 손)을 겹쳐요">📂 녹음 재생<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
+  <button id="btnSettings">⚙ 설정</button>
+  <button id="btnAbout">ⓘ 출처</button>
+  <span id="status" class="grow">대기 중 · ▶ 시작을 누르고 마이크를 허용하세요</span>
+</div>
+<div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
+<div class="hud" id="toast"></div>
+<div class="hud" id="settings">
+  <h3>소리원</h3>
+  <label><input type="checkbox" id="phoneOn"> 📱 폰 A · Hz <input type="number" id="phoneHz" value="17000" step="50"></label>
+  <label class="note">위치 cm (경첩 기준): 오른쪽 <input type="number" id="px" value="0"> 높이 <input type="number" id="py" value="45"> 앞 <input type="number" id="pz" value="30"></label>
+  <label><input type="checkbox" id="phone2On"> 📱 폰 B · Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
+  <label class="note">위치 cm: 오른쪽 <input type="number" id="p2x" value="-25"> 높이 <input type="number" id="p2y" value="40"> 앞 <input type="number" id="p2z" value="-2"></label>
+  <label class="note">폰을 켜면 그 배치로 학습한 보정 파일이 있어야 학습 지도로 풀어요. 없으면 물리 풀이예요</label>
+  <label class="file" style="display:inline-block">📥 보정 불러오기<input id="calibFile" type="file" accept=".json,application/json"></label>
+  <span id="calibName" class="note"></span>
+  <h3>필터 (One Euro, Casiez 2012)</h3>
+  <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
+  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="3"> <span id="tauV" class="note">3초 (멈추면 1초)</span></label>
+  <h3>보기</h3>
+  <label><input type="checkbox" id="showTrail" checked> 궤적</label>
+  <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
+  <label><input type="checkbox" id="showRaw"> 필터 전 원값 점</label>
+  <label>볼륨 <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5"></label>
+  <p class="note">손가락 모양은 서진 님 오른손(teach 세션 웹캠에서 본 모양)으로 고정이에요. 소리는 손의 위치만 재요.</p>
+</div>
+<div class="hud" id="about">
+  <h3>만든 방법</h3>
+  <p class="note">노트북 스피커 두 개가 18kHz·19.5kHz를 내고, 마이크 두 개가 손에 반사된 소리를 들어요. 소리원마다 I/Q 위상으로 경로 길이 변화를 재고(LLAP 방식), 웹캠으로 가르친 세션(teach.html, MediaPipe 손 관절이 정답)에서 배운 지도로 경로 변화를 손 이동으로 바꿔요(브라보). 이 화면은 그 위치를 One Euro 필터로 다듬고, 소리는 움직임만 재기 때문에 천천히 가운데로 돌아오게 해요. 손가락 모양은 고정이에요.</p>
+  <h3>오픈소스 (라이선스)</h3>
+  <ul class="note">
+    <li>three.js r160: 3D 화면, OrbitControls, EffectComposer, UnrealBloomPass(글로우), CSS2DRenderer (MIT)</li>
+    <li>MediaPipe Tasks Vision 0.10.21 HandLandmarker와 hand_landmarker 모델: teach.html의 웹캠 선생님 (Apache-2.0)</li>
+    <li>bat3d.js·vision3d.browser.js: 팀 코드(브라보). 1€ 필터는 논문을 보고 직접 구현했어요(참고 구현은 BSD/MIT)</li>
+  </ul>
+  <h3>레퍼런스</h3>
+  <ul class="note">
+    <li>W. Wang, A. X. Liu, K. Sun. Device-free gesture tracking using acoustic signals (LLAP). MobiCom 2016</li>
+    <li>W. Mao, J. He, L. Qiu. CAT: High-precision acoustic motion tracking. MobiCom 2016</li>
+    <li>R. Nandakumar, V. Iyer, D. Tan, S. Gollakota. FingerIO: Using active sonar for fine-grained finger tracking. CHI 2016</li>
+    <li>S. Yun, Y.-C. Chen, H. Zheng, L. Qiu, W. Mao. Strata: Fine-grained acoustic-based device-free tracking. MobiSys 2017</li>
+    <li>W. Mao et al. RNN-based room scale hand motion tracking (RTrack). MobiCom 2019</li>
+    <li>G. Casiez, N. Roussel, D. Vogel. 1€ Filter: A simple speed-based low-pass filter for noisy input in interactive systems. CHI 2012</li>
+    <li>R. E. Kalman. A new approach to linear filtering and prediction problems. 1960 (엔진의 등속 칼만)</li>
+    <li>F. Zhang et al. MediaPipe Hands: On-device real-time hand tracking. arXiv:2006.10214, 2020</li>
+  </ul>
+</div>
+<div class="hud" id="acc">
+  <div class="big">🔊 <b>소리만으로</b> · 📷 웹캠 꺼짐</div>
+  <div id="accNums">정확도: 미확인</div>
+  <div class="note" style="margin-top:4px">소리는 움직임만 재서 절대 위치는 몰라요. 손을 멈추면 천천히 가운데로 돌아와요. 손은 노트북 앞 모서리 위, 책상에서 18~25cm(웹캠에서 25~45cm)에 두세요.</div>
+</div>
+<div class="hud" id="live">
+  <div class="kv" id="pos"></div>
+  <div id="bars" style="margin-top:6px"></div>
+</div>
+<script src="bat3d.js?v=20261115035640" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="vision3d.browser.js?v=20261115035640"></script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* Bat Ears hologram: a sound-only hand tracker shown as a hologram.
+ * Position: bravo's estimator (web/bat3d.js, from 3d.html: I/Q phase path tracking of every tone, LLAP-style, and a
+ * map learned from webcam-taught sessions). This page adds the display chain: continuity across engine re-zeroing,
+ * a spring back to the centre (sound measures movement, not absolute position), a One Euro filter (Casiez et al.,
+ * CHI 2012) per axis, and a three.js scene (bloom = UnrealBloomPass). The hand's finger shape is fixed (서진's right
+ * hand from a teach session); only its position comes from sound. ?sim=1 = simulated motion, for testing the screen. */
+const $ = (id) => document.getElementById(id);
+const Q = new URLSearchParams(location.search);
+const SIM = Q.get('sim') === '1';
+const REC = Q.get('rec') === '1' ? [] : null;
+
+// ------------------------------------------------------------------ One Euro filter (Casiez, Roussel, Vogel, CHI 2012)
+// written from the paper: a low-pass whose cutoff rises with speed (little jitter at rest, little lag when moving)
+const alpha = (cutoff, dt) => { const tau = 1 / (2 * Math.PI * cutoff); return 1 / (1 + tau / dt); };
+class OneEuro {
+  constructor(minCutoff, beta, dCutoff = 1) { Object.assign(this, { minCutoff, beta, dCutoff, x: null, dx: 0, raw: null }); }
+  reset() { this.x = null; this.dx = 0; this.raw = null; }
+  filter(v, dt, scale = 1) {
+    if (this.x == null) { this.x = v; this.raw = v; return v; }
+    const d = (v - this.raw) / dt;
+    this.raw = v;
+    this.dx += alpha(this.dCutoff, dt) * (d - this.dx);
+    const cutoff = this.minCutoff * scale + this.beta * Math.abs(this.dx);
+    this.x += alpha(cutoff, dt) * (v - this.x);
+    return this.x;
+  }
+}
+// tuned on teach session 044652 (not in the built-in calibration) against the webcam truth, 250 ms moves, hand < 45 cm:
+// raw corr x/y/z 0.27/0.61/0.80, jitter at rest 2.9 mm per 50 ms; bravo's start (0.8/8, y 0.4/4) 0.23/0.29/0.72, 1.8 mm;
+// 0.8 Hz / beta 40 on all axes 0.28/0.53/0.79, 2.0 mm (a high beta keeps the moves, a low cutoff calms the rest).
+// The spring helps too: without it x drops to 0.20 (drift)
+const euro = [new OneEuro(0.8, 40, 1), new OneEuro(0.8, 40, 1), new OneEuro(0.8, 40, 1)];
+
+// ------------------------------------------------------------------ 서진's right hand (MediaPipe world landmarks, median of
+// the 'hold still' step of teach session 043301; palm facing the laptop, fingers up). three.js frame: x right, y up,
+// z toward the viewer; centred on the palm (landmarks 0, 5, 9, 13, 17)
+const HAND = [[0.0012, -0.0719, 0.0165], [-0.0312, -0.0468, -0.0031], [-0.0552, -0.0302, -0.0118], [-0.0771, -0.0075, -0.0273], [-0.0885, 0.0131, -0.0311],
+  [-0.0354, 0.0198, -0.0023], [-0.0426, 0.0481, -0.0123], [-0.0471, 0.0661, -0.0206], [-0.0503, 0.0811, -0.0505], [-0.0085, 0.0239, 0.0009],
+  [-0.0137, 0.0636, -0.0101], [-0.0142, 0.0811, -0.0308], [-0.0175, 0.1054, -0.049], [0.0124, 0.0219, -0.0053], [0.0121, 0.0513, -0.0155],
+  [0.0109, 0.0717, -0.0316], [0.0092, 0.0931, -0.0525], [0.0301, 0.0064, -0.0096], [0.0381, 0.0284, -0.0114], [0.042, 0.0494, -0.0185], [0.0462, 0.0651, -0.037]];
+const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
+
+// bravo's frame (x right, y up, z toward the screen; origin = deck centre, m) -> three.js (z toward the viewer)
+const T3 = (p) => new THREE.Vector3(p[0], p[1], -p[2]);
+const H0 = [0, 0.12, 0];          // the engine's origin (12 cm above the deck centre)
+const HOME0 = [0, 0.19, -0.15];   // where the hand rests in the picture: over the laptop's front edge, ~20 cm up
+let HOME = HOME0.slice();         // replay with the webcam truth: the ghost's palm at the start
+
+// ------------------------------------------------------------------ scene
+const stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x04070c, 1);
+stage.appendChild(renderer.domElement);
+const labels = new CSS2DRenderer();
+labels.setSize(innerWidth, innerHeight);
+Object.assign(labels.domElement.style, { position: 'absolute', top: '0', left: '0', pointerEvents: 'none' });
+stage.appendChild(labels.domElement);
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x04070c, 1.1);
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.01, 10);
+camera.position.set(0.0, 0.36, 0.62);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.13, -0.02);
+controls.enableDamping = true;
+controls.minDistance = 0.3;
+controls.maxDistance = 1.6;
+controls.update();
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.1, 0.55, 0.05);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight);
+});
+
+const CYAN = 0x4fd8ff, add = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false };
+const lineMat = (color, opacity) => new THREE.LineBasicMaterial({ color, opacity, ...add });
+const polyline = (pts, mat) => new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(T3)), mat);
+const label = (text, p) => { const d = document.createElement('div'); d.className = 'lab'; d.textContent = text; const o = new CSS2DObject(d); o.position.copy(T3(p)); scene.add(o); return o; };
+
+// desk grid + laptop (deck, keyboard, screen) as hologram wireframe
+const grid = new THREE.GridHelper(0.9, 18, 0x1a6fa0, 0x0e3550);
+grid.material.transparent = true; grid.material.opacity = 0.55;
+scene.add(grid);
+scene.add(polyline([[-0.17, 0, -0.12], [0.17, 0, -0.12], [0.17, 0, 0.10], [-0.17, 0, 0.10], [-0.17, 0, -0.12]], lineMat(CYAN, 0.55)));
+scene.add(polyline([[-0.14, 0.002, -0.02], [0.14, 0.002, -0.02], [0.14, 0.002, 0.08], [-0.14, 0.002, 0.08], [-0.14, 0.002, -0.02]], lineMat(CYAN, 0.25)));
+scene.add(polyline([[-0.17, 0, 0.10], [0.17, 0, 0.10], [0.17, 0.20, 0.12], [-0.17, 0.20, 0.12], [-0.17, 0, 0.10]], lineMat(CYAN, 0.55)));
+const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.20), new THREE.MeshBasicMaterial({ color: 0x0b2a40, opacity: 0.35, side: THREE.DoubleSide, ...add }));
+scr.position.copy(T3([0, 0.10, 0.11])); scr.rotation.x = -Math.atan2(0.02, 0.20); scene.add(scr);
+const dotMesh = (p, color, r = 0.006) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), new THREE.MeshBasicMaterial({ color, ...add })); m.position.copy(T3(p)); scene.add(m); return m; };
+let srcMarks = [];
+function drawSources(G, phones) {
+  srcMarks.forEach((o) => scene.remove(o));
+  srcMarks = [];
+  if (!G) return;
+  srcMarks.push(dotMesh(G.SL, 0xffb74d), dotMesh(G.SR, 0xba68c8), label('🔊 L 18k', G.SL), label('🔊 R 19.5k', G.SR));
+  (G.M || []).forEach((m) => srcMarks.push(dotMesh(m, 0x81c784, 0.004)));
+  if (G.M) srcMarks.push(label('🎤', G.M[0]));
+  (phones || []).forEach((ph) => { if (ph.P) { srcMarks.push(dotMesh(ph.P, 0xf06292, 0.008), label(`📱${ph.id} ${(ph.hz / 1000).toFixed(2)}k`, ph.P)); } });
+}
+
+// the hologram hand: bones (thin glowing cylinders), joints (spheres), a scanline palm
+const hand = new THREE.Group();
+scene.add(hand);
+const boneMat = new THREE.MeshBasicMaterial({ color: CYAN, opacity: 0.85, ...add });
+const jointMat = new THREE.MeshBasicMaterial({ color: 0xbff4ff, opacity: 0.95, ...add });
+const up = new THREE.Vector3(0, 1, 0);
+for (const [a, b] of BONES) {
+  const pa = new THREE.Vector3(...HAND[a]), pb = new THREE.Vector3(...HAND[b]), d = pb.clone().sub(pa);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, d.length(), 8), boneMat);
+  m.position.copy(pa).add(pb).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(up, d.normalize());
+  hand.add(m);
+}
+HAND.forEach((p, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry([4, 8, 12, 16, 20].includes(i) ? 0.0042 : 0.0052, 12, 10), jointMat); m.position.set(...p); hand.add(m); });
+const palmShader = new THREE.ShaderMaterial({
+  uniforms: { time: { value: 0 }, color: { value: new THREE.Color(CYAN) } },
+  vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform float time; uniform vec3 color; varying vec3 vP; void main(){ float s = step(0.55, fract(vP.y * 160.0 - time * 1.5)); gl_FragColor = vec4(color, 0.10 + 0.16 * s); }',
+  side: THREE.DoubleSide, ...add,
+});
+{
+  const ring = [0, 1, 5, 9, 13, 17].map((i) => new THREE.Vector3(...HAND[i])), c = ring.reduce((s, v) => s.add(v), new THREE.Vector3()).multiplyScalar(1 / ring.length);
+  const pos = [];
+  for (let i = 0; i < ring.length; i++) { const a = ring[i], b = ring[(i + 1) % ring.length]; pos.push(c.x, c.y, c.z, a.x, a.y, a.z, b.x, b.y, b.z); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  hand.add(new THREE.Mesh(g, palmShader));
+}
+// honest error ellipsoid (held-out RMS per axis), the drop line and the shadow on the desk
+const errEl = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshBasicMaterial({ color: 0xffb74d, wireframe: true, opacity: 0.16, ...add }));
+scene.add(errEl);
+const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: CYAN, dashSize: 0.008, gapSize: 0.006, opacity: 0.6, ...add }));
+scene.add(drop);
+const shadow = new THREE.Mesh(new THREE.RingGeometry(0.012, 0.02, 32), new THREE.MeshBasicMaterial({ color: CYAN, opacity: 0.5, side: THREE.DoubleSide, ...add }));
+shadow.rotation.x = -Math.PI / 2;
+scene.add(shadow);
+const rawDot = new THREE.Mesh(new THREE.SphereGeometry(0.004, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff8a65, opacity: 0.7, ...add }));
+scene.add(rawDot);
+// trail: the last 3 s, fading (additive: darker = more transparent)
+const TRAIL = 180, trailPos = new Float32Array(TRAIL * 3), trailCol = new Float32Array(TRAIL * 3), trailPts = [];
+const trailGeo = new THREE.BufferGeometry();
+trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+trailGeo.setAttribute('color', new THREE.BufferAttribute(trailCol, 3));
+const trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ vertexColors: true, ...add }));
+scene.add(trail);
+// webcam truth for a replayed teach session (bravo's BatVision): a green skeleton at the WAV's playback time
+const ghost = { frames: null, s: null, cam: null, on: false, anchored: false, name: '', errs: [] };
+const ghostGeo = new THREE.BufferGeometry();
+ghostGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(BONES.length * 6), 3));
+const ghostLines = new THREE.LineSegments(ghostGeo, new THREE.LineBasicMaterial({ color: 0x69f0ae, opacity: 0.8, ...add }));
+const ghostJoints = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(63), 3)),
+  new THREE.PointsMaterial({ color: 0x69f0ae, size: 0.007, opacity: 0.9, ...add }));
+scene.add(ghostLines, ghostJoints);
+ghostLines.visible = ghostJoints.visible = false;
+function ghostAt(t) {   // the webcam frame nearest to WAV time t (s); null when the hand wasn't in the picture
+  const S = ghost.s;
+  if (!S || !S.length || t == null) return null;
+  let lo = 0, hi = S.length - 1;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (S[mid] < t) lo = mid + 1; else hi = mid; }
+  const i = lo > 0 && Math.abs(S[lo - 1] - t) < Math.abs(S[lo] - t) ? lo - 1 : lo;
+  if (Math.abs(S[i] - t) > 0.12) return null;
+  const f = ghost.frames[i];
+  if (!f.pts) f.pts = window.BatVision.landmarksToLaptop(f, ghost.cam);
+  return f.pts;
+}
+const palmOf = (pts) => [0, 1, 2].map((k) => [0, 5, 9, 13, 17].reduce((a, i) => a + pts[i][k], 0) / 5);
+
+// ------------------------------------------------------------------ display chain (per engine frame, ~100 Hz)
+const disp = { pos: HOME.slice(), raw: HOME.slice(), cont: null, off: [0, 0, 0], spring: [0, 0, 0], last: null, still: 0, frames: 0, t: 0 };
+const vsub = (a, b) => a.map((v, i) => v - b[i]), vadd = (a, b) => a.map((v, i) => v + b[i]);
+function resetDisplay() {
+  disp.cont = null; disp.off = [0, 0, 0]; disp.spring = [0, 0, 0]; disp.pos = HOME.slice(); disp.raw = HOME.slice();
+  euro.forEach((f) => f.reset()); trailPts.length = 0;
+}
+function onFrame(f) {
+  if (!f || !f.raw) return;
+  if (ghost.on && !ghost.anchored && f.s > 0.3) {   // replay: start the sound hand where the webcam saw the hand
+    const g = ghostAt(f.s);
+    if (g) { ghost.anchored = true; HOME = palmOf(g); resetDisplay(); disp.s = f.s; return; }
+  }
+  const t = f.t != null ? f.t : performance.now(), dt = disp.last == null ? 0.01 : Math.max(0.002, Math.min(0.1, (t - disp.last) / 1000));
+  disp.last = t;
+  // continuity: when the engine re-zeroes its path sums (f.reset) the raw position jumps back to its origin
+  let cont = vadd(f.raw, disp.off);
+  if (f.reset && disp.cont) { disp.off = vsub(disp.cont, f.raw); cont = disp.cont.slice(); }
+  const step = disp.cont ? vsub(cont, disp.cont) : [0, 0, 0];
+  disp.cont = cont;
+  // spring back to the centre: sound measures movement, so the absolute place slowly returns. tau 3 s moving, 1 s still:
+  // on 044652 a shorter spring removes drift (x corr 0.28 at 6 s -> 0.33 at 3 s), at the cost of not holding an off-centre pose
+  disp.still = f.moving === false ? (f.still || disp.still + dt * 1000) : 0;
+  const tau0 = Number($('tau').value), tau = tau0 <= 0 ? Infinity : disp.still > 1000 ? Math.min(1, tau0) : tau0, k = Math.exp(-dt / tau);
+  disp.spring = disp.spring.map((s, i) => (s + step[i]) * k);
+  const target = HOME.map((h, i) => h + disp.spring[i]);
+  disp.raw = target;
+  const sc = Number($('smooth').value);
+  disp.pos = target.map((v, i) => euro[i].filter(v, dt, sc));
+  disp.q = f.q; disp.moving = f.moving; disp.frames++; disp.t = t;
+  disp.s = f.s;
+  disp.eng = f.raw;
+  if (REC) REC.push([f.s, f.raw[0], f.raw[1], f.raw[2], f.moving ? 1 : 0]);   // ?rec=1: the engine stream, for tuning offline
+}
+
+// ------------------------------------------------------------------ engine: bravo's Bat3D, or simulated motion (?sim=1)
+function makeSim() {
+  let timer = 0, t0 = 0, cb = null;
+  const G = { SL: [-0.15, -0.01, -0.08], SR: [0.15, -0.01, -0.08], M: [[0.025, 0.19, 0.17], [-0.025, 0.19, 0.17]] };
+  return {
+    solver: { G, err: null, sim: true },
+    onFrame(fn) { cb = fn; },
+    async start() {
+      t0 = performance.now();
+      timer = setInterval(() => {
+        const t = (performance.now() - t0) / 1000, a = t * 0.9;
+        const moving = (t % 8) < 6;
+        const raw = [H0[0] + (moving ? 0.08 * Math.sin(a) : 0.08 * Math.sin(6 * 0.9)), H0[1] + 0.02 * Math.sin(2.3 * a), H0[2] + (moving ? 0.06 * Math.sin(2 * a) : 0.06 * Math.sin(12 * 0.9))]
+          .map((v) => v + (Math.random() - 0.5) * 0.006);
+        cb && cb({ t: performance.now(), raw, moving, still: moving ? 0 : ((t % 8) - 6) * 1000, q: [3, 2.8, 2.2, 2.0] });
+      }, 10);
+      return true;
+    },
+    stop() { clearInterval(timer); },
+    originReset() {},
+  };
+}
+let engine = null, running = false, mode = '';
+function phonesFromUi() {
+  const ph = [];
+  if ($('phoneOn').checked) ph.push({ id: 'A', hz: Number($('phoneHz').value), x_right_cm: Number($('px').value), h_cm: Number($('py').value), z_front_cm: Number($('pz').value) });
+  if ($('phone2On').checked) ph.push({ id: 'B', hz: Number($('phone2Hz').value), x_right_cm: Number($('p2x').value), h_cm: Number($('p2y').value), z_front_cm: Number($('p2z').value) });
+  return ph;
+}
+let calib = null;
+async function start(m, file) {
+  stop();
+  HOME = HOME0.slice();
+  resetDisplay();
+  mode = m;
+  if (SIM) {
+    engine = makeSim();
+    engine.onFrame(onFrame);
+    await engine.start();
+    running = true;
+    drawSources(engine.solver.G, []);
+    renderAcc(engine.solver);
+    $('status').textContent = '가상 움직임 (화면 시험)';
+    return;
+  }
+  if (!window.Bat3D) { $('status').textContent = '⚠️ 소리 엔진(bat3d.js)을 불러오지 못했어요'; return; }
+  // bravo's engine (3d.html v8): autoReset off, the display chain below handles stillness (re-centre spring)
+  engine = window.Bat3D.create({ geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false });
+  engine.on('frame', onFrame);
+  engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
+  engine.on('status', (t) => { if (t) $('status').textContent = t; });
+  try { await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) { $('status').textContent = '⚠️ 시작하지 못했어요: ' + (e.message || e); engine = null; return; }
+  running = true;
+  const info = engine.info();
+  drawSources(info.G, info.phones);
+  renderAcc(info);
+  if (m === 'mic') $('status').textContent = '듣는 중 · 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에서 움직여요';
+}
+function stop() {
+  if (engine && running) { try { engine.stop(); } catch (e) { /* ignore */ } }
+  running = false;
+}
+// ◎: the hand is at the centre now (live: the tape mark; replay: where the webcam sees it)
+function recenter() {
+  const g = ghost.on ? ghostAt(disp.s) : null;
+  HOME = g ? palmOf(g) : HOME0.slice();
+  resetDisplay();
+  ghost.errs.length = 0;
+}
+// 📂: a teach session's WAV, plus (optional) its _vision.csv, .json and .calib.json for the webcam truth
+async function openRecording(files) {
+  const wav = files.find((f) => /\.wav$/i.test(f.name));
+  if (!wav) { $('status').textContent = '⚠️ .wav 파일을 골라 주세요'; return; }
+  const vis = files.find((f) => /_vision\.csv$/i.test(f.name)), cal = files.find((f) => /\.calib\.json$/i.test(f.name));
+  const meta = files.find((f) => /\.json$/i.test(f.name) && !/\.calib\.json$/i.test(f.name));
+  Object.assign(ghost, { on: false, anchored: false, frames: null, s: null, name: '', errs: [] });
+  if (vis && meta && window.BatVision) {
+    try {
+      const m = JSON.parse(await meta.text()), c = cal ? JSON.parse(await cal.text()) : null;
+      const frames = window.BatVision.parseVisionCSV(await vis.text());
+      const cam = window.BatVision.camFromCalib(c, { W: (m.camera && m.camera.width) || 1280, H: (m.camera && m.camera.height) || 720 });
+      cam.scale = window.BatVision.sessionScale(frames, m.palm_width_cm);
+      const t0 = m.wav && m.wav.t0;
+      if (frames.length && Number.isFinite(t0)) {
+        frames.forEach((f) => { f.s = window.BatVision.wavTime(f, t0, cam.lagMs); });
+        frames.sort((a, b) => a.s - b.s);
+        Object.assign(ghost, { frames, s: frames.map((f) => f.s), cam, on: true, name: m.session || vis.name, calibOk: !!c });
+      }
+    } catch (e) { console.warn('[holo] webcam truth', e); }
+  }
+  await start('wav', wav);
+  if (!running) return;
+  const info = engine && engine.info ? engine.info() : {}, inTrain = ghost.on && info.calName && ghost.name && info.calName.includes(ghost.name.replace(/^.*?(\d{8}_\d{6}).*$/, '$1'));
+  $('status').textContent = `녹음 재생: ${wav.name}` + (ghost.on ? ` · 🟩 웹캠 정답 겹침${ghost.calibOk ? '' : ' (calib 없음: 카메라 기본값)'}` : ' · 웹캠 정답 없음 (_vision.csv와 .json을 같이 고르면 겹쳐요)')
+    + (inTrain ? ' · ⚠️ 이 세션은 기본 보정 학습에 쓰여서 실제보다 좋아 보일 수 있어요' : '');
+}
+function renderAcc(s) {
+  const e = s && s.err;
+  if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? '가상 움직임이라 정확도가 없어요' : '정확도: 미확인 (보정 없음, 물리 풀이)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
+  const r = e.rms, c = e.corr || [], mo = e.motion || [];
+  errEl.userData.r = r.map((v) => v / 100);
+  $('accNums').innerHTML = `정확도 (처음 보는 세션, 250ms 이동의 RMS 오차):<br><b>좌우 ±${r[0].toFixed(1)}cm</b> · <b>앞뒤 ±${r[2].toFixed(1)}cm</b> · 높이 ±${r[1].toFixed(1)}cm<br>`
+    + `<span class="note">실제 움직임 ${mo.map((v) => v.toFixed(1)).join(' / ')}cm, 상관 ${c.map((v) => v.toFixed(2)).join(' / ')} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
+}
+
+// ------------------------------------------------------------------ HUD + render loop
+function showToast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(showToast.h); showToast.h = setTimeout(() => { t.style.display = 'none'; }, 1800); }
+let hudT = 0;
+function renderHud(now) {
+  if (now - hudT < 150) return;
+  hudT = now;
+  const d = disp.pos.map((v, i) => 100 * (v - HOME[i]));
+  $('pos').innerHTML = `<b>좌우</b><span>${d[0] >= 0 ? '→' : '←'} ${Math.abs(d[0]).toFixed(1)} cm</span><b>앞뒤</b><span>${d[2] >= 0 ? '화면 쪽' : '몸 쪽'} ${Math.abs(d[2]).toFixed(1)} cm</span>`
+    + `<b>높이</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(약함)</span></span><b>상태</b><span>${!running ? '멈춤' : disp.moving ? '움직이는 중' : '멈춤 · 가운데로 돌아오는 중'}</span>`
+    + (ghost.on && ghost.errs.length > 20 ? (() => { const r = [0, 1, 2].map((i) => 100 * Math.sqrt(ghost.errs.reduce((a, q) => a + q.e[i] ** 2, 0) / ghost.errs.length)); return `<b>🟩 정답과 차이</b><span>좌우 ${r[0].toFixed(1)} · 앞뒤 ${r[2].toFixed(1)} · 높이 ${r[1].toFixed(1)} cm <span class="note">(최근 5초 RMS)</span></span>`; })() : '');
+  const q = disp.q || [], nm = ['L 18k', 'R 19.5k', '📱A', '📱B'];
+  let h = '';
+  for (let i = 0; i < q.length; i += 2) {
+    const v = (q[i] + (q[i + 1] ?? q[i])) / 2, w = Math.min(100, 100 * Math.max(0, v - 1) / 4);
+    h += `<div class="bar"><span>${nm[i / 2] || '경로'}</span><div class="track"><div class="fill" style="width:${w}%;background:${v > 2.5 ? 'var(--ok)' : v > 1.6 ? 'var(--warn)' : 'var(--bad)'}"></div></div></div>`;
+  }
+  $('bars').innerHTML = h ? '<div class="note">경로 품질 (움직이는 반사 / 잡음)</div>' + h : '';
+}
+const clock = new THREE.Clock();
+function frame() {
+  requestAnimationFrame(frame);
+  const now = performance.now(), el = clock.getElapsedTime();
+  const P = T3(disp.pos);
+  hand.position.copy(P);
+  hand.visible = running || SIM;
+  palmShader.uniforms.time.value = el;
+  boneMat.opacity = 0.75 + 0.1 * Math.sin(el * 7.3) * Math.sin(el * 3.1);   // a little hologram flicker
+  const r = errEl.userData.r || [0.04, 0.032, 0.045];
+  errEl.visible = $('showErr').checked && hand.visible;
+  errEl.position.copy(P); errEl.scale.set(r[0], r[1], r[2]);
+  shadow.position.set(P.x, 0.001, P.z); shadow.visible = hand.visible;
+  drop.geometry.setFromPoints([new THREE.Vector3(P.x, 0.001, P.z), P]); drop.computeLineDistances(); drop.visible = hand.visible;
+  rawDot.visible = $('showRaw').checked && hand.visible; rawDot.position.copy(T3(disp.raw));
+  const g = ghost.on && running ? ghostAt(disp.s) : null;
+  ghostLines.visible = ghostJoints.visible = !!g;
+  if (g) {
+    const arr = ghostGeo.attributes.position.array, E = (window.BatVision && window.BatVision.EDGES) || BONES;
+    let k = 0;
+    for (const [a, b] of E) { const A = T3(g[a]), B = T3(g[b]); arr[k++] = A.x; arr[k++] = A.y; arr[k++] = A.z; arr[k++] = B.x; arr[k++] = B.y; arr[k++] = B.z; }
+    ghostGeo.attributes.position.needsUpdate = true;
+    const ja = ghostJoints.geometry.attributes.position.array;
+    g.forEach((p, i) => { const v = T3(p); ja[3 * i] = v.x; ja[3 * i + 1] = v.y; ja[3 * i + 2] = v.z; });
+    ghostJoints.geometry.attributes.position.needsUpdate = true;
+    if (ghost.anchored) { const gp = palmOf(g); ghost.errs.push({ t: now, e: disp.pos.map((v, i) => v - gp[i]) }); while (ghost.errs.length && ghost.errs[0].t < now - 5000) ghost.errs.shift(); }
+  }
+  if (running && (!trailPts.length || now - trailPts[trailPts.length - 1].t > 16)) { trailPts.push({ t: now, p: P.clone() }); if (trailPts.length > TRAIL) trailPts.shift(); }
+  const n = trailPts.length;
+  for (let i = 0; i < TRAIL; i++) {
+    const q = trailPts[Math.min(n - 1, Math.max(0, i - (TRAIL - n)))], a = n ? Math.max(0, (i - (TRAIL - n)) / Math.max(1, n)) : 0;
+    const p = q ? q.p : P;
+    trailPos.set([p.x, p.y, p.z], 3 * i);
+    trailCol.set([0.31 * a, 0.85 * a, 1.0 * a], 3 * i);
+  }
+  trailGeo.attributes.position.needsUpdate = true; trailGeo.attributes.color.needsUpdate = true;
+  trail.visible = $('showTrail').checked && n > 1;
+  controls.update();
+  composer.render();
+  labels.render(scene, camera);
+  renderHud(now);
+}
+requestAnimationFrame(frame);
+
+// ------------------------------------------------------------------ wiring
+$('btnStart').onclick = () => start('mic');
+$('btnStop').onclick = () => { stop(); $('status').textContent = '멈춤'; };
+$('btnCenter').onclick = () => { if (engine && engine.originReset) engine.originReset(); recenter(); };
+addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); $('btnCenter').click(); } });
+$('wavFile').onchange = (e) => openRecording([...e.target.files]);
+$('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+$('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
+$('smooth').oninput = () => { $('smoothV').textContent = '×' + Number($('smooth').value).toFixed(1); };
+$('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? '끔' : `${v}초 (멈추면 ${Math.min(1, v)}초)`; };
+$('calibFile').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try { calib = JSON.parse(await f.text()); $('calibName').textContent = '불러옴: ' + (calib.session || f.name) + ' · 다시 시작하면 적용돼요'; } catch (er) { $('calibName').textContent = '⚠️ 읽을 수 없어요'; }
+};
+if (SIM) { $('sim').style.display = 'block'; start('sim'); }
+else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false }).info() : null);
+window.Holo = { REC, disp, onFrame, euro, start, stop, ghost, ghostAt: (t) => ghostAt(t), palmOf, get running() { return running; }, get engine() { return engine; } };   // for tests
+</script>
+</body>
+</html>

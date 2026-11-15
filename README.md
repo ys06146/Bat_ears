@@ -35,6 +35,7 @@ Other pages:
 | 🧪 `experiment-live.html` | Countdown-free live experiments (free gestures, continuous push -> pull sets), a 📢 jammer mode and a one-click interference test. |
 | 📢 `tone.html` | A mobile tone player, to use a phone as an extra sound source. |
 | 🧪 `3d.html` | 3D hand tracking (the new main demo candidate): the I/Q phase of every source, i.e. the laptop's two speakers plus phones A (20.5 kHz) and B (21.5 kHz), solved for the hand's position. It can load a calibration fitted from teach sessions. |
+| 🦇 `hologram.html` | **Sound-only hologram** (the 3D demo): the hand position from bravo's engine (`web/bat3d.js`, the same estimator as 3d.html) shown as a holographic hand in three.js, with a One Euro filter (Casiez et al., CHI 2012), a slow return to the centre (sound measures movement, not absolute position) and the honest held-out error on screen. 📂 replays a teach session; picking its `_vision.csv`, `.json` and `.calib.json` too overlays the webcam truth as a green hand (`web/vision3d.browser.js`). Sources and licenses: the ⓘ panel. |
 | 📷 `teach.html` | **Teacher mode** (experimental): the webcam's MediaPipe hand landmarks mark where the hand is while the engine records the stereo features, the I/Q path changes and the raw WAV, all on one clock, during a 2.5-minute guided session. Phones running `tone.html` add sources. Files go to `ml/data/teach/` to train the audio to 3D position mapping. The camera is only for training, and no video or image is stored. |
 
 `web/batears.html` is the original single-file test page, with a band check.

@@ -11,11 +11,11 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 stamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-for page in ('index.html', 'experiment-live.html', 'key.html', 'teach.html'):
+for page in ('index.html', 'experiment-live.html', 'key.html', 'teach.html', 'hologram.html'):
     path = os.path.join(HERE, '..', 'web', page)
     with open(path, encoding='utf-8') as f:
         html = f.read()
-    new, n = re.subn(r'(src|href)="([A-Za-z0-9_-]+\.(?:js|css))(?:\?v=[0-9]+)?"',
+    new, n = re.subn(r'(src|href)="([A-Za-z0-9_.-]+\.(?:js|css))(?:\?v=[0-9]+)?"',
                      lambda m: f'{m.group(1)}="{m.group(2)}?v={stamp}"', html)
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
         f.write(new)
