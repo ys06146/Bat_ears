@@ -462,7 +462,8 @@ function renderErr() {
   const g = solver.gain, hy = !solver.phone;
   let h = `<b>풀이</b><span>${solver.learned ? '학습 지도(비전)' : solver.cal ? '물리 · 보정된 기하' : '물리 · 추정 기하'}</span>`;
   h += `<b>기하 증폭</b><span>x ${g[0].toFixed(1)} · y ${hy ? '관측 불가(고정)' : g[1].toFixed(1)} · z ${g[2].toFixed(1)} (경로 1cm당 손 cm)</span>`;
-  if (solver.err) { const e = solver.err, cu = calibInUse; h += `<b>보정</b><span>${solver.calName}</span><b>비전 대비</b><span>x ±${e.rms[0].toFixed(1)} · y ±${e.rms[1].toFixed(1)} · z ±${e.rms[2].toFixed(1)} cm (처음 보는 데이터, ${cu.winMs}ms 이동, 손이 웹캠 ${Math.round(100 * (cu.nearM || 0.45))}cm 안), 상관 ${e.corr.map((v) => v.toFixed(2)).join('/')}</span>`; if (cu.truthFloorCm) h += `<b>정답 한계</b><span>x ${cu.truthFloorCm[0]} · y ${cu.truthFloorCm[1]} · z ${cu.truthFloorCm[2]} cm (웹캠 흔들림)</span>`; }
+  if (solver.err) { const e = solver.err, cu = calibInUse; const r1 = (v) => (Math.round(v * 10 + 1e-9) / 10).toFixed(1);   // 2.55 -> 2.6 (toFixed alone gives 2.5)
+    h += `<b>보정</b><span>${solver.calName}</span><b>비전 대비</b><span>x ±${r1(e.rms[0])} · y ±${r1(e.rms[1])} · z ±${r1(e.rms[2])} cm (처음 보는 데이터, ${cu.winMs}ms 이동, 손이 웹캠 ${Math.round(100 * (cu.nearM || 0.45))}cm 안), 상관 ${e.corr.map((v) => v.toFixed(2)).join('/')}</span>`; if (cu.truthFloorCm) h += `<b>정답 한계</b><span>x ${cu.truthFloorCm[0]} · y ${cu.truthFloorCm[1]} · z ${cu.truthFloorCm[2]} cm (웹캠 흔들림)</span>`; }
   else h += `<b>비전 대비</b><span>미확인 · 📥 보정 파일을 불러오면 표시해요</span>`;
   h += `<b>주의</b><span>상대 이동만 믿을 만해요. 절대 위치는 드리프트가 있어서 손을 1초 멈추면 원점을 다시 잡아요</span>`;
   $('err').innerHTML = h;
