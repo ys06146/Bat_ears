@@ -37,7 +37,8 @@
   const KEYS = ['ilatC', 'idep', 'bip'];
   const VERSION = 3;
   const lin = (db) => Math.pow(10, Math.max(-30, Math.min(60, db)) / 10);
-  const E_MIN = 2;   // use a frame for lat only if both tones' echo is > (E_MIN + 1) x the floor (eL, eR > ~7.8 dB)
+  const E_MIN = 3;   // use a frame for lat only if both tones' echo is > (E_MIN + 1) x the floor (eL, eR > ~9 dB);
+                     // 2 -> 3: Galaxy Book 205859 split 14/0/6 -> 16/0/4, MacBook 211820 12/3/5 -> 12/1/7 (plateau 3-5)
 
   // rest speed of one tone: median v over the last windowMs of quiet frames. Feed every frame of that tone:
   // push(t, v, max(dUp, dDown)); quiet = echo < quietDb over the floor.
@@ -184,5 +185,26 @@
     return { kind: c.dir, conf: +Math.abs(c.z).toFixed(2) };
   }
 
-  return { decide, learn, featuresOf, SwipeBurst, LRCheck, RestSpeed, classify, fit, excessDb, KEYS, VERSION };
+  // Per-laptop choice of cues. 'fft' = the FFT-centroid cues above; 'phase' = signed peaks from the live I/Q phase
+  // tracker (iq.js peaksBetween -> feat.pPk, feat.pDPk) plus the FFT depth cues. 214602 MacBook (first WAV check):
+  // time split fft 4/3/5 (33%) vs phase [pPk, pDPk] 8/1/3 (67%), phaseFft [pPk, idep, bip] 9/2/1 (75%); push/pull read
+  // as left/right 0-1/10. Checks: fft refused (reversed 0.25), phase OK (LOO 0.83/0.08/0.08, fp 0.1), phaseFft refused (fp 0.2).
+  // 205859 Galaxy Book: fft 16/0/4 (80%), 0/20 (phase not recorded there yet).
+  const KEYSETS = { fft: KEYS, phase: ['pPk', 'pDPk'], phaseFft: ['pPk', 'idep', 'bip'] };
+  // run the check with every key set the trials support; keep the best passing one (else the best failing one, for the
+  // reason text). score = hit - 2 x reversed - false left/right (all leave-one-out).
+  function bestCheck(items, opt = {}, keySets = KEYSETS) {
+    let best = null;
+    for (const [name, keys] of Object.entries(keySets)) {
+      const chk = new LRCheck({ ...opt, keys });
+      for (const it of items) chk.add(it.kind, it.feat);
+      const r = chk.result();
+      r.keys = name;
+      const sc = (r.ok ? 10 : 0) + (r.looAcc || 0) - 2 * (r.looWrong || 0) - (r.fpRate || 0) + (r.model ? 0 : -20);
+      if (!best || sc > best.sc) best = { sc, r };
+    }
+    return best.r;
+  }
+
+  return { decide, learn, featuresOf, SwipeBurst, LRCheck, RestSpeed, classify, fit, excessDb, bestCheck, KEYS, KEYSETS, VERSION };
 });

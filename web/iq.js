@@ -6,7 +6,10 @@
  *
  *   const iq = await BatIQ.start(ctx, micSourceNode, [18000, 19500]);   // null if AudioWorklet is unavailable
  *   iq.pathBetween(ta, tb) -> { dL, dR, n }     (m, perf-time ms; dL = change of the speaker L -> hand -> mic path)
- *   pLat = (dR - dL) / 2                         sideways cue for swipe.js (sign learned by the check)
+ *   iq.peaksBetween(ta, tb) -> { pPk, pDPk, n }  signed peak of the cumulative sideways (dR - dL) / 2 and depth
+ *                                                -(dL + dR) / 2 path change inside the window: the swipe cue to use
+ *     (214602 MacBook: window [burst start - 300 ms, burst end] -> left +5..+20 cm, right -14..-25 cm, push/pull
+ *      within +-7 cm; the NET change over a burst is spoiled by return strokes). gate 3 -> 1.5 keeps 2x more steps.
  *   iq.stop()
  */
 (function (root) {
@@ -17,7 +20,7 @@ class BatIQ extends AudioWorkletProcessor {
     super();
     const p = o.processorOptions || {};
     this.freqs = p.freqs || [18000, 19500];
-    this.dec = p.dec || 48; this.lpHz = p.lpHz || 250; this.tauS = p.tauS || 0.25; this.gate = p.gate || 3;
+    this.dec = p.dec || 48; this.lpHz = p.lpHz || 250; this.tauS = p.tauS || 0.25; this.gate = p.gate || 1.5;
     this.rate2 = sampleRate / this.dec; this.lam = this.freqs.map((f) => 343 / f);
     this.coef = [0.5412, 1.3066].map((Q) => { const w = 2 * Math.PI * this.lpHz / sampleRate, cw = Math.cos(w), al = Math.sin(w) / (2 * Q), a0 = 1 + al;
       return [(1 - cw) / 2 / a0, (1 - cw) / a0, (1 - cw) / 2 / a0, -2 * cw / a0, (1 - al) / a0]; });
@@ -97,6 +100,14 @@ registerProcessor('bat-iq', BatIQ);
     };
     return {
       node,
+      peaksBetween(ta, tb) {
+        let x = 0, y = 0, xp = 0, yp = 0, n = 0;
+        for (let i = h; i < T.length; i++) if (T[i] >= ta && T[i] <= tb) {
+          x += (R[i] - L[i]) / 2; y += -(R[i] + L[i]) / 2; n++;
+          if (Math.abs(x) > Math.abs(xp)) xp = x; if (Math.abs(y) > Math.abs(yp)) yp = y;
+        }
+        return { pPk: xp, pDPk: yp, n };
+      },
       pathBetween(ta, tb) { let dL = 0, dR = 0, n = 0; for (let i = h; i < T.length; i++) if (T[i] >= ta && T[i] <= tb) { dL += L[i]; dR += R[i]; n++; } return { dL, dR, n }; },
       stop() { try { src.disconnect(node); node.disconnect(); mute.disconnect(); } catch (_) { /* ignore */ } },
     };

@@ -821,6 +821,10 @@ registerProcessor('bat-tap', BatTap);`;
       if (feat && st.iq) {
         const pc = st.iq.pathBetween(ev.start - 150, now); // the FFT frames lag the sound by about half a window
         if (pc.n > 20) { feat.pLat = (pc.dR - pc.dL) / 2; feat.pDep = -(pc.dL + pc.dR) / 2; feat.pN = pc.n; }
+        // signed peaks of the running sideways / depth path change: return strokes cancel the net change, not the
+        // peak (bravo, 214602 MacBook WAV). From 300 ms before the burst: the FFT burst starts late
+        const pk = st.iq.peaksBetween ? st.iq.peaksBetween(ev.start - 300, now) : null;
+        if (pk && pk.n > 20) { feat.pPk = pk.pPk; feat.pDPk = pk.pDPk; }
       }
       emit('burst', { t: now, start: ev.start, feat, capped });
       if (!ev.fired && !(B.rejectCapped && capped)) {

@@ -154,7 +154,8 @@
     if (BatEars.running && BatEars.stereo) {
       g.fillStyle = BatEars.hasLrModel ? '#a5d6a7' : '#ffe082';
       const ago = m && m.at ? Math.round((Date.now() - Date.parse(m.at)) / 60000) : null;
-      g.fillText(BatEars.hasLrModel ? `좌우 판정 켜짐 (점검 교차검증 ${Math.round((m.looAcc || 0) * 100)}%${ago != null ? `, ${ago}분 전 점검` : ''})`
+      const cue = m && m.keys && m.keys !== 'fft' ? '위상 단서, ' : '';
+      g.fillText(BatEars.hasLrModel ? `좌우 판정 켜짐 (${cue}점검 교차검증 ${Math.round((m.looAcc || 0) * 100)}%${ago != null ? `, ${ago}분 전 점검` : ''})`
         : '좌우 판정 꺼짐: 🧭 좌우 점검을 먼저 해 주세요 (앉을 때마다 새로)', x0, H - 82);
     }
     if (S.last && now - S.last.t < 900) {

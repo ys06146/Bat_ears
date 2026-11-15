@@ -347,21 +347,25 @@
     not: '쓸기가 너무 적게 잡혔어요',
   };
   function runLrCheck() {
-    const chk = new BatSwipe.LRCheck({ need: 4 });
-    S.trials.forEach((t) => { if (t.swipe) chk.add(t.kind, t.swipe); }); // left/right + push/pull (false-swipe rate)
-    const r = chk.result(), pair = BatEars.stereoPair;
+    // left/right + push/pull (false-swipe rate). bestCheck (swipe.js) runs the check with each cue set the trials
+    // support (FFT, phase peaks, both) and keeps the best one that passes: some laptops only work with one of them
+    const items = S.trials.filter((t) => t.swipe).map((t) => ({ kind: t.kind, feat: t.swipe }));
+    const r = BatSwipe.bestCheck ? BatSwipe.bestCheck(items, { need: 4 })
+      : (() => { const c = new BatSwipe.LRCheck({ need: 4 }); items.forEach((x) => c.add(x.kind, x.feat)); return c.result(); })();
+    const pair = BatEars.stereoPair;
+    const nL = items.filter((x) => x.kind === 'left').length, nR = items.filter((x) => x.kind === 'right').length;
     const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
       : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak
       : /push\/pull in the check/.test(r.reason) ? LR_REASON.fewpp : LR_REASON.not;
     const out = {
       ok: r.ok, looAcc: r.looAcc, looWrong: r.looWrong, looUndecided: r.looUndecided, fpRate: r.fpRate, dComb: r.dComb,
-      dprime: r.dprime || null, reason: r.reason, why, nL: chk.L.length, nR: chk.R.length, nPushPull: chk.N.length,
-      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION,
+      dprime: r.dprime || null, reason: r.reason, why, nL, nR, nPushPull: items.length - nL - nR,
+      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION, keys: r.keys || 'fft',
     };
     if (r.ok && pair) {
       // kept for this browser session only (sessionStorage survives a reload, not a new tab): a model does not
       // carry over to another sitting (bravo, 205859 -> 171130), so each sitting starts with a fresh check
-      BatEars.config.lrModel = { pair: pair.slice(), model: r.model, looAcc: r.looAcc, at: new Date().toISOString() };
+      BatEars.config.lrModel = { pair: pair.slice(), model: r.model, looAcc: r.looAcc, keys: r.keys || 'fft', at: new Date().toISOString() };
       try { sessionStorage.setItem('batears-lr-model', JSON.stringify(BatEars.config.lrModel)); } catch (_) { /* private mode */ }
     }
     return out;
