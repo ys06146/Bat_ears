@@ -442,6 +442,9 @@ function phonesFromUi() {
   return ph;
 }
 let calib = null;
+// the engine's model: ?model=<name> picks one (bravo: 'learned', 'gated'); without it bat3d.js uses its own default.
+// The v15 file and earlier only know 'learned', so ?engine=v15 always asks for that
+const MODEL_OPT = Q.get('engine') === 'v15' ? { model: 'learned' } : Q.get('model') ? { model: Q.get('model') } : {};
 async function start(m, file) {
   stop();
   HOME = HOME0.slice();
@@ -461,8 +464,8 @@ async function start(m, file) {
   // bravo's engine (3d.html v8): autoReset off, the display chain below handles stillness (re-centre spring)
   const cn = $('calibSel').value, named = cn && cn !== 'galaxy' && window.Bat3D.CALIBS && window.Bat3D.CALIBS[cn];
   engine = window.Bat3D.create(named && !calib
-    ? { geom: 'galaxy', calibName: cn, model: 'learned', autoReset: false, amp: $('ampMode').value }
-    : { geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
+    ? { geom: 'galaxy', calibName: cn, ...MODEL_OPT, autoReset: false, amp: $('ampMode').value }
+    : { geom: 'galaxy', phones: phonesFromUi(), calib, ...MODEL_OPT, autoReset: false, amp: $('ampMode').value });
   engine.on('frame', onFrame);
   // circle calls are an experiment (bravo v15 makes them more frequent): off by default so a sweep doesn't pop a false 'circle' mid-demo
   engine.on('circle', (c) => { if (c && c.dir && $('showCircle').checked) showToast(c.dir === 'cw' ? '↻ Clockwise circle' : '↺ Counter-clockwise circle'); });
