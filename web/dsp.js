@@ -1024,7 +1024,8 @@ registerProcessor('bat-tap', BatTap);`;
     const idle = averageSpectrum(idleSpectra, bins);
     const freqs = [...new Set([requestedFreq, 18000, 18500, 19000, 19500, 20000, 20500, 21000])]
       .filter((f) => f >= 17500 && f <= ctx.sampleRate / 2 - config.noiseFarHz);
-    const candidates = [];
+    const candidates = [], skipped = [];
+    const r1 = (x) => (Number.isFinite(x) ? +x.toFixed(1) : x);
     const setVolume = (v) => {
       if (st.ctx === ctx) ramp(gain.gain, v, ctx.currentTime);
     };
@@ -1037,7 +1038,7 @@ registerProcessor('bat-tap', BatTap);`;
     for (const f of freqs) {
       if (st.ctx !== ctx) return null;
       const foreignDb = foreignLevel(idle, f);
-      if (foreignDb > 12) continue;
+      if (foreignDb > 12) { skipped.push({ f, foreignDb: r1(foreignDb) }); continue; } // occupied before we play
       osc.frequency.setValueAtTime(f, ctx.currentTime);
       setVolume(volume);
       const frames = await readFrames();
@@ -1049,7 +1050,9 @@ registerProcessor('bat-tap', BatTap);`;
       candidates.push({ f, snr, snrSd, foreignDb, leakDb });
     }
     const choice = robust.chooseFrequency(candidates);
-    if (!choice.f) return { f: requestedFreq, volume, selected: false, reason: choice.reason };
+    // why each frequency was (not) chosen: snr, its spread, foreign level, audible leak, pass/fail, score
+    const table = choice.table.map((c) => ({ f: c.f, snr: r1(c.snr), snrSd: r1(c.snrSd), foreignDb: r1(c.foreignDb), leakDb: r1(c.leakDb), ok: c.ok, score: c.score }));
+    if (!choice.f) return { f: requestedFreq, volume, selected: false, reason: choice.reason, table, skipped };
     osc.frequency.setValueAtTime(choice.f, ctx.currentTime);
     const target = 32;
     let selectedVolume = volume;
@@ -1059,7 +1062,7 @@ registerProcessor('bat-tap', BatTap);`;
         hi: volume, target,
       });
     }
-    return { f: choice.f, volume: selectedVolume, selected: true, reason: choice.reason };
+    return { f: choice.f, volume: selectedVolume, selected: true, reason: choice.reason, table, skipped };
   }
 
   async function bandCheck() {

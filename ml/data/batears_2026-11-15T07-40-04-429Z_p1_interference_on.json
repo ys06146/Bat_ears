@@ -1,0 +1,575 @@
+{
+  "session": {
+    "started_at": "2026-11-15T07:40:04.429Z",
+    "who": "p1",
+    "dist_cm": 20,
+    "condition": "other_batears",
+    "mode": "sequence",
+    "note": "간섭 테스트 · 자동 회피 켜기",
+    "target_sets": 10,
+    "stereo": false,
+    "continuous_pull": true,
+    "auto_tune": "interference",
+    "freq_hz": 20000,
+    "volume": 0.6,
+    "threshold_db": 6,
+    "raw": true,
+    "engine_info": {
+      "f0": 20000,
+      "raw": true,
+      "stereo": false,
+      "stereoFreqs": null,
+      "continuousPull": true,
+      "ctxRate": 48000,
+      "micRate": 48000,
+      "ec": false,
+      "ns": false,
+      "agc": false,
+      "ch": 2,
+      "fft": 8192,
+      "binHz": 5.86,
+      "mic": "마이크 배열(디지털 마이크용 인텔® 스마트 사운드 기술)",
+      "autoTune": {
+        "f": 20000,
+        "volume": 0.6,
+        "selected": false,
+        "reason": "no frequency passes minSnr / foreign-tone checks",
+        "occupied": true
+      }
+    },
+    "itest_phase": "on",
+    "label": "interference_on",
+    "finished_at": "2026-11-15T07:41:03.043Z"
+  },
+  "counts": {
+    "push": 17,
+    "pull": 14,
+    "left": 0,
+    "right": 0,
+    "wave": 0
+  },
+  "estimated_sequences": 12,
+  "marked_pairs": [
+    {
+      "id": 1,
+      "push": false,
+      "pull": false,
+      "correct_order": false
+    },
+    {
+      "id": 2,
+      "push": false,
+      "pull": false,
+      "correct_order": false
+    },
+    {
+      "id": 3,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 4,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 5,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 6,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 7,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 8,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 9,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "id": 10,
+      "push": true,
+      "pull": false,
+      "correct_order": false
+    }
+  ],
+  "actual": null,
+  "events": [
+    {
+      "t_ms": 135714,
+      "sec": 2.406,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": null,
+      "speed": 1.5126071110413117,
+      "strength": 31.70488573392116
+    },
+    {
+      "t_ms": 137215,
+      "sec": 3.908,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": null,
+      "speed": 1.2655522755205275,
+      "strength": 6.997937014127125
+    },
+    {
+      "t_ms": 137765,
+      "sec": 4.457,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": null,
+      "speed": 1.4298768262257355,
+      "strength": 30.29122495522344
+    },
+    {
+      "t_ms": 139434,
+      "sec": 6.126,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 1
+    },
+    {
+      "t_ms": 140437,
+      "sec": 7.129,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 1,
+      "push": false,
+      "pull": false,
+      "correct_order": false
+    },
+    {
+      "t_ms": 141331,
+      "sec": 8.023,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": null,
+      "speed": 1.3723791984426055,
+      "strength": 25.244636581616255
+    },
+    {
+      "t_ms": 142031,
+      "sec": 8.723,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": null,
+      "speed": 1.346230538316015,
+      "strength": 33.46839122467714
+    },
+    {
+      "t_ms": 143609,
+      "sec": 10.301,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 2
+    },
+    {
+      "t_ms": 145189,
+      "sec": 11.881,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 2,
+      "push": false,
+      "pull": false,
+      "correct_order": false
+    },
+    {
+      "t_ms": 146160,
+      "sec": 12.852,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 3
+    },
+    {
+      "t_ms": 147448,
+      "sec": 14.14,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 3,
+      "speed": 1.3267536902843189,
+      "strength": 26.438330202222062
+    },
+    {
+      "t_ms": 149465,
+      "sec": 16.157,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 3,
+      "speed": 1.6398555461486426,
+      "strength": 31.22471078267825
+    },
+    {
+      "t_ms": 150848,
+      "sec": 17.54,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 3,
+      "speed": 1.1237202840220804,
+      "strength": 10.778966396798971
+    },
+    {
+      "t_ms": 150852,
+      "sec": 17.544,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 3,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 152259,
+      "sec": 18.951,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 4
+    },
+    {
+      "t_ms": 153873,
+      "sec": 20.565,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 4,
+      "speed": 1.4105375110484324,
+      "strength": 18.656129751423002
+    },
+    {
+      "t_ms": 154372,
+      "sec": 21.064,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 4,
+      "speed": 1.4046175481228806,
+      "strength": 22.93398705448277
+    },
+    {
+      "t_ms": 155139,
+      "sec": 21.831,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 4,
+      "speed": 1.393424180231079,
+      "strength": 14.122510496211358
+    },
+    {
+      "t_ms": 155723,
+      "sec": 22.416,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 4,
+      "speed": 1.3340747425498476,
+      "strength": 25.30432320626616
+    },
+    {
+      "t_ms": 157158,
+      "sec": 23.85,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 4,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 158793,
+      "sec": 25.485,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 5
+    },
+    {
+      "t_ms": 159690,
+      "sec": 26.382,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 5,
+      "speed": 1.258407533653663,
+      "strength": 2.114940391067556
+    },
+    {
+      "t_ms": 159856,
+      "sec": 26.548,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 5,
+      "speed": 1.4009994771462602,
+      "strength": 23.404628561489627
+    },
+    {
+      "t_ms": 160474,
+      "sec": 27.166,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 5,
+      "speed": 1.291189178258521,
+      "strength": 27.292171100662834,
+      "source": "fft",
+      "distance": 0.10554200723802182,
+      "phasePath": 0.013957352278339386
+    },
+    {
+      "t_ms": 161481,
+      "sec": 28.173,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 5,
+      "speed": 0.932641761555523,
+      "strength": 3.6397138989880986
+    },
+    {
+      "t_ms": 161826,
+      "sec": 28.518,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 5,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 164154,
+      "sec": 30.846,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 6
+    },
+    {
+      "t_ms": 164857,
+      "sec": 31.549,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 6,
+      "speed": 1.3085914045131306,
+      "strength": 19.25445447897976
+    },
+    {
+      "t_ms": 165373,
+      "sec": 32.065,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 6,
+      "speed": 0.9458006514733537,
+      "strength": 23.210377084984593,
+      "source": "fft",
+      "distance": 0.09964048475923143,
+      "phasePath": 0.008518660934285549
+    },
+    {
+      "t_ms": 166206,
+      "sec": 32.898,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 6,
+      "speed": 1.3674175602559684,
+      "strength": 21.098432351174523
+    },
+    {
+      "t_ms": 166790,
+      "sec": 33.482,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 6,
+      "speed": 1.4449634264566549,
+      "strength": 24.770141532776886
+    },
+    {
+      "t_ms": 167924,
+      "sec": 34.616,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 6,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 170360,
+      "sec": 37.052,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 7
+    },
+    {
+      "t_ms": 171123,
+      "sec": 37.815,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 7,
+      "speed": 1.4383096416503955,
+      "strength": 27.12474225474161
+    },
+    {
+      "t_ms": 171739,
+      "sec": 38.431,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 7,
+      "speed": 1.3991545648438244,
+      "strength": 32.48613835006404
+    },
+    {
+      "t_ms": 172605,
+      "sec": 39.297,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 7,
+      "speed": 1.4670280887138576,
+      "strength": 32.546024096556245
+    },
+    {
+      "t_ms": 174306,
+      "sec": 40.998,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 7,
+      "speed": 1.6143060561710891,
+      "strength": 36.03479995262325
+    },
+    {
+      "t_ms": 177208,
+      "sec": 43.9,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 7,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 178895,
+      "sec": 45.587,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 8
+    },
+    {
+      "t_ms": 179598,
+      "sec": 46.29,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 8,
+      "speed": 1.3989332698315808,
+      "strength": 27.299690011441545
+    },
+    {
+      "t_ms": 180181,
+      "sec": 46.873,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 8,
+      "speed": 1.451067678010314,
+      "strength": 34.832376973946815
+    },
+    {
+      "t_ms": 181264,
+      "sec": 47.956,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 8,
+      "speed": 0.910810517305858,
+      "strength": 4.6814819574355795
+    },
+    {
+      "t_ms": 182076,
+      "sec": 48.768,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 8,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 183451,
+      "sec": 50.143,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 9
+    },
+    {
+      "t_ms": 184247,
+      "sec": 50.939,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 9,
+      "speed": 1.3606458333749005,
+      "strength": 30.199806908203932
+    },
+    {
+      "t_ms": 184864,
+      "sec": 51.556,
+      "type": "detected",
+      "kind": "pull",
+      "pair_id": 9,
+      "speed": 1.28359005976795,
+      "strength": 25.442147169981013,
+      "source": "fft",
+      "distance": 0.10990487364686224,
+      "phasePath": 0.03449218940600929
+    },
+    {
+      "t_ms": 186191,
+      "sec": 52.883,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 9,
+      "push": true,
+      "pull": true,
+      "correct_order": true
+    },
+    {
+      "t_ms": 188973,
+      "sec": 55.665,
+      "type": "pair_start",
+      "kind": "push_pull",
+      "pair_id": 10
+    },
+    {
+      "t_ms": 189664,
+      "sec": 56.356,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 10,
+      "speed": 1.3999749053859454,
+      "strength": 35.74478199965782
+    },
+    {
+      "t_ms": 191539,
+      "sec": 58.231,
+      "type": "detected",
+      "kind": "push",
+      "pair_id": 10,
+      "speed": 0.9574283405101814,
+      "strength": 7.506944351292319
+    },
+    {
+      "t_ms": 191755,
+      "sec": 58.447,
+      "type": "pair_end",
+      "kind": "push_pull",
+      "pair_id": 10,
+      "push": true,
+      "pull": false,
+      "correct_order": false
+    }
+  ]
+}
