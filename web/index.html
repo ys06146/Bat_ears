@@ -8,16 +8,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="style.css?v=20261115124422">
 </head>
-<body>
+<body class="page-game">
+<script src="sitenav.js?v=20261115115915"></script>
 <header>
   <h1>🦇 Bat Ears <span>Force with hand gestures · no camera</span></h1>
-  <a href="hologram.html" class="chip" style="text-decoration:none;font-weight:700;color:#4fd8ff;border-color:#4fd8ff" title="The main demo: following your hand in 3D with sound alone">🦇 3D hologram (main demo) →</a>
   <div id="status" class="chip">Idle</div>
 </header>
 
 <main>
   <section class="stage">
-    <div class="tabs">
+    <div class="tabs only-game">
       <button id="tabGame" class="tab sel">🎮 Game</button>
       <a href="experiment-live.html" class="tab" style="text-decoration:none;display:inline-flex;align-items:center">🧪 Free experiment mode</a>
       <button id="tabSonar" class="tab">🛰️ Sonar view</button>
@@ -26,7 +26,7 @@
       <button id="presentBtn" class="tab">⛶ Presentation mode</button>
       <button id="camBtn" class="tab" hidden>📷 Compare with real hand</button>
     </div>
-    <canvas id="game"></canvas>
+    <canvas id="game" class="only-game"></canvas>
     <canvas id="sonar" hidden></canvas>
     <div id="speed" class="speedgun" hidden></div>
     <div id="lr" class="lrtest" hidden></div>
@@ -40,8 +40,22 @@
     </form>
     <div id="camBox" hidden><video id="cam" autoplay muted playsinline></video><span>📷 Real hand (for comparison)</span></div>
     <div id="gesture">–</div>
+    <div class="collect-start only-collect">
+      <div class="panel">
+        <h2>🎯 Collect gesture data</h2>
+        <p class="lead">A guide shows each gesture with a 3·2·1 countdown. Do it on the cue and each one is scored ✅/❌ and saved automatically.</p>
+        <ol class="steps">
+          <li><b>📷 Cover the webcam.</b> It is not used.</li>
+          <li><b>🔊 Built-in speakers and mic</b>, volume 50% or more. Unplug headphones and Bluetooth.</li>
+          <li><b>On the right</b>, set your name, distance and reps, and pick the save folder once.</li>
+          <li><b>Press 🎯 Start (S)</b>, keep your hand away while it measures the background, then follow the cues. U undoes the last one, Esc stops.</li>
+        </ol>
+        <div class="row center"><button type="button" onclick="document.getElementById('collect').click()">🎯 Start collecting</button></div>
+        <p class="hint center">Each run adds a row to the experiment log on the right.</p>
+      </div>
+    </div>
 
-    <div id="intro" class="overlay">
+    <div id="intro" class="overlay only-game">
       <div class="panel" id="introSteps">
         <h2>🦇 Push meteors away with your hand</h2>
         <p class="lead">No camera: it senses your hand from the echo of an inaudible 20 kHz tone played by the laptop speakers.</p>
@@ -67,7 +81,7 @@
   </section>
 
   <aside>
-    <div class="card">
+    <div class="card only-collect">
       <div class="row"><b>🎯 Data collection</b><span class="hint">Gesture on the 3·2·1 cue → ✅/❌ right away → saved automatically</span></div>
       <div class="row">
         <label>Name <input id="who" type="text" maxlength="16" size="8" placeholder="seojin"></label>
@@ -89,7 +103,7 @@
       <p class="hint">Name is optional (letters and digits; blank means anon). Noise, device, mic, screen refresh rate and detector settings are recorded automatically. During a run, U = undo the last one, Esc = stop.</p>
     </div>
 
-    <div class="card" id="explog"></div>
+    <div class="card only-collect" id="explog"></div>
 
     <div class="card">
       <div class="row">
@@ -125,7 +139,7 @@
       <p class="hint">Top: ±600 Hz around the tone (blue = push, orange = pull). Bottom: everything above 10 kHz.</p>
     </div>
 
-    <div class="card">
+    <div class="card only-game">
       <div class="row between">
         <b>🏆 Leaderboard</b>
         <span class="row">
@@ -136,7 +150,7 @@
       <ol id="scores" class="scores"></ol>
     </div>
 
-    <details class="card" id="recBox">
+    <details class="card only-collect" id="recBox">
       <summary>Data recording (for classification and experiments)</summary>
       <div class="row" id="labels"></div>
       <div class="row">
@@ -148,7 +162,7 @@
       <p class="hint">Number keys 1–5 change the label (1 still, 2 push, 3 pull, 4 wave, 5 other). Pick the label first, then do that gesture.</p>
     </details>
 
-    <details class="card">
+    <details class="card only-game">
       <summary>How to use</summary>
       <ol class="hint">
         <li>Use the laptop’s built-in speakers and mic (no headphones or Bluetooth), volume 50% or more.</li>
