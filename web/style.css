@@ -37,7 +37,7 @@ h1 span { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 8
 
 /* ---- layout */
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 12px; padding: 12px 16px; height: calc(100% - 50px); }
-body.has-nav main { height: calc(100% - 50px - var(--nav-h, 0px)); }   /* the site menu (sitenav.js) takes a row */
+body.has-nav main { height: calc(100% - var(--nav-h, 0px)); }   /* the site menu (sitenav.js) replaces the title row */
 /* index.html (game) and collect.html (data collection) share the markup and scripts; each hides the other's parts */
 body.page-game .only-collect, body.page-collect .only-game { display: none !important; }
 .collect-start { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
