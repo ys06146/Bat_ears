@@ -232,11 +232,11 @@ def cmd_run(a):
 
 
 CUES = (
-    [(0.0, "STAY STILL (hands away)  가만히")]
-    + [(3.0 + 2.0 * i, f"PUSH #{i + 1}  >>> 밀기!") for i in range(5)]
-    + [(13.0, "get ready to PULL  당기기 준비 (손을 모니터 가까이)")]
-    + [(15.0 + 2.0 * i, f"PULL #{i + 1}  <<< 당기기!") for i in range(5)]
-    + [(25.0, "hands away, TALK or CLAP  손 치우고 말하기/박수"), (31.0, "done  끝")]
+    [(0.0, "STAY STILL (hands away)")]
+    + [(3.0 + 2.0 * i, f"PUSH #{i + 1}  >>>") for i in range(5)]
+    + [(13.0, "get ready to PULL (hand close to the monitor)")]
+    + [(15.0 + 2.0 * i, f"PULL #{i + 1}  <<<") for i in range(5)]
+    + [(25.0, "hands away, TALK or CLAP"), (31.0, "done")]
 )
 
 
@@ -266,7 +266,7 @@ def cmd_take(a):
     wavfile.write(wav_path, a.in_sr, (np.clip(x, -1, 1) * 32767).astype(np.int16))
     with cue_path.open("w", newline="", encoding="utf-8") as fh:
         csv.writer(fh).writerows([("t", "cue"), *cues_done])
-    print(f"\nsaved {wav_path.name} ({len(x) / a.in_sr:.1f} s). 끝! 창을 닫으셔도 돼요.")
+    print(f"\nsaved {wav_path.name} ({len(x) / a.in_sr:.1f} s). Done! You can close the window.")
 
 
 def main():
