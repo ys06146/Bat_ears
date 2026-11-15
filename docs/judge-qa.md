@@ -3,7 +3,7 @@
 Short answers to say out loud. [TBD] = fill in from our measurements (`python ml/train.py` prints them from guided-collection recordings).
 
 1. **How accurate is it?**
-   Across 10 guided recordings on a Windows laptop and MacBooks at 20–35 cm, 148 of 192 prompted pushes and pulls were recognized within 1.5 s (77%), with about 0.7 false triggers per minute while typing or sitting idle. Our MacBook sessions at 20 cm got 15 to 18 of 20 each. Our first detector got only 15%, because people wind up before a pull. For reference, SoundWave (Microsoft Research, CHI 2012) reported over 90% on its gesture set with native code.
+   Across 17 guided recordings on a Windows laptop and MacBooks at 20–60 cm, 268 of 332 prompted pushes and pulls were recognized within 1.5 s (81%), with about 0.6 false triggers per minute while typing or sitting idle. A MacBook Air got 86 of 100 at 60 cm. Our first detector got only 15%, because people wind up before a pull. For reference, SoundWave (Microsoft Research, CHI 2012) reported over 90% on its gesture set with native code.
 2. **Does it work in a loud room like this one?**
    Speech and music sit mostly far below 20 kHz, and we only look a few hundred Hz around our tone. We measured it: in a room 43 dB louder in the speech band, the noise next to our tones rose by less than 1 dB, and a MacBook at 60 cm got 33 of 40 prompts over two noisy sessions with none reversed (17 of 20 in the quiet room). For loud broadband noise like claps, we subtract the rise of the noise floor measured farther away, because a hand echo only lifts the bands right next to the tone. Thresholds also adapt to how noisy the room is at start-up.
 3. **What about privacy?**
