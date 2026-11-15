@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T12:53:18Z",
-  "main_sha": "e8d01be249549c89942f457a5f7f325544693066",
-  "exp_sha_before_run": "36ac0c28e4ed61ae9adcd81866143da9634166e5",
-  "report": "experiments/monitor-2026-11-15-0653.md",
+  "checked_at_utc": "2026-11-15T13:22:33Z",
+  "main_sha": "7b3a4cacd2fb3f61f67202b28752731d619673fa",
+  "exp_sha_before_run": "d8486a358e627aa31cfbc1f200a47a59ee241c87",
+  "report": "experiments/monitor-2026-11-15-0722.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -487,8 +487,8 @@
     },
     {
       "path": "web/hologram.html",
-      "sha": "daf86b0373706334c166bbd94de15c10e687c25f",
-      "size": 49735
+      "sha": "d3a1c8afcbd3e089ff631932445fd3e030a839bd",
+      "size": 52493
     },
     {
       "path": "web/index.html",
@@ -542,13 +542,13 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "f418941b8bb66a533ecde611644334d0381d7258",
-      "size": 70773
+      "sha": "a4d5cfc70617b8d3e4cc09521ca09024c6c46258",
+      "size": 74077
     },
     {
       "path": "web/tone.html",
-      "sha": "ed3b3adab2ce1b631102dc9e3766c982cae2dc83",
-      "size": 6958
+      "sha": "78af52d92aec234eb84e6df73f3efef5c5c39f5e",
+      "size": 7863
     },
     {
       "path": "web/vision3d.browser.js",
@@ -1258,9 +1258,10 @@
     "hologram_added_fixedHand_shape_filterChain_notRawError",
     "all5sittings_training_filterTuning_noUntouchedHoldout",
     "amp_modes_sizeVsRMSE_halfDefault",
-    "3d_volume_matchedTeach_noNewLiveValidation"
+    "3d_volume_matchedTeach_noNewLiveValidation",
+    "overheadPresets_added_noNamedCalibrationInCurrentEngine"
   ],
-  "notes": "Drive root81 and teach30 unchanged this run; always watch known subfolders even if root unchanged. All5 teacher sessions now in DEFAULT_CALIB;044652 also used for filter tuning, so obtain new frozen-model holdout. hologram exports page=hologram.html nested session/log raw+shown, amp/filter/tau/levelDb, may appear in new holo subfolder; route schema, do not pass to legacy trial/train parser. Size gain and display filtering are not improved sensing accuracy. Prior hand_mp provenance, duplicate event files, ambiguous legacy auth simulated and protocol distinctions still apply.",
+  "notes": "Root81/teach30 unchanged. Overhead preset added, but current bat3d blob4597 exports DEFAULT_CALIB not CALIBS and no galaxy+A-top model: preset uses temporary manual-phone physics path, accuracy unconfirmed. New named calibration may change this behavior later: check model and code. UI preparation check is not performance or interference-free validation. Other protocol/duplicate/auth/hand provenance restrictions remain in previous reports.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
