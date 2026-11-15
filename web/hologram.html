@@ -68,7 +68,10 @@
 <div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
 <div class="hud" id="toast"></div>
 <div class="hud" id="settings">
-  <h3>소리원</h3>
+  <h3>보정 (브라보)</h3>
+  <label><select id="calibSel"><option value="galaxy">노트북만 (기본)</option></select></label>
+  <label class="note" id="calibNote">이름 붙은 보정을 고르면 그 보정을 배울 때의 폰 구성(주파수·위치)이 같이 켜져요</label>
+  <h3>소리원 (수동)</h3>
   <label><input type="checkbox" id="phoneOn"> 📱 폰 A · Hz <input type="number" id="phoneHz" value="17000" step="50"></label>
   <label class="note">위치 cm (경첩 기준): 오른쪽 <input type="number" id="px" value="0"> 높이 <input type="number" id="py" value="45"> 앞 <input type="number" id="pz" value="30"></label>
   <label><input type="checkbox" id="phone2On"> 📱 폰 B · Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
@@ -403,7 +406,10 @@ async function start(m, file) {
   }
   if (!window.Bat3D) { $('status').textContent = '⚠️ 소리 엔진(bat3d.js)을 불러오지 못했어요'; return; }
   // bravo's engine (3d.html v8): autoReset off, the display chain below handles stillness (re-centre spring)
-  engine = window.Bat3D.create({ geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
+  const cn = $('calibSel').value, named = cn && cn !== 'galaxy' && window.Bat3D.CALIBS && window.Bat3D.CALIBS[cn];
+  engine = window.Bat3D.create(named && !calib
+    ? { geom: 'galaxy', calibName: cn, model: 'learned', autoReset: false, amp: $('ampMode').value }
+    : { geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
   engine.on('frame', onFrame);
   engine.on('circle', (c) => { if (c && c.dir) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
@@ -461,7 +467,8 @@ function renderAcc(s) {
   const r = e.rms, c = e.corr || [], mo = e.motion || [];
   errEl.userData.r = r.map((v) => v / 100);
   const sz = e.size, AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
-  $('accNums').innerHTML = `정확도 (처음 보는 세션, 250ms 이동의 RMS 오차):<br><b>좌우 ±${r[0].toFixed(1)}cm</b> · <b>앞뒤 ±${r[2].toFixed(1)}cm</b> · 높이 ±${r[1].toFixed(1)}cm<br>`
+  const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
+  $('accNums').innerHTML = `정확도 (${scope}, 250ms 이동의 RMS 오차):<br><b>좌우 ±${r[0].toFixed(1)}cm</b> · <b>앞뒤 ±${r[2].toFixed(1)}cm</b> · 높이 ±${r[1].toFixed(1)}cm<br>`
     + (sz ? `그리는 크기: 실제 움직임의 좌우 ${Math.round(100 * sz[0])}% · 앞뒤 ${Math.round(100 * sz[2])}% · 높이 ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
     + `<span class="note">실제 움직임 ${mo.map((v) => v.toFixed(1)).join(' / ')}cm, 상관 ${c.map((v) => v.toFixed(2)).join(' / ')} · 높이는 아직 약해요${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
 }
@@ -539,7 +546,7 @@ async function recStop() {
   const dev = (() => { try { return localStorage.getItem('batears-dev') || 'anon'; } catch (e) { return 'anon'; } })(), base = `batears_${stamp}_holo_${dev}`;
   const info = engine && engine.info ? engine.info() : {};
   const meta = { page: 'hologram.html', session: base, startedAt: rec.start, seconds: +(rec.frames / rec.rate).toFixed(2), rate: rec.rate, ua: navigator.userAgent,
-    volume: Number($('vol').value), amp: $('ampMode').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
+    volume: Number($('vol').value), amp: $('ampMode').value, calibName: $('calibSel').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
     engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
     log_columns: 't_s, raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams]', log: rec.log };
   const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
@@ -627,10 +634,22 @@ $('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.
 $('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnDebug').onclick = () => { const s = $('debug'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnRec').onclick = () => (rec.on ? recStop() : recStart());
+function fillCalibs() {
+  const C = (window.Bat3D && window.Bat3D.CALIBS) || null, sel = $('calibSel');
+  if (!C) return;
+  sel.innerHTML = Object.entries(C).map(([k, v]) => `<option value="${k}">${(v && v.label) || k}${k === 'galaxy' ? ' (기본)' : ''}</option>`).join('');
+}
+fillCalibs();
+$('calibSel').onchange = () => {
+  const cn = $('calibSel').value, C = (window.Bat3D && window.Bat3D.CALIBS) || {}, v = C[cn];
+  $('calibNote').textContent = v && v.phones && v.phones.length ? `이 보정은 ${v.phones.map((p) => `📱${p.id} ${p.hz}Hz (오른쪽 ${p.x_right_cm} · 높이 ${p.h_cm} · 앞 ${p.z_front_cm}cm)`).join(', ')}로 배웠어요. 폰을 그 자리에 두고 tone.html을 켜요. 다른 폰은 꺼요` : '노트북 스피커만 써요. 폰은 꺼도 돼요';
+  if (engine && engine.setOptions && running && !SIM) { engine.setOptions({ calibName: cn }); recenter(); const info = engine.info(); drawSources(info.G, info.phones); renderAcc(info); }
+  else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: cn, autoReset: false, amp: $('ampMode').value }).info());
+};
 $('ampMode').onchange = () => {
   const a = $('ampMode').value;
   if (engine && engine.setOptions && !SIM) { engine.setOptions({ amp: a }); recenter(); renderAcc(engine.info()); }
-  else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: a }).info());
+  else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: $('calibSel').value, autoReset: false, amp: a }).info());
 };
 $('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (teach와 같은 크기)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
 $('smooth').oninput = () => { $('smoothV').textContent = '×' + Number($('smooth').value).toFixed(1); };
