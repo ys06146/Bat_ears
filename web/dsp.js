@@ -1192,6 +1192,8 @@ registerProcessor('bat-tap', BatTap);`;
     config, info: null, lastBandCheck: null, foreign: [],
     start, stop, bandCheck, on, off, summary, drawZoom, drawWide,
     captureStart, captureStop,                      // raw mic WAV (all channels) for offline analysis
+    // the live I/Q tracker's 2D track (stereo only; null otherwise): { t[], u[], w[], area, n } (iq.js trackBetween)
+    iqTrack(ta, tb, every) { return st.iq && st.iq.trackBetween ? st.iq.trackBetween(ta, tb, every) : null; },
     setFreq(hz) {
       if (st.busy) return;
       if (!st.running) { st.f0 = Number(hz); return; }

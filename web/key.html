@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115022704">
+<link rel="stylesheet" href="style.css?v=20261115022954">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
@@ -79,7 +79,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115022704"></script><script src="swipe.js?v=20261115022704"></script><script src="wave.js?v=20261115022704"></script><script src="iq.js?v=20261115022704"></script><script src="dsp.js?v=20261115022704"></script><script src="auth.js?v=20261115022704"></script>
+<script src="robust.js?v=20261115022954"></script><script src="swipe.js?v=20261115022954"></script><script src="wave.js?v=20261115022954"></script><script src="iq.js?v=20261115022954"></script><script src="dsp.js?v=20261115022954"></script><script src="circle.js?v=20261115022954"></script><script src="auth.js?v=20261115022954"></script>
 <script>
 (() => {
 'use strict';
@@ -117,9 +117,36 @@ const session = { started_at: new Date().toISOString(), device, ua: navigator.us
 // ---- engine: frames (for each gesture's motion) and gestures
 E.on('frame', (f) => {
   if (f.calibrating || !f.tone) return;
-  buf.push({ t: f.t, v: f.v, a: Math.max(f.dUp || 0, f.dDown || 0) });
+  const a = Math.max(f.dUp || 0, f.dDown || 0);
+  buf.push({ t: f.t, v: f.v, a });
   while (buf.length && buf[0].t < f.t - 15000) buf.shift();
+  if (STEREO && cap) circleStep(f.t, a);
 });
+// ---- circle tokens (flag 'circles', stereo): judge each finished motion run with bravo's BatCircle
+const CIRCLE = { quietMs: 300, needTurns: 1.1, minSpanCm: 3 };
+let run = null;
+function circleStep(t, a) {
+  if (a > 12) { if (!run) run = { t0: t }; run.t1 = t; return; }
+  if (!run || t - run.t1 < CIRCLE.quietMs) return;
+  const r = run; run = null;
+  const tr = E.iqTrack ? E.iqTrack(r.t0 - 300, r.t1) : null;
+  if (!tr || tr.n < 50 || !window.BatCircle) return;
+  const c = window.BatCircle.analyze(tr.t, tr.u, tr.w);
+  if (!(Math.abs(c.turns) >= CIRCLE.needTurns && c.ru >= CIRCLE.minSpanCm && c.rw >= CIRCLE.minSpanCm)) return;
+  const k = cap;
+  // the gestures the engine fired during the circle are its own strokes
+  k.gestures = k.gestures.filter((x) => !(x.te >= r.t0 - 100 && x.te <= r.t1 + 300));
+  const s = Math.sign(c.turns);
+  if (k.sign == null && k.want) {                       // enrollment teaches which turn sign is clockwise here
+    const exp = k.want[k.gestures.length];
+    if (exp === 'cw' || exp === 'ccw') k.sign = (exp === 'cw' ? 1 : -1) * s;
+  }
+  if (k.sign == null) return;
+  k.gestures.push({ kind: s * k.sign > 0 ? 'cw' : 'ccw', te: r.t1, simulated: false, circle: { turns: +c.turns.toFixed(2), ru: +c.ru.toFixed(1), rw: +c.rw.toFixed(1) } });
+  k.gestures.sort((x, y) => x.te - y.te);
+  k.last = performance.now();
+  showLive(k.gestures.map((x) => x.kind));
+}
 E.on('gesture', (g) => {
   if (!cap) return;
   // a wave's first stroke often fires as a push/pull just before the wave (wave.js t0): drop it
@@ -134,15 +161,16 @@ E.on('state', (s) => {
 });
 
 // one attempt: n gestures, then 0.8 s of quiet; or 3 s of quiet after the first gesture; or 12 s in all
-function capture(n, { timeoutMs = 12000, idleMs = 3000 } = {}) {
+function capture(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null } = {}) {
   return new Promise((resolve) => {
-    cap = { gestures: [], start: performance.now(), last: 0 };
+    run = null;
+    cap = { gestures: [], start: performance.now(), last: 0, want, sign };
     const tick = () => {
       const c = cap, now = performance.now();
       if (!c) return;
       const done = c.gestures.length >= n && now - c.last > 800;
       const idle = c.gestures.length && now - c.last > idleMs;
-      if (done || idle || now - c.start > timeoutMs) { cap = null; resolve(finish(c, done ? 'done' : idle ? 'idle' : 'timeout')); return; }
+      if (done || idle || now - c.start > timeoutMs) { cap = null; const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout'); r.sign = c.sign; resolve(r); return; }
       setTimeout(tick, 100);
     };
     tick();
@@ -261,10 +289,12 @@ async function enroll() {
   busy = true; lock(true); meter(null);
   $('dots').replaceChildren(...Array.from({ length: N }, () => document.createElement('span')));
   const reps = [];
+  let circleSign = null;
   for (let tries = 0; reps.length < N && tries < N * 3; tries++) {
     say('📝', `${reps.length + 1}/${N}번째`, seqText(want) + ' · 지금 해 주세요');
     showLive([]);
-    const r = await capture(want.length);
+    const r = await capture(want.length, { want, sign: circleSign });
+    if (r.sign != null) circleSign = r.sign;
     const k = r.att.kinds, ok = k.length === want.length && k.every((x, i) => x === want[i]);
     showLive(k, want);
     if (ok) { reps.push(r.att); $('dots').children[reps.length - 1].className = 'on'; say('✓', `${reps.length}/${N} 기록했어요`, `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
@@ -273,7 +303,7 @@ async function enroll() {
   }
   if (reps.length < 3) { say('❌', '등록하지 못했어요', '반복이 3번보다 적게 잡혔어요. 다시 해 주세요'); busy = false; lock(false); return; }
   const tpl = A.buildTemplate(reps);
-  Object.assign(tpl, { owner, device, freq: E.freq });
+  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, stereo: STEREO });
   templates[owner] = tpl;
   store.set('batears-auth-templates', templates);
   refreshTpl(owner);
@@ -289,7 +319,7 @@ async function unlock() {
   busy = true; lock(true); meter(null);
   say('👂', '제스처 비밀번호를 해 주세요', `동작 ${tpl.kinds.length}개`);
   showLive([]);
-  const r = await capture(tpl.kinds.length);
+  const r = await capture(tpl.kinds.length, { sign: tpl.circleSign == null ? null : tpl.circleSign });
   const sc = r.gestures.length ? A.score(tpl, r.att)
     : { orderOk: false, accepted: false, reason: r.why === 'timeout' ? 'timeout' : 'none', score: null, threshold: tpl.threshold, parts: null };
   showLive(r.att.kinds, tpl.kinds);
