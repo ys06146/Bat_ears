@@ -32,6 +32,8 @@ td,th{padding:8px;border-bottom:1px solid #273448;text-align:left}
 #saveStatus,.warn{color:#e9b879;font-size:12px}
 #review{margin-top:14px}
 #actualInputs{display:flex;flex-wrap:wrap;gap:12px}
+.jam{font-size:40px;font-weight:800;color:#ff8a65;margin:10px 0}
+#itestCard{border:1px solid #5b4630}
 @media(max-width:950px){main{grid-template-columns:1fr}.stage{min-height:0}}
 </style></head><body>
 <header><h1>🦇 Bat Ears <span>손짓으로 쓰는 포스 · 카메라 안 씀</span></h1><span id="status" class="chip">대기 중</span></header>
@@ -55,6 +57,14 @@ td,th{padding:8px;border-bottom:1px solid #273448;text-align:left}
 <div class="card"><h3>실시간 이벤트 기록</h3><div id="feed"><table><thead><tr><th>시간(s)</th><th>구분</th><th>동작</th><th>속도(m/s)</th><th>세트</th></tr></thead><tbody id="rows"></tbody></table></div></div>
 </section>
 <aside>
+<div class="card" id="itestCard"><h3>📢 간섭 시험</h3>
+<p>방해할 노트북 B는 <b>방해 모드</b>, 시험할 노트북 A는 <b>간섭 테스트</b>를 눌러요. 한 노트북에서 둘을 같이 쓰지 마세요.</p>
+<div class="row"><label>방해 톤 <input id="jamFreq" type="number" min="15000" max="23000" step="100" value="20000">Hz</label><label>음량 <input id="jamVol" type="range" min="0.05" max="1" step="0.05" value="0.6"><b id="jamVolLabel">60%</b></label></div>
+<div class="row"><button id="jam">📢 방해 모드 시작</button></div>
+<div id="jamStatus" class="jam" hidden></div>
+<div class="row"><button id="itest">🧪 간섭 테스트 (자동 회피 끄기 → 켜기, 10세트씩)</button></div>
+<p id="itestStatus" class="warn">스테레오 끔 · 20.0kHz · 연속 Push→Pull 10세트를 자동 회피 끄고 한 번, 켜고 한 번 해요. 세트마다 Q 누르고 밀기→당기기, E 누르기. 끝날 때마다 메인 페이지에서 고른 데이터 폴더에 자동 저장돼요.</p>
+</div>
 <div class="card"><h3>🎯 데이터 수집 설정</h3>
 <div class="row"><label>참가자 <input id="who" type="text" value="p1" maxlength="24"></label><label>거리 <input id="dist" type="number" min="1" max="150" value="20">cm</label></div>
 <div class="row"><label>실험 유형 <select id="mode"><option value="free">자유 모드 (전체 동작)</option><option value="sequence">연속 Push→Pull</option><option value="swipe">자유 모드 (좌우 포함)</option></select></label><label id="setLabel" hidden>목표 세트 <input id="targetSets" type="number" min="1" max="1000" value="10"></label></div>
@@ -93,7 +103,7 @@ function download(name,data,type){const u=URL.createObjectURL(new Blob([data],{t
 function log(type,kind,extra={}){const t=performance.now(),v={t_ms:Math.round(t),sec:secs(t),type,kind,pair_id:current?.id||null,...extra};events.push(v);$('count').textContent=detected().length;if(type==='detected')$('last').textContent=labels[kind]||kind;const tr=document.createElement('tr');[v.sec,type,labels[kind]||kind,extra.speed==null?'–':Number(extra.speed).toFixed(2),v.pair_id||'–'].forEach(x=>{const td=document.createElement('td');td.textContent=x;tr.appendChild(td)});$('rows').prepend(tr);return v}
 function mark(kind){if(running)log('intended',kind)}
 function pairStart(){if(!running||current)return;current={id:++seq,start_ms:performance.now(),events_start:events.length};$('pairStart').disabled=true;$('pairEnd').disabled=false;log('pair_start','push_pull')}
-function pairEnd(){if(!current)return;const p=current,t=performance.now();p.end_ms=t;p.detected=events.slice(p.events_start).filter(e=>e.type==='detected'&&e.t_ms<=t);p.push=p.detected.some(e=>e.kind==='push');p.pull=p.detected.some(e=>e.kind==='pull');p.correct_order=p.detected.some((e,i)=>e.kind==='push'&&p.detected.slice(i+1).some(f=>f.kind==='pull'));pairs.push(p);log('pair_end','push_pull',{push:p.push,pull:p.pull,correct_order:p.correct_order});current=null;$('pairStart').disabled=!running;$('pairEnd').disabled=true;$('pairs').textContent=pairs.length}
+function pairEnd(){if(!current)return;const p=current,t=performance.now();p.end_ms=t;p.detected=events.slice(p.events_start).filter(e=>e.type==='detected'&&e.t_ms<=t);p.push=p.detected.some(e=>e.kind==='push');p.pull=p.detected.some(e=>e.kind==='pull');p.correct_order=p.detected.some((e,i)=>e.kind==='push'&&p.detected.slice(i+1).some(f=>f.kind==='pull'));pairs.push(p);log('pair_end','push_pull',{push:p.push,pull:p.pull,correct_order:p.correct_order});current=null;$('pairStart').disabled=!running;$('pairEnd').disabled=true;$('pairs').textContent=pairs.length;itestAfterSet()}
 function estimate(){let waiting=false,completed=0;for(const e of detected()){if(e.kind==='push')waiting=true;else if(e.kind==='pull'&&waiting){completed++;waiting=false}}return completed}
 function summary(){const c=counts(),n=Number(session?.target_sets)||0,seqs=estimate();const lines=kinds.map(k=>labels[k]+': '+c[k]);let out='<p><b>인식된 횟수</b> — '+lines.join(' · ')+'</p>';if(session?.mode==='sequence')out+='<p><b>목표 '+n+'세트</b> (Push '+n+'회 + Pull '+n+'회) · 감지된 Push '+c.push+'/'+n+' ('+pct(c.push,n)+') · Pull '+c.pull+'/'+n+' ('+pct(c.pull,n)+') · 순서상 완성된 쌍 '+seqs+'/'+n+' ('+pct(seqs,n)+')</p><p class="warn">중복 감지로 횟수가 목표를 넘을 수 있습니다. 실제 세트별 성공률이 아닌 이벤트 기반 추정치입니다.</p>';return out}
 function showReview(){if(!session)return;$('review').hidden=false;$('stats').innerHTML=summary();$('actualBox').hidden=session.mode==='sequence';$('comparison').textContent='';if(session.mode!=='sequence'){$('actualInputs').replaceChildren();for(const k of kinds){const label=document.createElement('label');label.textContent=labels[k]+' 실제 횟수';const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';input.value='0';input.id='actual_'+k;label.append(input);$('actualInputs').append(label)}}}
@@ -114,6 +124,64 @@ $('th').onchange=()=>{engine.config.threshold=Number($('th').value)||6};
 $('check').onclick=async()=>{try{const result=await engine.bandCheck();$('settings').textContent=result?result.map(x=>(x.f/1000).toFixed(1)+'kHz '+x.snr.toFixed(0)+'dB').join(' · '):'점검 실패'}catch(e){$('warn').textContent=e.message}};
 engine.on('frame',f=>{if(!running)return;$('snr').textContent=Number.isFinite(f.snr)?f.snr.toFixed(0)+' dB':'–';$('vel').textContent=Number.isFinite(f.v)?f.v.toFixed(2)+' m/s':'–';const width=x=>Math.max(0,Math.min(100,x*5))+'%';$('barUp').style.width=width(f.dUp||0);$('barDown').style.width=width(f.dDown||0);$('vUp').textContent=Number.isFinite(f.dUp)?f.dUp.toFixed(1):'–';$('vDown').textContent=Number.isFinite(f.dDown)?f.dDown.toFixed(1):'–';engine.drawZoom($('zoom'));engine.drawWide($('wide'))});
 $('mode').dispatchEvent(new Event('change'));
+
+// ---- 📢 jammer (laptop B): a plain mono tone through its own AudioContext. No mic, no detection, no recording.
+let jam=null;
+async function jamToggle(){
+  if(jam){const j=jam;jam=null;try{j.g.gain.setTargetAtTime(0,j.ctx.currentTime,0.03);await new Promise(r=>setTimeout(r,120));j.osc.stop();await j.ctx.close()}catch(e){}
+    $('jam').textContent='📢 방해 모드 시작';$('jamStatus').hidden=true;$('status').textContent='대기 중';$('start').disabled=false;$('itest').disabled=false;return}
+  if(running||itest){alert('이 노트북은 실험 중이에요. 방해 모드는 다른 노트북에서 켜 주세요.');return}
+  const f=Math.max(15000,Math.min(23000,Math.round(Number($('jamFreq').value)||20000))),v=Number($('jamVol').value)||0.6;
+  const ctx=new AudioContext();try{await ctx.resume()}catch(e){}
+  if(f>ctx.sampleRate/2-500){alert('이 기기는 '+f+'Hz를 낼 수 없어요');await ctx.close();return}
+  const osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.value=f;g.gain.value=0;osc.connect(g).connect(ctx.destination);osc.start();g.gain.setTargetAtTime(v,ctx.currentTime,0.05);
+  jam={ctx,osc,g,f};
+  $('jam').textContent='■ 방해 모드 끄기';$('jamStatus').textContent='📢 방해 중 '+f+'Hz';$('jamStatus').hidden=false;$('status').textContent='📢 방해 중 '+f+'Hz';$('start').disabled=true;$('itest').disabled=true}
+$('jam').onclick=jamToggle;
+$('jamVol').oninput=()=>{const v=Number($('jamVol').value);$('jamVolLabel').textContent=Math.round(v*100)+'%';if(jam)jam.g.gain.setTargetAtTime(v,jam.ctx.currentTime,0.05)};
+$('jamFreq').onchange=()=>{if(!jam)return;const f=Math.max(15000,Math.min(23000,Math.round(Number($('jamFreq').value)||20000)));jam.osc.frequency.setValueAtTime(f,jam.ctx.currentTime);jam.f=f;$('jamStatus').textContent='📢 방해 중 '+f+'Hz';$('status').textContent='📢 방해 중 '+f+'Hz'};
+
+// ---- 🧪 interference test (laptop A): auto-avoid off, then on, 10 push->pull sets each, saved as _interference_off / _on
+let itest=null;
+const idbOpen=()=>new Promise((res,rej)=>{const r=indexedDB.open('batears',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const idbGet=async k=>{const db=await idbOpen();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})};
+const idbPut=async(k,v)=>{const db=await idbOpen();return new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})};
+// the data folder picked on the main page (same key as recorder.js), else ask once and remember it there
+async function dataDir(){
+  try{const h=await idbGet('dataDir');if(h){let q=await h.queryPermission({mode:'readwrite'});if(q!=='granted')q=await h.requestPermission({mode:'readwrite'});if(q==='granted')return h}}catch(e){}
+  if(!window.showDirectoryPicker)return null;
+  try{const h=await window.showDirectoryPicker({id:'batears-data',mode:'readwrite'});idbPut('dataDir',h).catch(()=>{});return h}catch(e){return null}}
+async function itestClick(){
+  if(running)return;
+  if(jam){alert('이 노트북은 방해 모드 중이에요. 간섭 테스트는 다른 노트북에서 해 주세요.');return}
+  if(!itest){const dir=await dataDir();itest={phase:'off',dir};$('saveStatus').textContent=dir?'저장 폴더: '+dir.name:'저장 폴더가 없어서 끝날 때마다 다운로드돼요'}
+  await itestPhase()}
+async function itestPhase(){
+  const on=itest.phase==='on';
+  if(ended||events.length)clear(true);
+  $('stereo').checked=false;$('freq').value=20000;$('freqLabel').textContent='20.0 kHz';$('mode').value='sequence';$('mode').dispatchEvent(new Event('change'));
+  $('targetSets').value=10;$('autoTone').checked=on;$('condition').value='other_batears';$('note').value='간섭 테스트 · 자동 회피 '+(on?'켜기':'끄기');
+  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · 시작 중…';
+  await start();
+  if(!running){$('itest').textContent='▶ 간섭 테스트 '+(on?'2/2 (자동 회피 켜기)':'1/2 (자동 회피 끄기)')+' 다시 시작';$('itestStatus').textContent='시작하지 못했어요. 버튼을 다시 눌러 주세요';return}
+  session.itest_phase=itest.phase;session.label='interference_'+itest.phase;
+  $('itest').textContent='🧪 간섭 테스트 진행 중';$('itest').disabled=true;
+  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · 0/10세트 · Q 누르고 밀기→당기기, E'}
+async function itestAfterSet(){
+  if(!itest||!running||!session)return;
+  const n=Number(session.target_sets)||10,on=itest.phase==='on';
+  $('itestStatus').textContent=(on?'2/2 자동 회피 켜기':'1/2 자동 회피 끄기')+' · '+pairs.length+'/'+n+'세트';
+  if(pairs.length<n)return;
+  await stop();
+  await itestSave();
+  if(!on){itest.phase='on';$('itestStatus').textContent='1/2 저장 완료 → 3초 뒤 자동 회피를 켜고 2/2를 시작해요. 손을 치워 주세요';await new Promise(r=>setTimeout(r,3000));await itestPhase()}
+  else{$('itestStatus').textContent='✅ 간섭 테스트 끝 · 끄기(off)·켜기(on) 결과가 저장됐어요';$('itest').textContent='🧪 간섭 테스트 (자동 회피 끄기 → 켜기, 10세트씩)';$('itest').disabled=false;itest=null}}
+async function itestSave(){
+  const base='batears_'+new Date(session.started_at).toISOString().replace(/[:.]/g,'-')+'_'+(session.who||'anon').replace(/[^a-zA-Z0-9_-]/g,'_')+'_'+session.label;
+  const files=[[base+'.json',JSON.stringify(report(),null,2),'application/json'],[base+'.csv',eventCsv(),'text/csv']];
+  if(itest.dir){try{for(const [name,data] of files){const h=await itest.dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(data);await w.close()}$('saveStatus').textContent='저장됨: '+base;return}catch(e){$('saveStatus').textContent='폴더 저장 실패, 다운로드해요: '+e.message}}
+  for(const [name,data,type] of files)download(name,data,type)}
+$('itest').onclick=itestClick;
 document.querySelectorAll('[data-mark]').forEach(b=>b.onclick=()=>mark(b.dataset.mark));
 window.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||e.repeat)return;const k={1:'push',2:'pull',3:'left',4:'right',5:'wave',6:'idle'}[e.key];if(k)mark(k);else if(e.key.toLowerCase()==='q')pairStart();else if(e.key.toLowerCase()==='e')pairEnd()});
 })();
