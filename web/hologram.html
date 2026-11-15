@@ -681,12 +681,13 @@ async function cmpStart() {
   try {
     CMP.stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: false });
     CMP.video = $('cmpVideo'); CMP.video.srcObject = CMP.stream; await CMP.video.play();
+    CMP.starting = true;   // ⏺ pressed while the model loads still records a compare sitting (서진 11:03 lost one)
     $('cmpStat').textContent = '손 인식 모델을 불러오는 중… (처음 한 번 몇 초)';
     const mod = await import(`${MP_BASE}/vision_bundle.mjs`), files = await mod.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
     const opts = (delegate) => ({ baseOptions: { modelAssetPath: MP_MODEL, delegate }, runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 });
     try { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('GPU')); CMP.delegate = 'GPU'; } catch (e) { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('CPU')); CMP.delegate = 'CPU'; }
     CMP.cam = window.BatVision.camFromCalib(cmpCalib(), { W: CMP.video.videoWidth || 1280, H: CMP.video.videoHeight || 720 });
-    Object.assign(CMP, { on: true, frames: [], pairs: [], pts: null, palm: null, seen: 0, present: 0, anchored: false, lastTs: 0 });
+    Object.assign(CMP, { on: true, starting: false, frames: [], pairs: [], pts: null, palm: null, seen: 0, present: 0, anchored: false, lastTs: 0 });
     CMP.video.requestVideoFrameCallback(cmpFrame);
     $('cmpStat').textContent = '손을 카메라에 보여 주세요';
   } catch (e) {
@@ -695,7 +696,7 @@ async function cmpStart() {
   }
 }
 function cmpStop(keepPanel) {
-  CMP.on = false; CMP.pts = null; CMP.palm = null;
+  CMP.on = false; CMP.starting = false; CMP.pts = null; CMP.palm = null;
   if (CMP.vrec && CMP.vrec.state !== 'inactive') { try { CMP.vrec.stop(); } catch (e) { /* ignore */ } }
   if (CMP.stream) CMP.stream.getTracks().forEach((t) => t.stop());
   CMP.stream = null;
@@ -771,7 +772,7 @@ function cmpStats() {
 }
 function pickVideoMime() { const c = ['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']; return window.MediaRecorder ? c.find((m) => MediaRecorder.isTypeSupported(m)) || '' : ''; }
 function cmpRecStart() {
-  if (!CMP.on) return;
+  if (!CMP.stream) return;
   CMP.rows = []; CMP.vframes = []; CMP.vchunks = []; CMP.vstart = null; CMP.vstop = null; CMP.vrec = null; CMP.mime = pickVideoMime();
   if (!CMP.mime || !CMP.stream) return;
   try {
@@ -807,8 +808,8 @@ async function recStart() {
   await dataDir(true);
   const ctx = audioG.ctx, node = ctx.createScriptProcessor(4096, 2, 1);
   node.channelCount = 2; node.channelCountMode = 'explicit'; node.channelInterpretation = 'discrete';
-  Object.assign(rec, { on: true, chunks: [], log: [], node, rate: ctx.sampleRate, start: new Date().toISOString(), frames: 0, t0: null, cmp: CMP.on, peaks0: topPeaks() });
-  if (CMP.on) cmpRecStart();
+  Object.assign(rec, { on: true, chunks: [], log: [], node, rate: ctx.sampleRate, start: new Date().toISOString(), frames: 0, t0: null, cmp: !!(CMP.on || CMP.starting), peaks0: topPeaks() });
+  if (rec.cmp) cmpRecStart();
   node.onaudioprocess = (e) => {
     if (!rec.on) return;
     const ib = e.inputBuffer, n = ib.length, L = ib.getChannelData(0), R = ib.numberOfChannels > 1 ? ib.getChannelData(1) : L, out = new Int16Array(2 * n);
@@ -821,6 +822,7 @@ async function recStart() {
   audioG.source.connect(node); node.connect(rec.mute).connect(ctx.destination);
   $('btnRec').textContent = '⏹ 녹화 끝'; $('btnRec').classList.add('recOn');
   $('recInfo').textContent = '⏺ 녹화 중: 손을 좌우·앞뒤·위아래로 또렷하게 움직여요 (30초~1분이면 충분해요)';
+  bigNote(rec.cmp ? '⏺ 비교 녹화 중: 소리 + 웹캠 손 + 영상 → compare/' : '⏺ 녹화 중: 소리만 → holo/ (👁 비교를 켜면 웹캠도 같이 저장돼요)', 5000);
   $('debug').style.display = 'block';
 }
 async function recStop() {
