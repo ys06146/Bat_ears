@@ -150,6 +150,7 @@
   // left/right check session: n swipes each way + 5 push + 5 pull. swipe.js v3 learns push/pull as a class of
   // its own, and they also measure how often a push/pull would be misread as a swipe
   const LR_PP = 5;
+  const WEAK_ECHO_DB = 18; // swipe echo peak (weaker tone) below this = hand too far for left/right (bravo)
   function planLr(n) {
     const list = [];
     for (let i = 0; i < n; i++) list.push('left', 'right');
@@ -235,9 +236,12 @@
       // stereo sessions also keep the raw mic signal (WAV next to the CSV) so left/right ideas can be tested offline
       if (opt.swipe && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
       if (opt.swipeOnly) {
-        say('손을 키보드 위 10~15cm에 두세요', BatEars.hasLrModel ? '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm)'
-          : '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm). 처음엔 기록만 하고, 끝나면 이 노트북에서 좌우가 되는지 알려 드려요');
-        await sleep(2500 * speed);
+        // left/right needs the hand close: at 55 cm the swipe echo was 7 dB weaker and the check failed (224420)
+        const far = dist > 25;
+        say(far ? `⚠️ 거리 칸이 ${dist}cm예요. 좌우는 손을 키보드 위 10~15cm에 두고 해요` : '손을 키보드 위 10~15cm에 두세요',
+          BatEars.hasLrModel ? '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm)'
+            : '좌우 끝까지 넓게, 빠르게 쓸기 (약 50cm). 처음엔 기록만 하고, 끝나면 이 노트북에서 좌우가 되는지 알려 드려요');
+        await sleep((far ? 4500 : 2500) * speed);
       } else {
         say('손을 화면 앞 15cm쯤에 두세요', '팁: 빠르게 치고, 천천히 원위치');
         await sleep(1500 * speed);
@@ -275,7 +279,9 @@
         S.lastWin = { t0: S.win.t0, feat: S.win.feat, trial };
         S.win = null;
         const learning = (kind === 'left' || kind === 'right') && !BatEars.hasLrModel;
-        if (learning) feedback(`📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
+        const weak = learning && trial.swipe && trial.swipe.ePk < WEAK_ECHO_DB;
+        if (weak) feedback(`📏 에코가 약해요 (${trial.swipe.ePk.toFixed(0)}dB): 손을 키보드 위 10~15cm로 더 가까이 두고 쓸어 주세요`, 'miss');
+        else if (learning) feedback(`📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
         else if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
         else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind}(으)로 잡혔어요 · 빠르게 치고 천천히 돌아오기`, 'bad');
         else feedback('⚪ 못 잡았어요 · 조금 더 빠르고 크게', 'miss');
@@ -344,6 +350,7 @@
     rev: '좌우가 자주 반대로 나와요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     fewpp: '밀기·당기기가 너무 적게 잡혔어요',
+    far: '에코가 약해요: 손을 키보드 위 10~15cm로 더 가까이 두고 다시 점검해 주세요',
     not: '쓸기가 너무 적게 잡혔어요',
   };
   function runLrCheck() {
@@ -354,13 +361,17 @@
       : (() => { const c = new BatSwipe.LRCheck({ need: 4 }); items.forEach((x) => c.add(x.kind, x.feat)); return c.result(); })();
     const pair = BatEars.stereoPair;
     const nL = items.filter((x) => x.kind === 'left').length, nR = items.filter((x) => x.kind === 'right').length;
-    const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
+    // median echo peak of the swipes (dB over the floor): 22 at 20 cm vs 15 at 55 cm on two MacBooks
+    const eks = items.filter((x) => (x.kind === 'left' || x.kind === 'right') && Number.isFinite(x.feat.ePk)).map((x) => x.feat.ePk).sort((a, b) => a - b);
+    const echoDb = eks.length ? eks[eks.length >> 1] : null;
+    const why = r.ok ? '' : echoDb != null && echoDb < WEAK_ECHO_DB ? LR_REASON.far
+      : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
       : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak
       : /push\/pull in the check/.test(r.reason) ? LR_REASON.fewpp : LR_REASON.not;
     const out = {
       ok: r.ok, looAcc: r.looAcc, looWrong: r.looWrong, looUndecided: r.looUndecided, fpRate: r.fpRate, dComb: r.dComb,
       dprime: r.dprime || null, reason: r.reason, why, nL, nR, nPushPull: items.length - nL - nR,
-      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION, keys: r.keys || 'fft',
+      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION, keys: r.keys || 'fft', echoDb,
     };
     if (r.ok && pair) {
       // kept for this browser session only (sessionStorage survives a reload, not a new tab): a model does not

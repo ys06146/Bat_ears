@@ -809,8 +809,11 @@ registerProcessor('bat-tap', BatTap);`;
     guardFrame(ev, Math.max(L.dUp, L.dDown, R.dUp, R.dDown), dep);
     ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
     ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
-    if (ev.sb) ev.sb.push({ t: now, vL: L.v, vR: R.v, eL: SW.excessDb(L.dUp, L.dDown), eR: SW.excessDb(R.dUp, R.dDown),
-      v0L: st.sch.L.rest ? st.sch.L.rest.value : 0, v0R: st.sch.R.rest ? st.sch.R.rest.value : 0 });
+    if (ev.sb) {
+      const eL = SW.excessDb(L.dUp, L.dDown), eR = SW.excessDb(R.dUp, R.dDown);
+      ev.ePk = Math.max(ev.ePk == null ? -Infinity : ev.ePk, Math.min(eL, eR)); // the weaker tone's echo peak (dB)
+      ev.sb.push({ t: now, vL: L.v, vR: R.v, eL, eR, v0L: st.sch.L.rest ? st.sch.L.rest.value : 0, v0R: st.sch.R.rest ? st.sch.R.rest.value : 0 });
+    }
     let kind = null;
     // early push/pull only when left/right can't happen: a swipe also moves toward then away from the mic, so with
     // a model the whole burst has to be seen first (costs ~gapMs of latency)
@@ -818,6 +821,7 @@ registerProcessor('bat-tap', BatTap);`;
     const capped = now - ev.start > B.maxMs;
     if (now - ev.last > B.gapMs || capped) {
       const feat = ev.sb ? ev.sb.features() : null;
+      if (feat && Number.isFinite(ev.ePk)) feat.ePk = +ev.ePk.toFixed(1); // echo strength: a far hand can't do left/right
       if (feat && st.iq) {
         const pc = st.iq.pathBetween(ev.start - 150, now); // the FFT frames lag the sound by about half a window
         if (pc.n > 20) { feat.pLat = (pc.dR - pc.dL) / 2; feat.pDep = -(pc.dL + pc.dR) / 2; feat.pN = pc.n; }
