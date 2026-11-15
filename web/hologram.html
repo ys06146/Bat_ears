@@ -171,12 +171,12 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115122206" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115124422" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115122206"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115124422"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115122206"></script>
+<script src="vision3d.browser.js?v=20261115124422"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
