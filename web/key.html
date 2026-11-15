@@ -3,7 +3,7 @@
 <title>Bat Ears | Air Password</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115135402">
+<link rel="stylesheet" href="style.css?v=20261115140629">
 <style>
 /* Same look as the game: style.css (zinc + Badger Red) for type, buttons, cards and the header; below, only this page's parts */
 :root{--teal:#e0464c;--ok:#4ade80;--red:#f87171;--gold:#fbbf24;--dim:#71717a;--line:#27272a}
@@ -62,7 +62,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}td,th{padd
 @media(max-width:950px){.keygrid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<script src="sitenav.js?v=20261115135402"></script>
+<script src="sitenav.js?v=20261115140629"></script>
 <span id="status" class="chip" data-nav-slot>Off</span>
 <div class="keygrid">
     <section class="card drawcard">
@@ -104,7 +104,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}td,th{padd
     <p class="hint">Stored only in this browser. Same engine and filter as the hologram; the limits are first estimates.</p>
   </details>
 </div></div>
-<script src="bat3d.js?v=20261115135402"></script><script src="airkey.js?v=20261115135402"></script>
+<script src="bat3d.js?v=20261115140629"></script><script src="airkey.js?v=20261115140629"></script>
 <script>
 (() => {
 'use strict';
@@ -146,10 +146,10 @@ function resetDisplay() { Object.assign(disp, { pos: HOME.slice(), cont: null, o
 // draw, then hold still again. Still = the engine's own still signal, as the hologram uses; the hand's speed is a fallback
 const HOLD_MS = 2000, STILL_AFTER = 600, MAX_REC = 5000, WAIT_MOVE = 10000, SPEED_WIN = 150, GO_SPEED = 0.12, STOP_SPEED = 0.06;
 const ZONE = [0.18, 0.12, 0.15];   // hologram.html's taught zone around the hand spot (half-widths, m)
-// as hologram.html's ampTable()/yBoost() with 'Draw height at true size' on: the gated model 1.402 / 1.184, the linear one 1.77 / 1.33
+// as hologram.html's ampTable()/yBoost() with 'Draw height at true size' on: seqg 1.569 / 1.253, the gated model 1.402 / 1.184, the linear one 1.77 / 1.33
 function heightGain(model) {
   const c = (((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy) || {};
-  const src = model === 'gated' && c.gated && c.gated.amp ? c.gated : c, M = src.amp && src.amp.modes;
+  const src = model === 'seqg' && c.seqg && c.seqg.amp ? c.seqg : model === 'gated' && c.gated && c.gated.amp ? c.gated : c, M = src.amp && src.amp.modes;
   return M && M.matched && M.half ? M.matched.k[1] / M.half.k[1] : 1;
 }
 let Y_GAIN = 1;   // set when the engine starts, from the model it runs
