@@ -146,8 +146,9 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const MP_VER = '0.10.21';
   const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
-  const VFOV_DEG = 43;   // typical laptop webcam vertical field of view (bravo); only used for the auto labels
-  const F_H = 1 / (2 * Math.tan((VFOV_DEG / 2) * Math.PI / 180));   // focal length in image heights
+  // webcam horizontal field of view, as in bravo's teach_fit camera model (auto labels and the distance guide)
+  const HFOV_DEG = 60;
+  const fH = () => (cam.w / cam.h) / (2 * Math.tan((HFOV_DEG / 2) * Math.PI / 180));   // focal length in image heights
   const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12],
     [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
   const EDGE = 0.05;     // landmarks this close to the frame edge = about to leave the picture
@@ -553,7 +554,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const asp = cam.w / cam.h, s = (a.scale + b.scale) / 2;
     const vr = -((b.px - a.px) * asp) / dt / s;   // raw image x grows toward the person's left
     const vu = -(b.py - a.py) / dt / s;
-    const vs = (Math.log(b.scale / a.scale) / dt) * (F_H / s);   // depth speed / hand size = (f / s) * dln(s)/dt
+    const vs = (Math.log(b.scale / a.scale) / dt) * (fH() / s);   // depth speed / hand size = (f / s) * dln(s)/dt
     return { vr, vu, vs, sp: Math.hypot(vr, vu, vs) };
   }
   const dominant = (v) => {
@@ -586,7 +587,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     $('edge').textContent = warn;
     cam.edgeWarn = !!warn && r.present;
     // rough distance from the webcam: palm width (knuckles 5-17; 서진's, else 8 cm) over its size in the picture
-    if (r.present && r.pw > 0) { cam.dist.push((F_H * (numOr($('palm').value) || 8)) / r.pw); if (cam.dist.length > 9) cam.dist.shift(); }
+    if (r.present && r.pw > 0) { cam.dist.push((fH() * (numOr($('palm').value) || 8)) / r.pw); if (cam.dist.length > 9) cam.dist.shift(); }
     if (!r.present) cam.dist.length = 0;
     const dm = cam.dist.length >= 3 ? cam.dist.slice().sort((x, y) => x - y)[cam.dist.length >> 1] : null;
     $('dist').innerHTML = dm == null ? '' : `📏 웹캠에서 약 <span class="${dm >= 25 && dm <= 45 ? 'ok' : dm >= 20 && dm <= 50 ? 'warn' : 'bad'}">${Math.round(dm)}cm</span>`
@@ -1005,7 +1006,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
         coords: 'lm: raw (not mirrored) camera image, x 0..1 left->right of the camera picture (= toward the person\'s left), y 0..1 top->bottom, z MediaPipe relative depth (smaller = nearer the camera); wlm: MediaPipe world landmarks in m, hand-centred',
         hand: "hand = the person's own hand (MediaPipe's label swapped, because it assumes a mirrored picture); hand_mp = MediaPipe's raw label",
         t_cap: 'requestVideoFrameCallback metadata.captureTime (cap_src c) or expectedDisplayTime (e) or performance.now() (r)',
-        derived: `palm = mean of landmarks 0,5,9,13,17; scale = mean side of the 0-5-17 triangle in image heights; v_right/v_up/v_screen = centred-difference speeds in hand sizes per second in the person's frame (depth from d ln(scale)/dt with an assumed ${VFOV_DEG} deg vertical FOV); auto = still / left / right / up / down / push / pull (blank = slow move)`,
+        derived: `palm = mean of landmarks 0,5,9,13,17; scale = mean side of the 0-5-17 triangle in image heights; v_right/v_up/v_screen = centred-difference speeds in hand sizes per second in the person's frame (depth from d ln(scale)/dt with an assumed ${HFOV_DEG} deg horizontal FOV); auto = still / left / right / up / down / push / pull (blank = slow move)`,
         frames: rows.length, present: present.length, present_ratio: rows.length ? rd(present.length / rows.length, 3) : null,
         fps: span > 0 ? rd((rows.length - 1) / span, 2) : null,
         skipped_frames: cam.skipped, skipped_note: 'frames the browser presented but this page did not process (requestVideoFrameCallback presentedFrames gaps, whole camera run)',
