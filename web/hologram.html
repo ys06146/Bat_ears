@@ -172,6 +172,10 @@
   <div id="bars" style="margin-top:6px"></div>
 </div>
 <script src="bat3d.js?v=20261115110158" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script>
+// ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115113500"><\/script>');
+</script>
 <script src="vision3d.browser.js?v=20261115110158"></script>
 <script type="module">
 import * as THREE from 'three';
@@ -1032,6 +1036,7 @@ $('calibFile').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
   try { calib = JSON.parse(await f.text()); $('calibName').textContent = 'Loaded: ' + (calib.session || f.name) + ' · applies on the next start'; } catch (er) { $('calibName').textContent = '⚠️ Can’t read it'; }
 };
+if (Q.get('engine') === 'v15') $('status').textContent = 'Engine: v15 fallback (?engine=v15) · press ▶ Start and allow the microphone';
 if (SIM) { $('sim').style.display = 'block'; $('intro').style.display = 'none'; start('sim'); }
 else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: $('ampMode').value }).info() : null);
 window.__holoReady = true;
