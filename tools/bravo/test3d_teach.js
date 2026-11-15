@@ -69,7 +69,7 @@ if (process.env.LABELS) {
     const v = t.vision && t.vision.lab, cs = calls.filter((c) => c.t >= t.tGo && c.t <= (t.tEnd ?? t.tGo + 1000 * (t.dur || 4)) + 600);
     if (/^c?cw_[hv]$/.test(v)) {
       if (!cs.length) { r.miss++; continue; }
-      const want = v.split('_'), dirOk = cs.some((c) => c.dir === want[0]), planeOk = cs.some((c) => (want[1] === 'v') === /수직/.test(c.plane));
+      const want = v.split('_'), dirOk = cs.some((c) => c.dir === want[0]), planeOk = cs.some((c) => (want[1] === 'v') === /vertical/.test(c.plane));
       if (dirOk && (planeOk || !api.solverRef().phone)) r.ok++; else if (!dirOk) r.wrongDir++; else r.wrongPlane++;
     } else if (v && v !== 'none') { r.nonCircle++; if (cs.length) r.nonCircleFired++; }
   }

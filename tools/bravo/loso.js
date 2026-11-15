@@ -53,6 +53,6 @@ if (process.env.SAVE) {
   const out = { v: 1, session: `default (${S.length} sittings, leave-one-out)`, created: new Date().toISOString(), winMs: WIN, nearM: NEAR, cam: base.cam, lagMs: 0, mics: base.mics,
     paths: base.paths.filter((p) => !p.pll).slice(0, 4), learned: { laptop: { idx: [0, 1, 2, 3], W: W.map((r) => r.map((x) => +x.toFixed(6))) }, all: null },
     errors: { 'learned, laptop only': { rms, motion: mot, corr: cor } }, truthFloorCm: base.truthFloorCm,
-    note: 'Galaxy Book 61f5, 서진, hand 25-45 cm from the webcam; error = leave-one-sitting-out over ' + S.map((s) => s.name.slice(8, 23)).join(', ') };
+    note: 'Galaxy Book 61f5, Seojin, hand 25-45 cm from the webcam; error = leave-one-sitting-out over ' + S.map((s) => s.name.slice(8, 23)).join(', ') };
   fs.writeFileSync(process.env.SAVE, JSON.stringify(out, null, 1)); console.log('saved ' + process.env.SAVE);
 }

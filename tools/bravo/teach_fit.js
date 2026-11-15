@@ -186,7 +186,7 @@ for (let i = 0, j = 0; i < tr.length; i++) { while (j < tr.length && tr[j].t < t
 if (jit[0].length > 5) console.log(`  truth floor (vision jitter at rest, ${jit[0].length} windows): x ${jit.map((a) => (100 * Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length)).toFixed(1)).join(' cm, y ').replace(/, y ([^,]*)$/, ', z $1')} cm`);
 else console.log('  truth floor: no rest segment in the schedule');
 
-// ---------------------------------------------------------------- calibration file for 3d.html (load with 📥 보정)
+// ---------------------------------------------------------------- calibration file for 3d.html (load with 📥 Load calibration)
 const floor = jit[0].length > 5 ? jit.map((a) => +(100 * Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length)).toFixed(2)) : null;
 // size modes (as in the built-in calibration): k = 1 / sqrt(size) ('half') or 1 / size ('matched'), errors on the held-out half
 // (k is taken from the same half it is scored on: slightly optimistic for one sitting)
