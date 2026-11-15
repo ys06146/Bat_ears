@@ -112,7 +112,15 @@ registerProcessor('bat-iq', BatIQ);
         const pStroke = imax > imin ? xmax - xmin : xmin - xmax;
         return { pPk: xp, pDPk: yp, pStroke, n };
       },
-      pathBetween(ta, tb) { let dL = 0, dR = 0, n = 0; for (let i = h; i < T.length; i++) if (T[i] >= ta && T[i] <= tb) { dL += L[i]; dR += R[i]; n++; } return { dL, dR, n }; },
+      pathBetween(ta, tb) {
+        let dL = 0, dR = 0, activeL = 0, activeR = 0, n = 0;
+        for (let i = h; i < T.length && T[i] <= tb; i++) if (T[i] >= ta) {
+          dL += L[i]; dR += R[i]; n++;
+          if (L[i] !== 0) activeL++;
+          if (R[i] !== 0) activeR++;
+        }
+        return { dL, dR, n, activeL, activeR };
+      },
       stop() { try { src.disconnect(node); node.disconnect(); mute.disconnect(); } catch (_) { /* ignore */ } },
     };
   }

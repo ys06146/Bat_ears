@@ -301,7 +301,39 @@
     return sd > sdDb || Math.abs(tail - head) > rampDb;
   }
 
+  // Follow a confirmed push with one deliberate pull, even when the echo never goes quiet.
+  class PullAfterPush {
+    constructor() { this.reset(); }
+    reset() { this.until = 0; this.stroke = null; }
+    arm(t) { this.until = t + 650; this.stroke = null; }
+
+    update({ t, v, up, down, blocked }, phasePath) {
+      if (blocked || t > this.until) this.reset();
+      if (!this.until) return null;
+      if (v > -0.4 || down < 8 || down - up < 2) {
+        this.stroke = null;
+        return null;
+      }
+      if (!this.stroke || t - this.stroke.last > 55) {
+        this.stroke = { start: t, last: t, distance: 0, peak: -v };
+        return null;
+      }
+      const s = this.stroke;
+      s.distance += -v * (t - s.last) / 1000;
+      s.last = t;
+      s.peak = Math.max(s.peak, -v);
+      if (t - s.start < 95) return null;
+      const phase = phasePath(s.start, t);
+      const phaseOk = phase != null && phase >= 0.08;
+      const fftOk = s.distance >= 0.09 && s.peak >= 0.9;
+      if (!fftOk && !(phaseOk && s.distance >= 0.045)) return null;
+      this.reset();
+      return { speed: s.peak, source: phaseOk ? 'fft+phase' : 'fft', distance: s.distance, phasePath: phase };
+    }
+  }
+
   const api = { AdaptiveFloor, RobustDetector, DEFAULTS, foreignToneMask, chooseFrequency, audibilityPenalty,
+    PullAfterPush,
     autoVolume, audibleLeak, dualVote, clipFraction, agcSuspect };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.BatRobust = api;
