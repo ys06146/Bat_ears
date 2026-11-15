@@ -3,7 +3,7 @@
 Short answers to say out loud. [TBD] = fill in from our measurements (`python ml/train.py` prints them from guided-collection recordings).
 
 1. **How accurate is it?**
-   On our first guided recording, 17 of 20 prompted pushes and pulls were recognized within 1.5 s (85%), with 4.5 false triggers per minute while typing or sitting idle. [TBD: update with all sessions.] Our first detector got only 15%, because people wind up before a pull. For reference, SoundWave (Microsoft Research, CHI 2012) reported over 90% on its gesture set with native code.
+   Across 6 guided recordings on 2 laptops at 20–35 cm, 82 of 112 prompted pushes and pulls were recognized within 1.5 s (73%), with about 2.4 false triggers per minute while typing or sitting idle. Our latest session got 17 of 20 live. Our first detector got only 15%, because people wind up before a pull. For reference, SoundWave (Microsoft Research, CHI 2012) reported over 90% on its gesture set with native code.
 2. **Does it work in a loud room like this one?**
    Speech and music sit mostly far below 20 kHz, and we only look a few hundred Hz around our tone. For loud broadband noise like claps, we subtract the rise of the noise floor measured farther away, because a hand echo only lifts the bands right next to the tone. Thresholds also adapt to how noisy the room is at start-up.
 3. **What about privacy?**
@@ -20,5 +20,7 @@ Short answers to say out loud. [TBD] = fill in from our measurements (`python ml
    Yes, by default. Chrome's echo cancellation and noise suppression erased the 20 kHz tone: −32 dB with them off, −179 dB with them on. We open the mic with echoCancellation, noiseSuppression and autoGainControl all off.
 9. **What's new compared with prior research?**
    Zero install: a link in any browser on a stock laptop. SoundWave and FingerIO were native research prototypes, and laptop presence sensing is built in by vendors. We also solved the browser-specific problems.
-10. **How fast is it, and what's next?**
+10. **Can it do left and right?**
+    Not reliably yet, so it isn't in the demo. A sideways hand changes its distance to the two speakers by only about a fifth of its speed. Our whole-burst cues got 15 of 20 swipes right within a session, but a model learned in one session got 7 of 20 in the next. The ↔ tab shows the per-laptop check, which says so honestly. Next we'll track each speaker's path length from the echo's phase.
+11. **How fast is it, and what's next?**
     An 8192-point FFT (about 170 ms window at 48 kHz) updated about 60 times a second. On synthetic input a push registers about a quarter second after the motion starts. Next: run the trained classifier live in the page, make stereo swipes more robust, and a phone version.

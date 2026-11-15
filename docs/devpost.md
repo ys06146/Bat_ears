@@ -12,8 +12,8 @@ Bat Ears turns the laptop's own speaker and microphone into a gesture sensor:
 - The speaker plays a steady ~20 kHz tone, which most people can't hear.
 - When your hand moves toward the screen, its echo comes back slightly higher in pitch. When it moves away, the echo comes back lower. This is the Doppler effect.
 - Bat Ears reads that shift about 60 times per second and recognizes a **push**, a **pull** and a **wave**, along with how fast your hand moved.
-- In an experimental stereo mode, the left and right speakers play different tones, which adds **left and right swipes** on laptops whose speakers are far enough apart. A 90-second check tells you honestly whether yours can.
-- We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars, wave for a shockwave, and swipe to slash. The webcam can stay taped over the whole time.
+- An experimental stereo mode plays a different tone on each speaker to try for **left and right swipes**. A 90-second check tells you honestly whether your laptop can do it. Ours can't yet, so the demo sticks to push, pull and wave.
+- We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars, and wave for a shockwave. The webcam can stay taped over the whole time.
 - A guided 2-minute **data collection** mode prompts you ("Push!") and labels everything automatically. We used it to measure accuracy and train a classifier.
 
 Everything runs inside the browser on the device. Nothing to install and no server; the audio is analysed on the device and never recorded or sent anywhere.
@@ -43,12 +43,12 @@ The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Micr
 - **Telling gestures from everything else:** typing, leaning and people walking by also create Doppler shifts. A classifier trained on our labelled recordings recognizes 76% of these "other" motions (leave-one-session-out).
 - **Too quiet, not too loud:** in a very quiet room the far noise band sat 80 dB under the tone, so a fast hand's own spill "raised the noise" by 6 dB and our clap veto blocked real gestures: one session scored 0 of 20. Now the veto only counts when the far band comes within 50 dB of the tone. Replaying the same recording gives 15 of 20.
 - **Two laptops, one room:** while we collected data on two laptops at once, one session dropped to 1 of 20, and every gesture lifted the far band by 15–33 dB. We believe the second laptop's tones were the cause, so the page now warns when it hears someone else's ultrasound.
-- **Left/right is physics, not tuning:** the obvious rule (compare the two tones' Doppler shifts frame by frame) scored at chance on our main laptop (7 of 14), because a sideways hand barely changes its distance to either speaker. Laptop audio effects (Dolby, "spatial sound") can also mix the two channels. We moved to whole-burst cues plus a per-laptop check that says plainly when a laptop can't do left/right. [TBD: second check result on the Galaxy Book.]
+- **Left/right is physics, not tuning:** the obvious rule (compare the two tones' Doppler shifts frame by frame) scored at chance on our main laptop (7 of 14), because a sideways hand barely changes its distance to either speaker. Laptop audio effects (Dolby, "spatial sound") can also mix the two channels. We moved to whole-burst cues plus a per-laptop check that says plainly when a laptop can't do left/right. A second session on the same laptop showed how hard it is: within one session the cues got 15 of 20 swipes right, but the model learned in the first session got only 7 of 20 in the second (35%). One cue even flipped sign between sessions, and 9 of 20 pushes and pulls looked like right swipes. So left/right stays an experimental tab, and the demo uses push, pull and wave.
 - **A loud hackathon venue:** [TBD: how the noise affected us and what we changed.]
 
 ## Accomplishments that we're proud of
 - Touchless gestures from a stock laptop, entirely in a web page, with no camera.
-- Push/pull from real recordings: 67 of 92 prompted gestures (73%) across 5 sessions on 2 laptops at 20–35 cm, or 68 of 112 (61%) if we also count the session spoiled by a second laptop. That's about 2.4 false triggers per minute while typing or idle (`python ml/report.py`). [TBD: more people and 10 cm.]
+- Push/pull from real recordings: 82 of 112 prompted gestures (73%) across 6 sessions on 2 laptops at 20–35 cm, or 83 of 132 (63%) if we also count the session spoiled by a second laptop. That's about 2.4 false triggers per minute while typing or idle (`python ml/report.py`). The latest session got 17 of 20 live (85%), with no false triggers while typing. [TBD: more people and 10 cm.]
 - An honest classifier result: a 5-class learned model reached 66% leave-one-session-out. It is best at rejecting non-gestures, but the rule-based burst detector is better at push vs pull, so the live app keeps the rules.
 
 ## What we learned
@@ -58,7 +58,7 @@ The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Micr
 - Check the physics before the code: left/right had to be redesigned because the signal we were thresholding was mostly not there.
 
 ## What's next
-- **Left and right swipes everywhere:** combine the per-laptop check with the laptop's two microphones, where the browser exposes them.
+- **Left and right swipes:** measure each speaker's path length from the echo's phase, as LLAP (MobiCom 2016) does, instead of from the Doppler spectrum, and use the laptop's two microphones where the browser exposes them.
 - **In-browser classifier:** run `ml/model.json` live in the page.
 - **Real uses:** cooking with messy hands, sterile environments, accessibility for people with limited mobility, and privacy-first smart devices.
 - **Phones:** a phone version using its speaker and microphone.
