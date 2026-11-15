@@ -3,7 +3,9 @@
 ## Main candidate: Bat Ears 3D (`web/3d.html`)
 
 Before judging (once):
-1. Phones run `web/tone.html`: 📱A **17000 Hz** on the right (25 cm right of the laptop's centre, 25 cm above the desk), 📱B **18750 Hz** on the left (25 cm left, **40 cm** high). Stand both on a support near the screen line, speaker facing the hand area, B at full volume. iPhones can't play above about 20 kHz.
+1. Phones run `web/tone.html`. iPhones can't play above about 20 kHz.
+   - ⬇️ Overhead (bravo's recommendation, for height): 📱A **17000 Hz** straight above the hand spot, at the laptop's centre line, 30 cm in front of the hinge and 45 cm above the desk. Stand it upright with the bottom speaker pointing down at the hand, fixed to a stand, a selfie stick or a lamp arm. It stays out of the webcam's view. 📱B (18750 Hz) is optional (left side, 40 cm high, full volume).
+   - ↔ Side (first plan): 📱A 17000 Hz on the right (25 cm right, 25 cm high), 📱B 18750 Hz on the left (25 cm left, 40 cm high), both facing the hand, B at full volume.
 2. Close every other Bat Ears tab and laptop. A stray 20 kHz tone sat right next to the laptop's 19.5 kHz band in all three teach sessions.
 3. Open `web/teach.html`, press ①, and use the preview to find the hand spot: above the laptop's front edge, 18-25 cm above the desk, '📏 웹캠에서 25~45cm' green. **Mark it on the desk with tape.** The calibration was learned in that range.
 4. Re-teach (② session, about 2.5 min) only if the laptop or the room changed. The Galaxy Book calibration from four sittings is built into 3d.html.
