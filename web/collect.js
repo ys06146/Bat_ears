@@ -147,8 +147,9 @@
     return quietest != null && room.ambientDb > quietest + 8 ? 'noisy' : 'quiet';
   }
 
-  // left/right check session: n swipes each way + 3 push + 3 pull (are pushes/pulls misread as swipes?)
-  const LR_PP = 3;
+  // left/right check session: n swipes each way + 5 push + 5 pull. swipe.js v3 learns push/pull as a class of
+  // its own, and they also measure how often a push/pull would be misread as a swipe
+  const LR_PP = 5;
   function planLr(n) {
     const list = [];
     for (let i = 0; i < n; i++) list.push('left', 'right');
@@ -342,6 +343,7 @@
     pp: '밀기·당기기가 좌우로 잘못 읽혀요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     rev: '좌우가 자주 반대로 나와요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
+    fewpp: '밀기·당기기가 너무 적게 잡혔어요',
     not: '쓸기가 너무 적게 잡혔어요',
   };
   function runLrCheck() {
@@ -349,15 +351,18 @@
     S.trials.forEach((t) => { if (t.swipe) chk.add(t.kind, t.swipe); }); // left/right + push/pull (false-swipe rate)
     const r = chk.result(), pair = BatEars.stereoPair;
     const why = r.ok ? '' : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
-      : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak : LR_REASON.not;
+      : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak
+      : /push\/pull in the check/.test(r.reason) ? LR_REASON.fewpp : LR_REASON.not;
     const out = {
       ok: r.ok, looAcc: r.looAcc, looWrong: r.looWrong, looUndecided: r.looUndecided, fpRate: r.fpRate, dComb: r.dComb,
       dprime: r.dprime || null, reason: r.reason, why, nL: chk.L.length, nR: chk.R.length, nPushPull: chk.N.length,
       hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION,
     };
     if (r.ok && pair) {
+      // kept for this browser session only (sessionStorage survives a reload, not a new tab): a model does not
+      // carry over to another sitting (bravo, 205859 -> 171130), so each sitting starts with a fresh check
       BatEars.config.lrModel = { pair: pair.slice(), model: r.model, looAcc: r.looAcc, at: new Date().toISOString() };
-      store.set('batears-lr-model', BatEars.config.lrModel);
+      try { sessionStorage.setItem('batears-lr-model', JSON.stringify(BatEars.config.lrModel)); } catch (_) { /* private mode */ }
     }
     return out;
   }

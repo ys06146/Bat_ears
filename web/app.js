@@ -44,7 +44,10 @@
   BatEars.on('state', setStatus);
   BatEars.on('error', (e) => warn(`마이크를 열 수 없어요 (${e.name}). 주소창 왼쪽 아이콘 → 마이크 허용 → 새로고침.`));
   // the left/right model learned by an earlier "↔ 좌우만" check on this laptop (used only with the same tone pair)
-  try { const m = JSON.parse(localStorage.getItem('batears-lr-model')); if (m && m.model && m.pair) BatEars.config.lrModel = m; } catch (_) { /* none */ }
+  // left/right model from this sitting's 🧭 check (sessionStorage: gone with the tab); models from older sittings
+  // (localStorage, before v3) are dropped because they don't carry over
+  try { localStorage.removeItem('batears-lr-model'); } catch (_) { /* none */ }
+  try { const m = JSON.parse(sessionStorage.getItem('batears-lr-model')); if (m && m.model && m.pair) BatEars.config.lrModel = m; } catch (_) { /* none */ }
   // another laptop running Bat Ears (or any ultrasonic beacon) nearby spoils both devices' detection
   const FOREIGN = '⚠️ 다른 초음파';
   BatEars.on('foreign', (e) => {
@@ -173,7 +176,7 @@
       }
     }
     const res = await BatCollect.start({
-      who, dist: $('dist').value, noise: $('noise').value, perGesture: lrOnly ? 5 : Number($('perGesture').value),
+      who, dist: $('dist').value, noise: $('noise').value, perGesture: lrOnly ? 6 : Number($('perGesture').value),
       wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: lrOnly ? false : $('incTyping').checked, freq: Number($('freq').value),
       swipeOnly: lrOnly,
     });
@@ -353,7 +356,7 @@
       // stereo: &lrmodel=<{pair, model} JSON> injects a left/right model (otherwise none, ignoring a saved one);
       // every burst's swipe.js features are logged so a model can be learned offline from a known schedule
       try { BatEars.config.lrModel = params.get('lrmodel') ? JSON.parse(params.get('lrmodel')) : null; } catch (_) { BatEars.config.lrModel = null; }
-      BatEars.on('burst', (e) => { if (e.feat) bursts.push({ at: +((e.start - t0) / 1000).toFixed(2), ilat: +e.feat.ilat.toFixed(4), balSlope: +e.feat.balSlope.toFixed(1), balDelta: +(e.feat.balDelta || 0).toFixed(2), ms: Math.round(e.feat.ms), n: e.feat.n }); });
+      BatEars.on('burst', (e) => { if (e.feat) bursts.push({ at: +((e.start - t0) / 1000).toFixed(2), ...Object.fromEntries(Object.entries(e.feat).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(4) : v])) }); });
       window.__autoBursts = bursts;
       const ok = await startEngine();
       if (ok && params.get('rec') === '1') BatRecorder.start();

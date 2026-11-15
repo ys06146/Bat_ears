@@ -24,7 +24,7 @@
         <label><input type="checkbox" class="lr-swap"> 좌우 바꾸기</label>
         <button class="lr-start">▶ 스테레오로 시작</button>
         <button class="secondary lr-reset">숫자 지우기</button>
-        <button class="secondary lr-collect" title="좌우 5번씩 쓸어서 이 노트북에서 좌우가 되는지 확인하고 배워요">🧭 좌우 점검 (좌우 5+5 · 밀기·당기기 3+3)</button>
+        <button class="secondary lr-collect" title="좌우 6번씩, 밀기·당기기 5번씩 해서 지금 이 자리에서 좌우가 되는지 확인하고 배워요 (앉을 때마다 새로)">🧭 좌우 점검 (좌우 6+6 · 밀기·당기기 5+5)</button>
       </div>
       <div class="lr-stage"><canvas class="lr-canvas"></canvas><div class="lr-coach" title="이렇게 쓸어요"></div></div>
       <p class="hint lr-hint">키보드 위 10~15cm에서 손바닥을 세우고 왼쪽 끝 ↔ 오른쪽 끝까지 넓게, 빠르게 쓸어 보세요. 두 톤의 SNR이 모두 20dB 이상이어야 해요. 낮은 쪽이 있으면 다른 톤 쌍을 고르세요. 방향이 반대로 나오면 '좌우 바꾸기'를 켜세요. 윈도우는 소리 효과가 좌우를 섞을 수 있어요: 설정 &gt; 시스템 &gt; 소리 &gt; 스피커에서 '오디오 향상'·'공간 음향' 끄기, 설정 &gt; 접근성 &gt; 오디오에서 '모노 오디오' 끄기, Dolby Atmos 끄기. 18kHz는 귀가 좋은 사람에게 아주 작게 들릴 수 있어요.</p>`;
@@ -153,7 +153,9 @@
     const m = BatEars.config.lrModel;
     if (BatEars.running && BatEars.stereo) {
       g.fillStyle = BatEars.hasLrModel ? '#a5d6a7' : '#ffe082';
-      g.fillText(BatEars.hasLrModel ? `좌우 판정 켜짐 (점검 교차검증 ${Math.round((m.looAcc || 0) * 100)}%)` : '좌우 판정 꺼짐: 🧭 좌우 점검을 먼저 해 주세요', x0, H - 82);
+      const ago = m && m.at ? Math.round((Date.now() - Date.parse(m.at)) / 60000) : null;
+      g.fillText(BatEars.hasLrModel ? `좌우 판정 켜짐 (점검 교차검증 ${Math.round((m.looAcc || 0) * 100)}%${ago != null ? `, ${ago}분 전 점검` : ''})`
+        : '좌우 판정 꺼짐: 🧭 좌우 점검을 먼저 해 주세요 (앉을 때마다 새로)', x0, H - 82);
     }
     if (S.last && now - S.last.t < 900) {
       g.fillStyle = COLORS[S.last.kind] || '#fff';

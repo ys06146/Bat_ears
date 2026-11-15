@@ -21,7 +21,7 @@
  *   'state'   { running, tone, calibrating, busy }
  *   'error'   { where, name, message }
  *   'burst'   { t, start, feat, capped }  stereo only: a motion burst ended; feat = swipe.js features
- *               { ilat, balSlope, latPk, depPk, n, ms } (the left/right check learns from these)
+ *               (v3: { ilatC, idep, bip, ilat, latPk, depPk, nC, n, ms }; the left/right check learns from these)
  *   'foreign' { t, tones: [kHz, ...] }  another ultrasonic tone (e.g. a second laptop running Bat Ears) has been
  *               audible for 1 s, or the list changed / cleared ([]). Also readable as BatEars.foreign.
  *
@@ -67,7 +67,8 @@
     stereoDetector: 'velocity',
     // left/right: a sideways hand barely changes the instantaneous sideways speed (lat ~0.2 x hand speed, bravo's
     // physics model), so each burst is judged as a whole by window.BatSwipe (swipe.js: ilat = integral of lat,
-    // balSlope = slope of the L-R echo balance) with a per-laptop model from the left/right check:
+    // v3: offset-corrected ilatC, net depth idep, two-way share bip; push/pull learned as a class) with a model from the
+    // left/right check of this sitting:
     // { pair: [fl, fr], model }. null (or another tone pair) = no usable left/right here, so none fire.
     lrModel: null,
     swapLR: false,       // flip left/right if a laptop's channels are wired the other way
@@ -732,6 +733,12 @@ registerProcessor('bat-tap', BatTap);`;
         }
       }
       res[key] = { m, dUp, dDown, v: m.centroid * C / (2 * ch.f) };
+      // rest speed of this tone (median v of quiet frames, last 3 s): swipe.js v3 removes it from the sideways speed.
+      // The noise floor around each carrier is lopsided, so v is not 0 at rest (205859: -0.69 / +0.27 m/s)
+      if (window.BatSwipe && window.BatSwipe.RestSpeed) {
+        if (!ch.rest) ch.rest = new window.BatSwipe.RestSpeed();
+        ch.rest.push(now, res[key].v, Math.max(dUp, dDown));
+      }
     }
     const ready = st.tone && !calibrating && st.sch.L.base && st.sch.R.base;
     if (ready) detectStereo(res, now); // energy rule (fires only in 'energy' mode) + baseline drift
@@ -785,7 +792,8 @@ registerProcessor('bat-tap', BatTap);`;
     guardFrame(ev, Math.max(L.dUp, L.dDown, R.dUp, R.dDown), dep);
     ev.latMax = Math.max(ev.latMax, lat); ev.latMin = Math.min(ev.latMin, lat);
     ev.depMax = Math.max(ev.depMax, dep); ev.depMin = Math.min(ev.depMin, dep);
-    if (ev.sb) ev.sb.push({ t: now, vL: L.v, vR: R.v, eL: SW.excessDb(L.dUp, L.dDown), eR: SW.excessDb(R.dUp, R.dDown) });
+    if (ev.sb) ev.sb.push({ t: now, vL: L.v, vR: R.v, eL: SW.excessDb(L.dUp, L.dDown), eR: SW.excessDb(R.dUp, R.dDown),
+      v0L: st.sch.L.rest ? st.sch.L.rest.value : 0, v0R: st.sch.R.rest ? st.sch.R.rest.value : 0 });
     let kind = null;
     // early push/pull only when left/right can't happen: a swipe also moves toward then away from the mic, so with
     // a model the whole burst has to be seen first (costs ~gapMs of latency)
