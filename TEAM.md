@@ -1,81 +1,81 @@
-# 팀 역할 분담과 할 일 (MadHacks 2026 · Bat Ears)
+# Team roles and to-dos (MadHacks 2026 · Bat Ears)
 
-🌐 사이트: https://ys06146.github.io/nhng/web/ · 🧭 담당: 알파(AI 팀원)가 코드·문서·진행을 챙기고 #알파에 보고해요
+🌐 Site: https://ys06146.github.io/nhng/web/ · 🧭 Owner: Alpha (AI teammate) looks after code, docs and progress, and reports in #alpha
 
-## 지금 상태 (11/15 10:50 CST)
-- 🧊 **주력은 높이까지 재는 3D 손 추적** (서진 님 결정, 11/15 03:15). 🦇 `web/hologram.html`이 데모 화면이고, 🧪 `web/3d.html`은 엔지니어용 화면이에요. 밀기·당기기·흔들기 게임은 검증된 대체 데모로 남기고, 제스처 키는 보조예요
-  - 소리원: 노트북 18/19.5kHz 스테레오가 기본이에요. 📱 폰(`tone.html`, A 17kHz · B 18.75kHz, 아이폰은 20kHz 위를 못 내요)은 실험이에요. 옆에 둔 폰은 높이 상관을 0.05 이하로만 올렸고, 손 위에서 아래로 둔 폰은 경로가 손을 따라가지 않았어요 (브라보 분석)
-  - 🦇 **소리 홀로그램** `web/hologram.html` (데모 화면): 웹캠 없이 소리만으로 손 위치를 홀로그램 손으로 보여 줘요. 브라보 엔진(`web/bat3d.js`) + One Euro 필터 + three.js 글로우예요. 📂로 teach 세션을 재생하면서 웹캠 정답(초록 손)과 비교할 수 있어요. 정확도는 화면에 정직하게 보여 줘요
-  - 📷 **선생님 모드** `web/teach.html`: 노트북 웹캠의 MediaPipe 손 관절(정답)과 스테레오 소리 특징·I/Q·원음 WAV를 같은 시계로 약 2분 30초 남겨요 (정지 → 좌우·위아래·앞뒤 → 수평·수직 원 → 밀기·당기기 → 흔들기 → 자유). `ml/data/teach/`에 저장되고 브라보가 소리 → 3D 위치를 학습해요 (`teach_fit.js` → `<세션>.calib.json`을 3d.html에서 불러와요). 카메라는 학습 때만 쓰고 데모에서는 꺼요. 📹 원본 영상은 기본으로 같은 폴더에 `.webm`(+ 프레임 시각 `_frames.csv`)으로 남아요. 이 컴퓨터에만 두고 `.gitignore`로 깃에서 빼요
-  - 배치: 화면은 거의 세우고(약 95°), 손은 책상 위 18~25cm, 화면 앞 15~30cm. 웹캠이 손을 못 본 구간은 정답이 없어서 버려요
-  - 실측 (브라보, 여덟 앉음 중 하나씩 빼고 학습해 그 앉음으로 시험, 노트북만, 손이 웹캠 약 45cm 안, 250ms 이동 9948구간): 오차 좌우 3.8 · 앞뒤 4.3 · 높이 2.5cm, 실제 움직임 5.5 · 5.8 · 3.0cm, 상관 0.73 · 0.70 · 0.57. 화면은 실제 크기의 83 · 83 · 75%로 그려요 (균형 모드, 엔진 15판)
-- 밀기·당기기·흔들기 게임은 11/14 21:15에 데모로 확정했던 검증된 기능이에요. 좌우는 실험 탭으로만 둬요
-- 🔐 **제스처 키** (`web/key.html`, 11/15 새벽): 동작 순서 = 비밀번호, 나만의 리듬·속도·모양 = 열쇠예요. 등록은 연습 1번 + 5~10번이고, 잠금 해제하면 ✅/❌와 이유(순서·리듬·속도·길이·모양)가 나와요
-  - 판정: `web/auth.js` (브라보 v2: 리듬을 동작 중심 시각으로 재요. 기준선은 등록 반복의 중앙값 + 3·MAD). 연속 동작은 엔진의 '연속 동작 모드'로 동작마다 따로 잡아요
-  - 평가: 시도마다 `ml/data/batears_auth_<기기>.json`에 저장되고 `python ml/auth_report.py`가 FAR·FRR·EER을 내요 (찰리 프로토콜: 본인 10번, 순서를 아는 남 10번)
-  - 실측: 서진 님 갤럭시 북에서 동작이 다 잡힌 시도 3번 모두 통과 (0.84, 0.85, 1.40). 원 토큰 🔃/🔄은 `key.html?circles=1`에서만 켜져요 (브라보 오프라인 18/20)
-- 실험용 페이지: 🧪 `experiment-live.html` (카운트다운 없는 실험, 소연·재윤, 📢 방해 모드와 🧪 간섭 테스트) · 📢 `tone.html` (폰 톤 재생기) · 🧪 `3d.html` (브라보 3D 실험, 폰 소리원)
-- 간섭 시험 (11/15 01:40): 같은 20kHz로 방해하면 헛감지가 많아요. 자동 회피는 대체 주파수를 못 찾아서, 데모 페이지에서는 꺼 둬요. 데모 때는 한 대만 켜요
-- 동작: 밀기·당기기(burst 판정), 흔들기(충격파), 소나 뷰(홀로그램과 5초 그래프), 🎯 안내형 데이터 수집(드라이브 자동 저장, 메타데이터 자동, 사람 모양 동작 안내 `web/coach.js`), ↔ 좌우 테스트 탭, 실험 기록장(서희), Force Push 게임, 스피드건
-- 좌우 스와이프: 브라보의 `web/swipe.js` v2(버스트 전체의 ilat·balDelta + 노트북별 학습)와 `🧭 좌우 점검`이 있어요. 서진 님 갤럭시 북 2차(20:58, 쓸기 20 + 밀기·당기기 20)는 같은 세션 안에서는 쓸기 75%지만, 1차에서 배운 모델로는 35%였고 밀기·당기기 20번 중 9번을 좌우로 읽었어요. balDelta는 세션마다 부호가 뒤집혔어요
-  - 보너스 목표 (브라보, 11/15 08:00까지): 처음 보는 데이터에서 70% 이상, 밀기·당기기 오인 20번 중 2번 이하면 데모에 보너스로 넣어요. 찰리 제안인 위상 적분(LLAP 방식)을 시험하려고 점검 때 마이크 원음을 같이 저장하게 만드는 중이에요 (알파)
-- 다른 기기의 초음파가 들리면 경고가 떠요 (노트북 두 대를 같이 켜면 서로 망쳐요). 20:58 세션에서 18.8kHz가 한 번 잡혔어요 (원인 미확인)
-- 실데이터: 밀기·당기기 18세션 (20cm 7 · 30cm 4 · 35cm 1 · 55cm 1 · 60cm 5, 서진 님 윈도우 노트북과 팀원 맥북) + 좌우 점검 6세션, `ml/data/`. 팀원은 공유 드라이브 폴더에 바로 저장해요. WAV는 깃에 안 올리고, 알파가 work\batears\wav_backup에 백업해요
-- 결과 (`python ml/report.py`, 23:55): 밀기·당기기 332번 중 268번(81%), 분당 오작동 0.6번, 반대 방향 12번. 망친 16:44 세션까지 넣으면 352번 중 269번(76%). 맥북 에어는 55cm 19/20, 60cm 다섯 세션 86/100이에요. 시끄러운 방(말소리 대역 43dB 큼)에서도 톤 옆 잡음은 1dB도 안 올랐어요
-- 판단 기록
-  - 사람은 당기기 전에 손을 앞으로 내밀고 밀고 나서는 돌아와요. 그래서 '움직임 안에서 가장 빠른 속도의 방향'으로 판정해요
-  - 조용한 방에서는 잡음 거르기(impulse veto)가 손짓까지 막았어요 (맥북 35cm 0/20). 먼 대역이 톤보다 50dB 넘게 작으면 거르지 않게 고쳤어요 (`config.burst.vetoSnrDb`, 같은 세션 15/20)
-  - 노트북 두 대를 동시에 켜면 초음파가 섞여요. 수집과 데모는 한 번에 한 대만 켜요
+## Status (11/15 10:50 CST)
+- 🧊 **The main feature is 3D hand tracking, including height** (Seojin's decision, 11/15 03:15). 🦇 `web/hologram.html` is the demo screen, and 🧪 `web/3d.html` is the engineering screen. The push/pull/wave game stays as the proven fallback demo, and the gesture key is a supporting feature
+  - Sound sources: the laptop's 18/19.5 kHz stereo is the default. 📱 Phones (`tone.html`, A 17 kHz · B 18.75 kHz; iPhones can't play above 20 kHz) are experimental. A phone at the side raised height correlation by 0.05 or less, and a phone placed above the hand, pointing down, gave a path that didn't follow the hand (Bravo's analysis)
+  - 🦇 **Sound hologram** `web/hologram.html` (demo screen): shows the hand's position as a hologram hand from sound alone, with no webcam. Bravo's engine (`web/bat3d.js`) + One Euro filter + three.js glow. 📂 replays a teach session so you can compare with the webcam ground truth (green hand). Accuracy is shown honestly on screen
+  - 📷 **Teacher mode** `web/teach.html`: records the laptop webcam's MediaPipe hand joints (ground truth) together with the stereo sound features, I/Q and raw WAV on the same clock, for about 2 min 30 s (still → left-right, up-down, toward-away → horizontal and vertical circles → push and pull → wave → free). It saves to `ml/data/teach/`, and Bravo learns sound → 3D position (`teach_fit.js` → `<session>.calib.json`, loaded by 3d.html). The camera is used only for teaching and is off in the demo. 📹 The raw video is saved by default in the same folder as `.webm` (+ frame times `_frames.csv`). It stays on this computer only and `.gitignore` keeps it out of git
+  - Layout: screen almost upright (about 95°), hand 18–25 cm above the desk and 15–30 cm in front of the screen. Stretches where the webcam can't see the hand have no ground truth and are dropped
+  - Measured (Bravo; eight sittings, each held out in turn as the test, laptop only, hand within about 45 cm of the webcam, 9948 windows of 250 ms movement): error left-right 3.8 · toward-away 4.3 · height 2.5 cm; actual movement 5.5 · 5.8 · 3.0 cm; correlation 0.73 · 0.70 · 0.57. The screen draws movement at 83 · 83 · 75% of true size (balanced mode, engine v15)
+- The push/pull/wave game is the proven feature we locked in as the demo at 11/14 21:15. Left/right stays an experimental tab only
+- 🔐 **Gesture key** (`web/key.html`, early 11/15): the order of moves is the password, and your own rhythm, speed and shape are the key. Enrollment is 1 practice + 5–10 repetitions, and unlocking shows ✅/❌ with the reason (order, rhythm, speed, length, shape)
+  - Decision: `web/auth.js` (Bravo v2: rhythm is measured at the centre time of each move; the threshold is the median of the enrollment repetitions + 3·MAD). Consecutive moves are each caught separately by the engine's "continuous gesture mode"
+  - Evaluation: each attempt is saved to `ml/data/batears_auth_<device>.json`, and `python ml/auth_report.py` gives FAR, FRR and EER (Charlie's protocol: 10 genuine attempts, 10 by someone who knows the order)
+  - Measured: on Seojin's Galaxy Book, all 3 attempts where every move was caught passed (0.84, 0.85, 1.40). Circle tokens 🔃/🔄 are only on with `key.html?circles=1` (Bravo offline 18/20)
+- Experiment pages: 🧪 `experiment-live.html` (experiments without a countdown, Soyeon and Jaeyun, 📢 jamming mode and 🧪 interference test) · 📢 `tone.html` (phone tone player) · 🧪 `3d.html` (Bravo's 3D experiment, phone sources)
+- Interference test (11/15 01:40): jamming on the same 20 kHz causes many false detections. Automatic avoidance couldn't find a substitute frequency, so it's off on the demo page. Run only one device during the demo
+- Features: push and pull (burst decision), wave (shockwave), sonar view (hologram and 5-second graph), 🎯 guided data collection (auto-save to Drive, automatic metadata, a figure demonstrating each gesture `web/coach.js`), ↔ left/right test tab, experiment log (Seohee), Force Push game, speed gun
+- Left/right swipes: Bravo's `web/swipe.js` v2 (whole-burst ilat·balDelta + per-laptop learning) and `🧭 Left/right check`. Seojin's Galaxy Book second run (20:58, 20 swipes + 20 pushes/pulls) got 75% of swipes within the same session, but the model learned in the first run got 35%, and it read 9 of 20 pushes/pulls as left/right. balDelta flipped sign between sessions
+  - Bonus goal (Bravo, by 11/15 08:00): if it reaches 70% or more on unseen data, with no more than 2 of 20 pushes/pulls misread, it goes into the demo as a bonus. To test Charlie's suggestion of phase integration (LLAP-style), Alpha is making the check also save the raw mic audio
+- A warning appears when another device's ultrasound is heard (two laptops running together spoil each other). 18.8 kHz was picked up once in the 20:58 session (cause unconfirmed)
+- Real data: 18 push/pull sessions (20 cm ×7 · 30 cm ×4 · 35 cm ×1 · 55 cm ×1 · 60 cm ×5, on Seojin's Windows laptop and teammates' MacBooks) + 6 left/right check sessions, in `ml/data/`. Teammates save straight into the shared Drive folder. WAVs don't go into git; Alpha backs them up to work\batears\wav_backup
+- Results (`python ml/report.py`, 23:55): push/pull 268 of 332 (81%), 0.6 false triggers per minute, 12 in the wrong direction. Including the spoiled 16:44 session, 269 of 352 (76%). MacBook Air: 19/20 at 55 cm, 86/100 over five sessions at 60 cm. In a noisy room (speech band 43 dB louder), the noise next to the tone rose by less than 1 dB
+- Decision log
+  - People push the hand forward before pulling, and come back after pushing. So we judge by "the direction of the fastest speed within the movement"
+  - In a quiet room the impulse veto blocked real gestures too (MacBook 35 cm 0/20). We changed it so it doesn't veto when the far band is more than 50 dB below the tone (`config.burst.vetoSnrDb`, same session 15/20)
+  - Two laptops running at once mix their ultrasound. Collection and demos use only one at a time
 
-## 마일스톤
-| 시각 (CST) | 목표 |
+## Milestones
+| Time (CST) | Goal |
 |---|---|
-| 11/14 22:00 | **MVP**: 실제 노트북에서 게임과 소나 뷰 시연 · 3세션 이상으로 정확도 표 · 데브포스트 초안 80% |
-| 11/15 08:00–10:30 | 2분 영상, 슬라이드, 리허설 |
-| 11/15 11:30 | **데브포스트 제출**: 레포·사이트 링크, 영상 |
-| 11/15 13:00 | 심사 데모 |
+| 11/14 22:00 | **MVP**: game and sonar view demo on a real laptop · accuracy table from 3+ sessions · Devpost draft 80% |
+| 11/15 08:00–10:30 | 2-minute video, slides, rehearsal |
+| 11/15 11:30 | **Devpost submission**: repo and site links, video |
+| 11/15 13:00 | Judging demo |
 
-## 할 일 체크리스트 (끝나면 체크하고 커밋)
+## To-do checklist (check off and commit when done)
 
-### 이재윤 · 신호처리·제스처 엔진 (`web/dsp.js`, 브랜치 `dsp-continuous-pull`)
-- [ ] 새 안내형 수집 CSV가 들어오면 `python ml/replay_burst.py <검증용 CSV> --candidate 8 0.9 1.1`로 기본값과 후보를 비교하고, 채택 시 `config.burst`와 Python 기본값을 함께 수정.
-  현재 후보는 앞선 6세션에서 62/103 → 64/103, 반대 9 → 11, 오작동 2.4회/분으로 동일. 최신 2세션에서는 6/12 → 8/12, 반대 1회로 동일했어요. 반대 판정 증가와 검증 표본 크기를 고려해 기본값을 유지했어요.
-- [ ] 데모 노트북에서 **🧭 좌우 점검** (좌우 6+6, 밀기·당기기 5+5)으로 학습하고 새 동작으로 정답·반대·보류를 기록. 반대가 반복되면 수집 방향을 확인하고 재학습. 주파수 쌍을 바꾼 경우에도 다시 학습.
-- [x] 시작할 때 톤을 끈 채 외부 톤을 측정하고, 보정과 판정의 도플러 계산에서 해당 FFT 빈을 제외. `BatEars.config.maskForeignTones = false`로 다음 시작부터 비교 가능.
-- [x] 단일 톤 시작 시 요청 대역에 간섭이 있으면 후보를 시험하고, 선택한 대역을 출력 없이 재확인한 뒤 보정. 자동 볼륨은 현재 설정을 상한으로 사용. 자유 실험 모드에서 **단일 톤 간섭 자동 회피**를 끄면 같은 기기에서 비교 가능.
-- [x] 자유 실험 모드의 **연속 Push→Pull**에서 Push 이후 반대 방향 도플러와 이동량으로 후속 Pull을 판정. I/Q에서 반전 후 경로 증가가 충분하면 약한 Pull도 확인하며, I/Q가 없으면 강한 FFT 증거로 판정. 실험 체크박스로 기능을 끄고 비교 가능.
-- [ ] 실제 노트북 두 대로 같은 주파수에서 순차·동시 시작을 시험하고 선택 주파수·볼륨·시작 시간 기록. 같은 거리에서 정면·사선 연속 Push→Pull, Push 후 일반 복귀, 흔들기를 각각 기록하고 보정 켜기·끄기의 감지율과 오인식을 비교.
+### Jaeyun Lee · signal processing and gesture engine (`web/dsp.js`, branch `dsp-continuous-pull`)
+- [ ] When new guided-collection CSVs come in, compare the default with the candidate using `python ml/replay_burst.py <validation CSV> --candidate 8 0.9 1.1`, and if adopted, update `config.burst` and the Python defaults together.
+  The current candidate went from 62/103 → 64/103 on the earlier 6 sessions, wrong direction 9 → 11, with false triggers unchanged at 2.4/min. On the latest 2 sessions it went 6/12 → 8/12, with wrong direction unchanged at 1. Given the extra wrong-direction calls and the small validation sample, we kept the default.
+- [ ] On the demo laptop, train with **🧭 Left/right check** (left/right 6+6, push/pull 5+5) and record correct, wrong-direction and held results on new moves. If wrong-direction repeats, check the collection direction and retrain. Retrain whenever the frequency pair changes too.
+- [x] At start, measure outside tones with our tone off, and exclude those FFT bins from the Doppler calculation for calibration and detection. `BatEars.config.maskForeignTones = false` allows comparison from the next start.
+- [x] When a single tone starts with interference in the requested band, try candidates, recheck the chosen band with no output, then calibrate. Automatic volume uses the current setting as its ceiling. Turning off **single-tone interference auto-avoid** in free experiment mode allows comparison on the same device.
+- [x] In free experiment mode, **continuous Push→Pull** detects the follow-up Pull from the opposite-direction Doppler and displacement after a Push. With I/Q, a weak Pull is also confirmed if the path grows enough after reversal; without I/Q, it needs strong FFT evidence. An experiment checkbox turns the feature off for comparison.
+- [ ] Test sequential and simultaneous starts on two real laptops on the same frequency, recording chosen frequency, volume and start time. At the same distance, record frontal and diagonal continuous Push→Pull, Push followed by a normal return, and waves, and compare detection and misreads with correction on and off.
 
-### 최서희 · 게임·UI (`web/game.js`, `index.html`, `app.js`, `style.css`, 브랜치 `game`)
-- [x] 시작 안내 오버레이: "웹캠 가리기 → ▶ 시작 → 1.5초 손 치우기"
-- [x] 효과음: 8kHz 아래의 짧고 작은 합성음 (초음파 감지를 방해하지 않게)
-- [x] 점수판: 이름 입력 + 상위 10 (localStorage)
-- [x] 발표용 화면: 전체화면 버튼, 큰 글씨
-- [x] (추가) 🎯 도플러 스피드건 미니 게임: 최고 속도 · 목표 속도 · 어둠 속 3라운드, 도플러 계산 표시, 이름 + 상위 10
+### Seohee Choi · game and UI (`web/game.js`, `index.html`, `app.js`, `style.css`, branch `game`)
+- [x] Start overlay: "Cover the webcam → ▶ Start → keep your hand away for 1.5 s"
+- [x] Sound effects: short, quiet synthesized sounds below 8 kHz (so they don't disturb ultrasonic sensing)
+- [x] Scoreboard: name entry + top 10 (localStorage)
+- [x] Presentation screen: full-screen button, large text
+- [x] (Extra) 🎯 Doppler speed gun mini game: top speed · target speed · three rounds in the dark, Doppler math shown, name + top 10
 
-### 강소연 · 실험·정확도·문턱값 (`experiments/`, 브랜치 `exp`)
-- [ ] 🎯 데이터 수집을 거리 10·20·30cm × 2명 이상으로 진행 (드라이브 nhng/ml/data에 자동 저장)
-- [ ] `python ml/replay_burst.py` · `python ml/train.py` 결과로 `experiments/results.md` 표 만들기: 거리·사람별 맞힘률, 반대 방향, 분당 오작동, 95% 신뢰구간
-- [ ] 지연 시간: 소나 뷰 그래프에서 손이 움직이기 시작한 때부터 감지선까지 대략 재기
+### Soyeon Kang · experiments, accuracy and thresholds (`experiments/`, branch `exp`)
+- [ ] Run 🎯 Data collection at 10, 20 and 30 cm × 2 or more people (auto-saves to Drive nhng/ml/data)
+- [ ] Build the `experiments/results.md` table from `python ml/replay_burst.py` · `python ml/train.py`: hit rate by distance and person, wrong direction, false triggers per minute, 95% confidence intervals
+- [ ] Latency: roughly measure, on the sonar view graph, the time from when the hand starts moving to the detection line
 
-### 배서진 · 데이터·분류, 총괄·발표 (`ml/`, `docs/`, 브랜치 `ml`)
-- [x] 실데이터 1세션 수집
-- [ ] `docs/devpost.md`의 [TBD]를 강소연 님 결과표로 채우기
-- [ ] 2분 영상 촬영 (`docs/demo-script.md`), 슬라이드 (`docs/slides.md`)
-- [ ] 예상 질문 연습 (`docs/judge-qa.md`)
-- [ ] 11:30 전에 데브포스트 제출
+### Seojin Bae · data and classification, lead and pitch (`ml/`, `docs/`, branch `ml`)
+- [x] Collect 1 real-data session
+- [ ] Fill the [TBD]s in `docs/devpost.md` from Soyeon's results table
+- [ ] Film the 2-minute video (`docs/demo-script.md`), slides (`docs/slides.md`)
+- [ ] Practise the expected questions (`docs/judge-qa.md`)
+- [ ] Submit to Devpost before 11:30
 
-### 알파 (AI 팀원)
-- [x] burst 판정, 소나 뷰, 데이터 수집과 자동 저장, 분석 도구, 문서 초안, 브라보의 robust.js 통합
-- [x] 정확도 표 `ml/report.py` (밀기·당기기 + 좌우 같은 세션/처음 보는 데이터), README 갱신, 찰리 발표 자료 `docs/pitch.md` 합침
-- [ ] 좌우 점검 때 마이크 원음 WAV 저장 (위상 방식 오프라인 시험용)
-- [ ] 새 데이터가 들어오면 자동 분석해서 이디스에게 보고
-- [ ] 22:00 MVP 점검, 마감 전 최종 점검 (링크, README, 리허설 체크리스트)
+### Alpha (AI teammate)
+- [x] Burst detection, sonar view, data collection and auto-save, analysis tools, doc drafts, merged Bravo's robust.js
+- [x] Accuracy table `ml/report.py` (push/pull + left/right, same session / unseen data), README update, merged Charlie's pitch material into `docs/pitch.md`
+- [ ] Save raw mic WAV during the left/right check (for offline testing of the phase method)
+- [ ] Analyse new data automatically when it arrives and report to Edith
+- [ ] 22:00 MVP check, final check before the deadline (links, README, rehearsal checklist)
 
-## 규칙
-- `main`은 언제나 데모할 수 있는 상태로 둬요(사이트가 main에서 바로 배포돼요). 각자 자기 브랜치에서 작업하고, 노트북에서 확인한 뒤 `main`에 합쳐요.
-- 자기 파트 파일만 고쳐요. 공용 파일(`index.html`, `app.js`)은 게임·UI 담당과 상의해요.
-- 엔진과 게임은 `BatEars.on('gesture', ...)` 이벤트로만 연결해요(`web/dsp.js` 맨 위 주석). 마이크 없이 개발할 때는 ↑ 밀기, ↓ 당기기, ← → 스와이프, W 흔들기.
-- 테스트: `tools/selftest/make_wav.py`로 가짜 마이크 소리를 만들어 헤드리스 크롬에서 돌려요. `tools/robust-tests/`는 판정기 단위 테스트예요.
-- `.js`나 `.css`를 바꿨으면 커밋 전에 `python tools/stamp.py`를 실행해요. 깃허브 페이지는 파일을 10분 동안 캐시해서, 안 하면 사람들이 옛 코드를 받아요.
-- 영상처럼 큰 파일은 깃 대신 드라이브에 올려요. 비밀 정보(.env, 키)와 개인 연락처는 올리지 않아요.
+## Rules
+- Keep `main` demoable at all times (the site deploys straight from main). Work on your own branch, check it on a laptop, then merge into `main`.
+- Only edit your own part's files. Talk to the game/UI owner before changing shared files (`index.html`, `app.js`).
+- The engine and the game connect only through the `BatEars.on('gesture', ...)` event (see the comment at the top of `web/dsp.js`). When developing without a mic: ↑ push, ↓ pull, ← → swipe, W wave.
+- Testing: `tools/selftest/make_wav.py` makes fake microphone audio to run in headless Chrome. `tools/robust-tests/` holds the detector unit tests.
+- If you changed `.js` or `.css`, run `python tools/stamp.py` before committing. GitHub Pages caches files for 10 minutes, so without it people get old code.
+- Put large files like video on Drive instead of git. Don't commit secrets (.env, keys) or personal contact details.

@@ -12,13 +12,13 @@ Your laptop hears where your hand is, in 3D, with no camera. Its two speakers pl
 
 ### 3D hologram (main demo)
 1. Tape over the webcam (the page never opens it). Open `hologram.html` in Chrome, with the built-in speakers and mic at 50 % volume or more.
-2. Press **▶ 시작 (Start)** and allow the microphone. Hold your hand over the laptop's front edge, about 20 cm up, press **◎** (space), then move it left-right and toward-away briskly.
+2. Press **▶ Start** and allow the microphone. Hold your hand over the laptop's front edge, about 20 cm up, press **◎** (space), then move it left-right and toward-away briskly.
 3. If the hand turns amber it has left the taught zone: come back and press ◎. Sound measures movement, not position, so the hand drifts back to the centre when you stop.
 4. No internet: run `python -m http.server 8000` in `web/` and open http://localhost:8000/hologram.html (three.js is bundled).
 
 ### Force Push (gestures)
 1. Open https://ys06146.github.io/nhng/web/ in Chrome. You can also open `web/index.html` from a clone. There's nothing to install and no server to run.
-2. Click **▶ 시작 (Start)**, allow the microphone, and keep your hand away for 1.5 s while it calibrates.
+2. Click **▶ Start**, allow the microphone, and keep your hand away for 1.5 s while it calibrates.
 3. From 20–30 cm in front of the screen, push your palm toward it fast to blast meteors, pull it back to grab stars, or wave for a shockwave. Without a mic, use ↑ ↓ ← → and W.
 
 Requirements:
@@ -31,12 +31,12 @@ Requirements:
 
 | Tab | What it does |
 |---|---|
-| 🎮 게임 | **Force Push**: push to blast meteors, pull to grab stars, wave for a shockwave. Scoreboard and presentation mode. |
-| 🛰️ 소나 뷰 | A hologram hand and a 5-second graph of hand speed, with an optional webcam view for comparison. |
-| 🎯 스피드건 | A Doppler speed gun mini game: top speed, target speed, three rounds in the dark. |
-| ↔ 좌우 테스트 | Experimental stereo mode (18 kHz left, 19.5 kHz right). It shows each speaker's SNR, and **🧭 좌우 점검** checks whether this laptop can tell left from right. |
+| 🎮 Game | **Force Push**: push to blast meteors, pull to grab stars, wave for a shockwave. Scoreboard and presentation mode. |
+| 🛰️ Sonar view | A hologram hand and a 5-second graph of hand speed, with an optional webcam view for comparison. |
+| 🎯 Speed gun | A Doppler speed gun mini game: top speed, target speed, three rounds in the dark. |
+| ↔ Left/right test | Experimental stereo mode (18 kHz left, 19.5 kHz right). It shows each speaker's SNR, and **🧭 Left/right check** checks whether this laptop can tell left from right. |
 
-Below the tabs, **🎯 데이터 수집** runs guided collection. A person drawn from behind demonstrates each gesture in time with a 3-2-1 countdown, and each prompt is scored live (✅/❌). The CSV and a JSON of conditions save into a folder automatically, and the experiment log keeps one row per run.
+Below the tabs, **🎯 Data collection** runs guided collection. A person drawn from behind demonstrates each gesture in time with a 3-2-1 countdown, and each prompt is scored live (✅/❌). The CSV and a JSON of conditions save into a folder automatically, and the experiment log keeps one row per run.
 
 Other pages:
 

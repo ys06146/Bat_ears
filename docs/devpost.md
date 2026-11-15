@@ -73,4 +73,4 @@ What's new for us: **a web page on a stock laptop** (optional ordinary phones), 
 `javascript` · `web-audio-api` · `audioworklet` · `three.js` · `mediapipe` · `webcodecs` · `html5-canvas` · `python` · `signal-processing` · `machine-learning`
 
 ## Team
-배서진 (data and classifier, lead and pitch) · 이재윤 (signal engine) · 최서희 (game and UI) · 강소연 (experiments and thresholds)
+Seojin Bae (data and classifier, lead and pitch) · Jaeyun Lee (signal engine) · Seohee Choi (game and UI) · Soyeon Kang (experiments and thresholds)

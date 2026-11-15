@@ -2,11 +2,11 @@
 
 ## 1. Record data (laptop, Chrome)
 
-1. Open `web/index.html`, click ▶ 시작, allow the mic, and keep your hand away for 1.5 s.
-2. Open **데이터 기록** and click **● 기록 시작**.
+1. Open `web/index.html`, click ▶ Start, allow the mic, and keep your hand away for 1.5 s.
+2. Open **Data recording** and click **● Start recording**.
 3. Pick a label with the number keys, then do only that motion for about 30 s:
    `1` idle · `2` push · `3` pull · `4` wave · `5` other (typing, moving around, walking by).
-4. Click **■ 기록 정지** → **CSV 저장**, and put the file in `ml/data/`.
+4. Click **■ Stop recording** → **Save CSV**, and put the file in `ml/data/`.
 5. Record several sessions (10 / 20 / 30 cm, different people). Each CSV is one session.
 
 ## 2. Train and evaluate
