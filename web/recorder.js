@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const LABELS = ['idle', 'push', 'pull', 'wave', 'other', 'left', 'right'];
+  const LABELS = ['idle', 'push', 'pull', 'wave', 'other', 'left', 'right', 'cw', 'ccw'];
   // stereo columns (vL, vR, dUpL, dDownL, dUpR, dDownR) are empty unless stereo mode is on
   const HEAD = ['session', 't_ms', 'label', 'gesture', 'dUp_db', 'dDown_db', 'up_db', 'down_db', 'v_mps', 'snr_db',
     'carrier_db', 'noise_db', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'cue',

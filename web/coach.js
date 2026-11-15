@@ -18,7 +18,17 @@
   const SHOULDER = [226, 188];
   const REST = [236, 132];
   // [start, end] of each stroke in picture coordinates (laptop deck spans x 84..276)
+  // circles (cw / ccw): an ellipse over the keyboard, 1.5 turns, starting at its left end. Clockwise as the person
+  // sees it facing the screen: toward the screen (up here) -> right -> toward me (down) -> left
+  const CIRCLE = { c: [200, 124], rx: 46, ry: 26, turns: 1.5 };
+  const isCircle = (k) => k === 'cw' || k === 'ccw';
+  function circleAt(kind, u) {
+    const th = Math.PI + (kind === 'cw' ? 1 : -1) * 2 * Math.PI * CIRCLE.turns * u;
+    return [CIRCLE.c[0] + CIRCLE.rx * Math.cos(th), CIRCLE.c[1] + CIRCLE.ry * Math.sin(th)];
+  }
   const PATHS = {
+    cw: [circleAt('cw', 0), circleAt('cw', 1)],
+    ccw: [circleAt('ccw', 0), circleAt('ccw', 1)],
     left: [[322, 112], [38, 112]],
     right: [[38, 112], [322, 112]],
     push: [[216, 142], [200, 98]],
@@ -31,9 +41,11 @@
     push: '화면 쪽으로 15cm 빠르게 ⟶ · 돌아올 땐 천천히',
     pull: '⟵ 내 쪽으로 15cm 빠르게 · 돌아올 땐 천천히',
     wave: '화면 쪽으로 앞뒤 빠르게 3번 〰',
+    cw: '↻ 시계 방향: 화면 쪽→오른쪽→내 쪽→왼쪽, 1바퀴 반',
+    ccw: '↺ 반시계 방향: 화면 쪽→왼쪽→내 쪽→오른쪽, 1바퀴 반',
   };
-  const COLOR = { push: '#4fc3f7', pull: '#ffb74d', wave: '#b388ff', left: '#80deea', right: '#80deea' };
-  const STROKE_MS = { left: 400, right: 400, push: 320, pull: 320, wave: 1100 };
+  const COLOR = { push: '#4fc3f7', pull: '#ffb74d', wave: '#b388ff', left: '#80deea', right: '#80deea', cw: '#a5d6a7', ccw: '#f48fb1' };
+  const STROKE_MS = { left: 400, right: 400, push: 320, pull: 320, wave: 1100, cw: 1500, ccw: 1500 };
 
   const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const clamp01 = (t) => Math.max(0, Math.min(1, t));
@@ -114,8 +126,12 @@
     }
     function setGuide(kind) {
       if (!kind) { guide.setAttribute('opacity', 0); head.setAttribute('opacity', 0); spk.setAttribute('opacity', 0); label.textContent = ''; return; }
-      const [a, b] = PATHS[kind];
-      guide.setAttribute('d', `M${a[0]},${a[1]} L${b[0]},${b[1]}`);
+      let [a, b] = PATHS[kind];
+      if (isCircle(kind)) {
+        const { c, rx, ry } = CIRCLE;
+        guide.setAttribute('d', `M${c[0] - rx},${c[1]} A${rx},${ry} 0 1 1 ${c[0] + rx},${c[1]} A${rx},${ry} 0 1 1 ${c[0] - rx},${c[1]}`);
+        a = circleAt(kind, 0.12); b = circleAt(kind, 0.15); // arrow a third of the way round shows the direction
+      } else guide.setAttribute('d', `M${a[0]},${a[1]} L${b[0]},${b[1]}`);
       guide.setAttribute('stroke', COLOR[kind]);
       guide.setAttribute('opacity', 0.8);
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), L = 13;
@@ -163,7 +179,7 @@
         run({
           step: (t) => {
             const u = clamp01(t / ms);
-            const p = kind === 'wave' ? lerp(a, b, (1 - Math.cos(u * 6 * Math.PI)) / 2) : lerp(a, b, ease(u));
+            const p = isCircle(kind) ? circleAt(kind, u) : kind === 'wave' ? lerp(a, b, (1 - Math.cos(u * 6 * Math.PI)) / 2) : lerp(a, b, ease(u));
             place(ghost, p);
             if (u >= 1) ghost.setAttribute('opacity', 0);
             return u >= 1;
@@ -181,7 +197,7 @@
             let p;
             if (t < strokeMs) {
               const u = t / strokeMs;
-              p = kind === 'wave' ? lerp(a, b, (1 - Math.cos(u * 6 * Math.PI)) / 2) : lerp(a, b, ease(u));
+              p = isCircle(kind) ? circleAt(kind, u) : kind === 'wave' ? lerp(a, b, (1 - Math.cos(u * 6 * Math.PI)) / 2) : lerp(a, b, ease(u));
               hist.push(p);
             } else if (t < strokeMs + holdMs) {
               p = kind === 'wave' ? a : b;

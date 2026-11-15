@@ -168,6 +168,7 @@
   // lrOnly: the "↔ 좌우만" button = a short left/right-only stereo session (no push/pull, no typing block)
   async function startCollect(lrOnly = false) {
     if (BatCollect.active) return;
+    const circleOnly = lrOnly === 'circle'; // the 🌀 circle session (2D spike)
     lrOnly = lrOnly === true;
     // name is optional: letters/numbers only (it ends up in public file names); empty = 'anon'
     const who = $('who').value.trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
@@ -180,9 +181,9 @@
       }
     }
     const res = await BatCollect.start({
-      who, dist: $('dist').value, noise: $('noise').value, perGesture: lrOnly ? 6 : Number($('perGesture').value),
-      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: lrOnly ? false : $('incTyping').checked, freq: Number($('freq').value),
-      swipeOnly: lrOnly,
+      who, dist: $('dist').value, noise: $('noise').value, perGesture: circleOnly ? 10 : lrOnly ? 6 : Number($('perGesture').value),
+      wave: $('incWave').checked, swipe: $('incSwipe').checked, typing: lrOnly || circleOnly ? false : $('incTyping').checked, freq: Number($('freq').value),
+      swipeOnly: lrOnly, circleOnly,
     });
     if (res && BatEars.info) showSettings(BatEars.info);
     $('stereo').checked = BatEars.stereo;
@@ -314,6 +315,7 @@
         speed: Number(params.get('fast') || 0.15), who: 'selftest', dist: 20, noise: params.get('noise') || 'auto',
         perGesture: Number(params.get('n') || 3), wave: false, swipe: params.get('swipe') === '1', typing: params.get('lr') !== '1', noDownload: true,
         swipeOnly: params.get('lr') === '1', // &lr=1: the "↔ 좌우만" session
+        circleOnly: params.get('circle') === '1', // &circle=1: the 🌀 circle session
       });
       const session = res && res.session;
       const lines = session ? BatRecorder.toCsv(session).split('\n') : [];

@@ -17,7 +17,7 @@
 (function () {
   'use strict';
 
-  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽' };
+  const NAMES = { push: '밀기', pull: '당기기', wave: '흔들기', left: '왼쪽', right: '오른쪽', cw: '시계 방향 원', ccw: '반시계 방향 원' };
   const HOW = {
     push: '손바닥을 화면 쪽으로 빠르게 ⟶ (돌아올 땐 천천히)',
     pull: '손을 내 쪽으로 빠르게 ⟵ (돌아올 땐 천천히)',
@@ -26,6 +26,8 @@
     right: '키보드 위 10~15cm에서 손을 오른쪽 끝까지 빠르게 쓸기 ▶ (돌아올 땐 천천히)',
   };
   const WINDOW_MS = 1800;   // after "GO", the first detected gesture counts
+  const CIRCLE_WINDOW_MS = 3000; // a circle (1.5 turns, ~1 s per turn) needs a longer window (bravo)
+  const winMs = (kind) => (kind === 'cw' || kind === 'ccw' ? CIRCLE_WINDOW_MS : WINDOW_MS);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let S = null, ui = null, beepCtx = null, lastMeta = null, lastWav = null;
 
@@ -162,6 +164,16 @@
     return list;
   }
 
+  // circle session for the 2D spike (bravo): n clockwise + n counter-clockwise + 3 push + 3 pull, shuffled
+  const CIRCLE_PP = 3;
+  function planCircle(n) {
+    const list = [];
+    for (let i = 0; i < n; i++) list.push('cw', 'ccw');
+    for (let i = 0; i < CIRCLE_PP; i++) list.push('push', 'pull');
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    return list;
+  }
+
   function plan(perGesture, wave, swipe, pushPull = true) {
     const list = [];
     if (pushPull) for (let i = 0; i < perGesture; i++) list.push('push', 'pull');
@@ -174,22 +186,25 @@
   // the first gesture inside the current trial window decides the result
   function onGesture(e) {
     if (!S) return;
-    if (S.win && e.t >= S.win.t0 && e.t <= S.win.t0 + WINDOW_MS && !S.win.got) S.win.got = { kind: e.kind, speed: e.speed || 0 };
+    if (S.win && e.t >= S.win.t0 && e.t <= S.win.t0 + S.win.ms && !S.win.got) S.win.got = { kind: e.kind, speed: e.speed || 0 };
     if (S.typingFrom && e.t >= S.typingFrom && !e.simulated) S.typingFalse++;
   }
 
   async function start(opt = {}) {
     if (S) return null;
     // swipeOnly: a short left/right-only session (stereo) for tuning swipes; it implies swipe
-    opt = { ...opt, swipe: !!(opt.swipe || opt.swipeOnly), swipeOnly: !!opt.swipeOnly };
-    if (opt.swipeOnly) opt.wave = false;
+    opt = { ...opt, swipe: !!(opt.swipe || opt.swipeOnly), swipeOnly: !!opt.swipeOnly, circleOnly: !!opt.circleOnly };
+    if (opt.swipeOnly || opt.circleOnly) opt.wave = false;
+    if (opt.circleOnly) { opt.swipe = false; opt.typing = false; }
+    const stereo = opt.swipe || opt.circleOnly;
     const speed = opt.speed || 1;
     const who = String(opt.who || 'anon').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16) || 'anon';
     const dist = Math.max(1, Math.min(150, Math.round(Number(opt.dist)))) || 20; // typed in cm
     let noise = opt.noise === 'noisy' ? 'noisy' : opt.noise === 'quiet' ? 'quiet' : 'auto';
     const perGesture = Math.max(1, Number(opt.perGesture) || 10);
-    const queue = opt.swipeOnly ? planLr(perGesture) : plan(perGesture, !!opt.wave, opt.swipe, true);
-    const target = opt.swipeOnly ? { push: LR_PP, pull: LR_PP } : { push: perGesture, pull: perGesture };
+    const queue = opt.circleOnly ? planCircle(perGesture) : opt.swipeOnly ? planLr(perGesture) : plan(perGesture, !!opt.wave, opt.swipe, true);
+    const target = opt.circleOnly ? { cw: perGesture, ccw: perGesture, push: CIRCLE_PP, pull: CIRCLE_PP }
+      : opt.swipeOnly ? { push: LR_PP, pull: LR_PP } : { push: perGesture, pull: perGesture };
     if (opt.wave) target.wave = Math.ceil(perGesture / 2);
     if (opt.swipe) { target.left = perGesture; target.right = perGesture; }
     S = {
@@ -199,7 +214,7 @@
     };
     show(true);
     feedback('');
-    const headText = () => `${who} · ${dist}cm · ${{ noisy: '시끄러움', quiet: '조용함', auto: '소음 재는 중' }[noise]}${opt.swipe ? ' · 스테레오' : ''} · 기기 ${S.device}`;
+    const headText = () => `${who} · ${dist}cm · ${{ noisy: '시끄러움', quiet: '조용함', auto: '소음 재는 중' }[noise]}${stereo ? ' · 스테레오' : ''} · 기기 ${S.device}`;
     ui.head.textContent = headText();
     renderProgress();
     let result = null;
@@ -209,7 +224,7 @@
     // end a little after its window closes, so the trial that just closed still takes it
     const offB = BatEars.on('burst', (e) => {
       if (!S || !e.feat) return;
-      const span = WINDOW_MS * S.speed;
+      const span = (S.win || S.lastWin || { ms: WINDOW_MS }).ms * S.speed;
       const keep = (w) => e.t >= w.t0 && e.start <= w.t0 + span && (!w.feat || e.feat.n > w.feat.n);
       if (S.win) { if (keep(S.win)) S.win.feat = e.feat; }
       else if (S.lastWin && keep(S.lastWin)) { S.lastWin.feat = e.feat; S.lastWin.trial.swipe = e.feat; }
@@ -217,9 +232,9 @@
     const off = () => { offG(); offF(); offB(); };
     try {
       say('준비', '마이크를 켜는 중이에요. 손을 치워 주세요');
-      if (BatEars.running && BatEars.stereo !== !!opt.swipe) await BatEars.stop(); // switch mono <-> stereo
+      if (BatEars.running && BatEars.stereo !== stereo) await BatEars.stop(); // switch mono <-> stereo
       if (!BatEars.running) {
-        const ok = await BatEars.start({ freq: opt.freq, raw: true, stereo: !!opt.swipe });
+        const ok = await BatEars.start({ freq: opt.freq, raw: true, stereo });
         if (!ok) { say('마이크를 열 수 없어요', '주소창 왼쪽에서 마이크를 허용하고 다시 눌러 주세요'); await sleep(3000); return null; }
       }
       say('준비', '기준값을 잡는 중이에요. 손을 치우고 가만히');
@@ -232,13 +247,16 @@
       ui.head.textContent = headText();
       S.sessionIndex = store.get('batears-session-n', 0) + 1;
       store.set('batears-session-n', S.sessionIndex);
-      BatRecorder.setTag(`${who}_d${dist}_${noise}${opt.swipeOnly ? '_lr' : ''}_${S.device}`);
+      BatRecorder.setTag(`${who}_d${dist}_${noise}${opt.swipeOnly ? '_lr' : opt.circleOnly ? '_circle' : ''}_${S.device}`);
       BatRecorder.setLabel('idle');
       BatRecorder.start();
       S.session = BatRecorder.session;
       // stereo sessions also keep the raw mic signal (WAV next to the CSV) so left/right ideas can be tested offline
-      if (opt.swipe && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
-      if (opt.swipeOnly) {
+      if (stereo && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
+      if (opt.circleOnly) {
+        say('손을 키보드 위 10~15cm에 두세요', '원은 책상과 나란하게, 지름 15~20cm로 1바퀴 반. 시계 방향 = 화면을 마주 보고 봤을 때 화면 쪽(위)→오른쪽→내 쪽(아래)→왼쪽. 기록만 해요');
+        await sleep(5000 * speed);
+      } else if (opt.swipeOnly) {
         // left/right needs the hand close: at 55 cm the swipe echo was 7 dB weaker and the check failed (224420)
         const far = dist > 25;
         say(far ? `⚠️ 거리 칸이 ${dist}cm예요. 좌우는 손을 키보드 위 10~15cm에 두고 해요` : '손을 키보드 위 10~15cm에 두세요',
@@ -266,25 +284,25 @@
         beep(990, 140, 0.12);
         BatRecorder.setLabel(kind);
         BatRecorder.markCue(kind);
-        S.win = { t0: performance.now(), got: null, feat: null };
+        S.win = { t0: performance.now(), got: null, feat: null, ms: winMs(kind) };
         say(`${NAMES[kind]}!`, HOW[kind]);
         if (ui.coach) ui.coach.go(kind); // the real stroke at real speed, then a slow way back
         ui.big.className = 'c-big go ' + kind;
-        await sleep(WINDOW_MS * speed);
+        await sleep(S.win.ms * speed);
         BatRecorder.setLabel('idle');
         ui.big.className = 'c-big';
         if (ui.coach) ui.coach.idle();
         const got = S.win.got;
         const res = !got ? 'miss' : got.kind === kind ? 'hit' : 'wrong';
-        const trial = { kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tEnd: performance.now() + 600 * speed };
+        const trial = { kind, result: res, got: got && got.kind, speed: got ? +got.speed.toFixed(2) : null, tStart, tGo: +S.win.t0.toFixed(1), tEnd: performance.now() + 600 * speed };
         if (S.win.feat) trial.swipe = S.win.feat;
         S.trials.push(trial);
-        S.lastWin = { t0: S.win.t0, feat: S.win.feat, trial };
+        S.lastWin = { t0: S.win.t0, feat: S.win.feat, trial, ms: S.win.ms };
         S.win = null;
-        const learning = (kind === 'left' || kind === 'right') && !BatEars.hasLrModel;
+        const learning = ((kind === 'left' || kind === 'right') && !BatEars.hasLrModel) || kind === 'cw' || kind === 'ccw';
         const weak = learning && trial.swipe && trial.swipe.ePk < WEAK_ECHO_DB;
         if (weak) feedback(`📏 에코가 약해요 (${trial.swipe.ePk.toFixed(0)}dB): 손을 키보드 위 10~15cm로 더 가까이 두고 쓸어 주세요`, 'miss');
-        else if (learning) feedback(`📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
+        else if (learning) feedback(kind === 'cw' || kind === 'ccw' ? `📝 ${NAMES[kind]} 기록했어요` : `📝 ${NAMES[kind]} 기록했어요 (좌우 점검 중이라 판정은 끝나고 알려 드려요)`, 'ok');
         else if (res === 'hit') feedback(`✅ ${NAMES[kind]} 인식! ${got.speed ? got.speed.toFixed(1) + ' m/s' : ''}`, 'ok');
         else if (res === 'wrong') feedback(`❌ ${NAMES[got.kind] || got.kind}(으)로 잡혔어요 · 빠르게 치고 천천히 돌아오기`, 'bad');
         else feedback('⚪ 못 잡았어요 · 조금 더 빠르고 크게', 'miss');
@@ -401,7 +419,7 @@
     const meta = {
       session: S.session, who: S.who, dist: S.dist, noise: S.noise, noiseSource: S.noiseSource, device: S.device,
       sessionIndex: S.sessionIndex, room: S.room,
-      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, swipeOnly: !!S.opt.swipeOnly, typing: !!S.opt.typing,
+      perGesture: S.opt.perGesture, wave: !!S.opt.wave, swipe: !!S.opt.swipe, swipeOnly: !!S.opt.swipeOnly, circleOnly: !!S.opt.circleOnly, typing: !!S.opt.typing,
       startedAt: S.startedAt, finishedAt: new Date().toISOString(), aborted: S.aborted,
       live: { trials: n, hits, accuracy: n ? +(hits / n).toFixed(3) : null, byGesture: by, typingFalseTriggers: S.opt.typing ? S.typingFalse : null },
       engine: BatEars.info, detector: BatEars.config.detector, burst: BatEars.config.burst, volume: BatEars.config.volume,
@@ -424,7 +442,7 @@
     if (!S.opt.noDownload || BatRecorder.folderName) {
       if (!BatRecorder.folderName) BatRecorder.download(S.session);
       BatRecorder.saveJson(`batears_${S.session}.json`, meta);
-      if (S.wav) BatRecorder.saveFile(meta.wav.file, S.wav.blob);
+      if (S.wav) BatRecorder.saveFile(meta.wav.file, S.wav.blob).then((ok) => { if (!ok && BatRecorder.folderName) feedback('⚠️ WAV를 폴더에 못 써서 다운로드 폴더로 보냈어요. ml/data로 옮겨 주세요', 'bad'); });
     }
     say(S.aborted ? '중단됨' : '완료 🎉', BatRecorder.folderName ? `"${BatRecorder.folderName}" 폴더에 자동 저장됐어요` : 'CSV·JSON을 내려받았어요. 드라이브 nhng/ml/data에 넣어 주세요', `${rows}줄`);
     const lr = S.lrCheck;

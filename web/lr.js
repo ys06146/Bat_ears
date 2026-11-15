@@ -25,6 +25,7 @@
         <button class="lr-start">▶ 스테레오로 시작</button>
         <button class="secondary lr-reset">숫자 지우기</button>
         <button class="secondary lr-collect" title="좌우 6번씩, 밀기·당기기 5번씩 해서 지금 이 자리에서 좌우가 되는지 확인하고 배워요 (앉을 때마다 새로)">🧭 좌우 점검 (좌우 6+6 · 밀기·당기기 5+5)</button>
+        <button class="secondary lr-circle" title="시계 방향 10번, 반시계 10번, 밀기·당기기 3+3 (스테레오, 원음 저장): 2D 실험용 녹음">🌀 원 그리기 수집 (시계 10 · 반시계 10)</button>
       </div>
       <div class="lr-stage"><canvas class="lr-canvas"></canvas><div class="lr-coach" title="이렇게 쓸어요"></div></div>
       <p class="hint lr-hint">키보드 위 10~15cm에서 손바닥을 세우고 왼쪽 끝 ↔ 오른쪽 끝까지 넓게, 빠르게 쓸어 보세요. 두 톤의 SNR이 모두 20dB 이상이어야 해요. 낮은 쪽이 있으면 다른 톤 쌍을 고르세요. 방향이 반대로 나오면 '좌우 바꾸기'를 켜세요. 윈도우는 소리 효과가 좌우를 섞을 수 있어요: 설정 &gt; 시스템 &gt; 소리 &gt; 스피커에서 '오디오 향상'·'공간 음향' 끄기, 설정 &gt; 접근성 &gt; 오디오에서 '모노 오디오' 끄기, Dolby Atmos 끄기. 18kHz는 귀가 좋은 사람에게 아주 작게 들릴 수 있어요.</p>`;
@@ -48,6 +49,12 @@
     };
     root.querySelector('.lr-reset').onclick = (e) => { e.target.blur(); S.counts = {}; };
     // guided left/right-only session with the tone pair chosen above (saved like any other session)
+    root.querySelector('.lr-circle').onclick = (e) => {
+      e.target.blur();
+      const p = PAIRS[Number(root.querySelector('.lr-pair').value)];
+      if (!BatEars.running || !BatEars.stereo) BatEars.config.stereoFreqs = p.slice();
+      if (window.startCollect) window.startCollect('circle');
+    };
     root.querySelector('.lr-collect').onclick = (e) => {
       e.target.blur();
       const p = PAIRS[Number(root.querySelector('.lr-pair').value)];
