@@ -7,17 +7,18 @@
 <style>
   :root { --bg: #09090b; --fg: #fafafa; --dim: #a1a1aa; --acc: #e0464c; --primary: #c5050c; --ok: #4ade80; --warn: #fbbf24; --bad: #ef4444; --glass: rgba(12, 12, 15, .82); --line: #27272a; }   /* Badger theme, as style.css */
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; overflow: hidden; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
   #stage { position: fixed; inset: 0; }
   #stage canvas { display: block; }
-  .hud { position: fixed; z-index: 2; background: var(--glass); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(6px); }
+  .hud { position: fixed; z-index: 2; background: var(--glass); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(8px); }
   #top { top: calc(12px + var(--nav-h, 0px)); left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
-  #top h1 { margin: 0; font-size: 18px; letter-spacing: .5px; }
-  #top h1 small { color: var(--dim); font-weight: 400; font-size: 13px; }
+  #top h1 { margin: 0 6px 0 2px; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  #top h1 small { color: var(--dim); font-weight: 400; font-size: 13px; margin-left: 8px; letter-spacing: 0; }
   .grow { flex: 1; }
-  button, select, label.file { background: rgba(24, 24, 27, .92); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: inherit; cursor: pointer; }
-  button:hover, label.file:hover { border-color: var(--acc); }
-  button.go { background: var(--primary); border-color: var(--primary); font-weight: 700; }
+  button, select, label.file { background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 8px; height: 34px; padding: 0 14px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }   /* as style.css secondary buttons */
+  select { height: 30px; padding: 0 8px; }
+  button:hover, label.file:hover { background: #18181b; }
+  button.go { background: var(--primary); border-color: var(--primary); color: #fff; }
   button.go:hover { background: #a00409; }
   input[type=file] { display: none; }
   #status { color: var(--dim); min-width: 200px; }
@@ -79,7 +80,8 @@
 </script>
 </head>
 <body>
-<script src="sitenav.js?v=20261115134214" data-overlay></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<script src="sitenav.js?v=20261115134728" data-overlay></script>
 <div id="stage"></div>
 <div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 Sound only · 📷 Webcam off<small id="filmAcc"></small></div>
 <div class="hud" id="intro">
@@ -94,7 +96,7 @@
   <div id="introErr"></div>
 </div>
 <div class="hud" id="top">
-  <h1>🦇 Bat Ears hologram <small>Sound only · no webcam</small></h1>
+  <h1>Hologram <small>Your hand in 3D from sound · no camera</small></h1>
   <button id="btnStart" class="go">▶ Start</button>
   <button id="btnStop">■ Stop</button>
   <button id="btnCenter" title="Hold your hand at its spot (25–35 cm above the keyboard) and press this (space bar)">◎ Center</button>
@@ -184,12 +186,12 @@
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115134214" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115134728" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115134214"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115134728"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115134214"></script>
+<script src="vision3d.browser.js?v=20261115134728"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
