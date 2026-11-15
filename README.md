@@ -1,12 +1,23 @@
 # Bat Ears 🦇
 
-Touchless hand gestures with no camera: your laptop plays an inaudible ~20 kHz tone and listens to the Doppler shift of your hand's echo, like a bat. Built at MadHacks 2026.
+Your laptop hears where your hand is, in 3D, with no camera. Its two speakers play inaudible tones (18 and 19.5 kHz), the mic follows how each echo path to your hand stretches and shrinks, and a map taught once by the webcam (2½ minutes, MediaPipe) turns that into 3D hand movement. Trained with a camera, runs without one. Built at MadHacks 2026.
 
-**Try it:** https://ys06146.github.io/nhng/web/ (Chrome on a laptop, built-in speaker and mic)
+**Try it** (Chrome on a laptop, built-in speakers and mic):
+- 🦇 main demo, the sound-only hologram: https://ys06146.github.io/nhng/web/hologram.html
+- 🎮 Force Push and the gesture pages: https://ys06146.github.io/nhng/web/
+
+**Honest numbers:** on sittings the model never saw (8 webcam-taught sittings, leave-one-sitting-out, laptop speakers only, hand within about 45 cm of the webcam), the RMS error of the hand's 250 ms movement is left-right 3.8 / toward-away 4.3 / up-down 2.5 cm, against movements of 5.5 / 5.8 / 3.0 cm (correlation 0.73 / 0.70 / 0.57). Height is the weak axis. One person, one laptop so far.
 
 ## Run
 
-1. Open the link above in Chrome. You can also open `web/index.html` from a clone. There's nothing to install and no server to run.
+### 3D hologram (main demo)
+1. Tape over the webcam (the page never opens it). Open `hologram.html` in Chrome, with the built-in speakers and mic at 50 % volume or more.
+2. Press **▶ 시작 (Start)** and allow the microphone. Hold your hand over the laptop's front edge, about 20 cm up, press **◎** (space), then move it left-right and toward-away briskly.
+3. If the hand turns amber it has left the taught zone: come back and press ◎. Sound measures movement, not position, so the hand drifts back to the centre when you stop.
+4. No internet: run `python -m http.server 8000` in `web/` and open http://localhost:8000/hologram.html (three.js is bundled).
+
+### Force Push (gestures)
+1. Open https://ys06146.github.io/nhng/web/ in Chrome. You can also open `web/index.html` from a clone. There's nothing to install and no server to run.
 2. Click **▶ 시작 (Start)**, allow the microphone, and keep your hand away for 1.5 s while it calibrates.
 3. From 20–30 cm in front of the screen, push your palm toward it fast to blast meteors, pull it back to grab stars, or wave for a shockwave. Without a mic, use ↑ ↓ ← → and W.
 

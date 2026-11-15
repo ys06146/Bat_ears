@@ -452,11 +452,13 @@ async function start(m, file) {
   }
   running = true;
   $('intro').style.display = 'none'; $('introErr').textContent = '';
+  startT = performance.now();
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
   if (m === 'mic') $('status').textContent = '듣는 중 · 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에서 움직여요';
 }
+let startT = 0;
 function startErrMsg(e) {
   const n = (e && e.name) || '', m = (e && e.message) || String(e);
   if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ 마이크가 막혀 있어요: 주소창 왼쪽 🔒(사이트 설정)에서 마이크를 허용하고 새로고침해요';
@@ -555,7 +557,9 @@ function renderDebug() {
     if (lv < -20) warn = `🔇 톤이 거의 안 들려요 (teach 때보다 ${(-lv).toFixed(0)}dB 작아요): 블루투스·이어폰을 빼고 내장 스피커·마이크로, 볼륨 50% 이상`;
     else if (lv < -6) warn = `🔈 소리가 teach 때보다 ${(-lv).toFixed(0)}dB 작아요: 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
   }
-  $('levelWarn').textContent = warn;
+  const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ 톤이 잘 들려요 (teach 때와 ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
+  $('levelWarn').textContent = warn || okMsg;
+  $('levelWarn').style.color = okMsg ? 'var(--ok)' : '';
   if ($('debug').style.display !== 'block') return;
   const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k·마이크0', 'L 18k·마이크1', 'R 19.5k·마이크0', 'R 19.5k·마이크1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
   let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -4 ? 'ok' : lv > -6 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (teach 세션 기준, ±6dB는 보통)</div>`;
