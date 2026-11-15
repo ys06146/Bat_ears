@@ -95,17 +95,19 @@
     }
     return M.map((r) => r.slice(n));
   }
-  const vec = (feat) => KEYS.map((k) => feat[k]);
-  function fit(items, { lam = 0.3 } = {}) {   // items = [{ kind, feat }]
+  const vec = (feat, keys = KEYS) => keys.map((k) => feat[k]);
+  // items = [{ kind, feat }]; keys = which features (default KEYS; e.g. ['pLat', 'idep', 'bip'] once the live I/Q phase
+  // tracker (iq.js) adds feat.pLat). The model remembers its keys, so classify needs no option.
+  function fit(items, { lam = 0.3, keys = KEYS } = {}) {
     const by = { left: [], right: [], pp: [] };
-    for (const it of items) if (it.feat && vec(it.feat).every(Number.isFinite)) by[clsOf(it.kind)].push(vec(it.feat));
+    for (const it of items) if (it.feat && vec(it.feat, keys).every(Number.isFinite)) by[clsOf(it.kind)].push(vec(it.feat, keys));
     if (CLS.some((c) => by[c].length < 2)) return null;
-    const n = KEYS.length, mu = {};
-    for (const c of CLS) mu[c] = KEYS.map((_, j) => by[c].reduce((s, x) => s + x[j], 0) / by[c].length);
-    const S = KEYS.map(() => KEYS.map(() => 0)); let dof = -CLS.length;
+    const n = keys.length, mu = {};
+    for (const c of CLS) mu[c] = keys.map((_, j) => by[c].reduce((s, x) => s + x[j], 0) / by[c].length);
+    const S = keys.map(() => keys.map(() => 0)); let dof = -CLS.length;
     for (const c of CLS) for (const x of by[c]) { dof++; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) S[i][j] += (x[i] - mu[c][i]) * (x[j] - mu[c][j]); }
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) S[i][j] = (S[i][j] / Math.max(1, dof)) * (i === j ? 1 : 1 - lam) + (i === j ? 1e-12 : 0);
-    return { v: VERSION, keys: KEYS.slice(), mu, P: inv(S) };
+    return { v: VERSION, keys: keys.slice(), mu, P: inv(S) };
   }
   const maha = (m, a, b) => { const d = a.map((x, i) => x - b[i]); let q = 0; for (let i = 0; i < d.length; i++) for (let j = 0; j < d.length; j++) q += d[i] * m.P[i][j] * d[j]; return q; };
   // separation of the left and right centroids in pooled-sd units (like d')
@@ -115,7 +117,7 @@
   // (a ~50 cm swipe + the 170 ms FFT window lasts >= ~400 ms; push/pull fragments are often 100-300 ms)
   function classify(feat, model, { margin = 0.5, minMs = 350 } = {}) {
     if (!feat || !model || model.v !== VERSION) return { dir: null, z: 0 };
-    const x = vec(feat);
+    const x = vec(feat, model.keys || KEYS);
     if (!x.every(Number.isFinite)) return { dir: null, z: 0 };
     const s = {}; for (const c of CLS) s[c] = -0.5 * maha(model, x, model.mu[c]);
     const best = CLS.slice().sort((a, b) => s[b] - s[a])[0];
@@ -127,8 +129,8 @@
 
   // The check: cued swipes AND cued push/pulls. Everything scored leave-one-out with the live rule.
   class LRCheck {
-    constructor({ need = 4, needPP = 2, minHit = 0.6, maxWrong = 0.1, maxFp = 0.15, minD = 1.5, rule, lam = 0.3 } = {}) {
-      Object.assign(this, { need, needPP, minHit, maxWrong, maxFp, minD, rule: rule || {}, lam });
+    constructor({ need = 4, needPP = 2, minHit = 0.6, maxWrong = 0.1, maxFp = 0.15, minD = 1.5, rule, lam = 0.3, keys = KEYS } = {}) {
+      Object.assign(this, { need, needPP, minHit, maxWrong, maxFp, minD, rule: rule || {}, lam, keys });
       this.items = [];
     }
     add(kind, feat) { if (feat) this.items.push({ kind, feat }); }
@@ -142,13 +144,13 @@
       if (nN < 2) return { ok: false, looAcc: 0, model: null, reason: 'not enough push/pull in the check (v3 learns them as a class)' };
       let hit = 0, wrong = 0, n = 0, fp = 0, nP = 0;
       it.forEach((x, i) => {
-        const m = fit(it.filter((_, j) => j !== i), { lam: this.lam });
+        const m = fit(it.filter((_, j) => j !== i), { lam: this.lam, keys: this.keys });
         if (!m) return;
         const d = classify(x.feat, m, this.rule).dir;
         if (clsOf(x.kind) === 'pp') { nP++; if (d) fp++; }
         else { n++; if (d === x.kind) hit++; else if (d) wrong++; }
       });
-      const model = fit(it, { lam: this.lam }), dc = dLR(model);
+      const model = fit(it, { lam: this.lam, keys: this.keys }), dc = dLR(model);
       const looAcc = n ? hit / n : 0, looWrong = n ? wrong / n : 0, fpRate = nP ? fp / nP : null;
       const ok = !!model && dc >= this.minD && looAcc >= this.minHit && looWrong <= this.maxWrong && fpRate != null && fpRate <= this.maxFp;
       const r2 = (v) => (v == null ? null : +v.toFixed(2));

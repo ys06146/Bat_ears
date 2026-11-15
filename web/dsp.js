@@ -327,7 +327,7 @@
     oscR.start();
     const binHz = ctx.sampleRate / analyser.fftSize;
     Object.assign(st, {
-      ctx, src, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount), tapLoaded: false, cap: null,
+      ctx, src, osc, gain, stream, analyser, data: new Float32Array(analyser.frequencyBinCount), tapLoaded: false, cap: null, iq: null,
       stereo, oscL, oscR, gainL, gainR, lastR: null, scand: null, scandFrames: 0, scandSince: 0, prevStereoT: 0,
       running: true, tone: false, busy: false, raw, f0, binHz,
       G: Math.ceil(config.guardHz / binHz), W: Math.floor(config.bandHz / binHz),
@@ -346,7 +346,23 @@
     };
     setTone(true);
     st.raf = requestAnimationFrame(loop);
+    if (stereo) startIq();
     return true;
+  }
+
+  // bravo's live I/Q phase tracker (iq.js, LLAP-style path length per speaker tone). Logging only for now: every
+  // stereo burst gets feat.pLat = (dR - dL) / 2 and feat.pDep, so the check data can compare it with v3's ilatC.
+  function startIq() {
+    const ctx = st.ctx, src = st.src;
+    if (!window.BatIQ || !ctx || !src || st.iq) return;
+    window.BatIQ.start(ctx, src, config.stereoFreqs.slice()).then((iq) => {
+      if (iq && st.ctx === ctx && st.running && st.stereo && !st.iq) st.iq = iq; else if (iq) iq.stop();
+    }).catch((e) => emit('error', { where: 'iq', name: e.name, message: e.message }));
+  }
+  function stopIq() {
+    if (!st.iq) return;
+    try { st.iq.stop(); } catch (_) { /* ignore */ }
+    st.iq = null;
   }
 
   // ---- raw microphone capture: a 16-bit WAV of every mic channel, for offline work on left/right (phase tracking
@@ -459,6 +475,7 @@ registerProcessor('bat-tap', BatTap);`;
 
   async function stop() {
     if (!st.running) return null;
+    stopIq();
     setTone(false);
     st.running = false;
     cancelAnimationFrame(st.raf);
@@ -801,6 +818,10 @@ registerProcessor('bat-tap', BatTap);`;
     const capped = now - ev.start > B.maxMs;
     if (now - ev.last > B.gapMs || capped) {
       const feat = ev.sb ? ev.sb.features() : null;
+      if (feat && st.iq) {
+        const pc = st.iq.pathBetween(ev.start - 150, now); // the FFT frames lag the sound by about half a window
+        if (pc.n > 20) { feat.pLat = (pc.dR - pc.dL) / 2; feat.pDep = -(pc.dL + pc.dR) / 2; feat.pN = pc.n; }
+      }
       emit('burst', { t: now, start: ev.start, feat, capped });
       if (!ev.fired && !(B.rejectCapped && capped)) {
         if (model && feat) {
@@ -1010,6 +1031,7 @@ registerProcessor('bat-tap', BatTap);`;
         st.oscL.frequency.setValueAtTime(config.stereoFreqs[0], t);
         st.oscR.frequency.setValueAtTime(config.stereoFreqs[1], t);
         if (st.stereo && st.tone) setTone(true);
+        if (st.stereo && st.iq) { stopIq(); startIq(); } // the tracker mixes down at fixed tone frequencies
       }
     },
     get running() { return st.running; },
