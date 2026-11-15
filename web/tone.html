@@ -2,7 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Bat Ears | 톤 재생기</title>
+<title>Bat Ears | Tone player</title>
 <style>
 :root{--bg:#090c13;--card:#141b28;--line:#39465c;--fg:#e8eef9;--muted:#9aa3b2;--on:#2e7d32;--off:#b23b3b}
 *{box-sizing:border-box}
@@ -25,27 +25,27 @@ label{display:block;font-size:15px;color:var(--muted);margin-bottom:8px}
 a{color:#8ab4f8}
 </style></head><body>
 <main>
-<h1>📢 Bat Ears 톤 재생기</h1>
+<h1>📢 Bat Ears tone player</h1>
 <div id="presetNote" class="card note" style="display:none;border-color:#ffca28"></div>
 <div class="card">
-  <label for="freq">주파수 (Hz)</label>
+  <label for="freq">Frequency (Hz)</label>
   <input id="freq" type="number" inputmode="numeric" min="100" max="23000" step="50" value="17000">
   <div class="presets"><button data-f="17000">📱A 17000</button><button data-f="18750">📱B 18750</button><button data-f="20500">20500</button><button data-f="21500">21500</button></div>
-  <p class="note" style="color:var(--muted);margin:10px 0 0;font-size:13px">노트북은 18000·19500Hz를 써요. 폰 A는 17000, 폰 B는 18750이에요(아이폰은 20kHz 넘는 소리를 거의 못 내요). 17kHz는 작게 들릴 수 있으니 A는 음량을 낮게 시작하고, B(18750)는 음량 최대로 해요. 폰은 받침 위에 세워서 스피커가 손 쪽을 향하게 둬요. 노트북 teach.html에서 폰마다 dB로 들리는지 보여요.</p>
+  <p class="note" style="color:var(--muted);margin:10px 0 0;font-size:13px">The laptop uses 18000 and 19500 Hz. Phone A is 17000 and phone B is 18750 (iPhones can barely play above 20 kHz). 17 kHz may be faintly audible, so start A at a low volume, and set B (18750) to full volume. Stand the phones on a holder with the speaker facing the hand. teach.html on the laptop shows, in dB, whether each phone is heard.</p>
 </div>
 <div class="card">
-  <label for="vol">음량</label>
+  <label for="vol">Volume</label>
   <div class="row"><input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"><span id="volLabel">60%</span></div>
 </div>
-<button id="toggle">▶ 시작</button>
-<div id="status">■ 멈춤</div>
+<button id="toggle">▶ Start</button>
+<div id="status">■ Stop</div>
 <div id="info"></div>
 <div class="card note">
-  📵 아이폰 무음 스위치를 끄세요 (무음이면 소리가 안 날 수 있어요).<br>
-  🔆 화면이 꺼지면 소리가 멈출 수 있어요. 켜 두기를 지원하면 자동으로 켜 둬요.<br>
-  🎧 이어폰·블루투스는 빼고, 폰 스피커를 노트북 쪽으로 향하게 두세요.
+  📵 Turn off the iPhone’s silent switch (in silent mode there may be no sound).<br>
+  🔆 The sound may stop when the screen turns off. If keep-awake is supported, it’s turned on automatically.<br>
+  🎧 Unplug earphones and Bluetooth, and point the phone speaker toward the laptop.
 </div>
-<p class="note" style="color:var(--muted)">마이크는 쓰지 않아요. 소리를 내기만 해요. <a href="index.html">Bat Ears 메인</a></p>
+<p class="note" style="color:var(--muted)">The microphone isn’t used. It only plays sound. <a href="index.html">Bat Ears main</a></p>
 </main>
 <script>
 (() => {
@@ -53,7 +53,7 @@ a{color:#8ab4f8}
   const $ = (id) => document.getElementById(id);
   let ctx = null, osc = null, gain = null, lock = null, playing = false;
   const freqNow = () => Math.max(100, Math.min(23000, Math.round(Number($('freq').value) || 17000)));
-  const ROLE = { 17000: '폰 A', 18750: '폰 B' };
+  const ROLE = { 17000: 'Phone A', 18750: 'Phone B' };
   // each phone remembers its own frequency
   try { const f = Number(localStorage.getItem('batears-tone-freq')); if (f >= 100 && f <= 23000) $('freq').value = f; } catch (e) { /* private mode */ }
   const remember = () => { try { localStorage.setItem('batears-tone-freq', String(freqNow())); } catch (e) { /* ignore */ } };
@@ -65,7 +65,7 @@ a{color:#8ab4f8}
     $('vol').value = 0.8; $('volLabel').textContent = '80%';
     const n = $('presetNote');
     n.style.display = 'block';
-    n.innerHTML = '📱 <b>폰 A · 17000Hz · 위에서 배치</b><br>노트북 가운데, 경첩에서 앞으로 30cm(노트북 앞 모서리 위), 책상 위 45cm에 세로로 세우고, 아래쪽 스피커가 손 자리를 향하게 해요. 아래 <b>▶ 시작</b>을 한 번 눌러요.';
+    n.innerHTML = '📱 <b>Phone A · 17000 Hz · overhead layout</b><br>Stand it upright at the laptop center, 30 cm forward from the hinge (above the laptop’s front edge), 45 cm above the desk, with the bottom speaker aimed at the hand spot. Press <b>▶ Start</b> below once.';
   }
   const volNow = () => Number($('vol').value) || 0.6;
 
@@ -74,10 +74,10 @@ a{color:#8ab4f8}
   }
   function show() {
     const f = freqNow();
-    $('status').textContent = playing ? `🔊 ${f}Hz 재생 중${ROLE[f] ? ` (${ROLE[f]})` : ''}` : '■ 멈춤';
-    $('toggle').textContent = playing ? '■ 멈추기' : '▶ 시작';
+    $('status').textContent = playing ? `🔊 ${f}Hz playing${ROLE[f] ? ` (${ROLE[f]})` : ''}` : '■ Stop';
+    $('toggle').textContent = playing ? '■ Stop' : '▶ Start';
     $('toggle').className = playing ? 'playing' : '';
-    $('info').textContent = ctx ? `오디오 ${ctx.sampleRate}Hz · 화면 켜 두기 ${lock ? '켜짐' : '안 됨'}${f > ctx.sampleRate / 2 - 500 ? ' · ⚠️ 이 기기에서 낼 수 없는 주파수' : ''}` : '';
+    $('info').textContent = ctx ? `Audio ${ctx.sampleRate}Hz · keep screen on ${lock ? 'on' : 'unavailable'}${f > ctx.sampleRate / 2 - 500 ? ' · ⚠️ this device can’t play that frequency' : ''}` : '';
   }
   async function start() {
     // iOS: the AudioContext has to be created / resumed inside the tap

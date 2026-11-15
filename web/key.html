@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bat Ears | 제스처 키</title>
+<title>Bat Ears | Gesture key</title>
 <link rel="stylesheet" href="style.css?v=20261115101840">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
@@ -36,51 +36,51 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
 @media(max-width:950px){main{grid-template-columns:1fr}}
 @media(max-width:600px){header{flex-wrap:wrap;gap:6px;padding:10px 12px}header h1{font-size:16px}header h1 span{display:block}main{padding:10px}.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.tabs a{flex:0 0 auto}}
 </style></head><body>
-<header><h1>🔐 Bat Ears 제스처 키 <span>손짓 순서 + 나만의 리듬으로 잠금 해제 · 카메라 없음 · 기록은 이 브라우저에만</span></h1><span id="status" class="chip">대기 중</span></header>
+<header><h1>🔐 Bat Ears gesture key <span>Unlock with a gesture sequence + your own rhythm · no camera · records stay in this browser</span></h1><span id="status" class="chip">Waiting</span></header>
 <main>
 <section>
-<div class="tabs"><a href="index.html">🎮 게임</a><a href="experiment-live.html">🧪 자유 실험 모드</a><a class="sel" href="key.html">🔐 제스처 키</a><a href="tone.html">📢 톤 재생기</a></div>
+<div class="tabs"><a href="index.html">🎮 Game</a><a href="experiment-live.html">🧪 Free experiment mode</a><a class="sel" href="key.html">🔐 Gesture key</a><a href="tone.html">📢 Tone player</a></div>
 <div class="card" id="lockCard">
   <div id="lockIcon">🔒</div>
-  <div id="result">마이크를 켜고 등록부터 해 주세요</div>
+  <div id="result">Turn on the mic and enroll first</div>
   <div id="detail"></div>
   <div id="live" class="chips"></div>
   <div class="meter"><div id="scoreBar"></div><div id="thrMark"></div></div>
   <div id="scoreText" class="hint"></div>
   <div class="parts">
-    <div>리듬<div class="pb"><div id="p_rhythm"></div></div></div>
-    <div>속도<div class="pb"><div id="p_speed"></div></div></div>
-    <div>길이<div class="pb"><div id="p_duration"></div></div></div>
-    <div>모양<div class="pb"><div id="p_shape"></div></div></div>
+    <div>Rhythm<div class="pb"><div id="p_rhythm"></div></div></div>
+    <div>Speed<div class="pb"><div id="p_speed"></div></div></div>
+    <div>Length<div class="pb"><div id="p_duration"></div></div></div>
+    <div>Shape<div class="pb"><div id="p_shape"></div></div></div>
   </div>
 </div>
-<div class="card"><h3>📋 시도 기록</h3><div id="statsLine" class="hint"></div>
-<table><thead><tr><th>시각</th><th>잠금</th><th>수행자</th><th>종류</th><th>순서</th><th>점수 / 기준</th><th>결과</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="card"><h3>📋 Attempt log</h3><div id="statsLine" class="hint"></div>
+<table><thead><tr><th>Time</th><th>Lock</th><th>Performer</th><th>Type</th><th>Order</th><th>Score / threshold</th><th>Result</th></tr></thead><tbody id="rows"></tbody></table></div>
 </section>
 <aside>
-<div class="card"><h3>🎤 마이크</h3>
-  <button id="mic" class="big">▶ 마이크 켜기</button>
-  <p class="hint">켜면 손을 치우고 1.5초 기다려요. 손은 화면에서 20cm쯤. 마이크 없이 화면만 보려면 키보드 ↑ 밀기 · ↓ 당기기 · W 흔들기.</p>
+<div class="card"><h3>🎤 Microphone</h3>
+  <button id="mic" class="big">▶ Turn on mic</button>
+  <p class="hint">After turning it on, keep your hand away and wait 1.5 s. Hand about 20 cm from the screen. To just see the screen without a mic, use the keyboard: ↑ push · ↓ pull · W wave.</p>
   <p id="micInfo" class="hint"></p></div>
-<div class="card"><h3>📝 등록</h3>
-  <label>이름 <input id="owner" type="text" maxlength="16" placeholder="seojin"></label>
+<div class="card"><h3>📝 Enroll</h3>
+  <label>Name <input id="owner" type="text" maxlength="16" placeholder="seojin"></label>
   <div id="tokens"></div>
   <div id="pick" class="chips" style="justify-content:flex-start"></div>
-  <label>반복 <select id="reps"><option>5</option><option selected>6</option><option>7</option><option>8</option><option>10</option></select>번</label>
-  <button id="enroll">📝 등록 시작</button>
+  <label>Reps <select id="reps"><option>5</option><option selected>6</option><option>7</option><option>8</option><option>10</option></select></label>
+  <button id="enroll">📝 Start enrollment</button>
   <div id="dots"></div>
-  <p class="hint">동작 3~6개를 골라 순서를 정하고, 내 리듬으로 반복해요. 첫 1번은 연습이라 기록하지 않아요. 반복이 고를수록 잠금이 단단해져요.</p></div>
-<div class="card"><h3>🔓 잠금 해제</h3>
-  <label>잠금 <select id="tpl"></select></label>
-  <label>지금 하는 사람 <input id="performer" type="text" maxlength="16" placeholder="같으면 비워 두기"></label>
-  <label>시도 종류 <select id="attack"><option value="genuine">본인</option><option value="zero-effort">다른 사람 · 그냥 해 보기</option><option value="imitation-watched">다른 사람 · 보고 따라 하기</option><option value="imitation-blind">다른 사람 · 순서만 알고</option></select></label>
-  <button id="unlock" class="big">🔓 시도 (Space)</button>
-  <p class="hint">순서와 리듬을 그대로 해요. 마지막 동작 뒤 0.8초 기다리면 판정해요.</p>
-  <button id="delTpl" class="secondary">이 잠금 지우기</button></div>
-<div class="card"><h3>📁 평가 기록</h3>
-  <p class="hint">시도마다 잠금 주인, 수행자, 본인/타인, 순서 일치, 스타일 점수를 남겨요 (FAR·FRR 계산용, python ml/auth_report.py).</p>
-  <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
-  <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
+  <p class="hint">Pick 3–6 gestures in an order and repeat them in your own rhythm. The first one is practice and isn’t recorded. The more even your repetitions, the tighter the lock.</p></div>
+<div class="card"><h3>🔓 Unlock</h3>
+  <label>Lock <select id="tpl"></select></label>
+  <label>Person trying now <input id="performer" type="text" maxlength="16" placeholder="leave blank if the same"></label>
+  <label>Attempt type <select id="attack"><option value="genuine">Owner</option><option value="zero-effort">Someone else · just trying</option><option value="imitation-watched">Someone else · copying after watching</option><option value="imitation-blind">Someone else · knows only the order</option></select></label>
+  <button id="unlock" class="big">🔓 Try (Space)</button>
+  <p class="hint">Repeat the order and rhythm exactly. It decides 0.8 s after the last gesture.</p>
+  <button id="delTpl" class="secondary">Delete this lock</button></div>
+<div class="card"><h3>📁 Evaluation log</h3>
+  <p class="hint">Each attempt records the lock owner, performer, owner/other, order match and style score (for FAR and FRR, python ml/auth_report.py).</p>
+  <button id="save">📁 Save to data folder</button> <label><input id="autoSave" type="checkbox" checked> Auto-save every attempt</label>
+  <p id="saveStatus" class="hint">Uses the data folder picked on the main page (Drive nhng/ml/data).</p></div>
 </aside></main>
 <script src="robust.js?v=20261115101840"></script><script src="swipe.js?v=20261115101840"></script><script src="wave.js?v=20261115101840"></script><script src="iq.js?v=20261115101840"></script><script src="dsp.js?v=20261115101840"></script><script src="circle.js?v=20261115101840"></script><script src="auth.js?v=20261115101840"></script>
 <script>
@@ -93,19 +93,19 @@ const E = window.BatEars, A = window.BatAuth;
 // stereo. cw / ccw need a circle detector that emits 'cw' / 'ccw' gestures (bravo's iq.js trackBetween area sign);
 // they stay off until it is validated on a real recording.
 const TOKENS = [
-  { id: 'push', label: '⟶ 밀기', name: '밀기' },
-  { id: 'pull', label: '⟵ 당기기', name: '당기기' },
-  { id: 'wave', label: '〰 흔들기', name: '흔들기' },
-  { id: 'cw', label: '🔃 시계 원', name: '시계 원', flag: 'circles', stereo: true },
-  { id: 'ccw', label: '🔄 반시계 원', name: '반시계 원', flag: 'circles', stereo: true },
+  { id: 'push', label: '⟶ Push', name: 'Push' },
+  { id: 'pull', label: '⟵ Pull', name: 'Pull' },
+  { id: 'wave', label: '〰 Wave', name: 'Wave' },
+  { id: 'cw', label: '🔃 Clockwise circle', name: 'Clockwise circle', flag: 'circles', stereo: true },
+  { id: 'ccw', label: '🔄 Counter-clockwise circle', name: 'Counter-clockwise circle', flag: 'circles', stereo: true },
 ];
 const flags = { circles: new URLSearchParams(location.search).get('circles') === '1' || (() => { try { return localStorage.getItem('batears-auth-circles') === '1'; } catch (e) { return false; } })() };
 const ON = TOKENS.filter((t) => !t.flag || flags[t.flag]);
 const STEREO = ON.some((t) => t.stereo);
 const NAMES = Object.fromEntries(TOKENS.map((t) => [t.id, t.name])), ICON = Object.fromEntries(TOKENS.map((t) => [t.id, t.label]));
-const REASON = { ok: '✅ 열렸어요', order: '❌ 순서가 달라요', rhythm: '❌ 리듬(동작 사이 간격)이 달라요', speed: '❌ 손 속도가 달라요',
-  duration: '❌ 동작 길이가 달라요', shape: '❌ 움직임 모양이 달라요', timeout: '❌ 시간이 지났어요', none: '❌ 손짓이 안 잡혔어요' };
-const ATTACK = { genuine: '본인', 'zero-effort': '타인·그냥', 'imitation-watched': '타인·보고', 'imitation-blind': '타인·순서만' };
+const REASON = { ok: '✅ Unlocked', order: '❌ Wrong order', rhythm: '❌ Rhythm (gaps between gestures) doesn’t match', speed: '❌ Hand speed doesn’t match',
+  duration: '❌ Gesture length doesn’t match', shape: '❌ Movement shape doesn’t match', timeout: '❌ Time ran out', none: '❌ No gesture caught' };
+const ATTACK = { genuine: 'Owner', 'zero-effort': 'Other · just trying', 'imitation-watched': 'Other · watched', 'imitation-blind': 'Other · order only' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* full / private */ } } };
 const clean = (s) => String(s || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16);
@@ -161,14 +161,14 @@ E.on('gesture', (g) => {
   showLive(cap.gestures.map((x) => x.kind));
 });
 E.on('state', (s) => {
-  $('status').textContent = !s.running ? '대기 중' : s.calibrating ? '기준값 잡는 중 · 손 치우기' : busy ? '듣는 중' : '준비됨';
+  $('status').textContent = !s.running ? 'Waiting' : s.calibrating ? 'Measuring baseline · hand away' : busy ? 'Listening' : 'Ready';
   $('status').className = 'chip ' + (!s.running ? '' : s.calibrating ? 'cal' : 'on');
 });
 
 // one attempt: n gestures, then 0.8 s of quiet; or 3 s of quiet after the first gesture; or 12 s in all
 async function capture(n, opts = {}) {
   // never listen while the engine is still calibrating (gestures can't fire then)
-  for (let i = 0; E.running && calibrating && i < 60; i++) { $('detail').textContent = '기준값 잡는 중 · 손을 치우고 잠깐만요'; await sleep(100); }
+  for (let i = 0; E.running && calibrating && i < 60; i++) { $('detail').textContent = 'Measuring baseline · keep your hand away for a moment'; await sleep(100); }
   return listen(n, opts);
 }
 function listen(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null, vote = 0 } = {}) {
@@ -222,7 +222,7 @@ function meter(sc) {
   $('thrMark').style.left = '50%';
   $('scoreBar').style.width = s == null ? '0%' : Math.min(100, (100 * s) / scale) + '%';
   $('scoreBar').style.background = sc && sc.accepted ? '#66bb6a' : '#ef5350';
-  $('scoreText').textContent = s == null ? '' : `점수 ${s} (낮을수록 비슷함) · 기준 ${thr}`;
+  $('scoreText').textContent = s == null ? '' : `Score ${s} (lower = more similar) · threshold ${thr}`;
   for (const k of ['rhythm', 'speed', 'duration', 'shape']) {
     const v = sc && sc.parts ? sc.parts[k] : null;
     $('p_' + k).style.width = v == null ? '0%' : Math.min(100, v * 25) + '%';
@@ -234,7 +234,7 @@ function renderPick() {
 }
 function refreshTpl(sel) {
   const names = Object.keys(templates);
-  $('tpl').replaceChildren(...names.map((n) => { const o = document.createElement('option'); o.value = n; o.textContent = `${n} (${templates[n].kinds.length}개)${templates[n].v !== A.VERSION ? ' · 다시 등록 필요' : ''}`; return o; }));
+  $('tpl').replaceChildren(...names.map((n) => { const o = document.createElement('option'); o.value = n; o.textContent = `${n} (${templates[n].kinds.length} gestures)${templates[n].v !== A.VERSION ? ' · re-enroll needed' : ''}`; return o; }));
   if (sel) $('tpl').value = sel;
 }
 function stats() {
@@ -243,11 +243,11 @@ function stats() {
     const o = by[a.owner] || (by[a.owner] = { g: 0, gOk: 0, i: 0, iOk: 0 });
     if (a.genuine) { o.g++; if (a.accepted) o.gOk++; } else { o.i++; if (a.accepted) o.iOk++; }
   }
-  $('statsLine').textContent = Object.entries(by).map(([n, o]) => `${n}: 본인 ${o.gOk}/${o.g} 통과 (FRR ${o.g ? Math.round(100 * (o.g - o.gOk) / o.g) : '–'}%) · 타인 ${o.iOk}/${o.i} 통과 (FAR ${o.i ? Math.round(100 * o.iOk / o.i) : '–'}%)`).join('  |  ') || '아직 시도가 없어요';
+  $('statsLine').textContent = Object.entries(by).map(([n, o]) => `${n}: owner ${o.gOk}/${o.g} passed (FRR ${o.g ? Math.round(100 * (o.g - o.gOk) / o.g) : '–'}%) · others ${o.iOk}/${o.i} passed (FAR ${o.i ? Math.round(100 * o.iOk / o.i) : '–'}%)`).join('  |  ') || 'No attempts yet';
 }
 function addRow(a) {
   const tr = document.createElement('tr');
-  [a.t.slice(11, 19), a.owner, a.performer, ATTACK[a.attack] || a.attack, a.seq_ok ? '맞음' : '틀림', a.style_score == null ? '–' : `${a.style_score} / ${a.threshold}`, a.accepted ? '✅' : '❌ ' + (REASON[a.reason] || a.reason).replace('❌ ', '')]
+  [a.t.slice(11, 19), a.owner, a.performer, ATTACK[a.attack] || a.attack, a.seq_ok ? 'Correct' : 'Wrong', a.style_score == null ? '–' : `${a.style_score} / ${a.threshold}`, a.accepted ? '✅' : '❌ ' + (REASON[a.reason] || a.reason).replace('❌ ', '')]
     .forEach((x) => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); });
   $('rows').prepend(tr);
 }
@@ -268,22 +268,22 @@ const csvOf = (rows) => {
   return [keys.join(','), ...rows.map((r) => keys.map((k) => esc(k in r ? r[k] : (r.parts || {})[k])).join(','))].join('\n');
 };
 async function save(ask) {
-  if (!log.length) { $('saveStatus').textContent = '아직 저장할 시도가 없어요'; return false; }
+  if (!log.length) { $('saveStatus').textContent = 'No attempts to save yet'; return false; }
   const base = 'batears_auth_' + device;   // one file per browser with its whole log (re-written each time)
   const tpls = Object.fromEntries(Object.entries(templates).map(([n, t]) => [n, { kinds: t.kinds, n: t.n, threshold: t.threshold, loo: t.loo, created: t.created, device: t.device }]));
   const files = [[base + '.json', JSON.stringify({ session, templates: tpls, attempts: log }, null, 1)], [base + '.csv', csvOf(log)]];
   const d = await dataDir(ask);
   if (!d) {
-    if (ask) { for (const [n, data] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = n; a.click(); } $('saveStatus').textContent = '폴더가 없어서 다운로드했어요. ml/data로 옮겨 주세요'; return true; }
-    $('saveStatus').textContent = `⚠️ 폴더에 저장되지 않았어요 (권한 없음). '📁 데이터 폴더에 저장'을 눌러 주세요 · 시도 ${log.length - savedN()}개는 이 브라우저에 남아 있어요`;
+    if (ask) { for (const [n, data] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = n; a.click(); } $('saveStatus').textContent = 'No folder, so it downloaded. Please move it to ml/data'; return true; }
+    $('saveStatus').textContent = `⚠️ Not saved to the folder (no permission). Press '📁 Save to data folder' · ${log.length - savedN()} attempts are still in this browser`;
     return false;
   }
   try {
     for (const [n, data] of files) { const h = await d.getFileHandle(n, { create: true }), w = await h.createWritable(); await w.write(data); await w.close(); }
     store.set('batears-auth-saved', log.length);
-    $('saveStatus').textContent = `✅ 저장됨: ${base}.json (시도 ${log.length}개)`;
+    $('saveStatus').textContent = `✅ Saved: ${base}.json (${log.length} attempts)`;
     return true;
-  } catch (e) { $('saveStatus').textContent = '⚠️ 저장 실패: ' + e.message + ' · 📁 버튼을 다시 눌러 주세요'; return false; }
+  } catch (e) { $('saveStatus').textContent = '⚠️ Save failed: ' + e.message + ' · press the 📁 button again'; return false; }
 }
 
 // ---- flows
@@ -292,61 +292,61 @@ async function micOn() {
   $('mic').disabled = true;
   const ok = await E.start({ freq: 20000, raw: true, stereo: STEREO, sequence: true }); // re-arm between strokes
   $('mic').disabled = false;
-  if (!ok) { say('🎤', '마이크를 켤 수 없어요', '주소창 왼쪽에서 마이크를 허용해 주세요'); return; }
-  $('mic').textContent = '🎤 마이크 켜짐';
+  if (!ok) { say('🎤', 'Can’t turn on the microphone', 'Allow the microphone left of the address bar'); return; }
+  $('mic').textContent = '🎤 Microphone on';
   const i = E.info || {};
-  $('micInfo').textContent = `${i.f0 || E.freq}Hz · 마이크 ${i.micRate || '?'}Hz · ${i.mic || ''}`;
-  say(templates[$('tpl').value] ? '🔒' : '📝', templates[$('tpl').value] ? '🔓 시도를 누르고 제스처 비밀번호를 해 주세요' : '오른쪽에서 동작 순서를 골라 등록해 주세요');
+  $('micInfo').textContent = `${i.f0 || E.freq}Hz · mic ${i.micRate || '?'}Hz · ${i.mic || ''}`;
+  say(templates[$('tpl').value] ? '🔒' : '📝', templates[$('tpl').value] ? 'Press 🔓 Try and perform your gesture password' : 'Pick a gesture order on the right and enroll');
 }
 async function enroll() {
   if (busy) return;
   const owner = clean($('owner').value);
-  if (!owner) { alert('이름을 적어 주세요 (영문·숫자)'); return; }
-  if (pick.length < 3 || pick.length > 6) { alert('동작을 3~6개 골라 주세요'); return; }
+  if (!owner) { alert('Please enter a name (letters and digits)'); return; }
+  if (pick.length < 3 || pick.length > 6) { alert('Pick 3–6 gestures'); return; }
   const N = Number($('reps').value) || 6, want = pick.slice();
   busy = true; lock(true); meter(null);
   // one practice repetition first (kept out of the template: real first reps ran far from the rest, bravo)
-  $('dots').replaceChildren(...Array.from({ length: N + 1 }, (_, i) => { const d = document.createElement('span'); if (!i) { d.title = '연습'; d.style.outline = '1px dashed #9aa3b2'; } return d; }));
+  $('dots').replaceChildren(...Array.from({ length: N + 1 }, (_, i) => { const d = document.createElement('span'); if (!i) { d.title = 'Practice'; d.style.outline = '1px dashed #9aa3b2'; } return d; }));
   const reps = [];
   let practice = null, circleSign = null, circleVote = 0;
   for (let tries = 0; reps.length < N && tries < (N + 1) * 3; tries++) {
-    say('📝', practice ? `${reps.length + 1}/${N}번째` : '연습 1번 (기록 안 해요)', seqText(want) + ' · 지금 해 주세요 (동작마다 빠르게, 사이에 잠깐 멈추기)');
+    say('📝', practice ? `${reps.length + 1}/${N}` : 'Practice 1 (not recorded)', seqText(want) + ' · go now (each gesture quick, with a short pause between)');
     showLive([]);
     const r = await capture(want.length, { want, sign: circleSign, vote: circleVote });
     circleVote = r.vote || 0;
     circleSign = Math.sign(circleVote) || null;
     const k = r.att.kinds, ok = k.length === want.length && k.every((x, i) => x === want[i]);
     showLive(k, want);
-    if (ok && !practice) { practice = r.att; $('dots').children[0].className = 'on'; say('✓', '연습 끝 · 이제 진짜예요', `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
-    else if (ok) { reps.push(r.att); $('dots').children[reps.length].className = 'on'; say('✓', `${reps.length}/${N} 기록했어요`, `간격 ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}초`); }
-    else say('↺', '다시 해 주세요', (k.length ? '잡힌 순서: ' + seqText(k) : '손짓이 안 잡혔어요') + ' · 원하는 순서: ' + seqText(want));
+    if (ok && !practice) { practice = r.att; $('dots').children[0].className = 'on'; say('✓', 'Practice done · now for real', `Gaps ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}s`); }
+    else if (ok) { reps.push(r.att); $('dots').children[reps.length].className = 'on'; say('✓', `${reps.length}/${N} recorded`, `Gaps ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}s`); }
+    else say('↺', 'Please do it again', (k.length ? 'Caught order: ' + seqText(k) : 'No gesture caught') + ' · wanted order: ' + seqText(want));
     await sleep(1100);
   }
-  if (reps.length < 3) { say('❌', '등록하지 못했어요', '반복이 3번보다 적게 잡혔어요. 다시 해 주세요'); busy = false; lock(false); return; }
+  if (reps.length < 3) { say('❌', 'Couldn’t enroll', 'Fewer than 3 repetitions were caught. Please do it again'); busy = false; lock(false); return; }
   const tpl = A.buildTemplate(reps);
   Object.assign(tpl, { owner, device, freq: E.freq, circleSign, circleVote: +circleVote.toFixed(2), stereo: STEREO, practice });
   templates[owner] = tpl;
   store.set('batears-auth-templates', templates);
   refreshTpl(owner);
-  say('✅', `${owner} 등록 완료`, `동작 ${tpl.kinds.length}개 · ${tpl.n}번 반복 · 기준 점수 ${tpl.threshold} (반복끼리 차이 ${tpl.loo.join(' ')})`);
+  say('✅', `${owner} enrolled`, `Gestures ${tpl.kinds.length} · ${tpl.n} reps · threshold score ${tpl.threshold} (spread between reps ${tpl.loo.join(' ')})`);
   busy = false; lock(false);
 }
 async function unlock() {
   if (busy) return;
   const owner = $('tpl').value, tpl = templates[owner];
-  if (!tpl) { alert('먼저 등록해 주세요'); return; }
-  if (tpl.v !== A.VERSION) { say('📝', '판정 방식이 바뀌어서 다시 등록해야 해요', `'${owner}'를 같은 순서로 다시 등록해 주세요 (리듬을 동작 중심으로 재요)`); return; }
-  if (!E.running && !confirm('마이크가 꺼져 있어요. 키보드 시뮬레이션(↑ ↓ W)으로만 시도할까요?')) return;
+  if (!tpl) { alert('Please enroll first'); return; }
+  if (tpl.v !== A.VERSION) { say('📝', 'The scoring method changed, so you need to re-enroll', `'${owner}': please re-enroll in the same order (rhythm is now measured at each gesture’s center)`); return; }
+  if (!E.running && !confirm('The microphone is off. Try with keyboard simulation (↑ ↓ W) only?')) return;
   if ($('autoSave').checked) await dataDir(true); // ask for the folder now, while the click still counts as a gesture
   busy = true; lock(true); meter(null);
-  say('👂', '제스처 비밀번호를 해 주세요', `동작 ${tpl.kinds.length}개 · 동작마다 빠르게, 사이에 손을 아주 잠깐 멈추기`);
+  say('👂', 'Perform your gesture password', `Gestures ${tpl.kinds.length} · each gesture quick, with a very short pause between`);
   showLive([]);
   const r = await capture(tpl.kinds.length, { sign: tpl.circleSign == null ? null : tpl.circleSign });
   const sc = r.gestures.length ? A.score(tpl, r.att)
     : { orderOk: false, accepted: false, reason: r.why === 'timeout' ? 'timeout' : 'none', score: null, threshold: tpl.threshold, parts: null };
   showLive(r.att.kinds, tpl.kinds);
   meter(sc);
-  say(sc.accepted ? '🔓' : '🔒', REASON[sc.reason] || sc.reason, sc.orderOk ? '' : `잡힌 순서: ${seqText(r.att.kinds) || '없음'}`);
+  say(sc.accepted ? '🔓' : '🔒', REASON[sc.reason] || sc.reason, sc.orderOk ? '' : `Caught order: ${seqText(r.att.kinds) || 'none'}`);
   const attack = $('attack').value, performer = clean($('performer').value) || (attack === 'genuine' ? owner : 'other');
   const a = { t: new Date().toISOString(), owner, performer, attack, genuine: attack === 'genuine', expected: tpl.kinds, got: r.att.kinds,
     seq_ok: sc.orderOk, style_score: sc.score, threshold: sc.threshold, accepted: sc.accepted, reason: sc.reason, parts: sc.parts,
@@ -370,13 +370,13 @@ $('mic').onclick = micOn;
 $('enroll').onclick = (e) => { e.target.blur(); enroll(); };
 $('unlock').onclick = (e) => { e.target.blur(); unlock(); };
 $('save').onclick = () => save(true);
-$('delTpl').onclick = () => { const n = $('tpl').value; if (n && confirm(`'${n}' 잠금을 지울까요?`)) { delete templates[n]; store.set('batears-auth-templates', templates); refreshTpl(); } };
+$('delTpl').onclick = () => { const n = $('tpl').value; if (n && confirm(`'${n}' Delete the lock?`)) { delete templates[n]; store.set('batears-auth-templates', templates); refreshTpl(); } };
 window.addEventListener('keydown', (e) => {
   const tag = (e.target && e.target.tagName) || '';
   if (e.code === 'Space' && !['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(tag)) { e.preventDefault(); unlock(); }
 });
 refreshTpl(); renderPick(); stats();
-if (log.length > savedN()) $('saveStatus').textContent = `⚠️ 저장 안 된 시도 ${log.length - savedN()}개가 이 브라우저에 있어요 → '📁 데이터 폴더에 저장'`;
+if (log.length > savedN()) $('saveStatus').textContent = `⚠️ Unsaved attempts: ${log.length - savedN()} in this browser → '📁 Save to data folder'`;
 window.BatKey = { session, get templates() { return templates; } }; // for tests
 })();
 </script></body></html>

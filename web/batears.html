@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bat Ears 테스트 (alpha)</title>
+<title>Bat Ears test (alpha)</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -36,57 +36,57 @@
 </style>
 </head>
 <body>
-<h1>🦇 Bat Ears 테스트: 초음파 도플러 손동작</h1>
-<p class="hint">스피커로 거의 안 들리는 고음을 내고, 손에 반사돼 돌아온 소리의 주파수 변화(도플러)로 밀기·당기기를 알아냅니다. 헤드폰·블루투스 말고 노트북 내장 스피커와 마이크로 하세요.</p>
+<h1>🦇 Bat Ears test: ultrasonic Doppler hand gestures</h1>
+<p class="hint">The speaker plays a high tone you can barely hear, and the frequency change (Doppler) of the sound reflected back from your hand tells push from pull. Use the laptop’s built-in speakers and mic, not headphones or Bluetooth.</p>
 
 <div class="row">
-  <button id="start">▶ 시작</button>
-  <button id="stop" class="secondary" disabled>■ 정지</button>
-  <button id="check" class="secondary" disabled>대역 점검</button>
-  <button id="copy" class="secondary">결과 복사</button>
+  <button id="start">▶ Start</button>
+  <button id="stop" class="secondary" disabled>■ Stop</button>
+  <button id="check" class="secondary" disabled>Band check</button>
+  <button id="copy" class="secondary">Copy results</button>
 </div>
 <div class="row">
-  <label>주파수 <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"> <b id="freqLabel">20.0 kHz</b></label>
+  <label>Frequency <input id="freq" type="range" min="15000" max="21000" step="100" value="20000"> <b id="freqLabel">20.0 kHz</b></label>
 </div>
 <div class="row">
-  <label>음량 <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"></label>
-  <label>민감도 <input id="th" type="number" value="6" min="2" max="20" step="0.5"> dB</label>
-  <label><input id="raw" type="checkbox" checked> 마이크 보정 3종 끄기</label>
+  <label>Volume <input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"></label>
+  <label>Sensitivity <input id="th" type="number" value="6" min="2" max="20" step="0.5"> dB</label>
+  <label><input id="raw" type="checkbox" checked> Turn off the 3 mic processing filters</label>
 </div>
 <div id="settings"></div>
 <div id="warn"></div>
 
 <div id="gesture">–</div>
 <div class="stats">
-  <div class="stat">밀기 (가까이)<b id="nPush">0</b></div>
-  <div class="stat">당기기 (멀리)<b id="nPull">0</b></div>
-  <div class="stat">반사 신호 SNR<b id="snr">–</b></div>
-  <div class="stat">손 속도 추정<b id="vel">–</b></div>
-  <div class="stat">마이크 샘플레이트<b id="sr">–</b></div>
+  <div class="stat">Push (closer)<b id="nPush">0</b></div>
+  <div class="stat">Pull (farther)<b id="nPull">0</b></div>
+  <div class="stat">Reflected signal SNR<b id="snr">–</b></div>
+  <div class="stat">Estimated hand speed<b id="vel">–</b></div>
+  <div class="stat">Mic sample rate<b id="sr">–</b></div>
 </div>
 <div class="bars">
-  <span>높아짐 (밀기)</span><div class="bar"><div id="barUp" style="background:#4fc3f7"></div></div><span id="vUp">–</span>
-  <span>낮아짐 (당기기)</span><div class="bar"><div id="barDown" style="background:#ffb74d"></div></div><span id="vDown">–</span>
+  <span>Higher (push)</span><div class="bar"><div id="barUp" style="background:#4fc3f7"></div></div><span id="vUp">–</span>
+  <span>Lower (pull)</span><div class="bar"><div id="barDown" style="background:#ffb74d"></div></div><span id="vDown">–</span>
 </div>
 <canvas id="zoom"></canvas>
-<p class="hint">위: 톤 주변 ±600Hz 확대 (파랑 = 밀기 구간, 주황 = 당기기 구간). 아래: 10kHz부터 최고 주파수까지 전체.</p>
+<p class="hint">Top: zoom on ±600 Hz around the tone (blue = push band, orange = pull band). Bottom: everything from 10 kHz to the top frequency.</p>
 <canvas id="wide"></canvas>
 
 <details open>
-  <summary>손 테스트 방법</summary>
+  <summary>How to test with your hand</summary>
   <ol class="hint">
-    <li>▶ 시작 → 주소창 아래 마이크 요청에서 <b>허용</b>.</li>
-    <li>처음 1.5초는 손을 치우고 가만히 (기준값 잡는 중).</li>
-    <li>"반사 신호 SNR"이 20dB 이상인지 확인. 낮으면 음량을 올리거나 주파수를 19kHz, 18kHz로 낮춰 보기.</li>
-    <li>손바닥을 화면 앞 10~20cm에서 화면 쪽으로 빠르게 <b>밀기 5번</b>, 몇 초 쉬고 <b>당기기 5번</b>.</li>
-    <li>손을 치우고 10초 동안 가만히 두면서 저절로 숫자가 오르지 않는지 확인.</li>
-    <li><b>대역 점검</b>을 한 번 누른 뒤 <b>결과 복사</b> → 디스코드에 붙여넣기.</li>
+    <li>▶ Start → in the mic request below the address bar, choose <b>Allow</b>.</li>
+    <li>For the first 1.5 s keep your hand away and still (measuring the baseline).</li>
+    <li>"Reflected signal SNR" should be 20 dB or more. If lower, raise the volume or lower the frequency to 19 kHz or 18 kHz.</li>
+    <li>10–20 cm in front of the screen, quickly <b>push your palm toward the screen 5 times</b>, rest a few seconds, then <b>pull 5 times</b>.</li>
+    <li>Keep your hand away and still for 10 s, and check that the numbers don’t rise on their own.</li>
+    <li><b>Band check</b> once, then <b>Copy results</b> → paste into Discord.</li>
   </ol>
 </details>
 <details>
-  <summary>측정 정보</summary>
+  <summary>Measurement info</summary>
   <pre id="info">–</pre>
-  <textarea id="out" rows="4" placeholder="복사가 안 되면 여기에 결과가 나와요"></textarea>
+  <textarea id="out" rows="4" placeholder="If copying fails, the results appear here"></textarea>
 </details>
 
 <script>
@@ -152,7 +152,7 @@ async function start(opt = {}) {
   const raw = opt.raw ?? $('raw').checked;
   warn('');
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    warn('이 브라우저에서는 마이크를 쓸 수 없어요. 크롬으로 열어 주세요.');
+    warn('This browser can’t use the microphone. Please open it in Chrome.');
     return false;
   }
   const ctx = new AudioContext({ latencyHint: 'interactive' });
@@ -162,7 +162,7 @@ async function start(opt = {}) {
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio, video: false });
   } catch (e) {
-    warn('마이크를 열 수 없어요 (' + e.name + '). 주소창 왼쪽 아이콘 → 마이크 허용 후 새로고침해 주세요.');
+    warn('Can’t open the microphone (' + e.name + '). Click the icon left of the address bar → allow the microphone, then reload.');
     log({ type: 'error', name: e.name, msg: e.message });
     try { await ctx.close(); } catch (_) { /* ignore */ }
     return false;
@@ -205,11 +205,11 @@ async function start(opt = {}) {
 }
 
 function showSettings(s, ctxRate) {
-  const mark = (v) => (v === false ? '✅ 꺼짐' : v === true ? '⚠️ 켜짐' : '? 모름');
-  $('settings').textContent = `마이크 ${s.sampleRate ? s.sampleRate + 'Hz' : '?'} · 처리 ${ctxRate}Hz · 에코 제거 ${mark(s.echoCancellation)} · 잡음 억제 ${mark(s.noiseSuppression)} · 자동 음량 ${mark(s.autoGainControl)}`;
+  const mark = (v) => (v === false ? '✅ off' : v === true ? '⚠️ on' : '? unknown');
+  $('settings').textContent = `Mic ${s.sampleRate ? s.sampleRate + 'Hz' : '?'} · processing ${ctxRate}Hz · echo cancellation ${mark(s.echoCancellation)} · noise suppression ${mark(s.noiseSuppression)} · auto gain ${mark(s.autoGainControl)}`;
   $('sr').textContent = (s.sampleRate || ctxRate) + ' Hz';
   if (s.sampleRate && s.sampleRate < 40000) {
-    warn(`마이크가 ${s.sampleRate}Hz라서 ${s.sampleRate / 2}Hz 위는 못 받아요. 다른 마이크를 고르거나 윈도우 소리 설정에서 마이크 형식을 48000Hz로 바꿔 주세요.`);
+    warn(`The mic runs at ${s.sampleRate}Hz, so it can’t hear above ${s.sampleRate / 2}Hz. Pick another mic, or set the mic format to 48000 Hz in Windows Sound settings.`);
   }
 }
 
@@ -297,7 +297,7 @@ function detect(m, dUp, dDown, now) {
     st.counts[c]++;
     $(c === 'push' ? 'nPush' : 'nPull').textContent = st.counts[c];
     const g = $('gesture');
-    g.textContent = c === 'push' ? '밀기 ⟶' : '⟵ 당기기';
+    g.textContent = c === 'push' ? 'Push ⟶' : '⟵ Pull';
     g.className = c;
     st.clearAt = now + 700;
     const ev = {
@@ -323,11 +323,11 @@ function render(m, dUp, dDown, now) {
   $('vUp').textContent = st.base ? dUp.toFixed(1) : '…';
   $('vDown').textContent = st.base ? dDown.toFixed(1) : '…';
   const g = $('gesture');
-  if (st.tone && now < st.calibUntil) { g.textContent = '기준값 잡는 중… 손 치우기'; g.className = ''; }
-  else if (g.textContent.startsWith('기준값')) g.textContent = '–';
+  if (st.tone && now < st.calibUntil) { g.textContent = 'Measuring baseline… hand away'; g.className = ''; }
+  else if (g.textContent.startsWith('Baseline')) g.textContent = '–';
   if (st.clearAt && now > st.clearAt) { g.textContent = '–'; g.className = ''; st.clearAt = 0; }
   if (st.tone && now > st.calibUntil && !(m.snr >= 15)) {
-    warn('반사 신호가 약해요 (SNR 15dB 미만). 음량을 올리거나, 헤드폰을 빼거나, 주파수를 낮춰 보세요.', true);
+    warn('The reflected signal is weak (SNR below 15 dB). Turn the volume up, unplug headphones, or try a lower frequency.', true);
   } else if ($('warn').dataset.auto === '1') warn('');
   drawZoom(m);
   drawWide();
@@ -410,7 +410,7 @@ async function bandCheck() {
   if (!st.running || st.busy) return null;
   st.busy = true;
   $('check').disabled = true;
-  $('gesture').textContent = '대역 점검 중…';
+  $('gesture').textContent = 'Checking bands…';
   $('gesture').className = '';
   const keepF = st.f0, keepTone = st.tone, nyq = st.ctx.sampleRate / 2;
   setTone(false);
@@ -433,7 +433,7 @@ async function bandCheck() {
   $('gesture').textContent = '–';
   st.lastCheck = sweep;
   log({ type: 'bandcheck', sweep });
-  $('info').textContent = JSON.stringify(st.startInfo, null, 2) + '\n\n대역 점검 (주파수: SNR)\n' +
+  $('info').textContent = JSON.stringify(st.startInfo, null, 2) + '\n\nBand check (frequency: SNR)\n' +
     sweep.map((s) => `${(s.f / 1000).toFixed(1)}kHz: ${s.snr} dB`).join('\n');
   return sweep;
 }
@@ -455,8 +455,8 @@ $('copy').onclick = async () => {
   $('out').value = text;
   try {
     await navigator.clipboard.writeText(text);
-    $('copy').textContent = '복사됨 ✓';
-    setTimeout(() => { $('copy').textContent = '결과 복사'; }, 1500);
+    $('copy').textContent = 'Copied ✓';
+    setTimeout(() => { $('copy').textContent = 'Copy results'; }, 1500);
   } catch (_) {
     $('out').closest('details').open = true;
     $('out').select();
@@ -470,7 +470,7 @@ $('freq').oninput = () => {
 $('vol').oninput = () => {
   if (st.ctx && st.tone) st.gain.gain.setTargetAtTime(Number($('vol').value), st.ctx.currentTime, 0.03);
 };
-$('raw').onchange = () => { if (st.running) warn('보정 설정은 정지 후 다시 시작해야 적용돼요.'); };
+$('raw').onchange = () => { if (st.running) warn('Calibration settings apply after you stop and start again.'); };
 
 // Unattended self-test: ?auto=1&secs=8&sweep=1
 async function auto() {
