@@ -906,7 +906,10 @@ async function recStop() {
     CMP.rows = null; CMP.vframes = null; sub = 'compare'; base = cbase;
   }
   rec.chunks = [];
-  const where = await saveFiles(files, sub);
+  rec.saving = true; $('btnRec').disabled = true;
+  bigNote(`💾 Saving ${files.length} files… don’t close or reload this tab`, 120000);
+  let where = '';
+  try { where = await saveFiles(files, sub); } finally { rec.saving = false; $('btnRec').disabled = false; }
   $('recInfo').textContent = `Saved (${where}): ${base}.wav · .json, ${meta.seconds}s. Let Bravo know`;
   bigNote(saveFiles.toFolder ? `✅ Saved: ${base} (${meta.seconds}s, ${where})` : `⬇️ ${base}: ${where}`, 7000);
 }
@@ -1037,7 +1040,9 @@ $('wavFile').onchange = (e) => openRecording([...e.target.files]);
 $('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnDebug').onclick = () => { const s = $('debug'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
-$('btnRec').onclick = () => (rec.on ? recStop() : recStart());
+$('btnRec').onclick = () => (rec.saving ? null : rec.on ? recStop() : recStart());
+// leaving or reloading during a recording or while its files are written would lose them: ask the browser to confirm
+addEventListener('beforeunload', (e) => { if (rec.on || rec.saving) { e.preventDefault(); e.returnValue = ''; } });
 function fillCalibs() {
   const C = (window.Bat3D && window.Bat3D.CALIBS) || null, sel = $('calibSel');
   if (!C) return;
