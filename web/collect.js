@@ -150,7 +150,10 @@
   // left/right check session: n swipes each way + 5 push + 5 pull. swipe.js v3 learns push/pull as a class of
   // its own, and they also measure how often a push/pull would be misread as a swipe
   const LR_PP = 5;
-  const WEAK_ECHO_DB = 18; // swipe echo peak (weaker tone) below this = hand too far for left/right (bravo)
+  // swipe echo peak (weaker tone, dB over the floor). Bravo on 8 sessions: Galaxy Book 205859 (best left/right) has a
+  // median of 17.5 dB, normal sessions 22-23, the 55 cm and no-signal sessions ~15. So: warn per swipe under 14 dB
+  // (1-2 of 20 in good sessions), and blame distance for a failed check when the median is under 16
+  const WEAK_ECHO_DB = 14, FAR_ECHO_DB = 16;
   function planLr(n) {
     const list = [];
     for (let i = 0; i < n; i++) list.push('left', 'right');
@@ -364,7 +367,7 @@
     // median echo peak of the swipes (dB over the floor): 22 at 20 cm vs 15 at 55 cm on two MacBooks
     const eks = items.filter((x) => (x.kind === 'left' || x.kind === 'right') && Number.isFinite(x.feat.ePk)).map((x) => x.feat.ePk).sort((a, b) => a - b);
     const echoDb = eks.length ? eks[eks.length >> 1] : null;
-    const why = r.ok ? '' : echoDb != null && echoDb < WEAK_ECHO_DB ? LR_REASON.far
+    const why = r.ok ? '' : echoDb != null && echoDb < FAR_ECHO_DB ? LR_REASON.far
       : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
       : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak
       : /push\/pull in the check/.test(r.reason) ? LR_REASON.fewpp : LR_REASON.not;
