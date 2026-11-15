@@ -82,7 +82,7 @@
     <li>📷 Tape over the webcam. This page never turns the camera on</li>
     <li>🔊 Use the laptop’s built-in speakers and mic (unplug Bluetooth and earphones). Plug in the charger and set the volume to 50% or more</li>
     <li>Press ▶ Start and allow the microphone</li>
-    <li>✋ Hold your hand about 20 cm above the laptop’s front edge (the tape mark) and press ◎ Center (space). Then move it left-right and toward-away briskly (about 20 cm a second)</li>
+    <li>✋ Hold your hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam, and press ◎ Center (space). Then move it left-right and toward-away briskly (about 20 cm a second)</li>
   </ol>
   <div class="row"><button id="introStart" class="go">▶ Start</button><button id="introClose">Close</button><span class="note">Sound is analysed only inside this browser and never sent anywhere</span></div>
   <div id="introErr"></div>
@@ -91,7 +91,7 @@
   <h1>🦇 Bat Ears hologram <small>Hand position from sound alone, no webcam</small></h1>
   <button id="btnStart" class="go">▶ Start</button>
   <button id="btnStop">■ Stop</button>
-  <button id="btnCenter" title="Hold your hand at the tape mark and press this (space bar)">◎ Center</button>
+  <button id="btnCenter" title="Hold your hand at its spot (25–35 cm above the keyboard) and press this (space bar)">◎ Center</button>
   <label class="file" title="Plays a teach session WAV instead of the mic. Pick the same session’s _vision.csv, .json and .calib.json too to overlay the webcam ground truth (green hand)">📂 Play recording<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
   <button id="btnSettings">⚙ Settings</button>
   <button id="btnAbout">ⓘ Credits</button>
@@ -163,20 +163,20 @@
 <div class="hud" id="acc">
   <div class="big">🔊 <b>Sound only</b> · 📷 Webcam off</div>
   <div id="accNums">Accuracy: unconfirmed</div>
-  <div class="note" style="margin-top:4px">Keep your hand above the laptop’s front edge, 18–25 cm above the desk (25–45 cm from the webcam), and move it briskly like in teach (about 20 cm a second). Very slow movement (below 5–8 cm a second) is hard for sound to catch. Sound only measures movement, so it doesn’t know absolute position, and when your hand stops it drifts slowly back to the center. Height is barely caught with the laptop speakers alone.</div>
+  <div class="note" style="margin-top:4px">Keep your hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam: height tracks best there (correlation 0.81, vs 0.58 below 17 cm, where up-down mixes with depth near the mic), and move it briskly like in teach (about 20 cm a second). Very slow movement (below 5–8 cm a second) is hard for sound to catch. Sound only measures movement, so it doesn’t know absolute position, and when your hand stops it drifts slowly back to the center. Height is barely caught with the laptop speakers alone.</div>
   <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
-  <div id="hgauge" title="Height: ±12 cm from the tape mark"><div class="hgTrack"><div class="hgMid"></div><div id="hgDot"></div></div><span>height</span></div>
+  <div id="hgauge" title="Height: ±12 cm from the centre"><div class="hgTrack"><div class="hgMid"></div><div id="hgDot"></div></div><span>height</span></div>
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115115915" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
+<script src="bat3d.js?v=20261115122206" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script>
 // ?engine=v15: the 15th engine (8 sittings, before any newer one) instead of the current bat3d.js, to fall back in one click
-if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115115915"><\/script>');
+if (new URLSearchParams(location.search).get('engine') === 'v15') document.write('<script src="bat3d_v15.js?v=20261115122206"><\/script>');
 </script>
-<script src="vision3d.browser.js?v=20261115115915"></script>
+<script src="vision3d.browser.js?v=20261115122206"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -483,7 +483,7 @@ async function start(m, file) {
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
-  if (m === 'mic') $('status').textContent = 'Listening · move your hand about 20 cm above the laptop’s front edge (the tape mark)';
+  if (m === 'mic') $('status').textContent = 'Listening · hand 25–35 cm above the keyboard, a little higher than the top of the screen, within 45 cm of the webcam';
 }
 let startT = 0;
 // another Bat Ears tab playing its tones spoils this one: ask the other tabs every 3 s while listening (dsp.js pages answer too)

@@ -322,7 +322,7 @@ registerProcessor('bat-iq6', BatIQ6);
         const merger = ctx.createChannelMerger(2); gainNode = ctx.createGain(); gainNode.gain.value = vol;
         [18000, 19500].forEach((f, i) => { const osc = ctx.createOscillator(); osc.frequency.value = f; const g = ctx.createGain(); g.gain.value = 0.5; osc.connect(g).connect(merger, 0, i); osc.start(); oscs.push(osc); });
         merger.connect(gainNode).connect(ctx.destination);
-        status((solver.cal ? 'Listening · hand above the laptop’s front edge, 18–25 cm above the desk, 25–45 cm from the webcam (the calibrated range)' : 'Listening · hand 10–25 cm above the middle-to-front of the keyboard') + (cfg.phone ? ` · phones ${cfg.freqs.slice(2).join('/')}Hz` : ''));
+        status((solver.cal ? 'Listening · hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam' : 'Listening · hand 10–25 cm above the middle-to-front of the keyboard') + (cfg.phone ? ` · phones ${cfg.freqs.slice(2).join('/')}Hz` : ''));
       } else {
         const buf = await ctx.decodeAudioData(arrayBuffer);
         src = ctx.createBufferSource(); src.buffer = buf; src.connect(node); src.start();

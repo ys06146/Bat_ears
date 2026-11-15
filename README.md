@@ -12,7 +12,7 @@ Your laptop hears where your hand is, in 3D, with no camera. Its two speakers pl
 
 ### 3D hologram (main demo)
 1. Tape over the webcam (the page never opens it). Open `hologram.html` in Chrome, with the built-in speakers and mic at 50 % volume or more.
-2. Press **▶ Start** and allow the microphone. Hold your hand over the laptop's front edge, about 20 cm up, press **◎** (space), then move it left-right and toward-away briskly.
+2. Press **▶ Start** and allow the microphone. Hold your hand 25–35 cm above the keyboard (a little higher than the top of the screen), within 45 cm of the webcam, press **◎** (space), then move it left-right and toward-away briskly.
 3. If the hand turns amber it has left the taught zone: come back and press ◎. Sound measures movement, not position, so the hand drifts back to the centre when you stop.
 4. No internet: run `python -m http.server 8000` in `web/` and open http://localhost:8000/hologram.html (three.js is bundled).
 
