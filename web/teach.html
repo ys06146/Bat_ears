@@ -124,7 +124,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   </div>
 </aside>
 </main>
-<script src="robust.js?v=20261115030207"></script><script src="swipe.js?v=20261115030207"></script><script src="wave.js?v=20261115030207"></script><script src="iq.js?v=20261115030207"></script><script src="dsp.js?v=20261115030207"></script><script src="recorder.js?v=20261115030207"></script>
+<script src="robust.js?v=20261115035640"></script><script src="swipe.js?v=20261115035640"></script><script src="wave.js?v=20261115035640"></script><script src="iq.js?v=20261115035640"></script><script src="dsp.js?v=20261115035640"></script><script src="recorder.js?v=20261115035640"></script>
 <script>
 /* Bat Ears teach mode: the webcam is a temporary teacher. MediaPipe HandLandmarker (VIDEO mode, one hand, no
  * smoothing) logs where the hand is while the engine plays its stereo tones (18 / 19.5 kHz) and records the raw mic
@@ -203,16 +203,16 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const hk = Object.assign({ hx: 0, hz: 8, hh: 1.5 }, store.get('batears-teach-hkey', {}));
   const AGREED = { A: { x: 25, h: 25, z: -2 }, B: { x: -25, h: 40, z: -2 } };   // bravo's starting layout, hinge frame (cm)
   const POS = ['x', 'h', 'z'];   // H-key frame: right +, up +, toward the person +
-  const OFF = { x: 'hx', h: 'hh', z: 'hz' };
   const r1 = (v) => Math.round(v * 10) / 10;
   const agreedH = (id) => { const a = AGREED[id]; return a ? { x: r1(a.x - hk.hx), h: r1(a.h - hk.hh), z: r1(a.z - hk.hz) } : null; };
-  let phones = store.get('batears-teach-phones-h', null);
-  if (!phones) {   // positions typed before the H-key change were in the hinge frame: convert them once
+  let phones = store.get('batears-teach-phones-h2', null), movedOld = false;
+  if (!phones) {
+    // the page before 11/15 04:10 had no H-key inputs; 서진 measured those numbers from the H key, so they move over as they are
     const old = store.get('batears-teach-phones', null);
-    phones = old ? old.map((p) => { const q = { ...p }; POS.forEach((k) => { const v = parseFloat(p[k]); q[k] = Number.isFinite(v) ? String(r1(v - hk[OFF[k]])) : ''; }); return q; })
-      : [{ on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' }, { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' }];
+    phones = old || [{ on: true, id: 'A', hz: 20500, x: '', h: '', z: '', note: '' }, { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' }];
+    movedOld = !!old && old.some((p) => POS.some((k) => Number.isFinite(parseFloat(p[k]))));
   }
-  const savePhones = () => store.set('batears-teach-phones-h', phones);
+  const savePhones = () => store.set('batears-teach-phones-h2', phones);
   const hingeOf = (p) => {
     const v = POS.map((k) => parseFloat(p[k])), f = (i, o) => (Number.isFinite(v[i]) ? r1(o + v[i]) : null);
     return { x_right_cm: f(0, hk.hx), h_cm: f(1, hk.hh), z_front_cm: f(2, hk.hz) };
@@ -256,17 +256,69 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     markNeed();
     renderHinge();
   }
+  // phone level = the peak within +-3 bins of its Hz over the median of the bins 120-350 Hz away (dB). The engine's
+  // foreign-tone detector needs 30 dB over the whole 15-23 kHz floor, which a phone across the desk often doesn't reach
+  const LV_OK = 15, LV_WEAK = 8;
+  const levels = new Map();   // Hz -> the last few levels
+  function levelAt(hz) {
+    const s = E.spectrum ? E.spectrum() : null;
+    if (!s) return null;
+    const a = s.db, k0 = Math.round(Number(hz) / s.binHz);
+    if (!(k0 > 70 && k0 < a.length - 70)) return null;
+    let pk = -Infinity;
+    for (let k = k0 - 3; k <= k0 + 3; k++) if (a[k] > pk) pk = a[k];
+    const ring = [];
+    for (let d = 20; d <= 60; d++) ring.push(a[k0 - d], a[k0 + d]);
+    ring.sort((x, y) => x - y);
+    const v = pk - ring[ring.length >> 1];
+    return Number.isFinite(v) ? v : null;
+  }
+  const levelOf = (hz) => { const xs = (levels.get(Number(hz)) || []).slice().sort((x, y) => x - y); return xs.length ? xs[xs.length >> 1] : null; };
+  const heardOf = (hz) => heardHz(hz) || (levelOf(hz) ?? -99) >= LV_WEAK;
+  // the strongest narrow peaks in 15-23.5 kHz other than the laptop's own two tones: what the mic really hears
+  function topPeaks(n) {
+    const s = E.spectrum ? E.spectrum() : null;
+    if (!s) return [];
+    const a = s.db, lo = Math.ceil(15000 / s.binHz), hi = Math.min(a.length - 7, Math.floor(23500 / s.binHz));
+    const vals = [];
+    for (let k = lo; k <= hi; k++) vals.push(a[k]);
+    vals.sort((x, y) => x - y);
+    const floor = vals[vals.length >> 1], own = E.config.stereoFreqs || [], out = [];
+    for (let k = lo + 6; k <= hi; k++) {
+      const v = a[k];
+      if (!(v > a[k - 1] && v >= a[k + 1]) || v - a[k - 6] < 8 || v - a[k + 6] < 8) continue;
+      const f = k * s.binHz;
+      if (own.some((o) => Math.abs(f - o) < 350)) continue;
+      if (v - floor >= 15) out.push({ hz: Math.round(f), db: Math.round(v - floor) });
+    }
+    return out.sort((x, y) => y.db - x.db).slice(0, n);
+  }
+  function measure() {
+    for (const p of phones) {
+      const v = levelAt(p.hz);
+      if (v == null) continue;
+      const k = Number(p.hz), xs = levels.get(k) || [];
+      xs.push(v);
+      if (xs.length > 5) xs.shift();
+      levels.set(k, xs);
+    }
+    renderHeard();
+  }
   function renderHeard() {
     const on = !!audio.on;
     document.querySelectorAll('#phones tbody tr').forEach((tr) => {
       const p = phones[Number(tr.dataset.i)];
       const cell = tr.querySelector('.heard');
       if (!p || !cell) return;
-      cell.innerHTML = !on ? '–' : heardHz(p.hz) ? '<span class="ok">✅ 들림</span>' : `<span class="${p.on ? 'bad' : 'muted'}">❌ 안 들림</span>`;
+      const lv = levelOf(p.hz), db = lv == null ? '' : ` ${lv >= 0 ? '+' : ''}${Math.round(lv)}dB`;
+      cell.innerHTML = !on ? '–' : heardHz(p.hz) || (lv ?? -99) >= LV_OK ? `<span class="ok">✅ 들림${db}</span>`
+        : (lv ?? -99) >= LV_WEAK ? `<span class="warn">⚠️ 약함${db}</span>` : `<span class="${p.on ? 'bad' : 'muted'}">❌ 안 들림${db}</span>`;
     });
     const mine = phones.filter((p) => p.on).map((p) => Number(p.hz));
     const other = (E.foreign || []).filter((k) => !mine.some((hz) => Math.abs(k * 1000 - hz) <= 80));
-    $('foreignInfo').innerHTML = on && other.length ? `<span class="warn">⚠️ 표에 없는 초음파: ${other.map((k) => k.toFixed(1) + 'kHz').join(', ')} (다른 기기?)</span>` : '';
+    const peaks = on ? topPeaks(4) : [];
+    $('foreignInfo').innerHTML = (on && other.length ? `<span class="warn">⚠️ 표에 없는 초음파: ${other.map((k) => k.toFixed(1) + 'kHz').join(', ')} (다른 기기?)</span><br>` : '')
+      + (peaks.length ? `🔎 들리는 초음파 봉우리: ${peaks.map((x) => `${(x.hz / 1000).toFixed(2)}k +${x.db}dB`).join(' · ')}` : '');
   }
   $('phones').addEventListener('input', (e) => {
     const tr = e.target.closest('tr'), k = e.target.dataset.k;
@@ -300,7 +352,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const phoneMeta = () => phones.filter((p) => p.on).map((p) => ({
     id: String(p.id), hz: numOr(p.hz), ...hingeOf(p),
     from_h_key_cm: { right: numOr(p.x), up: numOr(p.h), toward_user: numOr(p.z) },
-    note: String(p.note || ''), heard: audio.on ? heardHz(p.hz) : null,
+    note: String(p.note || ''), heard: audio.on ? heardOf(p.hz) : null, level_db: audio.on ? rd(levelOf(p.hz), 1) : null,
   }));
   ['angle', 'palm', 'memo'].forEach((k) => {
     const v = store.get('batears-teach-' + k, null);
@@ -567,6 +619,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const now = performance.now();
     if (now - audio.lastInfo > 500) {
       audio.lastInfo = now;
+      measure();
       const i = E.info || {};
       const proc = i.ec || i.ns || i.agc ? '<span class="bad">⚠️ 마이크 처리 켜짐</span>' : '처리 꺼짐';
       $('audioInfo').innerHTML = `🎤 ${i.micRate || i.ctxRate || '?'}Hz ${i.ch || '?'}ch · ${proc} · 톤 ${(E.config.stereoFreqs || []).map((x) => x / 1000).join('/')}kHz · SNR ${fin(f.snr) ? f.snr.toFixed(0) : '–'}dB${f.calibrating ? ' · 보정 중 (손 치워요)' : ''}`;
@@ -663,7 +716,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const t0 = performance.now();
     sess = { t0, startedAt: new Date().toISOString(), session: R.session, plan: plan(t0), i: 0, done: false, capOk,
       vision: [], events: [], bursts: [], foreign: [], iq: [], iqUpTo: null, U: 0, W: 0, iqLive: false,
-      phonesStart: phoneMeta(), foreignStart: (E.foreign || []).slice() };
+      phonesStart: phoneMeta(), foreignStart: (E.foreign || []).slice(), peaksStart: topPeaks(6) };
     sess.iqTimer = setInterval(() => iqPoll(false), 100);
     $('setup').classList.add('hidden');
     $('result').classList.add('hidden');
@@ -921,6 +974,8 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       phone_position: 'measured from the centre of the H key to the phone speaker (from_h_key_cm: right +, up +, toward the person +); x_right_cm / h_cm / z_front_cm = the same point in the hinge frame (laptop centre line, desk surface, hinge line) = h_key offset + measurement',
       engine: E.info || null, stereoFreqs: (E.config.stereoFreqs || []).slice(), volume: E.config.volume,
       phones: phoneMeta(), phones_at_start: sess.phonesStart, foreign_at_start: sess.foreignStart, foreign_at_end: (E.foreign || []).slice(),
+      phone_level_note: `level_db = peak within +-3 FFT bins of the phone's Hz over the median of the bins 120-350 Hz away; heard = level >= ${LV_WEAK} dB or the engine's foreign-tone detector (30 dB over the 15-23 kHz floor) found it`,
+      peaks_at_start: sess.peaksStart, peaks_at_end: topPeaks(6),
       camera: { label: cam.track ? cam.track.label : '', width: settings.width || cam.w, height: settings.height || cam.h, frameRate: settings.frameRate || null,
         deviceId: settings.deviceId || '', facingMode: settings.facingMode || '', resizeMode: settings.resizeMode || '' },
       vision: {
@@ -966,7 +1021,8 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     lines.push('');
     lines.push(`세션 ${mmss((m.tStop - m.tStart))}${m.early ? ' (중간에 멈춤)' : ''} · 영상 ${v.frames}프레임 ${v.fps || '–'}fps · 손 보임 ${v.present_ratio != null ? Math.round(100 * v.present_ratio) : '–'}% · 지연 중앙값 ${v.latency_ms_median ?? '–'}ms`);
     lines.push(m.wav ? `WAV ${m.wav.channels}ch ${m.wav.rate}Hz ${m.wav.seconds}초${m.wav.capped ? ' ⚠️ 잘림' : ''} · I/Q ${m.iq.bins}칸${m.iq.live ? '' : ' ⚠️ 비어 있음'} · 🦇 제스처 ${m.events.length}개` : '⚠️ WAV를 녹음하지 못했어요');
-    if (m.phones.length) lines.push(`📱 ${m.phones.map((p) => `${p.id} ${p.hz}Hz ${p.heard ? '✅들림' : '❌안들림'}`).join(' · ')}`);
+    if (m.phones.length) lines.push(`📱 ${m.phones.map((p) => `${p.id} ${p.hz}Hz ${p.heard ? '✅들림' : '❌안들림'}${p.level_db != null ? ` ${p.level_db}dB` : ''}`).join(' · ')}`);
+    if (m.peaks_at_end && m.peaks_at_end.length) lines.push(`🔎 들린 초음파 봉우리: ${m.peaks_at_end.map((x) => `${(x.hz / 1000).toFixed(2)}k +${x.db}dB`).join(' · ')}`);
     if (m.palm_width_cm == null) lines.push('❓ 손바닥 폭(cm)이 비어 있어요. 다음 세션 전에 적어 주세요');
     lines.push('');
     lines.push('단계 | 손 보임 | 📷 본 것 | 🦇 들은 것');
@@ -984,6 +1040,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   window.addEventListener('beforeunload', (e) => { if (sess && !sess.done) { e.preventDefault(); e.returnValue = ''; } });
 
   renderPhones();
+  if (movedOld) { savePhones(); setStatus('ℹ️ 전에 적은 폰 위치를 H키 기준 값으로 그대로 옮겼어요. 맞는지 확인해 주세요'); }
   dataDir(false).then(showFolder);
   window.BatTeach = { get sess() { return sess; }, cam, audio, get vis() { return vis; }, plan, STEPS, derive, visionEvents, finish };   // for tests
 })();

@@ -13,6 +13,7 @@
  *   config                 tunables (threshold, margin, minSnr, ...)
  *   info                   mic / audio-context info after start
  *   drawZoom(canvas), drawWide(canvas)
+ *   spectrum()             -> { db, binHz } | null   the latest mic spectrum (dB per FFT bin, read-only)
  *
  * events
  *   'gesture' { kind: 'push' | 'pull' | 'wave' | 'left' | 'right', speed (m/s, recent peak), strength (dB), t (ms), simulated }
@@ -1211,6 +1212,8 @@ registerProcessor('bat-tap', BatTap);`;
     captureStart, captureStop,                      // raw mic WAV (all channels) for offline analysis
     // the live I/Q tracker's 2D track (stereo only; null otherwise): { t[], u[], w[], area, n } (iq.js trackBetween)
     iqTrack(ta, tb, every) { return st.iq && st.iq.trackBetween ? st.iq.trackBetween(ta, tb, every) : null; },
+    // the latest mic spectrum for level meters (teach.html): { db: the analyser's dB per FFT bin (read-only), binHz } or null
+    spectrum() { return st.running && st.data ? { db: st.data, binHz: st.binHz } : null; },
     setFreq(hz) {
       if (st.busy) return;
       if (!st.running) { st.f0 = Number(hz); return; }
