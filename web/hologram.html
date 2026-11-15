@@ -47,6 +47,10 @@
   #hgDot.out { background: var(--warn); box-shadow: 0 0 10px var(--warn); }
   @media (max-width: 760px) { #hgauge { display: none; } }
   #alert { left: 50%; top: 84px; transform: translateX(-50%); width: max-content; max-width: min(760px, calc(100% - 32px)); font-size: 18px; font-weight: 800; color: #ffd180; border-color: var(--warn); display: none; text-align: center; }
+  #cmp { left: 50%; bottom: 12px; transform: translateX(-50%); display: none; font-size: 13px; max-width: min(640px, calc(100% - 32px)); }
+  #cmp video { width: 160px; border-radius: 8px; transform: scaleX(-1); float: left; margin-right: 10px; }
+  #cmp b { color: #69f0ae; }
+  button.cmpOn { background: #1b5e20; border-color: #69f0ae; }
   #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
   #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
@@ -92,6 +96,7 @@
   <button id="btnSettings">⚙ 설정</button>
   <button id="btnAbout">ⓘ 출처</button>
   <button id="btnDebug">🔍 진단</button>
+  <button id="btnCmp" title="웹캠 손(초록, 정답)과 소리 손을 같이 그려 실시간으로 비교해요. ⏺와 함께 쓰면 학습 데이터(compare/)로 저장돼요. 데모 때는 꺼요">👁 비교</button>
   <button id="btnFilm" title="패널을 숨기고 전체 화면으로 (H: 패널, F: 전체 화면, 스페이스: 가운데)">🎬 촬영 모드</button>
   <button id="btnRec" title="마이크 원음과 엔진 값을 저장해요 (브라보 분석용)">⏺ 녹화</button>
   <span id="status" class="grow">대기 중 · ▶ 시작을 누르고 마이크를 허용하세요</span>
@@ -99,6 +104,7 @@
 <div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
 <div class="hud" id="toast"></div>
 <div class="hud" id="alert"></div>
+<div class="hud" id="cmp"><video id="cmpVideo" muted playsinline></video><div><b>👁 웹캠 비교</b> <span class="note">(초록 손 = 웹캠 정답 · 이 화면만 카메라를 켜요)</span></div><div id="cmpStat">카메라를 켜는 중…</div><div style="clear:both"></div></div>
 <div class="hud" id="settings">
   <h3>보정 (브라보)</h3>
   <label><select id="calibSel"><option value="galaxy">노트북만 (기본)</option></select></label>
@@ -392,6 +398,7 @@ function onFrame(f) {
   const sc = Number($('smooth').value);
   disp.pos = target.map((v, i) => euro[i].filter(v, dt, sc));
   disp.q = f.q; disp.moving = f.moving; disp.frames++; disp.t = t;
+  if (CMP.on) { const tp = performance.now(); CMP.snd.push({ t: tp, p: disp.pos.slice() }); while (CMP.snd.length && CMP.snd[0].t < tp - 2000) CMP.snd.shift(); }
   if (disp.frames % 3 === 0) { hist.push([t, ...vsub(disp.cont, H0), ...vsub(disp.pos, HOME)]); while (hist.length && hist[0][0] < t - 6000) hist.shift(); }
   if (rec.on) rec.log.push([+(t / 1000).toFixed(3), ...f.raw.map((v) => +v.toFixed(5)), ...disp.pos.map((v) => +v.toFixed(5)), f.moving ? 1 : 0, f.levelDb != null ? +f.levelDb.toFixed(1) : null,
     ...(f.amp || []).map((v) => +v.toExponential(3)), ...(f.q || []).map((v) => +v.toFixed(2)), ...(f.act || []).map((v) => +v.toFixed(3)), +performance.now().toFixed(1)]);
@@ -527,7 +534,7 @@ function stop() {
 }
 // ◎: the hand is at the centre now (live: the tape mark; replay: where the webcam sees it)
 function recenter() {
-  const g = ghost.on ? ghostAt(disp.s) : null;
+  const g = CMP.on && CMP.pts ? CMP.pts : ghost.on ? ghostAt(disp.s) : null;
   HOME = g ? palmOf(g) : HOME0.slice();
   resetDisplay();
   ghost.errs.length = 0;
@@ -660,6 +667,138 @@ function renderDebug() {
   // hist rows: [t, raw x, y, z (vs the engine origin), shown x, y, z (vs the centre)]
   line(1, 'rgba(239,83,80,.8)'); line(4, '#4fd8ff'); line(3, 'rgba(255,183,77,.8)'); line(6, '#3d7bff'); line(5, 'rgba(200,200,200,.6)');
 }
+// ------------------------------------------------------------------ 👁 compare: the webcam as live truth (off by default)
+const MP_VER = '0.10.21', MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
+const MP_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+const CMP = { on: false, stream: null, video: null, lmk: null, delegate: '', cam: null, frames: [], pts: null, palm: null, pairs: [], snd: [],
+  lastTs: 0, seen: 0, present: 0, anchored: false, palmCm: 8.5, rows: null, vrec: null, vchunks: [], vframes: null, vstart: null, vstop: null, mime: '' };
+try { const v = Number(localStorage.getItem('batears-palm-cm')); if (v >= 5 && v <= 12) CMP.palmCm = v; } catch (e) { /* default */ }
+function cmpCalib() { const B = window.Bat3D || {}; return calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)) || null; }
+async function cmpStart() {
+  if (CMP.on) return;
+  if (!window.BatVision) { $('cmpStat').textContent = '⚠️ vision3d.browser.js가 없어요'; return; }
+  $('cmp').style.display = 'block'; $('btnCmp').classList.add('cmpOn'); $('cmpStat').textContent = '카메라를 켜는 중…';
+  try {
+    CMP.stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: false });
+    CMP.video = $('cmpVideo'); CMP.video.srcObject = CMP.stream; await CMP.video.play();
+    $('cmpStat').textContent = '손 인식 모델을 불러오는 중… (처음 한 번 몇 초)';
+    const mod = await import(`${MP_BASE}/vision_bundle.mjs`), files = await mod.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
+    const opts = (delegate) => ({ baseOptions: { modelAssetPath: MP_MODEL, delegate }, runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 });
+    try { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('GPU')); CMP.delegate = 'GPU'; } catch (e) { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('CPU')); CMP.delegate = 'CPU'; }
+    CMP.cam = window.BatVision.camFromCalib(cmpCalib(), { W: CMP.video.videoWidth || 1280, H: CMP.video.videoHeight || 720 });
+    Object.assign(CMP, { on: true, frames: [], pairs: [], pts: null, palm: null, seen: 0, present: 0, anchored: false, lastTs: 0 });
+    CMP.video.requestVideoFrameCallback(cmpFrame);
+    $('cmpStat').textContent = '손을 카메라에 보여 주세요';
+  } catch (e) {
+    $('cmpStat').textContent = '⚠️ 카메라·모델을 켜지 못했어요: ' + (e.message || e);
+    cmpStop(true);
+  }
+}
+function cmpStop(keepPanel) {
+  CMP.on = false; CMP.pts = null; CMP.palm = null;
+  if (CMP.vrec && CMP.vrec.state !== 'inactive') { try { CMP.vrec.stop(); } catch (e) { /* ignore */ } }
+  if (CMP.stream) CMP.stream.getTracks().forEach((t) => t.stop());
+  CMP.stream = null;
+  $('btnCmp').classList.remove('cmpOn');
+  if (!keepPanel) $('cmp').style.display = 'none';
+}
+// the sound hand's drawn position by time (performance.now), to pair with each camera frame
+function sndAt(t) {
+  const S = CMP.snd; if (!S.length) return null;
+  let lo = 0, hi = S.length - 1;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (S[m].t < t) lo = m + 1; else hi = m; }
+  return Math.abs(S[lo].t - t) < 60 ? S[lo].p : null;
+}
+function cmpFrame(now, md) {
+  if (!CMP.on || !CMP.video) return;
+  const tcap = md && Number.isFinite(md.captureTime) ? md.captureTime : md && Number.isFinite(md.expectedDisplayTime) ? md.expectedDisplayTime : now;
+  if (CMP.vframes && md) CMP.vframes.push([+performance.now().toFixed(2), Number.isFinite(md.captureTime) ? +md.captureTime.toFixed(2) : '', Number.isFinite(md.expectedDisplayTime) ? +md.expectedDisplayTime.toFixed(2) : '',
+    Number.isFinite(md.mediaTime) ? +md.mediaTime.toFixed(4) : '', md.presentedFrames ?? '', md.width ?? '', md.height ?? '']);
+  let ts = now; if (ts <= CMP.lastTs) ts = CMP.lastTs + 0.01; CMP.lastTs = ts;
+  let res = null;
+  try { res = CMP.lmk.detectForVideo(CMP.video, ts); } catch (e) { /* skip this frame */ }
+  const tres = performance.now(), lm = res && res.landmarks && res.landmarks[0];
+  CMP.seen++;
+  if (lm && lm.length >= 21) {
+    CMP.present++;
+    const wl = res.worldLandmarks && res.worldLandmarks[0], hd = res.handedness || res.handednesses, cat = hd && hd[0] && hd[0][0];
+    const fr = { t: tcap, present: true, lm: lm.map((q) => [q.x, q.y, q.z]), wlm: wl && wl.length >= 21 ? wl.map((q) => [q.x, q.y, q.z]) : null, hand: cat ? cat.categoryName : '' };
+    CMP.frames.push(fr); if (CMP.frames.length > 120) CMP.frames.shift();
+    if (CMP.frames.length % 15 === 0) CMP.cam.scale = window.BatVision.sessionScale(CMP.frames, CMP.palmCm);
+    CMP.pts = window.BatVision.landmarksToLaptop(fr, CMP.cam); CMP.palm = CMP.pts ? palmOf(CMP.pts) : null;
+    if (CMP.palm && running && !CMP.anchored) { CMP.anchored = true; recenter(); }
+    if (CMP.palm && running) { const sp = sndAt(tcap + (CMP.cam.lagMs || 0)); if (sp) { CMP.pairs.push({ t: tcap, c: CMP.palm, s: sp }); while (CMP.pairs.length && CMP.pairs[0].t < tcap - 15000) CMP.pairs.shift(); } }
+    if (CMP.rows) CMP.rows.push(visionRow(tcap, tres, 1, fr, cat));
+  } else {
+    CMP.pts = null; CMP.palm = null;
+    if (CMP.rows) CMP.rows.push(visionRow(tcap, tres, 0));
+  }
+  CMP.video.requestVideoFrameCallback(cmpFrame);
+}
+// teach.html's _vision.csv row (v_right, v_up, v_screen and auto left empty)
+function visionRow(tcap, tres, present, fr, cat) {
+  const f = (v, n) => (Number.isFinite(v) ? v.toFixed(n) : '');
+  const head = [f(tcap, 2), f(tres, 2), 'c', present];
+  if (!present) return head.concat(new Array(10 + 126).fill('')).join(',');
+  const W = CMP.cam.W, H = CMP.cam.H, asp = W / H, L = fr.lm;
+  const P = [0, 5, 9, 13, 17], px = P.reduce((a, i) => a + L[i][0], 0) / 5, py = P.reduce((a, i) => a + L[i][1], 0) / 5;
+  const d = (a, b) => Math.hypot((L[a][0] - L[b][0]) * asp, L[a][1] - L[b][1]), sc = (d(0, 5) + d(0, 17) + d(5, 17)) / 3;
+  const lmS = L.map((q) => q.map((v) => v.toFixed(4)).join(',')).join(','), wlS = fr.wlm ? fr.wlm.map((q) => q.map((v) => v.toFixed(4)).join(',')).join(',') : new Array(63).fill('').join(',');
+  return head.concat([fr.hand, fr.hand, cat ? f(cat.score, 3) : '', f(px, 4), f(py, 4), f(sc, 4), '', '', '', '', lmS, wlS]).join(',');
+}
+const VISION_HEAD = ['t_cap', 't_res', 'cap_src', 'present', 'hand', 'hand_mp', 'score', 'palm_x', 'palm_y', 'scale', 'v_right', 'v_up', 'v_screen', 'auto']
+  .concat(Array.from({ length: 21 }, (_, i) => [`lm${i}_x`, `lm${i}_y`, `lm${i}_z`]).flat(), Array.from({ length: 21 }, (_, i) => [`wlm${i}_x`, `wlm${i}_y`, `wlm${i}_z`]).flat()).join(',');
+// live numbers: 250 ms movement of the drawn sound hand vs the webcam palm, last 15 s
+function cmpStats() {
+  if (!CMP.on) return;
+  const P = CMP.pairs, D = [];
+  let j = 0;
+  for (let i = 0; i < P.length; i++) {
+    while (j < i && P[j].t < P[i].t - 250) j++;
+    const a = P[j]; if (!a || j === i || P[i].t - a.t < 200 || P[i].t - a.t > 300) continue;
+    D.push([0, 1, 2].map((k) => [P[i].s[k] - a.s[k], P[i].c[k] - a.c[k]]));
+  }
+  const vis = CMP.seen ? Math.round(100 * CMP.present / CMP.seen) : 0;
+  if (D.length < 20) { $('cmpStat').innerHTML = `${CMP.lmk ? CMP.delegate : ''} · 손 보임 ${vis}% · ${running ? '손을 움직이면 숫자가 나와요' : '▶ 시작을 누르면 소리 손과 비교해요'}`; return; }
+  const ax = [0, 2, 1].map((k) => {
+    const s = D.map((r) => r[k][0]), c = D.map((r) => r[k][1]), m = (v) => v.reduce((a, x) => a + x, 0) / v.length, ms = m(s), mc = m(c);
+    let sc = 0, ss = 0, cc = 0, e = 0;
+    for (let i = 0; i < s.length; i++) { sc += (s[i] - ms) * (c[i] - mc); ss += (s[i] - ms) ** 2; cc += (c[i] - mc) ** 2; e += (s[i] - c[i]) ** 2; }
+    return { rms: 100 * Math.sqrt(e / s.length), r: sc / Math.sqrt(ss * cc || 1), mv: 100 * Math.sqrt(cc / s.length) };
+  });
+  const nm = ['좌우', '앞뒤', '높이'];
+  $('cmpStat').innerHTML = `최근 15초, 250ms 이동: ` + ax.map((a, i) => `<b>${nm[i]}</b> ±${f1(a.rms)}cm (상관 ${a.r.toFixed(2)}, 실제 ${f1(a.mv)})`).join(' · ') + ` · 손 보임 ${vis}%`;
+}
+function pickVideoMime() { const c = ['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']; return window.MediaRecorder ? c.find((m) => MediaRecorder.isTypeSupported(m)) || '' : ''; }
+function cmpRecStart() {
+  if (!CMP.on) return;
+  CMP.rows = []; CMP.vframes = []; CMP.vchunks = []; CMP.vstart = null; CMP.vstop = null; CMP.vrec = null; CMP.mime = pickVideoMime();
+  if (!CMP.mime || !CMP.stream) return;
+  try {
+    const r = new MediaRecorder(new MediaStream(CMP.stream.getVideoTracks()), { mimeType: CMP.mime, videoBitsPerSecond: 5000000 });
+    r.ondataavailable = (e) => { if (e.data && e.data.size) CMP.vchunks.push(e.data); };
+    r.onstart = () => { CMP.vstart = performance.now(); };
+    CMP.vrec = r; r.start(1000);
+  } catch (e) { CMP.vrec = null; }
+}
+function cmpRecStop() {
+  return new Promise((resolve) => {
+    const r = CMP.vrec;
+    if (!r || r.state === 'inactive') { resolve(null); return; }
+    r.onstop = () => { CMP.vstop = performance.now(); resolve(new Blob(CMP.vchunks, { type: 'video/webm' })); };
+    try { r.stop(); } catch (e) { resolve(null); }
+  });
+}
+function topPeaks() {
+  if (!fx.an) return [];
+  const an = fx.an, hz = audioG.ctx.sampleRate / an.fftSize, b = new Float32Array(an.frequencyBinCount); an.getFloatFrequencyData(b);
+  const lo = Math.floor(15000 / hz), hi = Math.min(b.length - 1, Math.ceil(22000 / hz)), out = [];
+  const idx = Array.from({ length: hi - lo }, (_, i) => lo + i).sort((x, y) => b[y] - b[x]);
+  for (const i of idx) { const f = i * hz; if (out.every((q) => Math.abs(q.hz - f) > 60)) out.push({ hz: Math.round(f), db: +b[i].toFixed(1) }); if (out.length >= 6) break; }
+  return out;
+}
+$('btnCmp').onclick = () => { if (CMP.on || $('cmp').style.display === 'block') cmpStop(); else cmpStart(); };
+
 // ⏺: the mic (2 ch, raw) + the engine stream + what was shown, into ml/data/holo/ (or downloaded), for bravo
 const rec = { on: false, chunks: [], log: [], node: null, mute: null, rate: 48000, start: '', frames: 0 };
 async function recStart() {
@@ -668,11 +807,13 @@ async function recStart() {
   await dataDir(true);
   const ctx = audioG.ctx, node = ctx.createScriptProcessor(4096, 2, 1);
   node.channelCount = 2; node.channelCountMode = 'explicit'; node.channelInterpretation = 'discrete';
-  Object.assign(rec, { on: true, chunks: [], log: [], node, rate: ctx.sampleRate, start: new Date().toISOString(), frames: 0 });
+  Object.assign(rec, { on: true, chunks: [], log: [], node, rate: ctx.sampleRate, start: new Date().toISOString(), frames: 0, t0: null, cmp: CMP.on, peaks0: topPeaks() });
+  if (CMP.on) cmpRecStart();
   node.onaudioprocess = (e) => {
     if (!rec.on) return;
     const ib = e.inputBuffer, n = ib.length, L = ib.getChannelData(0), R = ib.numberOfChannels > 1 ? ib.getChannelData(1) : L, out = new Int16Array(2 * n);
     for (let i = 0; i < n; i++) { out[2 * i] = Math.max(-1, Math.min(1, L[i])) * 32767; out[2 * i + 1] = Math.max(-1, Math.min(1, R[i])) * 32767; }
+    if (rec.t0 == null) rec.t0 = performance.now() - (n / rec.rate) * 1000;   // approx. capture time of this block's first sample
     rec.chunks.push(out); rec.frames += n;
     if (rec.frames > rec.rate * 300) recStop();   // 5 min cap
   };
@@ -691,18 +832,43 @@ async function recStop() {
   tag(0, 'RIFF'); hd.setUint32(4, 36 + bytes, true); tag(8, 'WAVE'); tag(12, 'fmt '); hd.setUint32(16, 16, true); hd.setUint16(20, 1, true); hd.setUint16(22, 2, true);
   hd.setUint32(24, rec.rate, true); hd.setUint32(28, rec.rate * 4, true); hd.setUint16(32, 4, true); hd.setUint16(34, 16, true); tag(36, 'data'); hd.setUint32(40, bytes, true);
   const p2 = (n) => String(n).padStart(2, '0'), d = new Date(), stamp = `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;
-  const dev = (() => { try { return localStorage.getItem('batears-dev') || 'anon'; } catch (e) { return 'anon'; } })(), base = `batears_${stamp}_holo_${dev}`;
+  const dev = (() => { try { return localStorage.getItem('batears-dev') || 'anon'; } catch (e) { return 'anon'; } })();
+  let base = `batears_${stamp}_holo_${dev}`;
   const info = engine && engine.info ? engine.info() : {};
   const meta = { page: 'hologram.html', session: base, startedAt: rec.start, seconds: +(rec.frames / rec.rate).toFixed(2), rate: rec.rate, ua: navigator.userAgent,
     volume: Number($('vol').value), amp: $('ampMode').value, calibName: $('calibSel').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
     build: ((document.querySelector('script[src^="bat3d.js"]') || {}).getAttribute ? document.querySelector('script[src^="bat3d.js"]').getAttribute('src') : ''), yReal: $('yReal').checked, yGain: +yGain.toFixed(3), zone: ZONE,
     engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
     log_columns: 't_s (engine clock), raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams], t_ms (performance.now, same clock as t_cap and wav.t0)', log: rec.log };
-  const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
+  let files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
+  let sub = 'holo';
+  if (rec.cmp && CMP.rows) {
+    // a teach-compatible sitting for bravo (compare/): same keys and columns as teach.html, json last
+    const vblob = await cmpRecStop(), cbase = base.replace('_holo_', '_cmp_'), tr = audioG && audioG.source && audioG.source.mediaStream ? audioG.source.mediaStream.getAudioTracks()[0] : null;
+    const vt = CMP.stream ? CMP.stream.getVideoTracks()[0] : null, vs = vt ? vt.getSettings() : {};
+    const nS = Math.max(0, Math.round(((rec.log[0] || []).length - 10) / 3)), nm = (q) => Array.from({ length: nS }, (_, i) => `${q}${i}`).join(',');
+    const holoCsv = `t_s,raw_x,raw_y,raw_z,shown_x,shown_y,shown_z,moving,levelDb,${nm('amp')},${nm('q')},${nm('act')},t_ms\n` + rec.log.map((r) => r.join(',')).join('\n') + '\n';
+    const cmeta = { version: 1, page: 'hologram.html', mode: 'compare', session: cbase, startedAt: rec.start, device: dev, ua: navigator.userAgent,
+      clock: 'performance.now() ms in every file (t_cap, wav.t0)', stereoFreqs: (info.freqs || [18000, 19500]).slice(0, 2), volume: +(0.5 * Number($('vol').value)).toFixed(3), volume_ui: Number($('vol').value),
+      screen_angle_deg: null, palm_width_cm: CMP.palmCm, calib: $('calibSel').value, phones: phonesFromUi(),
+      camera: { label: vt ? vt.label : '', width: vs.width || CMP.cam.W, height: vs.height || CMP.cam.H, frameRate: vs.frameRate || null, facingMode: vs.facingMode || '' },
+      engine: { mic: tr ? tr.getSettings() : null, freqs: info.freqs, calName: info.calName, err: info.err },
+      vision: { lib: `@mediapipe/tasks-vision@${MP_VER}`, model: MP_MODEL, task: 'HandLandmarker', runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5, delegate: CMP.delegate, cam_model: { hfov: CMP.cam.hfov, tilt: CMP.cam.tilt, lagMs: CMP.cam.lagMs, scale: CMP.cam.scale } },
+      wav: { file: `${cbase}.wav`, rate: rec.rate, channels: 2, seconds: meta.seconds, t0: rec.t0 != null ? +rec.t0.toFixed(2) : null, via: 'scriptprocessor' },
+      video: vblob ? { file: `${cbase}.webm`, frames_file: `${cbase}_frames.csv`, mime: CMP.mime, bytes: vblob.size, startPerf: CMP.vstart, stopPerf: CMP.vstop, local_only: true } : null,
+      files: { vision: `${cbase}_vision.csv`, holo: `${cbase}_holo.csv`, wav: `${cbase}.wav` },
+      peaks_at_start: rec.peaks0 || [], peaks_at_end: topPeaks(), holo: { tau: meta.tau, smooth: meta.smooth, amp: meta.amp, yReal: meta.yReal, yGain: meta.yGain, zone: meta.zone, filter: meta.filter, build: meta.build },
+      vision_rows: CMP.rows.length };
+    files = [[`${cbase}.wav`, files[1][1]], [`${cbase}_vision.csv`, new Blob([VISION_HEAD + '\n' + CMP.rows.join('\n') + '\n'], { type: 'text/csv' })],
+      [`${cbase}_holo.csv`, new Blob([holoCsv], { type: 'text/csv' })]];
+    if (vblob && vblob.size) files.push([`${cbase}.webm`, vblob], [`${cbase}_frames.csv`, new Blob(['perf_now,capture_time,expected_display_time,media_time,presented_frames,width,height\n' + CMP.vframes.map((r) => r.join(',')).join('\n') + '\n'], { type: 'text/csv' })]);
+    files.push([`${cbase}.json`, new Blob([JSON.stringify(cmeta)], { type: 'application/json' })]);   // last: bravo picks a sitting up when its json appears
+    CMP.rows = null; CMP.vframes = null; sub = 'compare'; base = cbase;
+  }
   rec.chunks = [];
-  const where = await saveFiles(files);
+  const where = await saveFiles(files, sub);
   $('recInfo').textContent = `저장했어요 (${where}): ${base}.wav · .json, ${meta.seconds}초. 브라보에게 알려 주세요`;
-  bigNote(where.endsWith('/holo/') ? `✅ 저장됨: ${base} (${meta.seconds}초, ${where})` : `⬇️ 다운로드됨: ${base} → ml/data/holo/로 옮겨 주세요`, 7000);
+  bigNote(/\/(holo|compare)\/$/.test(where) ? `✅ 저장됨: ${base} (${meta.seconds}초, ${where})` : `⬇️ ${base}: ${where}`, 7000);
 }
 // data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its holo/
 let dir = null;
@@ -716,17 +882,17 @@ async function dataDir(ask) {
   if (!ask || !window.showDirectoryPicker) return null;
   try { const h = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' }); idbPut('dataDir', h).catch(() => {}); return (dir = h); } catch (e) { return null; }
 }
-async function saveFiles(files) {
+async function saveFiles(files, subName = 'holo') {
   const root = await dataDir(false);
   if (root) {
     try {
-      const sub = await root.getDirectoryHandle('holo', { create: true });
+      const sub = await root.getDirectoryHandle(subName, { create: true });
       for (const [name, blob] of files) { const h = await sub.getFileHandle(name, { create: true }), w = await h.createWritable(); await w.write(blob); await w.close(); }
-      return `${root.name}/holo/`;
+      return `${root.name}/${subName}/`;
     } catch (e) { console.warn('[holo] folder save', e); }
   }
   for (const [name, blob] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
-  return '다운로드했어요. ml/data/holo/로 옮겨 주세요';
+  return `다운로드했어요. ml/data/${subName}/로 옮겨 주세요`;
 }
 const clock = new THREE.Clock();
 let frameN = 0;
@@ -760,7 +926,7 @@ function frame() {
   shadow.position.set(P.x, 0.001, P.z); shadow.visible = hand.visible;
   drop.geometry.setFromPoints([new THREE.Vector3(P.x, 0.001, P.z), P]); drop.computeLineDistances(); drop.visible = hand.visible;
   rawDot.visible = $('showRaw').checked && live; rawDot.position.copy(T3(disp.raw));
-  const g = ghost.on && running ? ghostAt(disp.s) : null;
+  const g = CMP.on && CMP.pts ? CMP.pts : ghost.on && running ? ghostAt(disp.s) : null;
   ghostLines.visible = ghostJoints.visible = !!g;
   if (g) {
     const arr = ghostGeo.attributes.position.array, E = (window.BatVision && window.BatVision.EDGES) || BONES;
@@ -787,6 +953,7 @@ function frame() {
   labels.render(scene, camera);
   renderHud(now);
   if (now - (renderDebug.t || 0) > 150) { renderDebug.t = now; renderDebug(); }
+  if (now - (cmpStats.t || 0) > 500) { cmpStats.t = now; cmpStats(); }
 }
 requestAnimationFrame(frame);
 

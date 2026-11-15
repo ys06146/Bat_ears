@@ -37,3 +37,5 @@ ml/data/fake/
 ml/model.json
 # hologram field recordings (mic WAV + engine log): local data, never in the public repo
 ml/data/holo/
+# hologram compare sittings (mic WAV, webcam landmarks, raw video): local training data, never in the public repo
+ml/data/compare/
