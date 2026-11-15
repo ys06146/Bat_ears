@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bat Ears | Free Experiment Mode</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color-scheme:dark;background:#0b1220;color:#e7eefc}
+*{box-sizing:border-box}body{max-width:1050px;margin:0 auto;padding:24px}h1{margin:0 0 8px}
+p,small{color:#a8b7d0}a{color:#9ec8ff}.panel{background:#172338;border:1px solid #30425c;border-radius:15px;padding:18px;margin:14px 0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}label{display:flex;gap:6px;align-items:center}
+input,select,button{background:#253650;color:white;border:1px solid #51647e;border-radius:8px;padding:10px;font:inherit}
+input[type=number]{width:95px}input[type=text]{max-width:190px}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}
+button.primary{background:#2763d4;border-color:#5c8eea}button.mark{background:#34506b}
+.big{font-size:42px;font-weight:800;min-height:65px}#feed{max-height:270px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px;border-bottom:1px solid #34435c;text-align:left}
+.kpi{display:flex;gap:18px;flex-wrap:wrap}.kpi b{font-size:24px;display:block}
+#status{color:#a8b7d0}.warn{color:#ffca81}.ok{color:#79e6a5}
+</style></head><body>
+<a href="index.html">← 기존 Bat Ears 데모</a><h1>🦇 자유 실험 모드</h1>
+<p>카운트다운 없이 실시간 제스처 기록 · 연속 Push→Pull · 좌우 스와이프 · CSV/JSON 저장. 기존 엔진을 수정하지 않습니다.</p>
+<div class="panel">
+<div class="row">
+<label>참가자 <input id="who" type="text" value="p1" maxlength="24"></label>
+<label>거리(cm) <input id="dist" type="number" min="1" max="150" value="20"></label>
+<label>환경 <select id="condition"><option value="quiet">조용함</option><option value="music">음악/대화</option><option value="phone11400">휴대폰 11.4kHz</option><option value="phone20000">휴대폰 20kHz</option><option value="other_batears">다른 Bat Ears 실행</option><option value="other">기타</option></select></label>
+<label>실험 <select id="mode"><option value="free">자유 동작</option><option value="sequence">연속 Push→Pull</option><option value="swipe">좌우 포함</option></select></label>
+<label>메모 <input id="note" type="text" placeholder="기기, 음량, 간격 등"></label>
+</div><p>좌우 인식은 스테레오 모드가 필요하며, 기기별 좌우 학습 상태에 따라 감지가 제한될 수 있습니다.</p>
+<div class="row"><button class="primary" id="start">▶ 시작</button><button id="stop" disabled>■ 종료</button><span id="status">대기 중</span></div>
+</div>
+<div class="panel"><div class="row"><div><small>마지막 인식</small><div id="last" class="big">–</div></div><div class="kpi"><div>인식 이벤트<b id="count">0</b></div><div>완료 세트<b id="pairs">0</b></div><div>외부 초음파<b id="foreign">–</b></div></div></div>
+<p>실제 동작은 아래 버튼으로 표시하세요. <b>기록 버튼을 누르지 않은 경우 인식률을 계산하지 않습니다.</b> 자동 이벤트는 전부 타임스탬프로 저장됩니다.</p>
+<div class="row"><button class="mark" data-mark="push">1 밀기</button><button class="mark" data-mark="pull">2 당기기</button><button class="mark" data-mark="left">3 왼쪽</button><button class="mark" data-mark="right">4 오른쪽</button><button class="mark" data-mark="wave">5 흔들기</button><button class="mark" data-mark="idle">6 가만히</button></div>
+<p>연속 실험은 <b>세트 시작</b>을 누른 뒤 Push→Pull을 하고 <b>세트 종료</b>를 누르세요. 이벤트는 중간에 멈추지 않고 기록됩니다. 세트별 Push/Pull 감지 여부를 자동 요약합니다.</p>
+<div class="row"><button id="pairStart">세트 시작 (Q)</button><button id="pairEnd" disabled>세트 종료 (E)</button><button id="clear">기록 초기화</button><button id="csv">이벤트 CSV</button><button id="json">전체 JSON</button></div>
+</div>
+<div class="panel"><h3>실시간 이벤트</h3><div id="feed"><table><thead><tr><th>시간(s)</th><th>구분</th><th>동작</th><th>속도(m/s)</th><th>세트</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+<div class="panel"><h3>세트 결과</h3><div id="summary">아직 완료된 세트가 없습니다.</div><p class="warn">자동으로 인식된 Push/Pull의 존재 여부는 보여주지만, 실제 동작의 정확도는 사용자가 의도한 동작을 표시하거나 세트 완료를 확인한 경우에만 해석하세요. 손의 실제 시작 시각은 자동 검증되지 않습니다.</p></div>
+<script src="robust.js"></script><script src="swipe.js"></script><script src="wave.js"></script><script src="iq.js"></script><script src="dsp.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), engine=window.BatEars;
+let events=[],pairs=[],current=null,running=false,unsubs=[],t0=0,session=null,seq=0;
+const labels={push:'Push →',pull:'Pull ←',left:'Left ◀',right:'Right ▶',wave:'Wave 〰',idle:'Idle'};
+const secs=t=>Number(((t-t0)/1000).toFixed(3));
+const download=(name,data,type)=>{const u=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+function log(type,kind,extra={}){const t=performance.now(),v={t_ms:Math.round(t),sec:secs(t),type,kind,pair_id:current?.id||null,...extra};events.push(v);$('count').textContent=events.filter(e=>e.type==='detected').length;if(type==='detected')$('last').textContent=labels[kind]||kind;const tr=document.createElement('tr');[v.sec,type,labels[kind]||kind,extra.speed==null?'–':Number(extra.speed).toFixed(2),v.pair_id||'–'].forEach(x=>{const td=document.createElement('td');td.textContent=x;tr.appendChild(td)});$('rows').prepend(tr);return v}
+function mark(kind){if(!running)return;log('intended',kind)}
+function pairStart(){if(!running||current)return;current={id:++seq,start_ms:performance.now(),events_start:events.length};$('pairStart').disabled=true;$('pairEnd').disabled=false;log('pair_start','push_pull')}
+function pairEnd(){if(!current)return;const p=current;const t=performance.now();p.end_ms=t;p.detected=events.slice(p.events_start).filter(e=>e.type==='detected'&&e.t_ms<=t);p.push=p.detected.some(e=>e.kind==='push');p.pull=p.detected.some(e=>e.kind==='pull');p.both=p.push&&p.pull;p.correct_order=p.detected.some((e,i)=>e.kind==='push'&&p.detected.slice(i+1).some(f=>f.kind==='pull'));pairs.push(p);log('pair_end','push_pull',{push:p.push,pull:p.pull,correct_order:p.correct_order});current=null;$('pairStart').disabled=!running;$('pairEnd').disabled=true;$('pairs').textContent=pairs.length;renderSummary()}
+function renderSummary(){if(!pairs.length){$('summary').textContent='아직 완료된 세트가 없습니다.';return}const n=pairs.length,pp=pairs.filter(p=>p.push).length,pl=pairs.filter(p=>p.pull).length,ord=pairs.filter(p=>p.correct_order).length;$('summary').textContent=`총 ${n}세트 · Push 감지 ${pp}/${n} · Pull 감지 ${pl}/${n} · Push 다음 Pull 순서 감지 ${ord}/${n} (해당 세트 내 이벤트 기준)`}
+function off(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[]}
+async function start(){if(running)return;try{$('start').disabled=true;$('status').textContent='마이크 시작 중 / 약 1.5초 보정';const stereo=$('mode').value==='swipe';const ok=await engine.start({freq:20000,raw:true,stereo});if(!ok)throw Error('마이크/오디오 시작 실패');running=true;t0=performance.now();session={started_at:new Date().toISOString(),who:$('who').value,dist_cm:Number($('dist').value),condition:$('condition').value,mode:$('mode').value,note:$('note').value,stereo,engine_info:engine.info};unsubs.push(engine.on('gesture',g=>{if(g.simulated)return;log('detected',g.kind,{speed:g.speed??null,strength:g.strength??null})}));unsubs.push(engine.on('foreign',g=>{$('foreign').textContent=g.tones?.join(', ')||'없음';log('foreign','tone',{tones:g.tones||[]})}));$('stop').disabled=false;$('status').textContent='기록 중 · 카운트다운 없음';$('pairStart').disabled=false}catch(e){$('start').disabled=false;$('status').textContent='오류: '+e.message}}
+async function stop(){if(!running)return;if(current)pairEnd();running=false;off();try{await engine.stop()}catch(e){}$('stop').disabled=true;$('start').disabled=false;$('pairStart').disabled=true;$('pairEnd').disabled=true;$('status').textContent='종료 · 파일로 내보내기 가능'}
+function clear(){if(running){alert('먼저 실험을 종료해 주세요.');return}if(events.length&&!confirm('기존 기록을 지울까요?'))return;events=[];pairs=[];current=null;seq=0;session=null;$('rows').replaceChildren();$('last').textContent='–';$('count').textContent='0';$('pairs').textContent='0';$('foreign').textContent='–';renderSummary()}
+function exportJson(){download('batears_free_'+Date.now()+'.json',JSON.stringify({session,events,pairs},null,2),'application/json')}
+function exportCsv(){const keys=['sec','t_ms','type','kind','pair_id','speed','strength','tones','push','pull','correct_order'];const esc=x=>{let s=String(x??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download('batears_events_'+Date.now()+'.csv',[keys.join(','),...events.map(e=>keys.map(k=>esc(Array.isArray(e[k])?e[k].join(';'):e[k])).join(','))].join('\n'),'text/csv')}
+$('start').onclick=start;$('stop').onclick=stop;$('pairStart').onclick=pairStart;$('pairEnd').onclick=pairEnd;$('clear').onclick=clear;$('csv').onclick=exportCsv;$('json').onclick=exportJson;
+document.querySelectorAll('[data-mark]').forEach(b=>b.onclick=()=>mark(b.dataset.mark));
+window.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||e.repeat)return;const k={1:'push',2:'pull',3:'left',4:'right',5:'wave',6:'idle'}[e.key];if(k)mark(k);else if(e.key.toLowerCase()==='q')pairStart();else if(e.key.toLowerCase()==='e')pairEnd()});
+})();
+</script></body></html>
