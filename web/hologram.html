@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bat Ears | 소리 홀로그램</title>
+<title>Bat Ears | Sound hologram</title>
 <style>
   :root { --bg: #04070c; --fg: #e6f4ff; --dim: #8aa4b8; --acc: #4fd8ff; --ok: #66bb6a; --warn: #ffb74d; --bad: #ef5350; --glass: rgba(10, 22, 34, .72); --line: rgba(79, 216, 255, .28); }
   * { box-sizing: border-box; }
@@ -75,73 +75,73 @@
 </head>
 <body>
 <div id="stage"></div>
-<div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 소리만으로 · 📷 웹캠 꺼짐<small id="filmAcc"></small></div>
+<div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 Sound only · 📷 Webcam off<small id="filmAcc"></small></div>
 <div class="hud" id="intro">
-  <h2>🦇 소리만으로 손을 3D로 따라가요</h2>
+  <h2>🦇 Following your hand in 3D with sound alone</h2>
   <ol>
-    <li>📷 웹캠을 테이프로 가려요. 이 페이지는 카메라를 켜지 않아요</li>
-    <li>🔊 노트북 내장 스피커와 마이크를 써요 (블루투스·이어폰은 빼요). 충전기를 꽂고 볼륨은 50% 이상</li>
-    <li>▶ 시작을 누르고 마이크를 허용해요</li>
-    <li>✋ 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에 두고 ◎ 가운데(스페이스)를 눌러요. 그다음 좌우·앞뒤로 또렷하게(1초에 20cm쯤) 움직여요</li>
+    <li>📷 Tape over the webcam. This page never turns the camera on</li>
+    <li>🔊 Use the laptop’s built-in speakers and mic (unplug Bluetooth and earphones). Plug in the charger and set the volume to 50% or more</li>
+    <li>Press ▶ Start and allow the microphone</li>
+    <li>✋ Hold your hand about 20 cm above the laptop’s front edge (the tape mark) and press ◎ Center (space). Then move it left-right and toward-away briskly (about 20 cm a second)</li>
   </ol>
-  <div class="row"><button id="introStart" class="go">▶ 시작</button><button id="introClose">닫기</button><span class="note">소리는 이 브라우저 안에서만 분석하고 아무 데도 보내지 않아요</span></div>
+  <div class="row"><button id="introStart" class="go">▶ Start</button><button id="introClose">Close</button><span class="note">Sound is analysed only inside this browser and never sent anywhere</span></div>
   <div id="introErr"></div>
 </div>
 <div class="hud" id="top">
-  <h1>🦇 Bat Ears 홀로그램 <small>웹캠 없이 소리만으로 손 위치</small></h1>
-  <button id="btnStart" class="go">▶ 시작</button>
-  <button id="btnStop">■ 멈춤</button>
-  <button id="btnCenter" title="손을 테이프 자리에 두고 누르세요 (스페이스바)">◎ 가운데</button>
-  <label class="file" title="teach 세션 WAV를 소리 대신 재생해요. 같은 세션의 _vision.csv, .json, .calib.json을 함께 고르면 웹캠 정답(초록 손)을 겹쳐요">📂 녹음 재생<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
-  <button id="btnSettings">⚙ 설정</button>
-  <button id="btnAbout">ⓘ 출처</button>
-  <button id="btnDebug">🔍 진단</button>
-  <button id="btnCmp" title="웹캠 손(초록, 정답)과 소리 손을 같이 그려 실시간으로 비교해요. ⏺와 함께 쓰면 학습 데이터(compare/)로 저장돼요. 데모 때는 꺼요">👁 비교</button>
-  <button id="btnFilm" title="패널을 숨기고 전체 화면으로 (H: 패널, F: 전체 화면, 스페이스: 가운데)">🎬 촬영 모드</button>
-  <button id="btnRec" title="마이크 원음과 엔진 값을 저장해요 (브라보 분석용)">⏺ 녹화</button>
-  <span id="status" class="grow">대기 중 · ▶ 시작을 누르고 마이크를 허용하세요</span>
+  <h1>🦇 Bat Ears hologram <small>Hand position from sound alone, no webcam</small></h1>
+  <button id="btnStart" class="go">▶ Start</button>
+  <button id="btnStop">■ Stop</button>
+  <button id="btnCenter" title="Hold your hand at the tape mark and press this (space bar)">◎ Center</button>
+  <label class="file" title="Plays a teach session WAV instead of the mic. Pick the same session’s _vision.csv, .json and .calib.json too to overlay the webcam ground truth (green hand)">📂 Play recording<input id="wavFile" type="file" accept=".wav,.csv,.json" multiple></label>
+  <button id="btnSettings">⚙ Settings</button>
+  <button id="btnAbout">ⓘ Credits</button>
+  <button id="btnDebug">🔍 Diagnostics</button>
+  <button id="btnCmp" title="Draws the webcam hand (green, ground truth) and the sound hand together to compare them live. Used with ⏺, it saves training data (compare/). Turn it off for the demo">👁 Compare</button>
+  <button id="btnFilm" title="Hide the panels and go full screen (H: panels, F: full screen, space: center)">🎬 Filming mode</button>
+  <button id="btnRec" title="Saves the raw mic audio and engine values (for Bravo’s analysis)">⏺ Record</button>
+  <span id="status" class="grow">Waiting · press ▶ Start and allow the microphone</span>
 </div>
-<div class="hud" id="sim">🧪 가상 움직임 (소리 아님, 화면 시험용)</div>
+<div class="hud" id="sim">🧪 Simulated motion (not sound, for testing the screen)</div>
 <div class="hud" id="toast"></div>
 <div class="hud" id="alert"></div>
-<div class="hud" id="cmp"><video id="cmpVideo" muted playsinline></video><div><b>👁 웹캠 비교</b> <span class="note">(초록 손 = 웹캠 정답 · 이 화면만 카메라를 켜요)</span></div><div id="cmpStat">카메라를 켜는 중…</div><div style="clear:both"></div></div>
+<div class="hud" id="cmp"><video id="cmpVideo" muted playsinline></video><div><b>👁 Webcam compare</b> <span class="note">(green hand = webcam ground truth · only this view turns the camera on)</span></div><div id="cmpStat">Turning on the camera…</div><div style="clear:both"></div></div>
 <div class="hud" id="settings">
-  <h3>보정 (브라보)</h3>
-  <label><select id="calibSel"><option value="galaxy">노트북만 (기본)</option></select></label>
-  <label class="note" id="calibNote">이름 붙은 보정을 고르면 그 보정을 배울 때의 폰 구성(주파수·위치)이 같이 켜져요</label>
-  <h3>소리원 (수동)</h3>
-  <label><input type="checkbox" id="phoneOn"> 📱 폰 A · Hz <input type="number" id="phoneHz" value="17000" step="50"></label>
-  <label class="note">위치 cm (경첩 기준): 오른쪽 <input type="number" id="px" value="0"> 높이 <input type="number" id="py" value="45"> 앞 <input type="number" id="pz" value="30"></label>
-  <label><input type="checkbox" id="phone2On"> 📱 폰 B · Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
-  <label class="note">위치 cm: 오른쪽 <input type="number" id="p2x" value="-25"> 높이 <input type="number" id="p2y" value="40"> 앞 <input type="number" id="p2z" value="-2"></label>
-  <label class="note">📱 지금은 폰을 켜지 마세요. 기본 보정은 노트북 스피커만으로 학습해서 폰 소리를 안 써요. 높이를 쓰려면 폰 A(17000)를 손 자리 바로 위 45cm에 아래를 향하게 두고 teach.html 세션을 한 번 녹화해요. 브라보가 그 배치로 보정을 만들면 📥로 불러오고 폰 A를 켜요. 보정 없이 폰을 켜면 물리 풀이로 돌아가서 더 나빠질 수 있어요</label>
-  <label class="file" style="display:inline-block">📥 보정 불러오기<input id="calibFile" type="file" accept=".json,application/json"></label>
+  <h3>Calibration (Bravo)</h3>
+  <label><select id="calibSel"><option value="galaxy">Laptop only (default)</option></select></label>
+  <label class="note" id="calibNote">Choosing a named calibration also turns on the phone setup (frequencies and positions) it was learned with</label>
+  <h3>Sound sources (manual)</h3>
+  <label><input type="checkbox" id="phoneOn"> 📱 Phone A · Hz <input type="number" id="phoneHz" value="17000" step="50"></label>
+  <label class="note">Position cm (from the hinge): right <input type="number" id="px" value="0"> height <input type="number" id="py" value="45"> front <input type="number" id="pz" value="30"></label>
+  <label><input type="checkbox" id="phone2On"> 📱 Phone B · Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
+  <label class="note">Position cm: right <input type="number" id="p2x" value="-25"> height <input type="number" id="p2y" value="40"> front <input type="number" id="p2z" value="-2"></label>
+  <label class="note">📱 Don’t turn phones on for now. The default calibration was learned from the laptop speakers alone and doesn’t use phone sound. To use height, place phone A (17000) 45 cm directly above the hand spot, facing down, and record one teach.html session. Once Bravo builds a calibration for that layout, load it with 📥 and turn phone A on. Turning a phone on without a calibration falls back to the physics solver and can be worse</label>
+  <label class="file" style="display:inline-block">📥 Load calibration<input id="calibFile" type="file" accept=".json,application/json"></label>
   <span id="calibName" class="note"></span>
-  <h3>움직임 크기 (브라보)</h3>
-  <label><select id="ampMode"><option value="half" selected>균형 (기본): 오차 거의 그대로, 높이를 더 크게</option><option value="matched">실제 크기: 오차 7~17% 늘어요</option><option value="mse">오차 가장 작게: 움직임을 작게 그려요</option></select></label>
-  <label class="note">소리만으로 추정하면 정보가 약한 축(특히 높이)을 실제보다 작게 그려요. 크게 그리면 맞는 움직임과 틀린 움직임이 같이 커져요</label>
-  <h3>필터 (One Euro, Casiez 2012)</h3>
-  <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
-  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="2"> <span id="tauV" class="note">2초 (멈추면 2초)</span></label>
-  <h3>보기</h3>
-  <label><input type="checkbox" id="showTrail" checked> 궤적</label>
-  <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
-  <label><input type="checkbox" id="showRaw"> 필터 전 원값 점</label>
-  <label><input type="checkbox" id="showCircle"> ↻ 원 동작 알림 (엔진의 원 판정, 실험)</label>
-  <label><input type="checkbox" id="yReal" checked> 높이는 실제 크기로 그리기 (높이 오차 2.5 → 2.7cm)</label>
-  <label>톤 볼륨 <input type="range" id="vol" min="0.2" max="1.6" step="0.05" value="1.2"> <span id="volV" class="note">1.20 (teach와 같은 크기)</span></label>
-  <p class="note">손가락 모양은 서진 님 오른손(teach 세션 웹캠에서 본 모양)으로 고정이에요. 소리는 손의 위치만 재요.</p>
+  <h3>Movement size (Bravo)</h3>
+  <label><select id="ampMode"><option value="half" selected>Balanced (default): error almost unchanged, height drawn larger</option><option value="matched">True size: error up 7–17%</option><option value="mse">Smallest error: draws movement smaller</option></select></label>
+  <label class="note">Estimating from sound alone draws the weakly informed axes (especially height) smaller than real. Drawing them larger enlarges both the right and the wrong movement</label>
+  <h3>Filter (One Euro, Casiez 2012)</h3>
+  <label>Smooth ↔ Fast <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
+  <label>Return to center τ <input type="range" id="tau" min="0" max="15" step="0.5" value="2"> <span id="tauV" class="note">2 s (2 s once stopped)</span></label>
+  <h3>View</h3>
+  <label><input type="checkbox" id="showTrail" checked> Trail</label>
+  <label><input type="checkbox" id="showErr" checked> Error ellipse (honest RMS)</label>
+  <label><input type="checkbox" id="showRaw"> Raw dots before the filter</label>
+  <label><input type="checkbox" id="showCircle"> ↻ Circle gesture alerts (engine’s circle detection, experimental)</label>
+  <label><input type="checkbox" id="yReal" checked> Draw height at true size (height error 2.5 → 2.7 cm)</label>
+  <label>Tone volume <input type="range" id="vol" min="0.2" max="1.6" step="0.05" value="1.2"> <span id="volV" class="note">1.20 (same level as teach)</span></label>
+  <p class="note">The finger shape is fixed to Seojin’s right hand (as the webcam saw it in a teach session). Sound measures only the hand’s position.</p>
 </div>
 <div class="hud" id="about">
-  <h3>만든 방법</h3>
-  <p class="note">노트북 스피커 두 개가 18kHz·19.5kHz를 내고, 마이크 두 개가 손에 반사된 소리를 들어요. 소리원마다 I/Q 위상으로 경로 길이 변화를 재고(LLAP 방식), 웹캠으로 가르친 세션(teach.html, MediaPipe 손 관절이 정답)에서 배운 지도로 경로 변화를 손 이동으로 바꿔요(브라보). 이 화면은 그 위치를 One Euro 필터로 다듬고, 소리는 움직임만 재기 때문에 천천히 가운데로 돌아오게 해요. 손가락 모양은 고정이에요.</p>
-  <h3>오픈소스 (라이선스)</h3>
+  <h3>How it’s made</h3>
+  <p class="note">The two laptop speakers play 18 kHz and 19.5 kHz, and the two mics hear the sound reflected off the hand. For each source we measure the change in path length from the I/Q phase (as LLAP does), and a map learned from webcam-taught sessions (teach.html, with MediaPipe hand joints as ground truth) turns path changes into hand movement (Bravo). This screen smooths that position with a One Euro filter, and since sound only measures movement, it drifts slowly back to the center. The finger shape is fixed.</p>
+  <h3>Open source (licenses)</h3>
   <ul class="note">
-    <li>three.js r160: 3D 화면, OrbitControls, EffectComposer, UnrealBloomPass(글로우), CSS2DRenderer (MIT). <code>web/vendor/</code>에 같이 들어 있어서 인터넷 없이 로컬 서버로도 떠요</li>
-    <li>MediaPipe Tasks Vision 0.10.21 HandLandmarker와 hand_landmarker 모델: teach.html의 웹캠 선생님 (Apache-2.0)</li>
-    <li>bat3d.js·vision3d.browser.js: 팀 코드(브라보). 1€ 필터는 논문을 보고 직접 구현했어요(참고 구현은 BSD/MIT)</li>
+    <li>three.js r160: 3D view, OrbitControls, EffectComposer, UnrealBloomPass (glow), CSS2DRenderer (MIT). <code>web/vendor/</code> ships alongside, so it also runs from a local server without internet</li>
+    <li>MediaPipe Tasks Vision 0.10.21 HandLandmarker and the hand_landmarker model: the webcam teacher in teach.html (Apache-2.0)</li>
+    <li>bat3d.js · vision3d.browser.js: team code (Bravo). We implemented the 1€ filter ourselves from the paper (reference implementations are BSD/MIT)</li>
   </ul>
-  <h3>레퍼런스</h3>
+  <h3>References</h3>
   <ul class="note">
     <li>W. Wang, A. X. Liu, K. Sun. Device-free gesture tracking using acoustic signals (LLAP). MobiCom 2016</li>
     <li>W. Mao, J. He, L. Qiu. CAT: High-precision acoustic motion tracking. MobiCom 2016</li>
@@ -149,29 +149,29 @@
     <li>S. Yun, Y.-C. Chen, H. Zheng, L. Qiu, W. Mao. Strata: Fine-grained acoustic-based device-free tracking. MobiSys 2017</li>
     <li>W. Mao et al. RNN-based room scale hand motion tracking (RTrack). MobiCom 2019</li>
     <li>G. Casiez, N. Roussel, D. Vogel. 1€ Filter: A simple speed-based low-pass filter for noisy input in interactive systems. CHI 2012</li>
-    <li>R. E. Kalman. A new approach to linear filtering and prediction problems. 1960 (엔진의 등속 칼만)</li>
+    <li>R. E. Kalman. A new approach to linear filtering and prediction problems. 1960 (the engine’s constant-velocity Kalman)</li>
     <li>F. Zhang et al. MediaPipe Hands: On-device real-time hand tracking. arXiv:2006.10214, 2020</li>
   </ul>
 </div>
 <div class="hud" id="debug">
-  <h3>🔍 진단</h3>
+  <h3>🔍 Diagnostics</h3>
   <div id="dbgTone" class="note"></div>
   <canvas id="dbgPlot" width="480" height="150" style="width:100%;background:rgba(0,0,0,.35);border-radius:8px;margin-top:6px"></canvas>
-  <div class="note">최근 6초, ±15cm: 좌우(빨강 원값 · 하늘 표시), 앞뒤(주황 원값 · 파랑 표시), 높이(회색 표시)</div>
+  <div class="note">Last 6 s, ±15 cm: left-right (red raw · sky blue shown), toward-away (orange raw · blue shown), height (grey shown)</div>
   <div id="recInfo" class="note" style="margin-top:6px"></div>
 </div>
 <div class="hud" id="acc">
-  <div class="big">🔊 <b>소리만으로</b> · 📷 웹캠 꺼짐</div>
-  <div id="accNums">정확도: 미확인</div>
-  <div class="note" style="margin-top:4px">손은 노트북 앞 모서리 위, 책상에서 18~25cm(웹캠에서 25~45cm)에 두고, teach 때처럼 또렷하게(1초에 20cm쯤) 움직여요. 아주 천천히 움직이면(초속 5~8cm 아래) 소리가 잘 못 잡아요. 소리는 움직임만 재서 절대 위치는 모르고, 손을 멈추면 천천히 가운데로 돌아와요. 높이는 노트북 스피커만으로는 거의 안 잡혀요.</div>
+  <div class="big">🔊 <b>Sound only</b> · 📷 Webcam off</div>
+  <div id="accNums">Accuracy: unconfirmed</div>
+  <div class="note" style="margin-top:4px">Keep your hand above the laptop’s front edge, 18–25 cm above the desk (25–45 cm from the webcam), and move it briskly like in teach (about 20 cm a second). Very slow movement (below 5–8 cm a second) is hard for sound to catch. Sound only measures movement, so it doesn’t know absolute position, and when your hand stops it drifts slowly back to the center. Height is barely caught with the laptop speakers alone.</div>
   <div id="levelWarn" class="warn" style="margin-top:4px"></div>
 </div>
 <div class="hud" id="live">
-  <div id="hgauge" title="높이: 테이프 자리 기준 ±12cm"><div class="hgTrack"><div class="hgMid"></div><div id="hgDot"></div></div><span>높이</span></div>
+  <div id="hgauge" title="Height: ±12 cm from the tape mark"><div class="hgTrack"><div class="hgMid"></div><div id="hgDot"></div></div><span>height</span></div>
   <div class="kv" id="pos"></div>
   <div id="bars" style="margin-top:6px"></div>
 </div>
-<script src="bat3d.js?v=20261115101840" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js 없음 (?sim=1로 화면만 시험할 수 있어요)'"></script>
+<script src="bat3d.js?v=20261115101840" onerror="document.getElementById('status').textContent = '⚠️ bat3d.js missing (?sim=1 tests the screen only)'"></script>
 <script src="vision3d.browser.js?v=20261115101840"></script>
 <script type="module">
 import * as THREE from 'three';
@@ -189,7 +189,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
  * Position: bravo's estimator (web/bat3d.js, from 3d.html: I/Q phase path tracking of every tone, LLAP-style, and a
  * map learned from webcam-taught sessions). This page adds the display chain: continuity across engine re-zeroing,
  * a spring back to the centre (sound measures movement, not absolute position), a One Euro filter (Casiez et al.,
- * CHI 2012) per axis, and a three.js scene (bloom = UnrealBloomPass). The hand's finger shape is fixed (서진's right
+ * CHI 2012) per axis, and a three.js scene (bloom = UnrealBloomPass). The hand's finger shape is fixed (Seojin's right
  * hand from a teach session); only its position comes from sound. ?sim=1 = simulated motion, for testing the screen. */
 const $ = (id) => document.getElementById(id);
 const Q = new URLSearchParams(location.search);
@@ -218,10 +218,10 @@ class OneEuro {
 // raw corr x/y/z 0.27/0.61/0.80, jitter at rest 2.9 mm per 50 ms; bravo's start (0.8/8, y 0.4/4) 0.23/0.29/0.72, 1.8 mm;
 // 0.8 Hz / beta 40 on all axes 0.28/0.53/0.79, 2.0 mm (a high beta keeps the moves, a low cutoff calms the rest).
 // The spring helps too: without it x drops to 0.20 (drift)
-// live (서진, 05:30): 'follows slowly' -> more responsive: 1.5 Hz / beta 60 (044652 sweep: about the raw correlation, rest jitter ~2.3 mm)
+// live (Seojin, 05:30): 'follows slowly' -> more responsive: 1.5 Hz / beta 60 (044652 sweep: about the raw correlation, rest jitter ~2.3 mm)
 const euro = [new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1)];
 
-// ------------------------------------------------------------------ 서진's right hand (MediaPipe world landmarks, median of
+// ------------------------------------------------------------------ Seojin's right hand (MediaPipe world landmarks, median of
 // the 'hold still' step of teach session 043301; palm facing the laptop, fingers up). three.js frame: x right, y up,
 // z toward the viewer; centred on the palm (landmarks 0, 5, 9, 13, 17)
 const HAND = [[0.0012, -0.0719, 0.0165], [-0.0312, -0.0468, -0.0031], [-0.0552, -0.0302, -0.0118], [-0.0771, -0.0075, -0.0273], [-0.0885, 0.0131, -0.0311],
@@ -450,18 +450,18 @@ async function start(m, file) {
     running = true;
     drawSources(engine.solver.G, []);
     renderAcc(engine.solver);
-    $('status').textContent = '가상 움직임 (화면 시험)';
+    $('status').textContent = 'Simulated motion (screen test)';
     return;
   }
-  if (!window.Bat3D) { $('status').textContent = '⚠️ 소리 엔진(bat3d.js)을 불러오지 못했어요'; return; }
+  if (!window.Bat3D) { $('status').textContent = '⚠️ Couldn’t load the sound engine (bat3d.js)'; return; }
   // bravo's engine (3d.html v8): autoReset off, the display chain below handles stillness (re-centre spring)
   const cn = $('calibSel').value, named = cn && cn !== 'galaxy' && window.Bat3D.CALIBS && window.Bat3D.CALIBS[cn];
   engine = window.Bat3D.create(named && !calib
     ? { geom: 'galaxy', calibName: cn, model: 'learned', autoReset: false, amp: $('ampMode').value }
     : { geom: 'galaxy', phones: phonesFromUi(), calib, model: 'learned', autoReset: false, amp: $('ampMode').value });
   engine.on('frame', onFrame);
-  // circle calls are an experiment (bravo v15 makes them more frequent): off by default so a sweep doesn't pop a false '원' mid-demo
-  engine.on('circle', (c) => { if (c && c.dir && $('showCircle').checked) showToast(c.dir === 'cw' ? '↻ 시계 방향 원' : '↺ 반시계 방향 원'); });
+  // circle calls are an experiment (bravo v15 makes them more frequent): off by default so a sweep doesn't pop a false 'circle' mid-demo
+  engine.on('circle', (c) => { if (c && c.dir && $('showCircle').checked) showToast(c.dir === 'cw' ? '↻ Clockwise circle' : '↺ Counter-clockwise circle'); });
   engine.on('status', (t) => { if (t) $('status').textContent = t; });
   try { audioG = await engine.start({ mode: m, file, volume: Number($('vol').value) }); } catch (e) {
     const msg = startErrMsg(e);
@@ -476,7 +476,7 @@ async function start(m, file) {
   const info = engine.info();
   drawSources(info.G, info.phones);
   renderAcc(info);
-  if (m === 'mic') $('status').textContent = '듣는 중 · 손을 노트북 앞 모서리 위 20cm쯤(테이프 자리)에서 움직여요';
+  if (m === 'mic') $('status').textContent = 'Listening · move your hand about 20 cm above the laptop’s front edge (the tape mark)';
 }
 let startT = 0;
 // another Bat Ears tab playing its tones spoils this one: ask the other tabs every 3 s while listening (dsp.js pages answer too)
@@ -486,7 +486,7 @@ try {
   tabs.bc.onmessage = (e) => {
     const d = e.data || {};
     if (d.q === 'who-plays' && running && mode === 'mic') tabs.bc.postMessage({ a: 'playing', page: 'hologram.html' });
-    if (d.a === 'playing') { tabs.other = d.page || '다른 탭'; tabs.t = performance.now(); }
+    if (d.a === 'playing') { tabs.other = d.page || 'another tab'; tabs.t = performance.now(); }
   };
   setInterval(() => { if (running && mode === 'mic') tabs.bc.postMessage({ q: 'who-plays' }); }, 3000);
 } catch (e) { /* no BroadcastChannel */ }
@@ -522,10 +522,10 @@ function foreignCheck() {
 }
 function startErrMsg(e) {
   const n = (e && e.name) || '', m = (e && e.message) || String(e);
-  if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ 마이크가 막혀 있어요: 주소창 왼쪽 🔒(사이트 설정)에서 마이크를 허용하고 새로고침해요';
-  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '🎙️ 마이크를 찾지 못했어요: 노트북 내장 마이크가 켜져 있는지 확인해요 (Windows 설정 → 개인 정보 → 마이크)';
-  if (n === 'NotReadableError' || n === 'AbortError') return '🎙️ 다른 앱이 마이크를 쓰고 있어요: Zoom·Teams·다른 Bat Ears 탭을 닫고 다시 ▶ 시작';
-  return '⚠️ 시작하지 못했어요: ' + m;
+  if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ The microphone is blocked: allow it under 🔒 (site settings) left of the address bar, then reload';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '🎙️ No microphone found: check that the laptop’s built-in mic is on (Windows Settings → Privacy → Microphone)';
+  if (n === 'NotReadableError' || n === 'AbortError') return '🎙️ Another app is using the microphone: close Zoom, Teams or other Bat Ears tabs, then ▶ Start again';
+  return '⚠️ Couldn’t start: ' + m;
 }
 function stop() {
   if (rec.on) recStop();
@@ -542,7 +542,7 @@ function recenter() {
 // 📂: a teach session's WAV, plus (optional) its _vision.csv, .json and .calib.json for the webcam truth
 async function openRecording(files) {
   const wav = files.find((f) => /\.wav$/i.test(f.name));
-  if (!wav) { $('status').textContent = '⚠️ .wav 파일을 골라 주세요'; return; }
+  if (!wav) { $('status').textContent = '⚠️ Please choose a .wav file'; return; }
   const vis = files.find((f) => /_vision\.csv$/i.test(f.name)), cal = files.find((f) => /\.calib\.json$/i.test(f.name));
   const meta = files.find((f) => /\.json$/i.test(f.name) && !/\.calib\.json$/i.test(f.name));
   Object.assign(ghost, { on: false, anchored: false, frames: null, s: null, name: '', errs: [] });
@@ -565,8 +565,8 @@ async function openRecording(files) {
   // was this sitting used to train the calibration in use? (bravo's calibrations list their sessions in .note)
   const sid = (ghost.name.match(/\d{8}_\d{6}/) || [])[0], calText = calib ? `${calib.session || ''} ${calib.note || ''}` : (((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy || {}).note || '';
   const inTrain = ghost.on && sid && calText.includes(sid);
-  $('status').textContent = `녹음 재생: ${wav.name}` + (ghost.on ? ` · 🟩 웹캠 정답 겹침${ghost.calibOk ? '' : ' (calib 없음: 카메라 기본값)'}` : ' · 웹캠 정답 없음 (_vision.csv와 .json을 같이 고르면 겹쳐요)')
-    + (inTrain ? ' · ⚠️ 이 세션은 기본 보정 학습에 쓰여서 실제보다 좋아 보일 수 있어요' : '');
+  $('status').textContent = `Playing recording: ${wav.name}` + (ghost.on ? ` · 🟩 webcam ground truth overlaid${ghost.calibOk ? '' : ' (no calib: camera defaults)'}` : ' · no webcam ground truth (choose _vision.csv and .json too to overlay it)')
+    + (inTrain ? ' · ⚠️ this session was used to train the default calibration, so it may look better than reality' : '');
 }
 // one decimal, half-up (toFixed would print 2.55 as 2.5)
 const f1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
@@ -574,9 +574,9 @@ const f1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
 function filmCaption(s) {
   const e = s && s.err, el = $('filmAcc');
   if (!el) return;
-  if (!e || !e.rms) { el.textContent = s && s.sim ? '가상 움직임 (시험)' : '정확도 미확인 (보정 없음)'; return; }
-  const r = yAdj(e.rms, 'rms'), scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
-  el.textContent = `${scope} 기준 250ms 이동 오차: 좌우 ±${f1(r[0])} · 앞뒤 ±${f1(r[2])} · 높이 ±${f1(r[1])}cm (높이는 약해요)`;
+  if (!e || !e.rms) { el.textContent = s && s.sim ? 'Simulated motion (test)' : 'Accuracy unconfirmed (no calibration)'; return; }
+  const r = yAdj(e.rms, 'rms'), scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
+  el.textContent = `${scope} · 250 ms movement error: left-right ±${f1(r[0])} · toward-away ±${f1(r[2])} · height ±${f1(r[1])}cm (height is weak)`;
 }
 // height at its true size: the engine runs the 'half' size, so y gets matched k / half k more (1.77 / 1.33 on the 8-sitting calib)
 function ampTable() {
@@ -600,14 +600,14 @@ function refreshAcc() {
 function renderAcc(s) {
   filmCaption(s);
   const e = s && s.err;
-  if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? '가상 움직임이라 정확도가 없어요' : '정확도: 미확인 (보정 없음, 물리 풀이)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
+  if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? 'Simulated motion, so no accuracy' : 'Accuracy: unconfirmed (no calibration, physics solver)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
   const r = yAdj(e.rms, 'rms'), c = e.corr || [], mo = e.motion || [];
   errEl.userData.r = r.map((v) => v / 100);
-  const sz = yAdj(e.size, 'size'), AMP = { half: '균형', matched: '실제 크기', mse: '오차 가장 작게' };
-  const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
-  $('accNums').innerHTML = `정확도 (${scope}, 250ms 이동의 RMS 오차):<br><b>좌우 ±${f1(r[0])}cm</b> · <b>앞뒤 ±${f1(r[2])}cm</b> · 높이 ±${f1(r[1])}cm<br>`
-    + (sz ? `그리는 크기: 실제 움직임의 좌우 ${Math.round(100 * sz[0])}% · 앞뒤 ${Math.round(100 * sz[2])}% · 높이 ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
-    + `<span class="note">실제 움직임 좌우 ${mo.length ? f1(mo[0]) : '–'} · 앞뒤 ${mo.length ? f1(mo[2]) : '–'} · 높이 ${mo.length ? f1(mo[1]) : '–'}cm, 상관 ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? '높이는 실제 크기로 그려요. 높이는 상관 ' + (c[1] != null ? c[1].toFixed(2) : '–') + '로 약해요: 위아래 움직임의 약 ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '%만 설명돼요' : '높이는 아직 약해요'}${s.calName ? ' · 보정: ' + s.calName : ''}</span>`;
+  const sz = yAdj(e.size, 'size'), AMP = { half: 'balanced', matched: 'true size', mse: 'smallest error' };
+  const scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? 'unseen sitting' : s.calibScope;
+  $('accNums').innerHTML = `Accuracy (${scope}, RMS error of the 250 ms movement):<br><b>left-right ±${f1(r[0])}cm</b> · <b>toward-away ±${f1(r[2])}cm</b> · height ±${f1(r[1])}cm<br>`
+    + (sz ? `Drawn size, as a share of the real movement: left-right ${Math.round(100 * sz[0])}% · toward-away ${Math.round(100 * sz[2])}% · height ${Math.round(100 * sz[1])}% <span class="note">(${AMP[e.amp || s.amp] || e.amp || ''})</span><br>` : '')
+    + `<span class="note">Real movement left-right ${mo.length ? f1(mo[0]) : '–'} · toward-away ${mo.length ? f1(mo[2]) : '–'} · height ${mo.length ? f1(mo[1]) : '–'}cm, correlation ${c.length ? [c[0], c[2], c[1]].map((v) => v.toFixed(2)).join(' · ') : '–'} · ${yMatched() ? 'Height is drawn at true size. Height is weak, correlation ' + (c[1] != null ? c[1].toFixed(2) : '–') + ': it explains only about ' + (c[1] != null ? Math.round(100 * c[1] * c[1]) : '–') + '% of up-down movement' : 'height is still weak'}${s.calName ? ' · calibration: ' + s.calName : ''}</span>`;
 }
 
 // ------------------------------------------------------------------ HUD + render loop
@@ -620,16 +620,16 @@ function renderHud(now) {
   if (now - hudT < 150) return;
   hudT = now;
   const d = disp.pos.map((v, i) => 100 * (v - HOME[i]));
-  $('pos').innerHTML = `<b>좌우</b><span>${d[0] >= 0 ? '→' : '←'} ${Math.abs(d[0]).toFixed(1)} cm</span><b>앞뒤</b><span>${d[2] >= 0 ? '화면 쪽' : '몸 쪽'} ${Math.abs(d[2]).toFixed(1)} cm</span>`
-    + `<b>높이</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(약함)</span></span><b>상태</b><span>${!running ? '멈춤' : disp.out ? '<span style="color:var(--warn);font-weight:700">범위 밖 · 테이프 자리로 와서 ◎(스페이스)</span>' : disp.moving ? '움직이는 중' : '멈춤 · 가운데로 돌아오는 중'}</span>`
-    + (ghost.on && ghost.errs.length > 20 ? (() => { const r = [0, 1, 2].map((i) => 100 * Math.sqrt(ghost.errs.reduce((a, q) => a + q.e[i] ** 2, 0) / ghost.errs.length)); return `<b>🟩 정답과 차이</b><span>좌우 ${r[0].toFixed(1)} · 앞뒤 ${r[2].toFixed(1)} · 높이 ${r[1].toFixed(1)} cm <span class="note">(최근 5초 RMS)</span></span>`; })() : '');
+  $('pos').innerHTML = `<b>Left-right</b><span>${d[0] >= 0 ? '→' : '←'} ${Math.abs(d[0]).toFixed(1)} cm</span><b>Toward-away</b><span>${d[2] >= 0 ? 'toward screen' : 'toward body'} ${Math.abs(d[2]).toFixed(1)} cm</span>`
+    + `<b>height</b><span>${d[1] >= 0 ? '↑' : '↓'} ${Math.abs(d[1]).toFixed(1)} cm <span class="note">(weak)</span></span><b>Status</b><span>${!running ? 'Stopped' : disp.out ? '<span style="color:var(--warn);font-weight:700">Out of range · come back to the tape mark and press ◎ (space)</span>' : disp.moving ? 'Moving' : 'Stopped · returning to center'}</span>`
+    + (ghost.on && ghost.errs.length > 20 ? (() => { const r = [0, 1, 2].map((i) => 100 * Math.sqrt(ghost.errs.reduce((a, q) => a + q.e[i] ** 2, 0) / ghost.errs.length)); return `<b>🟩 Difference from ground truth</b><span>left-right ${r[0].toFixed(1)} · toward-away ${r[2].toFixed(1)} · height ${r[1].toFixed(1)} cm <span class="note">(last 5 s RMS)</span></span>`; })() : '');
   const q = disp.q || [], nm = ['L 18k', 'R 19.5k', '📱A', '📱B'];
   let h = '';
   for (let i = 0; i < q.length; i += 2) {
     const v = (q[i] + (q[i + 1] ?? q[i])) / 2, w = Math.min(100, 100 * Math.max(0, v - 1) / 4);
-    h += `<div class="bar"><span>${nm[i / 2] || '경로'}</span><div class="track"><div class="fill" style="width:${w}%;background:${v > 2.5 ? 'var(--ok)' : v > 1.6 ? 'var(--warn)' : 'var(--bad)'}"></div></div></div>`;
+    h += `<div class="bar"><span>${nm[i / 2] || 'path'}</span><div class="track"><div class="fill" style="width:${w}%;background:${v > 2.5 ? 'var(--ok)' : v > 1.6 ? 'var(--warn)' : 'var(--bad)'}"></div></div></div>`;
   }
-  $('bars').innerHTML = h ? '<div class="note">경로 품질 (움직이는 반사 / 잡음)</div>' + h : '';
+  $('bars').innerHTML = h ? '<div class="note">Path quality (moving reflection / noise)</div>' + h : '';
 }
 // ------------------------------------------------------------------ 🔍 diagnosis: received tone level vs the teach sittings, raw vs shown
 const REF = ((window.Bat3D || {}).REF_AMP || {}).galaxy || null;   // bravo: laptop carrier level, median of the five teach sittings
@@ -637,28 +637,28 @@ function renderDebug() {
   const lv = disp.levelDb;
   let warn = '';
   if (lv != null && running && mode === 'mic') {
-    if (lv < -20) warn = `🔇 톤이 거의 안 들려요 (teach 때보다 ${(-lv).toFixed(0)}dB 작아요): 블루투스·이어폰을 빼고 내장 스피커·마이크로, 볼륨 50% 이상`;
-    else if (lv < -12) warn = `🔈 소리가 가장 조용했던 teach보다도 작아요 (기준보다 ${(-lv).toFixed(0)}dB): 노트북 볼륨을 올려요 (작으면 움직임을 작게 그려요)`;
+    if (lv < -20) warn = `🔇 The tone is barely audible (${(-lv).toFixed(0)}dB below teach): unplug Bluetooth or earphones, use the built-in speakers and mic, volume 50% or more`;
+    else if (lv < -12) warn = `🔈 Quieter than even the quietest teach (${(-lv).toFixed(0)}dB below the reference): turn the laptop volume up (a quiet tone draws movement smaller)`;
   }
-  if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) warn = `🔊 다른 Bat Ears 탭(${tabs.other})도 초음파를 내고 있어요: 그 탭을 닫아요 (서로 방해해요)`;
+  if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) warn = `🔊 Another Bat Ears tab (${tabs.other}) is also playing ultrasound: close that tab (they interfere)`;
   if (performance.now() - fx.t > 1000) { fx.t = performance.now(); foreignCheck(); }
   const alerts = [];
-  if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) alerts.push(`🔊 다른 Bat Ears 탭(${tabs.other})이 초음파를 내고 있어요 → 그 탭을 닫아요`);
-  if (fx.peak && running) alerts.push(`📡 다른 초음파가 크게 들려요 (${(fx.peak.f / 1000).toFixed(2)}kHz, 우리 톤보다 ${fx.peak.rel >= 0 ? '+' : ''}${fx.peak.rel.toFixed(0)}dB) → 다른 Bat Ears 탭·기기를 끄고 폰을 노트북에서 치워요`);
-  if (lv != null && running && mode === 'mic' && lv < -12) alerts.push(`🔈 톤이 가장 조용했던 teach보다도 작아요 (기준보다 ${(-lv).toFixed(0)}dB) → 윈도우 볼륨을 올려요 (작으면 움직임을 작게 그려요)`);
+  if (tabs.other && running && mode === 'mic' && performance.now() - tabs.t < 7000) alerts.push(`🔊 Another Bat Ears tab (${tabs.other}) is playing ultrasound → close that tab`);
+  if (fx.peak && running) alerts.push(`📡 Loud foreign ultrasound (${(fx.peak.f / 1000).toFixed(2)}kHz, relative to our tone ${fx.peak.rel >= 0 ? '+' : ''}${fx.peak.rel.toFixed(0)}dB) → turn off other Bat Ears tabs and devices, and move phones away from the laptop`);
+  if (lv != null && running && mode === 'mic' && lv < -12) alerts.push(`🔈 Tone quieter than even the quietest teach (${(-lv).toFixed(0)}dB below the reference) → turn up the Windows volume (a quiet tone draws movement smaller)`);
   $('alert').textContent = alerts[0] || ''; $('alert').style.display = alerts.length ? 'block' : 'none';
-  const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ 톤이 잘 들려요 (teach 때와 ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
+  const okMsg = !warn && lv != null && running && mode === 'mic' && performance.now() - startT < 8000 ? `✅ Tone heard clearly (vs teach ${lv >= 0 ? '+' : ''}${lv.toFixed(0)}dB)` : '';
   $('levelWarn').textContent = warn || okMsg;
   $('levelWarn').style.color = okMsg ? 'var(--ok)' : '';
   if ($('debug').style.display !== 'block') return;
-  const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k·마이크0', 'L 18k·마이크1', 'R 19.5k·마이크0', 'R 19.5k·마이크1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
-  let h = `<div>노트북 톤 크기: <b class="${lv == null ? '' : lv > -9 ? 'ok' : lv > -12 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (처음 teach 다섯 앉음 기준. 최근 teach는 약 −8dB였고 잘 학습됐어요. −12dB 아래면 낮아요)</div>`;
-  h += '<table style="width:100%;font-size:12px"><tr><th align="left">경로</th><th>톤 크기</th><th>teach 대비</th><th>품질</th><th>움직임</th></tr>';
+  const a = disp.amp || [], q = disp.q || [], act = disp.act || [], nm = ['L 18k · mic0', 'L 18k · mic1', 'R 19.5k · mic0', 'R 19.5k · mic1', '📱A·0', '📱A·1', '📱B·0', '📱B·1'];
+  let h = `<div>Laptop tone level: <b class="${lv == null ? '' : lv > -9 ? 'ok' : lv > -12 ? 'warn' : 'bad'}">${lv == null ? '–' : (lv >= 0 ? '+' : '') + lv.toFixed(1) + ' dB'}</b> (relative to the first five teach sittings. Recent teach sittings ran at about −8 dB and trained well. Below −12 dB is low)</div>`;
+  h += '<table style="width:100%;font-size:12px"><tr><th align="left">path</th><th>Tone level</th><th>vs teach</th><th>Quality</th><th>Motion</th></tr>';
   for (let i = 0; i < a.length; i++) {
     const db = 20 * Math.log10(a[i] || 1e-9), dd = REF && REF[i] ? 20 * Math.log10((a[i] || 1e-9) / REF[i]) : NaN;
     h += `<tr><td>${nm[i] || i}</td><td align="center">${db.toFixed(0)} dBFS</td><td align="center" class="${!Number.isFinite(dd) ? '' : dd > -4 ? 'ok' : dd > -10 ? 'warn' : 'bad'}">${Number.isFinite(dd) ? (dd >= 0 ? '+' : '') + dd.toFixed(0) + ' dB' : '–'}</td><td align="center">${(q[i] || 0).toFixed(1)}</td><td align="center">${Math.round(100 * (act[i] || 0))}%</td></tr>`;
   }
-  $('dbgTone').innerHTML = (a.length ? h + '</table>' : '시작하면 경로별 톤 크기가 보여요') + `<div>화면 ${perf.fps.toFixed(0)}fps${perf.reduced ? ' (느려서 화질을 낮췄어요)' : ''}</div>`;
+  $('dbgTone').innerHTML = (a.length ? h + '</table>' : 'Path tone levels appear after you start') + `<div>Screen ${perf.fps.toFixed(0)}fps${perf.reduced ? ' (slow, so graphics quality was lowered)' : ''}</div>`;
   const c = $('dbgPlot'), g = c.getContext('2d'), W = c.width, H = c.height, t1 = disp.t || 0;
   g.clearRect(0, 0, W, H);
   g.strokeStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
@@ -676,8 +676,8 @@ try { const v = Number(localStorage.getItem('batears-palm-cm')); if (v >= 5 && v
 function cmpCalib() { const B = window.Bat3D || {}; return calib || (B.DEFAULT_CALIB && (B.DEFAULT_CALIB.galaxy || B.DEFAULT_CALIB)) || null; }
 async function cmpStart() {
   if (CMP.on) return;
-  if (!window.BatVision) { $('cmpStat').textContent = '⚠️ vision3d.browser.js가 없어요'; return; }
-  $('cmp').style.display = 'block'; $('btnCmp').classList.add('cmpOn'); $('cmpStat').textContent = '카메라를 켜는 중…';
+  if (!window.BatVision) { $('cmpStat').textContent = '⚠️ vision3d.browser.js is missing'; return; }
+  $('cmp').style.display = 'block'; $('btnCmp').classList.add('cmpOn'); $('cmpStat').textContent = 'Turning on the camera…';
   try {
     // like teach.html: insist on 30 fps (a dim room otherwise drops the webcam to ~15: the 11:06 take had 13.6 fps of video)
     const vc = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, min: 30 } };
@@ -686,17 +686,17 @@ async function cmpStart() {
       vc.frameRate = { ideal: 30 }; CMP.stream = await navigator.mediaDevices.getUserMedia({ video: vc, audio: false });
     }
     CMP.video = $('cmpVideo'); CMP.video.srcObject = CMP.stream; await CMP.video.play();
-    CMP.starting = true;   // ⏺ pressed while the model loads still records a compare sitting (서진 11:03 lost one)
-    $('cmpStat').textContent = '손 인식 모델을 불러오는 중… (처음 한 번 몇 초)';
+    CMP.starting = true;   // ⏺ pressed while the model loads still records a compare sitting (Seojin 11:03 lost one)
+    $('cmpStat').textContent = 'Loading the hand-tracking model… (a few seconds the first time)';
     const mod = await import(`${MP_BASE}/vision_bundle.mjs`), files = await mod.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
     const opts = (delegate) => ({ baseOptions: { modelAssetPath: MP_MODEL, delegate }, runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5 });
     try { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('GPU')); CMP.delegate = 'GPU'; } catch (e) { CMP.lmk = await mod.HandLandmarker.createFromOptions(files, opts('CPU')); CMP.delegate = 'CPU'; }
     CMP.cam = window.BatVision.camFromCalib(cmpCalib(), { W: CMP.video.videoWidth || 1280, H: CMP.video.videoHeight || 720 });
     Object.assign(CMP, { on: true, starting: false, frames: [], pairs: [], pts: null, palm: null, seen: 0, present: 0, anchored: false, lastTs: 0 });
     CMP.video.requestVideoFrameCallback(cmpFrame);
-    $('cmpStat').textContent = '손을 카메라에 보여 주세요';
+    $('cmpStat').textContent = 'Show your hand to the camera';
   } catch (e) {
-    $('cmpStat').textContent = '⚠️ 카메라·모델을 켜지 못했어요: ' + (e.message || e);
+    $('cmpStat').textContent = '⚠️ Couldn’t turn on the camera or model: ' + (e.message || e);
     cmpStop(true);
   }
 }
@@ -765,15 +765,15 @@ function cmpStats() {
     D.push([0, 1, 2].map((k) => [P[i].s[k] - a.s[k], P[i].c[k] - a.c[k]]));
   }
   const vis = CMP.seen ? Math.round(100 * CMP.present / CMP.seen) : 0;
-  if (D.length < 20) { $('cmpStat').innerHTML = `${CMP.lmk ? CMP.delegate : ''} · 손 보임 ${vis}% · ${running ? '손을 움직이면 숫자가 나와요' : '▶ 시작을 누르면 소리 손과 비교해요'}`; return; }
+  if (D.length < 20) { $('cmpStat').innerHTML = `${CMP.lmk ? CMP.delegate : ''} · hand visible ${vis}% · ${running ? 'Move your hand and numbers appear' : 'Press ▶ Start to compare with the sound hand'}`; return; }
   const ax = [0, 2, 1].map((k) => {
     const s = D.map((r) => r[k][0]), c = D.map((r) => r[k][1]), m = (v) => v.reduce((a, x) => a + x, 0) / v.length, ms = m(s), mc = m(c);
     let sc = 0, ss = 0, cc = 0, e = 0;
     for (let i = 0; i < s.length; i++) { sc += (s[i] - ms) * (c[i] - mc); ss += (s[i] - ms) ** 2; cc += (c[i] - mc) ** 2; e += (s[i] - c[i]) ** 2; }
     return { rms: 100 * Math.sqrt(e / s.length), r: sc / Math.sqrt(ss * cc || 1), mv: 100 * Math.sqrt(cc / s.length) };
   });
-  const nm = ['좌우', '앞뒤', '높이'];
-  $('cmpStat').innerHTML = `최근 15초, 250ms 이동: ` + ax.map((a, i) => `<b>${nm[i]}</b> ±${f1(a.rms)}cm (상관 ${a.r.toFixed(2)}, 실제 ${f1(a.mv)})`).join(' · ') + ` · 손 보임 ${vis}%`;
+  const nm = ['Left-right', 'Toward-away', 'height'];
+  $('cmpStat').innerHTML = `Last 15 s, 250 ms movement: ` + ax.map((a, i) => `<b>${nm[i]}</b> ±${f1(a.rms)}cm (correlation ${a.r.toFixed(2)}, actual ${f1(a.mv)})`).join(' · ') + ` · hand visible ${vis}%`;
 }
 function pickVideoMime() { const c = ['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']; return window.MediaRecorder ? c.find((m) => MediaRecorder.isTypeSupported(m)) || '' : ''; }
 function cmpRecStart() {
@@ -808,8 +808,8 @@ $('btnCmp').onclick = () => { if (CMP.on || $('cmp').style.display === 'block') 
 // ⏺: the mic (2 ch, raw) + the engine stream + what was shown, into ml/data/holo/ (or downloaded), for bravo
 const rec = { on: false, chunks: [], log: [], node: null, mute: null, rate: 48000, start: '', frames: 0 };
 async function recStart() {
-  if (!audioG || !audioG.ctx || !audioG.source || mode !== 'mic') { $('recInfo').textContent = '⏺는 ▶ 시작(마이크) 뒤에 눌러요'; $('debug').style.display = 'block'; return; }
-  if (!dir && !NOFOLDER) bigNote('📁 저장 폴더 권한 창이 뜨면 "방문할 때마다 허용"을 골라요 (다음부터 안 물어봐요)', 6000);
+  if (!audioG || !audioG.ctx || !audioG.source || mode !== 'mic') { $('recInfo').textContent = 'Press ⏺ after ▶ Start (mic)'; $('debug').style.display = 'block'; return; }
+  if (!dir && !NOFOLDER) bigNote('📁 When the save-folder permission prompt appears, choose "Allow on every visit" (it won’t ask again)', 6000);
   await dataDir(true);
   const ctx = audioG.ctx, node = ctx.createScriptProcessor(4096, 2, 1);
   node.channelCount = 2; node.channelCountMode = 'explicit'; node.channelInterpretation = 'discrete';
@@ -828,16 +828,16 @@ async function recStart() {
   };
   rec.mute = ctx.createGain(); rec.mute.gain.value = 0;
   audioG.source.connect(node); node.connect(rec.mute).connect(ctx.destination);
-  $('btnRec').textContent = '⏹ 녹화 끝'; $('btnRec').classList.add('recOn');
-  $('recInfo').textContent = '⏺ 녹화 중: 손을 좌우·앞뒤·위아래로 또렷하게 움직여요 (30초~1분이면 충분해요)';
-  bigNote(rec.cmp ? '⏺ 비교 녹화 중: 소리 + 웹캠 손 + 영상 → compare/' : '⏺ 녹화 중: 소리만 → holo/ (👁 비교를 켜면 웹캠도 같이 저장돼요)', 5000);
+  $('btnRec').textContent = '⏹ Stop recording'; $('btnRec').classList.add('recOn');
+  $('recInfo').textContent = '⏺ Recording: move your hand briskly left-right, toward-away and up-down (30 s to 1 min is enough)';
+  bigNote(rec.cmp ? '⏺ Compare recording: sound + webcam hand + video → compare/' : '⏺ Recording: sound only → holo/ (turn on 👁 Compare to save the webcam too)', 5000);
   $('debug').style.display = 'block';
 }
 async function recStop() {
   if (!rec.on) return;
   rec.on = false;
   try { audioG.source.disconnect(rec.node); rec.node.disconnect(); rec.mute.disconnect(); } catch (e) { /* ignore */ }
-  $('btnRec').textContent = '⏺ 녹화'; $('btnRec').classList.remove('recOn');
+  $('btnRec').textContent = '⏺ Record'; $('btnRec').classList.remove('recOn');
   const bytes = rec.frames * 4, hd = new DataView(new ArrayBuffer(44)), tag = (o, t) => { for (let i = 0; i < 4; i++) hd.setUint8(o + i, t.charCodeAt(i)); };
   tag(0, 'RIFF'); hd.setUint32(4, 36 + bytes, true); tag(8, 'WAVE'); tag(12, 'fmt '); hd.setUint32(16, 16, true); hd.setUint16(20, 1, true); hd.setUint16(22, 2, true);
   hd.setUint32(24, rec.rate, true); hd.setUint32(28, rec.rate * 4, true); hd.setUint16(32, 4, true); hd.setUint16(34, 16, true); tag(36, 'data'); hd.setUint32(40, bytes, true);
@@ -879,8 +879,8 @@ async function recStop() {
   }
   rec.chunks = [];
   const where = await saveFiles(files, sub);
-  $('recInfo').textContent = `저장했어요 (${where}): ${base}.wav · .json, ${meta.seconds}초. 브라보에게 알려 주세요`;
-  bigNote(/\/(holo|compare)\/$/.test(where) ? `✅ 저장됨: ${base} (${meta.seconds}초, ${where})` : `⬇️ ${base}: ${where}`, 7000);
+  $('recInfo').textContent = `Saved (${where}): ${base}.wav · .json, ${meta.seconds}s. Let Bravo know`;
+  bigNote(/\/(holo|compare)\/$/.test(where) ? `✅ Saved: ${base} (${meta.seconds}s, ${where})` : `⬇️ ${base}: ${where}`, 7000);
 }
 // data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir); files go to its holo/
 let dir = null;
@@ -904,7 +904,7 @@ async function saveFiles(files, subName = 'holo') {
     } catch (e) { console.warn('[holo] folder save', e); }
   }
   for (const [name, blob] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
-  return `다운로드했어요. ml/data/${subName}/로 옮겨 주세요`;
+  return `Downloaded. Please move it to ml/data/${subName}/`;
 }
 const clock = new THREE.Clock();
 let frameN = 0;
@@ -974,8 +974,8 @@ requestAnimationFrame(frame);
 $('btnStart').onclick = () => start('mic');
 $('introStart').onclick = () => start('mic');
 $('introClose').onclick = () => { $('intro').style.display = 'none'; };
-if (!window.chrome) $('introErr').textContent = '⚠️ Chrome(또는 Edge)에서 확인한 페이지예요. 다른 브라우저는 미확인이에요';
-$('btnStop').onclick = () => { stop(); $('status').textContent = '멈춤'; };
+if (!window.chrome) $('introErr').textContent = '⚠️ This page was checked in Chrome (or Edge). Other browsers are untested';
+$('btnStop').onclick = () => { stop(); $('status').textContent = 'Stopped'; };
 $('btnCenter').onclick = () => { if (engine && engine.originReset) engine.originReset(); recenter(); };
 function setFilm(on) {
   document.body.classList.toggle('film', on);
@@ -998,7 +998,7 @@ $('btnRec').onclick = () => (rec.on ? recStop() : recStart());
 function fillCalibs() {
   const C = (window.Bat3D && window.Bat3D.CALIBS) || null, sel = $('calibSel');
   if (!C) return;
-  sel.innerHTML = Object.entries(C).map(([k, v]) => `<option value="${k}">${(v && v.label) || k}${k === 'galaxy' ? ' (기본)' : ''}</option>`).join('');
+  sel.innerHTML = Object.entries(C).map(([k, v]) => `<option value="${k}">${(v && v.label) || k}${k === 'galaxy' ? ' (default)' : ''}</option>`).join('');
 }
 fillCalibs();
 // ?preset=above: bravo's phone-A-overhead calibration when bat3d.js has it; until then phone A with the physics solver, labelled
@@ -1007,13 +1007,13 @@ if (Q.get('preset') === 'above') {
   if (C['galaxy+A-top']) { $('calibSel').value = 'galaxy+A-top'; setTimeout(() => $('calibSel').onchange && $('calibSel').onchange(), 0); }   // the handler is set further down
   else {
     $('phoneOn').checked = true; $('phoneHz').value = 17000; $('px').value = 0; $('py').value = 45; $('pz').value = 30; $('phone2On').checked = false;
-    $('calibNote').innerHTML = '<span class="warn">📱 폰 A 위에서 (실험, 효과 미확인): 측정해 보니 위에서 아래로 둔 폰의 경로는 손을 따라가지 않았어요. 이 배치의 보정이 없어서 물리 풀이로 풀어요. 데모는 노트북만으로 해요</span>';
+    $('calibNote').innerHTML = '<span class="warn">📱 Phone A overhead (experimental, effect unconfirmed): we measured that a phone placed above, facing down, gives a path that doesn’t follow the hand. There’s no calibration for this layout, so it uses the physics solver. Do the demo with the laptop only</span>';
   }
-  $('status').textContent = '📱 폰 A 위에서 모드 · 폰에서 tone.html?preset=A를 켜고 ▶ 시작을 눌러요';
+  $('status').textContent = '📱 Phone A overhead mode · open tone.html?preset=A on the phone and press ▶ Start';
 }
 $('calibSel').onchange = () => {
   const cn = $('calibSel').value, C = (window.Bat3D && window.Bat3D.CALIBS) || {}, v = C[cn];
-  $('calibNote').textContent = v && v.phones && v.phones.length ? `이 보정은 ${v.phones.map((p) => `📱${p.id} ${p.hz}Hz (오른쪽 ${p.x_right_cm} · 높이 ${p.h_cm} · 앞 ${p.z_front_cm}cm)`).join(', ')}로 배웠어요. 폰을 그 자리에 두고 tone.html을 켜요. 다른 폰은 꺼요` : '노트북 스피커만 써요. 폰은 꺼도 돼요';
+  $('calibNote').textContent = v && v.phones && v.phones.length ? `This calibration was learned with ${v.phones.map((p) => `📱${p.id} ${p.hz}Hz (right ${p.x_right_cm} · height ${p.h_cm} · front ${p.z_front_cm}cm)`).join(', ')}. Put the phones in those spots and open tone.html. Turn other phones off` : 'Laptop speakers only. Phones can stay off';
   if (engine && engine.setOptions && running && !SIM) { engine.setOptions({ calibName: cn }); recenter(); const info = engine.info(); drawSources(info.G, info.phones); renderAcc(info); }
   else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: cn, autoReset: false, amp: $('ampMode').value }).info());
 };
@@ -1023,12 +1023,12 @@ $('ampMode').onchange = () => {
   if (engine && engine.setOptions && !SIM) { engine.setOptions({ amp: a }); recenter(); yGain = yBoost(); renderAcc(engine.info()); }
   else if (window.Bat3D && !SIM) renderAcc(window.Bat3D.create({ geom: 'galaxy', calibName: $('calibSel').value, autoReset: false, amp: a }).info());
 };
-$('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (teach와 같은 크기)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
+$('vol').oninput = () => { const v = Number($('vol').value); $('volV').textContent = v.toFixed(2) + (Math.abs(v - 1.2) < 0.01 ? ' (same level as teach)' : ''); if (engine && engine.setVolume) engine.setVolume(v); };
 $('smooth').oninput = () => { $('smoothV').textContent = '×' + Number($('smooth').value).toFixed(1); };
-$('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? '끔' : `${v}초 (멈추면 ${Math.min(2, v)}초)`; };
+$('tau').oninput = () => { const v = Number($('tau').value); $('tauV').textContent = v <= 0 ? 'off' : `${v}s (once stopped, ${Math.min(2, v)}s)`; };
 $('calibFile').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
-  try { calib = JSON.parse(await f.text()); $('calibName').textContent = '불러옴: ' + (calib.session || f.name) + ' · 다시 시작하면 적용돼요'; } catch (er) { $('calibName').textContent = '⚠️ 읽을 수 없어요'; }
+  try { calib = JSON.parse(await f.text()); $('calibName').textContent = 'Loaded: ' + (calib.session || f.name) + ' · applies on the next start'; } catch (er) { $('calibName').textContent = '⚠️ Can’t read it'; }
 };
 if (SIM) { $('sim').style.display = 'block'; $('intro').style.display = 'none'; start('sim'); }
 else renderAcc(window.Bat3D ? window.Bat3D.create({ geom: 'galaxy', autoReset: false, amp: $('ampMode').value }).info() : null);
@@ -1042,8 +1042,8 @@ setTimeout(function () {
   var d = document.createElement('div');
   d.className = 'hud';
   d.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%);max-width:520px;font-size:15px;border-color:#ef5350';
-  d.innerHTML = '<b>⚠️ 3D 화면을 불러오지 못했어요</b><br>새로고침해 보고, Chrome(또는 Edge)인지, WebGL(하드웨어 가속)이 켜져 있는지 확인해요.'
-    + '<br>대신 보여 줄 데모: <a href="index.html" style="color:#4fd8ff">🎮 Force Push</a>';
+  d.innerHTML = '<b>⚠️ Couldn’t load the 3D view</b><br>Try reloading, and check that this is Chrome (or Edge) and that WebGL (hardware acceleration) is on.'
+    + '<br>Demo to show instead: <a href="index.html" style="color:#4fd8ff">🎮 Force Push</a>';
   document.body.appendChild(d);
   var i = document.getElementById('intro'); if (i) i.style.display = 'none';
 }, 7000);
