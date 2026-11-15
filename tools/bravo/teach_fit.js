@@ -24,7 +24,7 @@ const vid = meta.video || meta.camera || {}, IW = vid.width || 1280, IH = vid.he
 const WIN = Number(process.env.WIN || 250), SPLIT = Number(process.env.SPLIT || 0.5);
 // ---------------------------------------------------------------- vision frames -> { t, lm[21][3], wlm[21][3] }
 function loadVision() {
-  const csv = base + '_vision.csv';
+  const csv = base + (process.env.VSUFFIX || '_vision') + '.csv';
   if (fs.existsSync(csv)) {
     const L = fs.readFileSync(csv, 'utf8').trim().split(/\r?\n/), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
     const num = (r, k) => (ix[k] == null ? NaN : Number(r[ix[k]]));

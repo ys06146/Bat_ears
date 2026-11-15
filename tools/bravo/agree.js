@@ -5,7 +5,7 @@
 const fs = require('fs'), V = require('./vision3d.js'), P = require('./phase.js');
 const base = process.argv[2], J = JSON.parse(fs.readFileSync(base + '.json', 'utf8')), meta = J.meta || J;
 const NEAR = Number(process.env.NEAR || 0.45), WIN = Number(process.env.WIN || 250);
-const L = fs.readFileSync(base + '_vision.csv', 'utf8').trim().split(/\r?\n/), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
+const L = fs.readFileSync(base + (process.env.VSUFFIX || '_vision') + '.csv', 'utf8').trim().split(/\r?\n/), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
 const fr = L.slice(1).map((l) => { const r = l.split(','), n = (k) => Number(r[ix[k]]); return { t: n('t_cap'), present: n('present') === 1, lm: Array.from({ length: 21 }, (_, j) => [n(`lm${j}_x`), n(`lm${j}_y`), 0]), wlm: Array.from({ length: 21 }, (_, j) => [n(`wlm${j}_x`), n(`wlm${j}_y`), n(`wlm${j}_z`)]) }; }).filter((f) => f.present);
 const cam = meta.camera || {}, lean = ((meta.screen_angle_deg ?? 95) - 90), r = lean * Math.PI / 180, C = [0, 0.19 * Math.cos(r), 0.10 + 0.19 * Math.sin(r)];
 const tr = fr.map((f) => { const c = V.handCam(f, { W: cam.width || 1280, H: cam.height || 720, hfov: 70 }); return c ? { t: f.t, d: c[2], H: V.toLaptop(c, { tilt: lean, C }) } : null; }).filter(Boolean);

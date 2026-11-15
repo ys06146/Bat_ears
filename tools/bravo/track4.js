@@ -5,7 +5,7 @@
 // 4 equations, 3 unknowns) -> PCA of the track: planarity (l3/l2), roundness (l2/l1), plane normal, winding in-plane.
 const fs = require('fs');
 const P = require('./phase.js'), BC = require('../../web/circle.js');
-const D = (process.env.DATA || require('path').join(__dirname, '../../ml/data')) + '/batears_', BK = (process.env.WAV_BACKUP || '') + 'batears_';
+const D = (process.env.DATA || require('path').join(__dirname, '../../ml/data')) + '/batears_', BK = (process.env.WAV_BACKUP || '') + '/batears_';
 const name = process.argv[2];
 const pick = (ext) => [D + name + ext, BK + name + ext].find((p) => fs.existsSync(p));
 const meta = JSON.parse(fs.readFileSync(pick('.json'), 'utf8')), wav = P.readWav(pick('.wav'));

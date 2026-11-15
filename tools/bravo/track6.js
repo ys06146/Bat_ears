@@ -6,7 +6,7 @@
 // height change (for the "push = up, pull = down" height test) and the toward-screen change.
 const fs = require('fs');
 const P = require('./phase.js'), PH = require('./phone.js'), BC = require('../../web/circle.js');
-const D = (process.env.DATA || require('path').join(__dirname, '../../ml/data')) + '/batears_', BK = (process.env.WAV_BACKUP || '') + 'batears_';
+const D = (process.env.DATA || require('path').join(__dirname, '../../ml/data')) + '/batears_', BK = (process.env.WAV_BACKUP || '') + '/batears_';
 const arg = process.argv[2];
 const pick = (ext) => [arg + ext, D + arg + ext, BK + arg + ext].find((p) => fs.existsSync(p));
 const meta = JSON.parse(fs.readFileSync(pick('.json'), 'utf8')), wav = P.readWav(pick('.wav'));

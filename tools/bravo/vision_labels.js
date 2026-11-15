@@ -9,7 +9,7 @@ const fs = require('fs'), V = require('./vision3d.js'), BC = require('../../web/
 const base = process.argv[2], J = JSON.parse(fs.readFileSync(base + '.json', 'utf8')), meta = J.meta || J;
 const cam = meta.camera || meta.video || {}, IW = cam.width || 1280, IH = cam.height || 720;
 const scrA = meta.screenAngle ?? meta.screen_angle_deg, tilt = Number(process.env.TILT ?? (Number.isFinite(scrA) ? scrA - 90 : 5)), hfov = Number(process.env.HFOV || 70);
-const L = fs.readFileSync(base + '_vision.csv', 'utf8').trim().split(/\r?\n/), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
+const L = fs.readFileSync(base + (process.env.VSUFFIX || '_vision') + '.csv', 'utf8').trim().split(/\r?\n/), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
 const fr = L.slice(1).map((l) => { const r = l.split(','), n = (k) => (ix[k] == null ? NaN : Number(r[ix[k]]));
   return { t: Number.isFinite(n('t_cap')) ? n('t_cap') : n('t_ms'), present: n('present') === 1, lm: Array.from({ length: 21 }, (_, j) => [n(`lm${j}_x`), n(`lm${j}_y`), 0]),
     wlm: Number.isFinite(n('wlm5_x')) ? Array.from({ length: 21 }, (_, j) => [n(`wlm${j}_x`), n(`wlm${j}_y`), n(`wlm${j}_z`)]) : null }; }).filter((f) => f.present);

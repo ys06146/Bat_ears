@@ -5,12 +5,12 @@ const fs = require('fs'), V = require('./vision3d.js'), P = require('./phase.js'
 const WIN = Number(process.env.WIN || 250), NEAR = Number(process.env.NEAR || 0.45);
 function load(base) {
   const J = JSON.parse(fs.readFileSync(base + '.json', 'utf8')), cam = J.camera || {}, lean = (J.screen_angle_deg ?? 95) - 90, r = lean * Math.PI / 180, C = [0, 0.19 * Math.cos(r), 0.10 + 0.19 * Math.sin(r)];
-  const L = fs.readFileSync(base + '_vision.csv', 'utf8').trim().split('\n').map((l) => l.replace(/\r$/, '')), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
+  const L = fs.readFileSync(base + (process.env.VSUFFIX || '_vision') + '.csv', 'utf8').trim().split('\n').map((l) => l.replace(/\r$/, '')), h = L[0].split(','), ix = Object.fromEntries(h.map((k, i) => [k, i]));
   const tr = L.slice(1).map((l) => { const q = l.split(','), n = (k) => Number(q[ix[k]]); if (n('present') !== 1) return null;
     const f = { lm: Array.from({ length: 21 }, (_, j) => [n(`lm${j}_x`), n(`lm${j}_y`), 0]), wlm: Array.from({ length: 21 }, (_, j) => [n(`wlm${j}_x`), n(`wlm${j}_y`), n(`wlm${j}_z`)]) };
     const c = V.handCam(f, { W: cam.width || 1280, H: cam.height || 720, hfov: 66 }); return c ? { t: n('t_cap'), H: V.toLaptop(c, { tilt: lean, C }) } : null; }).filter(Boolean);
   const wav = P.readWav(base + '.wav'), t0 = J.wav.t0, F = J.stereoFreqs || [18000, 19500];
-  const st = F.flatMap((f) => [0, 1].map((c) => P.pathSteps(P.baseband(wav.ch[c], wav.rate, f), f, { gate: 1.5 })));
+  const st = F.flatMap((f) => [0, 1].map((c) => P.pathSteps(P.baseband(wav.ch[c], wav.rate, f), f, { gate: Number(process.env.GATE || 1.5), tauS: Number(process.env.TAU || 0.25) })));
   const rate = st[0].rate, n = st[0].step.length, cum = st.map((s) => { const q = new Float64Array(n + 1); for (let k = 0; k < n; k++) q[k + 1] = q[k] + s.step[k]; return q; });
   const D = (p, tms) => cum[p][Math.max(0, Math.min(n, Math.round((tms - t0) / 1000 * rate)))];
   const ws = [];
@@ -58,4 +58,11 @@ const matched = S.flatMap((_, i) => { const a = ampOf(preds.filter((__, j) => j 
 console.log('size-matched (nested): ' + f(stats(matched)) + '   k = ' + ampOf(all).map((v) => (1 / v).toFixed(2)).join('/'));
 const half = S.flatMap((_, i) => { const a = ampOf(preds.filter((__, j) => j !== i).flat()); return preds[i].map((q) => ({ p: q.p.map((v, k) => v / Math.sqrt(a[k])), y: q.y })); });
 console.log('half-way (sqrt)      : ' + f(stats(half)) + '   k = ' + ampOf(all).map((v) => (1 / Math.sqrt(v)).toFixed(2)).join('/'));
-if (process.env.OUT) fs.writeFileSync(process.env.OUT, JSON.stringify({ slope: sAll, sizeRatio: ampOf(all), kMatched: ampOf(all).map((v) => 1 / v), kHalf: ampOf(all).map((v) => 1 / Math.sqrt(v)) }));
+if (process.env.OUT) {
+  const r2 = (x) => +x.toFixed(2), pack = (st, k) => ({ k: k.map((v) => +v.toFixed(3)), rms: st.rms.map(r2), size: st.amp.map(r2) });
+  const base = stats(all), sz = ampOf(all);
+  const amp = { method: 'leave-one-sitting-out over ' + S.length + ' sittings, scale estimated without the held-out sitting', corr: base.corr.map(r2),
+    motion: [0, 1, 2].map((k) => r2(100 * Math.sqrt(all.reduce((s, q) => s + q.y[k] ** 2, 0) / all.length))),
+    modes: { mse: pack(base, [1, 1, 1]), half: pack(stats(half), sz.map((v) => 1 / Math.sqrt(v))), matched: pack(stats(matched), sz.map((v) => 1 / v)) } };
+  fs.writeFileSync(process.env.OUT, JSON.stringify({ slope: sAll, sizeRatio: sz, amp }));
+}
