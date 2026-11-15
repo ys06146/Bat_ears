@@ -679,7 +679,12 @@ async function cmpStart() {
   if (!window.BatVision) { $('cmpStat').textContent = '⚠️ vision3d.browser.js가 없어요'; return; }
   $('cmp').style.display = 'block'; $('btnCmp').classList.add('cmpOn'); $('cmpStat').textContent = '카메라를 켜는 중…';
   try {
-    CMP.stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: false });
+    // like teach.html: insist on 30 fps (a dim room otherwise drops the webcam to ~15: the 11:06 take had 13.6 fps of video)
+    const vc = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, min: 30 } };
+    try { CMP.stream = await navigator.mediaDevices.getUserMedia({ video: vc, audio: false }); } catch (e) {
+      if (e.name !== 'OverconstrainedError') throw e;
+      vc.frameRate = { ideal: 30 }; CMP.stream = await navigator.mediaDevices.getUserMedia({ video: vc, audio: false });
+    }
     CMP.video = $('cmpVideo'); CMP.video.srcObject = CMP.stream; await CMP.video.play();
     CMP.starting = true;   // ⏺ pressed while the model loads still records a compare sitting (서진 11:03 lost one)
     $('cmpStat').textContent = '손 인식 모델을 불러오는 중… (처음 한 번 몇 초)';
@@ -814,7 +819,10 @@ async function recStart() {
     if (!rec.on) return;
     const ib = e.inputBuffer, n = ib.length, L = ib.getChannelData(0), R = ib.numberOfChannels > 1 ? ib.getChannelData(1) : L, out = new Int16Array(2 * n);
     for (let i = 0; i < n; i++) { out[2 * i] = Math.max(-1, Math.min(1, L[i])) * 32767; out[2 * i + 1] = Math.max(-1, Math.min(1, R[i])) * 32767; }
-    if (rec.t0 == null) rec.t0 = performance.now() - (n / rec.rate) * 1000;   // approx. capture time of this block's first sample
+    // wav start on the performance clock. A busy main thread delays these callbacks (서진's 11:06 compare take: the first one
+    // came ~1.5 s late), so keep a first-callback and an end-anchored estimate; both can only run late, the json uses the earlier
+    if (rec.t0 == null) rec.t0 = performance.now() - (n / rec.rate) * 1000;
+    rec.tLast = performance.now();
     rec.chunks.push(out); rec.frames += n;
     if (rec.frames > rec.rate * 300) recStop();   // 5 min cap
   };
@@ -856,7 +864,9 @@ async function recStop() {
       camera: { label: vt ? vt.label : '', width: vs.width || CMP.cam.W, height: vs.height || CMP.cam.H, frameRate: vs.frameRate || null, facingMode: vs.facingMode || '' },
       engine: { mic: tr ? tr.getSettings() : null, freqs: info.freqs, calName: info.calName, err: info.err },
       vision: { lib: `@mediapipe/tasks-vision@${MP_VER}`, model: MP_MODEL, task: 'HandLandmarker', runningMode: 'VIDEO', numHands: 1, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5, delegate: CMP.delegate, cam_model: { hfov: CMP.cam.hfov, tilt: CMP.cam.tilt, lagMs: CMP.cam.lagMs, scale: CMP.cam.scale } },
-      wav: { file: `${cbase}.wav`, rate: rec.rate, channels: 2, seconds: meta.seconds, t0: rec.t0 != null ? +rec.t0.toFixed(2) : null, via: 'scriptprocessor' },
+      wav: (() => { const tf = rec.t0, te = rec.tLast != null ? rec.tLast - (rec.frames / rec.rate) * 1000 : null, t0 = [tf, te].filter(Number.isFinite);
+        return { file: `${cbase}.wav`, rate: rec.rate, channels: 2, seconds: meta.seconds, t0: t0.length ? +Math.min(...t0).toFixed(2) : null,
+          t0_first_callback: Number.isFinite(tf) ? +tf.toFixed(2) : null, t0_end_anchored: Number.isFinite(te) ? +te.toFixed(2) : null, via: 'scriptprocessor', note: 't0 = the earlier of the two estimates (callbacks can only be late)' }; })(),
       video: vblob ? { file: `${cbase}.webm`, frames_file: `${cbase}_frames.csv`, mime: CMP.mime, bytes: vblob.size, startPerf: CMP.vstart, stopPerf: CMP.vstop, local_only: true } : null,
       files: { vision: `${cbase}_vision.csv`, holo: `${cbase}_holo.csv`, wav: `${cbase}.wav` },
       peaks_at_start: rec.peaks0 || [], peaks_at_end: topPeaks(), holo: { tau: meta.tau, smooth: meta.smooth, amp: meta.amp, yReal: meta.yReal, yGain: meta.yGain, zone: meta.zone, filter: meta.filter, build: meta.build },
@@ -901,6 +911,7 @@ let frameN = 0;
 const perf = { n: 0, t0: performance.now(), fps: 60, low: 0, reduced: false };
 function frame() {
   requestAnimationFrame(frame);
+  if ((CMP.on || CMP.starting) && (frame.k = (frame.k || 0) + 1) % 2) return;   // 👁: 30 fps drawing, no bloom (below)
   perf.n++;
   { const tn = performance.now(); if (tn - perf.t0 > 1000) { perf.fps = perf.n * 1000 / (tn - perf.t0); perf.n = 0; perf.t0 = tn;
     // a slow laptop GPU: drop to pixel ratio 1 and a lighter bloom after 3 slow seconds (the hand must not lag behind)
@@ -951,7 +962,7 @@ function frame() {
   if (frameN++ % 2 === 0) { trailGeo.setPositions(trailPos); trailGeo.setColors(trailCol); }   // 30 Hz is plenty
   trail.visible = $('showTrail').checked && n > 1;
   controls.update();
-  composer.render();
+  if (CMP.on || CMP.starting) renderer.render(scene, camera); else composer.render();
   labels.render(scene, camera);
   renderHud(now);
   if (now - (renderDebug.t || 0) > 150) { renderDebug.t = now; renderDebug(); }
