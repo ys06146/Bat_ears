@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Bat Ears | 톤 재생기</title>
+<style>
+:root{--bg:#090c13;--card:#141b28;--line:#39465c;--fg:#e8eef9;--muted:#9aa3b2;--on:#2e7d32;--off:#b23b3b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:520px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+h1{font-size:20px;margin:4px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:15px;color:var(--muted);margin-bottom:8px}
+#freq{width:100%;font-size:44px;font-weight:800;text-align:center;background:#0d131e;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.row{display:flex;gap:10px;align-items:center}
+#vol{flex:1;height:36px}
+#volLabel{min-width:56px;text-align:right;font-size:20px;font-weight:700}
+#toggle{width:100%;font-size:34px;font-weight:800;padding:26px 0;border:0;border-radius:18px;color:#fff;background:var(--on);touch-action:manipulation}
+#toggle.playing{background:var(--off)}
+#status{font-size:28px;font-weight:800;text-align:center;margin:16px 0 6px;min-height:36px}
+#info{font-size:13px;color:var(--muted);text-align:center;min-height:18px}
+.note{font-size:15px;line-height:1.6;color:#ffd180}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.presets button{flex:1;min-width:72px;font-size:16px;padding:10px 0;border-radius:10px;border:1px solid var(--line);background:#0d131e;color:var(--fg)}
+a{color:#8ab4f8}
+</style></head><body>
+<main>
+<h1>📢 Bat Ears 톤 재생기</h1>
+<div class="card">
+  <label for="freq">주파수 (Hz)</label>
+  <input id="freq" type="number" inputmode="numeric" min="100" max="23000" step="100" value="20500">
+  <div class="presets"><button data-f="18000">18000</button><button data-f="19500">19500</button><button data-f="20000">20000</button><button data-f="20500">20500</button></div>
+</div>
+<div class="card">
+  <label for="vol">음량</label>
+  <div class="row"><input id="vol" type="range" min="0.05" max="1" step="0.05" value="0.6"><span id="volLabel">60%</span></div>
+</div>
+<button id="toggle">▶ 시작</button>
+<div id="status">■ 멈춤</div>
+<div id="info"></div>
+<div class="card note">
+  📵 아이폰 무음 스위치를 끄세요 (무음이면 소리가 안 날 수 있어요).<br>
+  🔆 화면이 꺼지면 소리가 멈출 수 있어요. 켜 두기를 지원하면 자동으로 켜 둬요.<br>
+  🎧 이어폰·블루투스는 빼고, 폰 스피커를 노트북 쪽으로 향하게 두세요.
+</div>
+<p class="note" style="color:var(--muted)">마이크는 쓰지 않아요. 소리를 내기만 해요. <a href="index.html">Bat Ears 메인</a></p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  let ctx = null, osc = null, gain = null, lock = null, playing = false;
+  const freqNow = () => Math.max(100, Math.min(23000, Math.round(Number($('freq').value) || 20500)));
+  const volNow = () => Number($('vol').value) || 0.6;
+
+  async function keepAwake() {
+    try { if ('wakeLock' in navigator && !lock) { lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); } } catch (e) { /* not allowed / not supported */ }
+  }
+  function show() {
+    const f = freqNow();
+    $('status').textContent = playing ? `🔊 ${f}Hz 재생 중` : '■ 멈춤';
+    $('toggle').textContent = playing ? '■ 멈추기' : '▶ 시작';
+    $('toggle').className = playing ? 'playing' : '';
+    $('info').textContent = ctx ? `오디오 ${ctx.sampleRate}Hz · 화면 켜 두기 ${lock ? '켜짐' : '안 됨'}${f > ctx.sampleRate / 2 - 500 ? ' · ⚠️ 이 기기에서 낼 수 없는 주파수' : ''}` : '';
+  }
+  async function start() {
+    // iOS: the AudioContext has to be created / resumed inside the tap
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* Safari 17+ only */ }
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    try { await ctx.resume(); } catch (e) { /* ignore */ }
+    osc = ctx.createOscillator();
+    gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freqNow();
+    gain.gain.value = 0;
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    gain.gain.setTargetAtTime(volNow(), ctx.currentTime, 0.04);
+    playing = true;
+    await keepAwake();
+    show();
+  }
+  function stop() {
+    if (osc && ctx) {
+      const o = osc;
+      gain.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
+      setTimeout(() => { try { o.stop(); o.disconnect(); } catch (e) { /* ignore */ } }, 150);
+    }
+    osc = null;
+    playing = false;
+    if (lock) { lock.release().catch(() => {}); lock = null; }
+    show();
+  }
+  $('toggle').addEventListener('click', () => { if (playing) stop(); else start(); });
+  const retune = () => { if (playing && osc) osc.frequency.setValueAtTime(freqNow(), ctx.currentTime); show(); };
+  $('freq').addEventListener('change', retune);
+  $('freq').addEventListener('input', retune);
+  document.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { $('freq').value = b.dataset.f; retune(); }));
+  $('vol').addEventListener('input', () => {
+    const v = volNow();
+    $('volLabel').textContent = Math.round(v * 100) + '%';
+    if (playing && gain) gain.gain.setTargetAtTime(v, ctx.currentTime, 0.04);
+  });
+  // coming back to the page: the wake lock was released and iOS may have suspended the audio
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && playing) { try { await ctx.resume(); } catch (e) { /* ignore */ } await keepAwake(); show(); }
+  });
+  show();
+})();
+</script>
+</body></html>

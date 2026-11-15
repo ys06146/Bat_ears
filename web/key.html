@@ -1,13 +1,15 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bat Ears | 제스처 키</title>
-<link rel="stylesheet" href="style.css?v=20261115025047">
+<link rel="stylesheet" href="style.css?v=20261115025512">
 <style>
 body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
 header h1{margin:0;font-size:19px}header span{font-size:12px;color:#a9b1c2;font-weight:400}
 main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;padding:16px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+/* style.css fixes main's height and scrolls aside for the one-screen game page; these pages scroll as documents */
+main{height:auto}aside{overflow:visible}
+.tabs{position:static;transform:none;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .tabs a{padding:9px 12px;border-radius:8px;background:#171b24;color:#d7dce6;text-decoration:none;font-size:13px}
 .tabs .sel{background:#28394e;color:#b9e1ff}
 .card{margin-bottom:14px;padding:16px}h3{margin:0 0 10px;font-size:15px}
@@ -32,11 +34,12 @@ button{cursor:pointer}button:disabled{opacity:.45}
 table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;border-bottom:1px solid #273448;text-align:left}
 .big{font-size:16px;padding:10px 16px}
 @media(max-width:950px){main{grid-template-columns:1fr}}
+@media(max-width:600px){header{flex-wrap:wrap;gap:6px;padding:10px 12px}header h1{font-size:16px}header h1 span{display:block}main{padding:10px}.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.tabs a{flex:0 0 auto}}
 </style></head><body>
 <header><h1>🔐 Bat Ears 제스처 키 <span>손짓 순서 + 나만의 리듬으로 잠금 해제 · 카메라 없음 · 기록은 이 브라우저에만</span></h1><span id="status" class="chip">대기 중</span></header>
 <main>
 <section>
-<div class="tabs"><a href="index.html">🎮 게임</a><a href="experiment-live.html">🧪 자유 실험 모드</a><a class="sel" href="key.html">🔐 제스처 키</a></div>
+<div class="tabs"><a href="index.html">🎮 게임</a><a href="experiment-live.html">🧪 자유 실험 모드</a><a class="sel" href="key.html">🔐 제스처 키</a><a href="tone.html">📢 톤 재생기</a></div>
 <div class="card" id="lockCard">
   <div id="lockIcon">🔒</div>
   <div id="result">마이크를 켜고 등록부터 해 주세요</div>
@@ -79,7 +82,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;borde
   <button id="save">📁 데이터 폴더에 저장</button> <label><input id="autoSave" type="checkbox" checked> 시도마다 자동 저장</label>
   <p id="saveStatus" class="hint">메인 페이지에서 고른 데이터 폴더(드라이브 nhng/ml/data)를 그대로 써요.</p></div>
 </aside></main>
-<script src="robust.js?v=20261115025047"></script><script src="swipe.js?v=20261115025047"></script><script src="wave.js?v=20261115025047"></script><script src="iq.js?v=20261115025047"></script><script src="dsp.js?v=20261115025047"></script><script src="circle.js?v=20261115025047"></script><script src="auth.js?v=20261115025047"></script>
+<script src="robust.js?v=20261115025512"></script><script src="swipe.js?v=20261115025512"></script><script src="wave.js?v=20261115025512"></script><script src="iq.js?v=20261115025512"></script><script src="dsp.js?v=20261115025512"></script><script src="circle.js?v=20261115025512"></script><script src="auth.js?v=20261115025512"></script>
 <script>
 (() => {
 'use strict';
