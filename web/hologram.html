@@ -121,6 +121,9 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 
 /* Bat Ears hologram: a sound-only hand tracker shown as a hologram.
  * Position: bravo's estimator (web/bat3d.js, from 3d.html: I/Q phase path tracking of every tone, LLAP-style, and a
@@ -183,22 +186,22 @@ Object.assign(labels.domElement.style, { position: 'absolute', top: '0', left: '
 stage.appendChild(labels.domElement);
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x04070c, 1.1);
-const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.01, 10);
-camera.position.set(0.0, 0.36, 0.62);
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.01, 10);
+camera.position.set(0.0, 0.42, 0.86);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.13, -0.02);
+controls.target.set(0, 0.12, 0.0);
 controls.enableDamping = true;
 controls.minDistance = 0.3;
 controls.maxDistance = 1.6;
 controls.update();
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.1, 0.55, 0.05);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.7, 0.4, 0.18);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight); trailMat.resolution.set(innerWidth, innerHeight);
 });
 
 const CYAN = 0x4fd8ff, add = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false };
@@ -230,21 +233,21 @@ function drawSources(G, phones) {
 // the hologram hand: bones (thin glowing cylinders), joints (spheres), a scanline palm
 const hand = new THREE.Group();
 scene.add(hand);
-const boneMat = new THREE.MeshBasicMaterial({ color: CYAN, opacity: 0.85, ...add });
-const jointMat = new THREE.MeshBasicMaterial({ color: 0xbff4ff, opacity: 0.95, ...add });
+const boneMat = new THREE.MeshBasicMaterial({ color: 0x2bb8f0, opacity: 0.7, ...add });
+const jointMat = new THREE.MeshBasicMaterial({ color: 0x7fdcff, opacity: 0.75, ...add });
 const up = new THREE.Vector3(0, 1, 0);
 for (const [a, b] of BONES) {
   const pa = new THREE.Vector3(...HAND[a]), pb = new THREE.Vector3(...HAND[b]), d = pb.clone().sub(pa);
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, d.length(), 8), boneMat);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0026, 0.0026, d.length(), 8), boneMat);
   m.position.copy(pa).add(pb).multiplyScalar(0.5);
   m.quaternion.setFromUnitVectors(up, d.normalize());
   hand.add(m);
 }
-HAND.forEach((p, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry([4, 8, 12, 16, 20].includes(i) ? 0.0042 : 0.0052, 12, 10), jointMat); m.position.set(...p); hand.add(m); });
+HAND.forEach((p, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry([4, 8, 12, 16, 20].includes(i) ? 0.0030 : 0.0036, 12, 10), jointMat); m.position.set(...p); hand.add(m); });
 const palmShader = new THREE.ShaderMaterial({
   uniforms: { time: { value: 0 }, color: { value: new THREE.Color(CYAN) } },
   vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-  fragmentShader: 'uniform float time; uniform vec3 color; varying vec3 vP; void main(){ float s = step(0.55, fract(vP.y * 160.0 - time * 1.5)); gl_FragColor = vec4(color, 0.10 + 0.16 * s); }',
+  fragmentShader: 'uniform float time; uniform vec3 color; varying vec3 vP; void main(){ float s = step(0.55, fract(vP.y * 160.0 - time * 1.5)); gl_FragColor = vec4(color * 0.6, 0.05 + 0.08 * s); }',
   side: THREE.DoubleSide, ...add,
 });
 {
@@ -255,21 +258,22 @@ const palmShader = new THREE.ShaderMaterial({
   hand.add(new THREE.Mesh(g, palmShader));
 }
 // honest error ellipsoid (held-out RMS per axis), the drop line and the shadow on the desk
-const errEl = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshBasicMaterial({ color: 0xffb74d, wireframe: true, opacity: 0.16, ...add }));
+const errEl = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 10), new THREE.MeshBasicMaterial({ color: 0xffb74d, wireframe: true, opacity: 0.07, ...add }));
 scene.add(errEl);
 const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: CYAN, dashSize: 0.008, gapSize: 0.006, opacity: 0.6, ...add }));
 scene.add(drop);
-const shadow = new THREE.Mesh(new THREE.RingGeometry(0.012, 0.02, 32), new THREE.MeshBasicMaterial({ color: CYAN, opacity: 0.5, side: THREE.DoubleSide, ...add }));
+const shadow = new THREE.Mesh(new THREE.RingGeometry(0.01, 0.015, 32), new THREE.MeshBasicMaterial({ color: CYAN, opacity: 0.35, side: THREE.DoubleSide, ...add }));
 shadow.rotation.x = -Math.PI / 2;
 scene.add(shadow);
 const rawDot = new THREE.Mesh(new THREE.SphereGeometry(0.004, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff8a65, opacity: 0.7, ...add }));
 scene.add(rawDot);
 // trail: the last 3 s, fading (additive: darker = more transparent)
 const TRAIL = 180, trailPos = new Float32Array(TRAIL * 3), trailCol = new Float32Array(TRAIL * 3), trailPts = [];
-const trailGeo = new THREE.BufferGeometry();
-trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
-trailGeo.setAttribute('color', new THREE.BufferAttribute(trailCol, 3));
-const trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ vertexColors: true, ...add }));
+const trailGeo = new LineGeometry();
+trailGeo.setPositions(trailPos); trailGeo.setColors(trailCol);
+const trailMat = new LineMaterial({ linewidth: 3, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+trailMat.resolution.set(innerWidth, innerHeight);
+const trail = new Line2(trailGeo, trailMat);
 scene.add(trail);
 // webcam truth for a replayed teach session (bravo's BatVision): a green skeleton at the WAV's playback time
 const ghost = { frames: null, s: null, cam: null, on: false, anchored: false, name: '', errs: [] };
@@ -452,6 +456,7 @@ function renderHud(now) {
   $('bars').innerHTML = h ? '<div class="note">경로 품질 (움직이는 반사 / 잡음)</div>' + h : '';
 }
 const clock = new THREE.Clock();
+let frameN = 0;
 function frame() {
   requestAnimationFrame(frame);
   const now = performance.now(), el = clock.getElapsedTime();
@@ -459,7 +464,7 @@ function frame() {
   hand.position.copy(P);
   hand.visible = running || SIM;
   palmShader.uniforms.time.value = el;
-  boneMat.opacity = 0.75 + 0.1 * Math.sin(el * 7.3) * Math.sin(el * 3.1);   // a little hologram flicker
+  boneMat.opacity = 0.62 + 0.08 * Math.sin(el * 7.3) * Math.sin(el * 3.1);   // a little hologram flicker
   const r = errEl.userData.r || [0.04, 0.032, 0.045];
   errEl.visible = $('showErr').checked && hand.visible;
   errEl.position.copy(P); errEl.scale.set(r[0], r[1], r[2]);
@@ -486,7 +491,7 @@ function frame() {
     trailPos.set([p.x, p.y, p.z], 3 * i);
     trailCol.set([0.31 * a, 0.85 * a, 1.0 * a], 3 * i);
   }
-  trailGeo.attributes.position.needsUpdate = true; trailGeo.attributes.color.needsUpdate = true;
+  if (frameN++ % 2 === 0) { trailGeo.setPositions(trailPos); trailGeo.setColors(trailCol); }   // 30 Hz is plenty
   trail.visible = $('showTrail').checked && n > 1;
   controls.update();
   composer.render();
