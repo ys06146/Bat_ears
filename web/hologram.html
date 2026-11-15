@@ -268,7 +268,7 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight); trailMat.resolution.set(innerWidth, innerHeight);
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight); trailMat.resolution.set(innerWidth, innerHeight); camTrailMat.resolution.set(innerWidth, innerHeight);
 });
 
 const CYAN = 0x4fd8ff, add = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false };
@@ -342,6 +342,14 @@ const trailMat = new LineMaterial({ linewidth: 3, vertexColors: true, transparen
 trailMat.resolution.set(innerWidth, innerHeight);
 const trail = new Line2(trailGeo, trailMat);
 scene.add(trail);
+// 👁 compare: the webcam palm's path over the same ~3 s, in green next to the sound trail (Seojin 12:22: compare the shapes)
+const camTrailGeo = new LineGeometry();
+camTrailGeo.setPositions([0, 0, 0, 0, 0, 0.001]);
+const camTrailMat = new LineMaterial({ color: 0x69f0ae, linewidth: 3, transparent: true, opacity: 0.9, depthWrite: false });
+camTrailMat.resolution.set(innerWidth, innerHeight);
+const camTrail = new Line2(camTrailGeo, camTrailMat);
+camTrail.visible = false;
+scene.add(camTrail);
 // webcam truth for a replayed teach session (bravo's BatVision): a green skeleton at the WAV's playback time
 const ghost = { frames: null, s: null, cam: null, on: false, anchored: false, name: '', errs: [] };
 const ghostGeo = new THREE.BufferGeometry();
@@ -720,7 +728,7 @@ async function cmpStart() {
   }
 }
 function cmpStop(keepPanel) {
-  CMP.on = false; CMP.starting = false; CMP.pts = null; CMP.palm = null;
+  CMP.on = false; CMP.starting = false; CMP.ptrail = []; CMP.pts = null; CMP.palm = null;
   if (CMP.vrec && CMP.vrec.state !== 'inactive') { try { CMP.vrec.stop(); } catch (e) { /* ignore */ } }
   if (CMP.stream) CMP.stream.getTracks().forEach((t) => t.stop());
   CMP.stream = null;
@@ -751,6 +759,7 @@ function cmpFrame(now, md) {
     CMP.frames.push(fr); if (CMP.frames.length > 120) CMP.frames.shift();
     if (CMP.frames.length % 15 === 0) CMP.cam.scale = window.BatVision.sessionScale(CMP.frames, CMP.palmCm);
     CMP.pts = window.BatVision.landmarksToLaptop(fr, CMP.cam); CMP.palm = CMP.pts ? palmOf(CMP.pts) : null;
+    if (CMP.palm) { const tn = performance.now(); (CMP.ptrail = CMP.ptrail || []).push({ t: tn, p: T3(CMP.palm) }); while (CMP.ptrail[0].t < tn - 2900) CMP.ptrail.shift(); CMP.ptrailDirty = true; }
     if (CMP.palm && running && !CMP.anchored) { CMP.anchored = true; recenter(); }
     if (CMP.palm && running) { const sp = sndAt(tcap + (CMP.cam.lagMs || 0)); if (sp) { CMP.pairs.push({ t: tcap, c: CMP.palm, s: sp }); while (CMP.pairs.length && CMP.pairs[0].t < tcap - 15000) CMP.pairs.shift(); } }
     if (CMP.rows) CMP.rows.push(visionRow(tcap, tres, 1, fr, cat));
@@ -992,6 +1001,10 @@ function frame() {
   if (frameN++ % 2 === 0) { trailGeo.setPositions(trailPos); trailGeo.setColors(trailCol); }   // 30 Hz is plenty
   trail.visible = $('showTrail').checked && n > 1;
   controls.update();
+  if (CMP.on && CMP.ptrail && CMP.ptrail.length >= 2) {
+    if (CMP.ptrailDirty) { const arr = []; for (const q of CMP.ptrail) arr.push(q.p.x, q.p.y, q.p.z); camTrailGeo.setPositions(arr); camTrail.computeLineDistances(); CMP.ptrailDirty = false; }
+    camTrail.visible = true;
+  } else camTrail.visible = false;
   if (CMP.on || CMP.starting) renderer.render(scene, camera); else composer.render();
   labels.render(scene, camera);
   renderHud(now);
