@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T11:14:58Z",
-  "main_sha": "cf22b894a21b07b36f09faf9560b7461dee679f5",
-  "exp_sha_before_run": "653f24786013e7b0d42b92e7ddcd564eabc26462",
-  "report": "experiments/monitor-2026-11-15-0515.md",
+  "checked_at_utc": "2026-11-15T12:53:18Z",
+  "main_sha": "e8d01be249549c89942f457a5f7f325544693066",
+  "exp_sha_before_run": "36ac0c28e4ed61ae9adcd81866143da9634166e5",
+  "report": "experiments/monitor-2026-11-15-0653.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -17,18 +17,18 @@
     },
     {
       "path": "README.md",
-      "sha": "7e6f40bed001fbc88fa33c578276e734e32bccfa",
-      "size": 5892
+      "sha": "4daa7611344bcd11e70d73218c723f6fc36f4ac4",
+      "size": 6448
     },
     {
       "path": "TEAM.md",
-      "sha": "37feb28f3b0d9fa813e3ad500fb82dcf9c85cdef",
-      "size": 11022
+      "sha": "425d57adbd63a37f28a75383d64d31973c17d2e6",
+      "size": 11397
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "794ec885a933bf1a5ce7f64542041c0cf7617884",
-      "size": 4928
+      "sha": "b2233c916dedf872729ca0c1b09f13d1a030313c",
+      "size": 5284
     },
     {
       "path": "docs/devpost.md",
@@ -422,13 +422,13 @@
     },
     {
       "path": "tools/stamp.py",
-      "sha": "10932cdafa937ad0e633d02bd3f2a203bc1f0f41",
-      "size": 951
+      "sha": "f30ecefa8b42e4f94b0e28f995dbd7ac27298060",
+      "size": 969
     },
     {
       "path": "web/3d.html",
-      "sha": "d2135c95a9991b264640aeba52ef25949dfc955f",
-      "size": 41408
+      "sha": "ad73bca8344ee25127e9d323c77c2a125be8a179",
+      "size": 42358
     },
     {
       "path": "web/app.js",
@@ -439,6 +439,11 @@
       "path": "web/auth.js",
       "sha": "ee42c5b1387c46af764ecd27b6155e7ccb19e857",
       "size": 8942
+    },
+    {
+      "path": "web/bat3d.js",
+      "sha": "4597a0fa6c56af25b78e2732861bbba7654d908f",
+      "size": 27252
     },
     {
       "path": "web/batears.html",
@@ -467,7 +472,7 @@
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "87a900052e39b615c4843408798ac34eba83f327",
+      "sha": "b019b7d2606d4325d459a51f52afa82c7581805c",
       "size": 27246
     },
     {
@@ -481,8 +486,13 @@
       "size": 17699
     },
     {
+      "path": "web/hologram.html",
+      "sha": "daf86b0373706334c166bbd94de15c10e687c25f",
+      "size": 49735
+    },
+    {
       "path": "web/index.html",
-      "sha": "05d31e485d4a2528b84c2b3806e4eb9b0730b173",
+      "sha": "5c8b03355c5951a9b778eb05d0292d23571dc1f9",
       "size": 9921
     },
     {
@@ -492,7 +502,7 @@
     },
     {
       "path": "web/key.html",
-      "sha": "dc27c1950bde7e1115dac202eb8ffc6988c7a825",
+      "sha": "919775c88df0de4bb0ee7ff54e909048bf92178e",
       "size": 28152
     },
     {
@@ -532,13 +542,18 @@
     },
     {
       "path": "web/teach.html",
-      "sha": "be9dafaebd8da5205c8bcc59823c5521054b712d",
+      "sha": "f418941b8bb66a533ecde611644334d0381d7258",
       "size": 70773
     },
     {
       "path": "web/tone.html",
       "sha": "ed3b3adab2ce1b631102dc9e3766c982cae2dc83",
       "size": 6958
+    },
+    {
+      "path": "web/vision3d.browser.js",
+      "sha": "99684bcbb7092e9f661aeef095dd9c4d3f99b50e",
+      "size": 5815
     },
     {
       "path": "web/wave.js",
@@ -1239,9 +1254,13 @@
     "hand_column_inverted_all5_use_hand_mp_without_rewriting_raw",
     "teacher4_5_presence98.45_93.62",
     "phoneA_r2_weak044652_layoutChanged_Babsent",
-    "builtIn4sittingDisplacementRMSE_4.03_3.15_4.46_distanceGuideChanged"
+    "builtIn4sittingDisplacementRMSE_4.03_3.15_4.46_distanceGuideChanged",
+    "hologram_added_fixedHand_shape_filterChain_notRawError",
+    "all5sittings_training_filterTuning_noUntouchedHoldout",
+    "amp_modes_sizeVsRMSE_halfDefault",
+    "3d_volume_matchedTeach_noNewLiveValidation"
   ],
-  "notes": "Always inspect teach subfolder even if root unchanged. Raw five teacher sessions have hand opposite hand_mp on every present row; preserve raw, use hand_mp with provenance, do not assume all coordinate/auto labels inverted. New camera guide FOV78/palm-world fallback changes displayed distance. 044652 phone A only at x38,h31.5,z43 is not overhead layout. Latest built-in calibration already includes043301; seek new frozen-model holdout. Other protocol/duplicate/auth ambiguity restrictions remain in earlier reports.",
+  "notes": "Drive root81 and teach30 unchanged this run; always watch known subfolders even if root unchanged. All5 teacher sessions now in DEFAULT_CALIB;044652 also used for filter tuning, so obtain new frozen-model holdout. hologram exports page=hologram.html nested session/log raw+shown, amp/filter/tau/levelDb, may appear in new holo subfolder; route schema, do not pass to legacy trial/train parser. Size gain and display filtering are not improved sensing accuracy. Prior hand_mp provenance, duplicate event files, ambiguous legacy auth simulated and protocol distinctions still apply.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1528,5 +1547,71 @@
         }
       ]
     }
-  ]
+  ],
+  "latest_3d_stored_metrics": {
+    "method": "leave-one-sitting-out over 5 sittings, scale estimated without the held-out sitting",
+    "corr": [
+      0.78,
+      0.47,
+      0.72
+    ],
+    "motion": [
+      6.96,
+      3.4,
+      6.25
+    ],
+    "modes": {
+      "mse": {
+        "k": [
+          1,
+          1,
+          1
+        ],
+        "rms": [
+          4.42,
+          2.99,
+          4.33
+        ],
+        "size": [
+          0.7,
+          0.47,
+          0.72
+        ]
+      },
+      "half": {
+        "k": [
+          1.2,
+          1.46,
+          1.17
+        ],
+        "rms": [
+          4.42,
+          3.08,
+          4.45
+        ],
+        "size": [
+          0.85,
+          0.69,
+          0.86
+        ]
+      },
+      "matched": {
+        "k": [
+          1.44,
+          2.12,
+          1.38
+        ],
+        "rms": [
+          4.75,
+          3.51,
+          4.81
+        ],
+        "size": [
+          1.03,
+          1.01,
+          1.03
+        ]
+      }
+    }
+  }
 }
