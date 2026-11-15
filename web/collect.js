@@ -153,7 +153,7 @@
   // swipe echo peak (weaker tone, dB over the floor). Bravo on 8 sessions: Galaxy Book 205859 (best left/right) has a
   // median of 17.5 dB, normal sessions 22-23, the 55 cm and no-signal sessions ~15. So: warn per swipe under 14 dB
   // (1-2 of 20 in good sessions), and blame distance for a failed check when the median is under 16
-  const WEAK_ECHO_DB = 14, FAR_ECHO_DB = 16;
+  const WEAK_ECHO_DB = 14, FAR_ECHO_DB = 16, SMALL_STROKE_CM = 8;
   function planLr(n) {
     const list = [];
     for (let i = 0; i < n; i++) list.push('left', 'right');
@@ -353,7 +353,7 @@
     rev: '좌우가 자주 반대로 나와요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     weak: '신호가 약해요: 키보드 위 10~15cm에서 더 넓게 쓸어 보세요',
     fewpp: '밀기·당기기가 너무 적게 잡혔어요',
-    far: '에코가 약해요: 손을 키보드 위 10~15cm로 더 가까이 두고 다시 점검해 주세요',
+    far: '📏 손이 멀거나 쓸기가 작아요: 키보드 위 10~15cm에서 노트북 폭보다 넓게 쓸고 다시 점검해 주세요',
     not: '쓸기가 너무 적게 잡혔어요',
   };
   function runLrCheck() {
@@ -367,14 +367,19 @@
     // median echo peak of the swipes (dB over the floor): 22 at 20 cm vs 15 at 55 cm on two MacBooks
     const eks = items.filter((x) => (x.kind === 'left' || x.kind === 'right') && Number.isFinite(x.feat.ePk)).map((x) => x.feat.ePk).sort((a, b) => a - b);
     const echoDb = eks.length ? eks[eks.length >> 1] : null;
-    const why = r.ok ? '' : echoDb != null && echoDb < FAR_ECHO_DB ? LR_REASON.far
+    // median sideways stroke of the swipes from the phase tracker (cm): 15.7 at 20 cm vs 3.3-5.0 at 55-60 cm, where
+    // push/pull read ~5 (bravo). A noisy room can keep the echo above the cutoff, so either one means "too far"
+    const sts = items.filter((x) => (x.kind === 'left' || x.kind === 'right') && Number.isFinite(x.feat.pStroke)).map((x) => Math.abs(x.feat.pStroke) * 100).sort((a, b) => a - b);
+    const strokeCm = sts.length ? +sts[sts.length >> 1].toFixed(1) : null;
+    const tooFar = (echoDb != null && echoDb < FAR_ECHO_DB) || (strokeCm != null && strokeCm < SMALL_STROKE_CM);
+    const why = r.ok ? '' : tooFar ? LR_REASON.far
       : /^no /.test(r.reason) ? LR_REASON.no : /^push\/pull/.test(r.reason) ? LR_REASON.pp
       : /reversed/.test(r.reason) ? LR_REASON.rev : /^weak/.test(r.reason) ? LR_REASON.weak
       : /push\/pull in the check/.test(r.reason) ? LR_REASON.fewpp : LR_REASON.not;
     const out = {
       ok: r.ok, looAcc: r.looAcc, looWrong: r.looWrong, looUndecided: r.looUndecided, fpRate: r.fpRate, dComb: r.dComb,
       dprime: r.dprime || null, reason: r.reason, why, nL, nR, nPushPull: items.length - nL - nR,
-      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION, keys: r.keys || 'fft', echoDb,
+      hadModel: BatEars.hasLrModel, pair, version: BatSwipe.VERSION, keys: r.keys || 'fft', echoDb, strokeCm,
     };
     if (r.ok && pair) {
       // kept for this browser session only (sessionStorage survives a reload, not a new tab): a model does not
