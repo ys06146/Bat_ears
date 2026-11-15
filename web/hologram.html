@@ -819,7 +819,7 @@ async function recStart() {
     if (!rec.on) return;
     const ib = e.inputBuffer, n = ib.length, L = ib.getChannelData(0), R = ib.numberOfChannels > 1 ? ib.getChannelData(1) : L, out = new Int16Array(2 * n);
     for (let i = 0; i < n; i++) { out[2 * i] = Math.max(-1, Math.min(1, L[i])) * 32767; out[2 * i + 1] = Math.max(-1, Math.min(1, R[i])) * 32767; }
-    // wav start on the performance clock. A busy main thread delays these callbacks (서진's 11:06 compare take: the first one
+    // wav start on the performance clock. A busy main thread delays these callbacks (Seojin's 11:06 compare take: the first one
     // came ~1.5 s late), so keep a first-callback and an end-anchored estimate; both can only run late, the json uses the earlier
     if (rec.t0 == null) rec.t0 = performance.now() - (n / rec.rate) * 1000;
     rec.tLast = performance.now();
