@@ -654,6 +654,7 @@ async function recStop() {
   const info = engine && engine.info ? engine.info() : {};
   const meta = { page: 'hologram.html', session: base, startedAt: rec.start, seconds: +(rec.frames / rec.rate).toFixed(2), rate: rec.rate, ua: navigator.userAgent,
     volume: Number($('vol').value), amp: $('ampMode').value, calibName: $('calibSel').value, filter: euro.map((f) => [f.minCutoff, f.beta]), smooth: Number($('smooth').value), tau: Number($('tau').value), phones: phonesFromUi(),
+    build: ((document.querySelector('script[src^="bat3d.js"]') || {}).getAttribute ? document.querySelector('script[src^="bat3d.js"]').getAttribute('src') : ''), yReal: $('yReal').checked, yGain: +yGain.toFixed(3), zone: ZONE,
     engine: { freqs: info.freqs, calName: info.calName, learned: info.learned, err: info.err },
     log_columns: 't_s, raw x y z (m, engine), shown x y z (m, display), moving, levelDb, amp[streams], q[streams], act[streams]', log: rec.log };
   const files = [[`${base}.json`, new Blob([JSON.stringify(meta)], { type: 'application/json' })], [`${base}.wav`, new Blob([hd.buffer, ...rec.chunks], { type: 'audio/wav' })]];
