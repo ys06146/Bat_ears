@@ -52,14 +52,14 @@
     <canvas id="view"></canvas>
     <div class="row">
       <label><input type="checkbox" id="phoneOn"> 📱 폰 A</label>
-      <label>Hz <input type="number" id="phoneHz" value="20500" step="50"></label>
+      <label>Hz <input type="number" id="phoneHz" value="17000" step="50"></label>
       <label>스피커 위치 cm: 오른쪽 <input type="number" id="px" value="25"></label>
       <label>책상 위 높이 <input type="number" id="py" value="25"></label>
       <label>화면 선 앞 <input type="number" id="pz" value="-2"></label>
     </div>
     <div class="row">
       <label><input type="checkbox" id="phone2On"> 📱 폰 B</label>
-      <label>Hz <input type="number" id="phone2Hz" value="21500" step="50"></label>
+      <label>Hz <input type="number" id="phone2Hz" value="18750" step="50"></label>
       <label>스피커 위치 cm: 오른쪽 <input type="number" id="p2x" value="-25"></label>
       <label>책상 위 높이 <input type="number" id="p2y" value="40"></label>
       <label>화면 선 앞 <input type="number" id="p2z" value="-2"></label>
@@ -67,7 +67,7 @@
       <select id="model" title="경로 → 위치 풀이"><option value="physics">물리 풀이</option><option value="learned">학습 지도(비전)</option></select>
     </div>
     <div class="row">
-      <label title="18kHz가 실제로 오른쪽 스피커에서 나면 켜요 (갤럭시 북 원 WAV는 켠 쪽이 맞았어요)"><input type="checkbox" id="swapLR" checked> 스피커 좌우 바꿈</label>
+      <label title="18kHz가 실제로 오른쪽 스피커에서 나면 켜요 (갤럭시 북은 웹캠 정답으로 라벨대로임을 확인: 끔)"><input type="checkbox" id="swapLR"> 스피커 좌우 바꿈</label>
       <label><input type="checkbox" id="flipX"> 좌우 뒤집기</label>
       <label><input type="checkbox" id="flipZ"> 앞뒤 뒤집기</label>
       <label><input type="checkbox" id="flipDir"> 원 방향 뒤집기</label>
@@ -101,7 +101,8 @@
     <div class="panel note">
       좌표: x 오른쪽, y 위, z 화면 쪽. 경로 길이는 I/Q 위상 추적(LLAP 방식)으로 재고, 위치는 원점에서의 상대 변화예요. 손을 1초 멈추면 원점을 다시 잡아요.
       노트북만 쓰면 두 마이크가 화면 위에 좌우로 나란해서 <b>높이(y)는 관측되지 않아요</b>(특이값 세 번째 ≈ 0). 그래서 높이를 고정하고 x·z 평면만 풀어요.
-      📱 폰을 화면 옆에 세워 20.5kHz를 내면 세 번째 경로가 생겨서 높이도 풀어요. 폰 시계 오차는 폰→마이크 직접 경로 위상(PLL)으로 빼요.
+      📱 폰 A 17.0kHz, B 18.75kHz(아이폰은 20kHz 위를 못 내요)를 화면 옆에 세우면 경로가 늘어서 높이도 풀어요. 폰 시계 오차는 폰→마이크 직접 경로 위상(PLL)으로 빼요.
+      실측(teach 035336, 노트북만, 처음 보는 구간, 손이 웹캠 45cm 안): 학습 지도 x 3.9, y 3.5, z 6.2cm(상관 0.64/0.55/0.72).
       오프라인 점수(원 WAV 021834, 노트북만): 원 방향 17~18/20, 뒤집힘 0. 궤적 모양은 원이 아니고 길쭉해요(λ2/λ1 0.04).
     </div>
   </div>
@@ -193,8 +194,10 @@ registerProcessor('bat-iq6', BatIQ6);
 // ------------------------------------------------------------------ geometry (m): x right, y up, z toward the screen; origin = deck centre
 const GEOMS = {
   // bottom-firing speakers near the front corners; mic pair at the top bezel centre, ch0 = RIGHT mic (static phase signs, chan.js)
-  // swapLR: the real circle WAV (021834) only matches the physics with 18 kHz on the RIGHT speaker (or z mirrored)
-  galaxy: { SL: [-0.15, -0.01, -0.08], SR: [0.15, -0.01, -0.08], M: [[0.025, 0.19, 0.17], [-0.025, 0.19, 0.17]], swapLR: true },
+  // speakers as labelled (webcam teach 035336: 18 kHz path follows a LEFT source, corr 0.71 vs 0.41 swapped).
+  // laptopDirSign: with the hand over the keyboard (circle WAVs 021834 / 022153) the laptop-only x-z track comes out
+  // mirrored front/back, so the circle direction is flipped there (empirical, 2 sessions, 17/20 and 18/20)
+  galaxy: { SL: [-0.15, -0.01, -0.08], SR: [0.15, -0.01, -0.08], M: [[0.025, 0.19, 0.17], [-0.025, 0.19, 0.17]], swapLR: false, laptopDirSign: -1 },
   // speakers either side of the keyboard; the two mic channels are bit-identical on MacBooks (one mic)
   macbook: { SL: [-0.14, 0.0, 0.02], SR: [0.14, 0.0, 0.02], M: [[-0.10, 0.0, 0.10], [-0.10, 0.0, 0.10]], swapLR: false },
 };
@@ -239,10 +242,16 @@ function buildSolver() {
   // calibrated geometry (if the loaded calibration has one stream per tone x mic for this tone set): per-stream rows
   const cal = calib && calib.paths.length === 2 * T && calib.paths.every((p, i) => Math.abs(p.hz - cfg.freqs[i >> 1]) < 300) ? calib : null;
   const useAvg = avg && !cal;
-  const J = cal ? cal.paths.map((p) => row(p.pos, cal.mics[p.ch] || Mc)) : useAvg ? S.map((s) => row(s, Mc)) : S.flatMap((s) => G.M.map((m) => row(s, m)));
-  const PRIOR = [1e-3, phone ? 0.02 : 10, 1e-3];   // laptop only: height unobservable -> held at the origin
+  const J = cal ? cal.paths.map((p) => row(p.pos, cal.mics[p.ch] || Mc).map((v) => v * (p.gain ?? 1))) : useAvg ? S.map((s) => row(s, Mc)) : S.flatMap((s) => G.M.map((m) => row(s, m)));
+  // laptop only: height unobservable -> held at the origin. With calibrated gains (the tracker recovers ~1/4-1/3 of the
+  // path) the rows shrink, so the priors shrink with them or the weak direction blows up (real 035336: z 36 cm)
+  const g2 = cal ? cal.paths.reduce((s, p) => s + (p.gain ?? 1) ** 2, 0) / cal.paths.length : 1;
   const JtJ = [0, 1, 2].map((i) => [0, 1, 2].map((j) => J.reduce((s, r) => s + r[i] * r[j], 0)));
-  const Ai = inv3(JtJ.map((r, i) => r.map((v, j) => v + (i === j ? PRIOR[i] : 0))));
+  // prior: small everywhere; laptop only also pins the WEAKEST direction of J^T J (pure height for the guessed geometry,
+  // a height/depth mix for a calibrated one) so it can't blow up
+  const E0 = eig3(JtJ), v3 = E0.vec[2], small = 1e-3 * g2 * (cal ? 20 : 1), big = phone ? 0 : 10 * g2;
+  const PRIOR = [0, 1, 2].map((i) => [0, 1, 2].map((j) => (i === j ? small : 0) + big * v3[i] * v3[j] + (phone && i === 1 && j === 1 && !cal ? 0.02 : 0)));
+  const Ai = inv3(JtJ.map((r, i) => r.map((v, j) => v + PRIOR[i][j])));
   const K = Ai.map((r) => J.map((_, n) => r.reduce((s, v, j) => s + v * J[n][j], 0)));
   const sv = eig3(JtJ).val.map((v) => Math.sqrt(Math.max(0, v)));
   // geometric error gain: hand cm per cm of path noise, per axis (with the height prior when it's unobservable)
@@ -383,7 +392,7 @@ function onSteps(m) {
         // 3D mode (phones): the span must also be roundish; laptop only: no roundness gate (its circle tracks come out thin)
         if (Math.abs(r.turns) >= 1.1 && r.ru >= 3 && r.rw >= 3 && r.t1 <= t - 300 && (!solver.phone || r.round >= 0.12)) {
           // clockwise on paper = negative winding (x right, b up)
-          const sgn = $('flipDir').checked ? -1 : 1;
+          const sgn = ($('flipDir').checked ? -1 : 1) * (solver.phone ? 1 : solver.G.laptopDirSign || 1);
           lastCircle = { dir: Math.sign(r.turns) * sgn < 0 ? 'cw' : 'ccw', turns: r.turns, ru: r.ru, rw: r.rw, at: performance.now(), t, plane: pc.name };
           circleEnd = r.t1;
           $('circleInfo').textContent = `마지막 원: ${pc.name}, ${Math.abs(r.turns).toFixed(1)}바퀴, 범위 ${r.ru.toFixed(0)} × ${r.rw.toFixed(0)}cm`;
@@ -504,7 +513,7 @@ $('btnOrigin').onclick = originReset;
 $('geom').addEventListener('change', () => { $('swapLR').checked = GEOMS[$('geom').value].swapLR; });
 $('calibFile').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
-  try { calib = JSON.parse(await f.text()); if (!ctx) { buildSolver(); resetLive(); } $('status').textContent = `보정 불러옴: ${calib.session} (${calib.paths.length}경로)` + (solver.cal ? '' : ' · 지금 톤 구성과 안 맞아서 기하는 추정값을 써요'); }
+  try { calib = JSON.parse(await f.text()); $('model').value = 'learned'; if (!ctx) { buildSolver(); resetLive(); } $('status').textContent = `보정 불러옴: ${calib.session} (${calib.paths.length}경로)` + (solver.cal ? '' : ' · 지금 톤 구성과 안 맞아서 기하는 추정값을 써요'); }
   catch (er) { $('status').textContent = '보정 파일을 읽을 수 없어요: ' + er.message; }
 };
 for (const id of ['geom', 'paths', 'phoneOn', 'phoneHz', 'px', 'py', 'pz', 'phone2On', 'phone2Hz', 'p2x', 'p2y', 'p2z', 'swapLR', 'model']) $(id).onchange = () => { if (!ctx) { buildSolver(); resetLive(); } else $('status').textContent = '설정 바뀜: 멈춘 뒤 다시 시작하세요'; };
