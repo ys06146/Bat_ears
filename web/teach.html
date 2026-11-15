@@ -23,6 +23,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:4px;text-align:left;border-bottom:1px solid #1e2738;white-space:nowrap}
 th{color:var(--muted);font-weight:500}
 td input{width:100%}
+td input.need{border-color:var(--bad)}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
 button{font:inherit;font-size:14px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#1b2538;color:var(--fg);cursor:pointer}
 button:disabled{opacity:.45;cursor:default}
@@ -78,7 +79,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     </div>
     <h2 style="margin-top:16px">📱 폰 소리원 <span class="muted">(tone.html을 켠 폰. 위치는 cm)</span></h2>
     <div class="tbl"><table id="phones"><thead><tr><th>사용</th><th>ID</th><th>Hz</th><th>오른쪽+</th><th>높이</th><th>앞+</th><th>메모 (기종·방향)</th><th>들림</th><th></th></tr></thead><tbody></tbody></table></div>
-    <div class="row"><button id="addPhone">+ 폰 추가</button><span class="muted">오른쪽 = 노트북 가운데에서 오른쪽(왼쪽은 −) · 높이 = 책상 위 · 앞 = 화면 선에서 내 쪽(뒤는 −). 폰 없이 하려면 '사용'을 끄세요</span></div>
+    <div class="row"><button id="addPhone">+ 폰 추가</button><button id="agreed" title="브라보 3d.html의 기본 배치">📐 약속 배치 넣기 (A 25/25/−2 · B −25/40/−2)</button><span class="muted">오른쪽 = 노트북 가운데에서 오른쪽(왼쪽은 −) · 높이 = 책상 위 · 앞 = 화면 선에서 내 쪽(뒤는 −). 실제로 놓은 자리를 적어 주세요. 폰 없이 하려면 '사용'을 끄세요</span></div>
     <div class="row">
       <button id="onBtn" class="big">① 소리·카메라 켜기</button>
       <button id="startBtn" class="big go" disabled>② 세션 시작 (약 2분 30초)</button>
@@ -193,6 +194,17 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     { on: true, id: 'B', hz: 21500, x: '', h: '', z: '', note: '' },
   ]);
   const savePhones = () => store.set('batears-teach-phones', phones);
+  // bravo's starting layout in 3d.html (cm): the solver starts here when a position is left blank
+  const AGREED = { A: { x: 25, h: 25, z: -2 }, B: { x: -25, h: 40, z: -2 } };
+  const POS = ['x', 'h', 'z'];
+  const blankPos = (p) => POS.some((k) => !Number.isFinite(parseFloat(p[k])));
+  function markNeed() {
+    document.querySelectorAll('#phones tbody tr').forEach((tr) => {
+      const p = phones[Number(tr.dataset.i)];
+      if (!p) return;
+      POS.forEach((k) => { const el = tr.querySelector(`[data-k="${k}"]`); if (el) el.classList.toggle('need', !!p.on && el.value.trim() === ''); });
+    });
+  }
   const heardHz = (hz) => (E.foreign || []).some((k) => Math.abs(k * 1000 - Number(hz)) <= 80);
   function renderPhones() {
     const tb = $('phones').querySelector('tbody');
@@ -200,13 +212,12 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
       <td><input type="checkbox" data-k="on" ${p.on ? 'checked' : ''}></td>
       <td><input data-k="id" value="${esc(p.id)}" maxlength="3" style="width:44px"></td>
       <td><input data-k="hz" type="number" step="100" min="15000" max="23000" value="${esc(p.hz)}" style="width:86px"></td>
-      <td><input data-k="x" type="number" step="1" value="${esc(p.x)}" style="width:62px"></td>
-      <td><input data-k="h" type="number" step="1" value="${esc(p.h)}" style="width:62px"></td>
-      <td><input data-k="z" type="number" step="1" value="${esc(p.z)}" style="width:62px"></td>
+      ${POS.map((k) => `<td><input data-k="${k}" type="number" step="1" value="${esc(p[k])}" placeholder="${AGREED[p.id] ? AGREED[p.id][k] : ''}" style="width:62px"></td>`).join('')}
       <td><input data-k="note" value="${esc(p.note)}" maxlength="60" placeholder="예: 아이폰 13, 노트북 쪽" style="min-width:150px"></td>
       <td class="heard">–</td>
       <td><button data-del="${i}" title="삭제">✕</button></td></tr>`).join('');
     renderHeard();
+    markNeed();
   }
   function renderHeard() {
     const on = !!audio.on;
@@ -227,6 +238,12 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     p[k] = k === 'on' ? e.target.checked : e.target.value;
     savePhones();
     renderHeard();
+    markNeed();
+  });
+  $('agreed').addEventListener('click', () => {
+    for (const p of phones) { const a = AGREED[p.id]; if (a) POS.forEach((k) => { if (!Number.isFinite(parseFloat(p[k]))) p[k] = String(a[k]); }); }
+    savePhones();
+    renderPhones();
   });
   $('phones').addEventListener('click', (e) => {
     const i = e.target.dataset && e.target.dataset.del;
@@ -586,10 +603,18 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   });
 
   // ---- ② session
-  let sess = null;
+  let sess = null, warnedBlank = false;
   $('startBtn').addEventListener('click', startSession);
   async function startSession() {
     if (!audio.on || !cam.on || !vis || (sess && !sess.done)) return;
+    const blank = phones.filter((p) => p.on && blankPos(p)).map((p) => p.id);
+    if (blank.length && !warnedBlank) {   // bravo needs the real positions; a second press starts anyway
+      warnedBlank = true;
+      markNeed();
+      setStatus(`⚠️ 📱${blank.join(', ')} 위치(오른쪽·높이·앞, cm)가 비어 있어요. 적고 ②를 다시 누르거나, 그대로 하려면 한 번 더 누르세요`);
+      return;
+    }
+    warnedBlank = false;
     $('startBtn').disabled = true;
     const capOk = await E.captureStart();
     R.setTag(`teach_${device}`);
