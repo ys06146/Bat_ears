@@ -2,6 +2,8 @@
 // Models beyond the historical 5/7-session tracker require explicit BAT_EVAL_GATE and BAT_EVAL_TAU_S.
 const fs=require('fs'),path=require('path'),ROOT=process.env.BAT_EVAL_REPO||path.resolve(__dirname,'..'),P=require(ROOT+'/tools/bravo/phase.js'),V=require(ROOT+'/tools/bravo/vision3d.js'),B=require(ROOT+'/web/bat3d.js');
 const base=process.argv[2],J=JSON.parse(fs.readFileSync(base+'.json')),cal=B.DEFAULT_CALIB.galaxy;
+const defaultModel=(B.create().info().model||'learned');
+if(defaultModel==='gated'&&process.env.BAT_EVAL_LINEAR_ONLY!=='1') throw new Error('This diagnostic evaluates only the fixed linear map, not the deployed gated model. Set BAT_EVAL_LINEAR_ONLY=1 only for an explicitly labeled linear-only diagnostic.');
 const historical=/default \([57] sittings/.test(cal.session);
 if (!historical && (!process.env.BAT_EVAL_GATE || !process.env.BAT_EVAL_TAU_S)) throw new Error('Explicit BAT_EVAL_GATE and BAT_EVAL_TAU_S required: match the source engine tracker, not historical defaults.');
 const tracker={gate:Number(process.env.BAT_EVAL_GATE ?? 1.5),tauS:Number(process.env.BAT_EVAL_TAU_S ?? 0.25)};
@@ -23,4 +25,4 @@ for(let i=0,j=0;i<tr.length;i++){
 }
 function stats(mode){const k=cal.amp.modes[mode].k,n=ws.length,e=[0,0,0],y2=[0,0,0],p2=[0,0,0],py=[0,0,0],ae=[0,0,0];for(const w of ws)for(let i=0;i<3;i++){const p=w.p[i]*k[i],y=w.y[i];e[i]+=(p-y)**2;ae[i]+=Math.abs(p-y);y2[i]+=y*y;p2[i]+=p*p;py[i]+=p*y;}return {rmse_cm:e.map(v=>100*Math.sqrt(v/n)),mae_cm:ae.map(v=>100*v/n),motion_cm:y2.map(v=>100*Math.sqrt(v/n)),uncentered_cosine:py.map((v,i)=>v/Math.sqrt(p2[i]*y2[i])),size:p2.map((v,i)=>Math.sqrt(v/y2[i]))};}
 if(process.env.BAT_EVAL_WINDOWS)fs.writeFileSync(process.env.BAT_EVAL_WINDOWS,JSON.stringify(ws));
-console.log(JSON.stringify({session:J.session,calibration:cal.session,training_session:inTraining,tracker,win_ms:250,camera:{hfov:78,tilt:lean,C},window_count:ws.length,rejected,range_limit_m:.45,wav:{rate:wav.rate,channels:wav.C,frames:wav.frames},stats:Object.fromEntries(['mse','half','matched'].map(m=>[m,stats(m)])),warning:(inTraining?'TRAINING SESSION, not holdout. ':'')+'One session, overlapping windows; fixed map feature-level displacement audit; no Kalman/display spring/filter; webcam pseudo-truth; no phone paths used.'},null,2));
+console.log(JSON.stringify({session:J.session,calibration:cal.session,evaluated_model:"learned-linear-only",deployed_default_model:defaultModel,training_session:inTraining,tracker,win_ms:250,camera:{hfov:78,tilt:lean,C},window_count:ws.length,rejected,range_limit_m:.45,wav:{rate:wav.rate,channels:wav.C,frames:wav.frames},stats:Object.fromEntries(['mse','half','matched'].map(m=>[m,stats(m)])),warning:(inTraining?'TRAINING SESSION, not holdout. ':'')+'One session, overlapping windows; fixed map feature-level displacement audit; no Kalman/display spring/filter; webcam pseudo-truth; no phone paths used.'},null,2));
