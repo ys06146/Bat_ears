@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T07:12:04Z",
-  "main_sha": "5b6890be0651f4a44b28360c52cefd84c3b34a45",
-  "exp_sha_before_run": "d3a26897d16872bfc584c15faf2e5212ebd87039",
-  "report": "experiments/monitor-2026-11-15-0112.md",
+  "checked_at_utc": "2026-11-15T08:22:17Z",
+  "main_sha": "21268df756552b1982e2fcf279234edfb95f4b46",
+  "exp_sha_before_run": "046ff3a87edfb6911ae9703666722a3ddf0b55a2",
+  "report": "experiments/monitor-2026-11-15-0222.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -54,6 +54,31 @@
       "path": "ml/README.md",
       "sha": "91f8d5d164c7b9a77ca5e0760175dc0ae5b5a749",
       "size": 1796
+    },
+    {
+      "path": "ml/auth_report.py",
+      "sha": "7a13d2f5c0f6cd96bcf1b575dc3d25755e1a13cf",
+      "size": 4581
+    },
+    {
+      "path": "ml/data/batears_2026-11-15T07-37-56-093Z_p1_interference_off.csv",
+      "sha": "cd086b67403c99faa57c2c37eda3a77cb22fd16d",
+      "size": 5003
+    },
+    {
+      "path": "ml/data/batears_2026-11-15T07-37-56-093Z_p1_interference_off.json",
+      "sha": "414fe3e8df1f826e211ee61cbaf0d403af67d52f",
+      "size": 15566
+    },
+    {
+      "path": "ml/data/batears_2026-11-15T07-40-04-429Z_p1_interference_on.csv",
+      "sha": "5455255872e3876811d19aa614c7eee4efc084b1",
+      "size": 3538
+    },
+    {
+      "path": "ml/data/batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
+      "sha": "342d24f85faea8dde6a86f471d7f00d25f7d1675",
+      "size": 11900
     },
     {
       "path": "ml/data/batears_20261114_153352_d20_p1.csv",
@@ -316,6 +341,11 @@
       "size": 9947
     },
     {
+      "path": "tools/auth-tests/test.js",
+      "sha": "d55410b103f6fdcee9f403ea034653ec65fef79d",
+      "size": 3766
+    },
+    {
       "path": "tools/lr-tests/physics.js",
       "sha": "0735fcb11b0eb1f8a20236c0dbc5de811593e358",
       "size": 2957
@@ -362,13 +392,18 @@
     },
     {
       "path": "tools/stamp.py",
-      "sha": "60cbe002dac84eb732f5db01258ce2fc04a54b30",
-      "size": 925
+      "sha": "d09013350c0366058a86e91d4159595f6f90e1cf",
+      "size": 937
     },
     {
       "path": "web/app.js",
-      "sha": "3060dc9b3e81767dd21fa4433bcd62dbc719f1ea",
-      "size": 20302
+      "sha": "4a97e1f2a952420e951f91f89dcf6f4b80e6037b",
+      "size": 20516
+    },
+    {
+      "path": "web/auth.js",
+      "sha": "85a4b2c02a9bd966059d397473105a1a995e34b5",
+      "size": 8074
     },
     {
       "path": "web/batears.html",
@@ -377,23 +412,23 @@
     },
     {
       "path": "web/coach.js",
-      "sha": "84ac64a0bede27c8eeaec22fd77fc7582606eae1",
-      "size": 11253
+      "sha": "e76d09daa478ae9d1da846c25515d4af30496a1f",
+      "size": 12517
     },
     {
       "path": "web/collect.js",
-      "sha": "52a3de6e00d09f5442099441427665111f2c26d4",
-      "size": 26125
+      "sha": "a3ab98454ec4566beb2cc87a045ff6b9c132d75b",
+      "size": 27927
     },
     {
       "path": "web/dsp.js",
-      "sha": "007b56fd19b1241a67abb7a6e637ae10482da2d0",
-      "size": 61043
+      "sha": "8e7c51687d2711ca5a77c012a47bff0f50ca6e2a",
+      "size": 61507
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "3e40011994c62063dd8bb1c412033baee7dccf64",
-      "size": 19389
+      "sha": "52b36eb837a154b611554949ce8484d0e68ae9de",
+      "size": 26757
     },
     {
       "path": "web/explog.js",
@@ -407,23 +442,28 @@
     },
     {
       "path": "web/index.html",
-      "sha": "2492c824d207ec2bd7760ed79d61a8b12829cec1",
+      "sha": "1ebf17a744563a0f8485fdb13694b9feeca8e8e4",
       "size": 9921
     },
     {
       "path": "web/iq.js",
-      "sha": "1fbd7c347c01636c5a1ae4bdb0da5bc975040017",
-      "size": 7850
+      "sha": "5aa7a72f31943e48bd33c811d3feb6fafdca5359",
+      "size": 8520
+    },
+    {
+      "path": "web/key.html",
+      "sha": "70dbe74ed035529477d18131bf9ea9f62eca0192",
+      "size": 22928
     },
     {
       "path": "web/lr.js",
-      "sha": "66568439a585811c10ee5ce0c6baae46d54cc0c6",
-      "size": 9537
+      "sha": "e1dee00d5e74e12d7c2bc0d19f8e369c927fe836",
+      "size": 10067
     },
     {
       "path": "web/recorder.js",
-      "sha": "b480cf70b98eec8306432c3e0ede1b69f4afd23b",
-      "size": 9441
+      "sha": "b81a7af197b5d73033327809745c35a70a0fa086",
+      "size": 9454
     },
     {
       "path": "web/robust.js",
@@ -457,6 +497,78 @@
     }
   ],
   "drive_files": [
+    {
+      "id": "1LUDDb-MnlNOzLjjButSPstL6MTMwYoqq",
+      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.csv",
+      "mime": "text/csv",
+      "size": "1384472",
+      "modified": "2026-11-15T08:21:05.900Z",
+      "url": "https://drive.google.com/file/d/1LUDDb-MnlNOzLjjButSPstL6MTMwYoqq/view?usp=drivesdk"
+    },
+    {
+      "id": "1JTGdXo9HhU2FK8hDsrlCc4C4dU1H4hY1",
+      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.wav",
+      "mime": "audio/x-wav",
+      "size": "27715116",
+      "modified": "2026-11-15T08:21:00.021Z",
+      "url": "https://drive.google.com/file/d/1JTGdXo9HhU2FK8hDsrlCc4C4dU1H4hY1/view?usp=drivesdk"
+    },
+    {
+      "id": "19HFDSLyjeQ5V-jcZVt0v0Hz8icVL3Mlg",
+      "name": "batears_20261115_021834_anon_d30_quiet_circle_61f5.json",
+      "mime": "application/json",
+      "size": "18608",
+      "modified": "2026-11-15T08:20:59.440Z",
+      "url": "https://drive.google.com/file/d/19HFDSLyjeQ5V-jcZVt0v0Hz8icVL3Mlg/view?usp=drivesdk"
+    },
+    {
+      "id": "1MdC9b1fqejqjHIlNtsh5_FKK7jS3uHh3",
+      "name": "batears_2026-11-15T07-40-04-429Z_p1.csv",
+      "mime": "text/csv",
+      "size": "3538",
+      "modified": "2026-11-15T07:41:23.111Z",
+      "url": "https://drive.google.com/file/d/1MdC9b1fqejqjHIlNtsh5_FKK7jS3uHh3/view?usp=drivesdk"
+    },
+    {
+      "id": "1-52WJLJla90KBinTBWR55F_jjhHJ2jqC",
+      "name": "batears_2026-11-15T07-40-04-429Z_p1.json",
+      "mime": "application/json",
+      "size": "11900",
+      "modified": "2026-11-15T07:41:22.946Z",
+      "url": "https://drive.google.com/file/d/1-52WJLJla90KBinTBWR55F_jjhHJ2jqC/view?usp=drivesdk"
+    },
+    {
+      "id": "1Tye4guIiXhjot21zRVrDkmEHjTOVN6xj",
+      "name": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.csv",
+      "mime": "text/csv",
+      "size": "3538",
+      "modified": "2026-11-15T07:41:03.318Z",
+      "url": "https://drive.google.com/file/d/1Tye4guIiXhjot21zRVrDkmEHjTOVN6xj/view?usp=drivesdk"
+    },
+    {
+      "id": "17VWw4EqMded2TljmPhguaiJ_3GiSa3Ph",
+      "name": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
+      "mime": "application/json",
+      "size": "11900",
+      "modified": "2026-11-15T07:41:03.104Z",
+      "url": "https://drive.google.com/file/d/17VWw4EqMded2TljmPhguaiJ_3GiSa3Ph/view?usp=drivesdk"
+    },
+    {
+      "id": "1J1xL8i41pAuJ7h9cDgoIYoBHO-_JtTCH",
+      "name": "batears_2026-11-15T07-37-56-093Z_p1_interference_off.csv",
+      "mime": "text/csv",
+      "size": "5003",
+      "modified": "2026-11-15T07:39:58.256Z",
+      "url": "https://drive.google.com/file/d/1J1xL8i41pAuJ7h9cDgoIYoBHO-_JtTCH/view?usp=drivesdk"
+    },
+    {
+      "id": "1scgUo2ndXzXs_RvyIhP5O7aBKq8bVPlH",
+      "name": "batears_2026-11-15T07-37-56-093Z_p1_interference_off.json",
+      "mime": "application/json",
+      "size": "15566",
+      "modified": "2026-11-15T07:39:58.000Z",
+      "url": "https://drive.google.com/file/d/1scgUo2ndXzXs_RvyIhP5O7aBKq8bVPlH/view?usp=drivesdk"
+    },
     {
       "id": "1bRbnG6xv6at1gIUTtLTLYhRqj7ohbUHR",
       "name": "batears_20261114_235151_1_d60_noisy_n0c4.csv",
@@ -994,7 +1106,10 @@
     "234303",
     "234730",
     "235001",
-    "235151"
+    "235151",
+    "2026-11-15T07:37:56.093Z_p1_sequence",
+    "2026-11-15T07:40:04.429Z_p1_sequence",
+    "20261115_021834_anon_d30_quiet_circle_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1003,7 +1118,24 @@
     "milz_LR0_live_despite_LOO65_67",
     "235001_completed90_autoNoise_differs_from_manual_loudMusic",
     "235151_aborted2trials",
-    "main5b6890_continuousPull_autoTune_new_freeExperiment_schema_27tests"
+    "main5b6890_continuousPull_autoTune_new_freeExperiment_schema_27tests",
+    "interference_on_selectedFalse_occupiedTrue_stayed20k",
+    "event_counts_not_accuracy_OFF51_ON31_pairCoverage9_7",
+    "duplicate_ON_export_sameSHA",
+    "circle_complete_training_only_not_recognition_collapse",
+    "auth_prototype_added_synthetic7tests_no_realFAR"
   ],
-  "notes": "No new Drive files this run. New experiment-live exports nested session+events/marked_pairs and event CSV, NOT legacy frame CSV; detect schema before analysis. continuousPull/IQ/masks are not replayed by legacy replay_burst.py. Compare condition flags and actual tone/volume; own exp commits alone are not notification reasons."
+  "notes": "Circle final CSV+JSON became complete during read; final 6077 rows/26 cues analyzed (initial partial 3789 rows not counted). New event schema must use audit_event_logs.py; marked-window coverage is not verified gesture accuracy. autoTune ON selected=false/occupied=true is failed avoidance, not a successful different-frequency treatment. Keep auth/circle protocols separate from PP.",
+  "duplicate_groups": [
+    {
+      "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
+      "duplicate": "batears_2026-11-15T07-40-04-429Z_p1.json",
+      "sha256": "224c6da6d1fd68d3ef3f83e031f008976d8116519bcc023ac133df640d7f1058"
+    },
+    {
+      "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.csv",
+      "duplicate": "batears_2026-11-15T07-40-04-429Z_p1.csv",
+      "sha256": "8215b1916d81f272caa59ab26a4339b1b22c5d40a64302d0844abd704cccdc81"
+    }
+  ]
 }
