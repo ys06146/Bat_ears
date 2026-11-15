@@ -29,6 +29,10 @@
   .track { height: 8px; background: rgba(255, 255, 255, .06); border-radius: 4px; overflow: hidden; }
   .fill { height: 100%; width: 0; background: var(--acc); transition: width .2s; }
   #toast { left: 50%; top: 78px; transform: translateX(-50%); font-size: 26px; font-weight: 800; display: none; }
+  body.film .hud:not(#filmCap):not(#toast):not(#sim) { display: none !important; }   /* the 'simulated' badge always stays */
+  #filmCap { left: 50%; bottom: 18px; transform: translateX(-50%); display: none; text-align: center; font-size: 18px; padding: 8px 18px; }
+  body.film #filmCap { display: block; }
+  #filmCap small { display: block; color: var(--dim); font-size: 13px; margin-top: 2px; }
   #sim { right: 12px; top: 74px; color: #ffcc80; border-color: #ff9800; font-weight: 700; display: none; }
   #settings { right: 12px; top: 74px; width: 330px; max-height: calc(100% - 300px); overflow: auto; display: none; font-size: 13px; }
   #settings h3, #about h3 { margin: 10px 0 4px; font-size: 13px; color: var(--acc); }
@@ -53,6 +57,7 @@
 </head>
 <body>
 <div id="stage"></div>
+<div class="hud" id="filmCap">🦇 <b>Bat Ears</b> · 🔊 소리만으로 · 📷 웹캠 꺼짐<small id="filmAcc"></small></div>
 <div class="hud" id="top">
   <h1>🦇 Bat Ears 홀로그램 <small>웹캠 없이 소리만으로 손 위치</small></h1>
   <button id="btnStart" class="go">▶ 시작</button>
@@ -62,6 +67,7 @@
   <button id="btnSettings">⚙ 설정</button>
   <button id="btnAbout">ⓘ 출처</button>
   <button id="btnDebug">🔍 진단</button>
+  <button id="btnFilm" title="패널을 숨기고 전체 화면으로 (H: 패널, F: 전체 화면, 스페이스: 가운데)">🎬 촬영 모드</button>
   <button id="btnRec" title="마이크 원음과 엔진 값을 저장해요 (브라보 분석용)">⏺ 녹화</button>
   <span id="status" class="grow">대기 중 · ▶ 시작을 누르고 마이크를 허용하세요</span>
 </div>
@@ -84,7 +90,7 @@
   <label class="note">소리만으로 추정하면 정보가 약한 축(특히 높이)을 실제보다 작게 그려요. 크게 그리면 맞는 움직임과 틀린 움직임이 같이 커져요</label>
   <h3>필터 (One Euro, Casiez 2012)</h3>
   <label>부드럽게 ↔ 빠르게 <input type="range" id="smooth" min="0.3" max="3" step="0.1" value="1"> <span id="smoothV" class="note">×1.0</span></label>
-  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="4"> <span id="tauV" class="note">4초 (멈추면 2초)</span></label>
+  <label>가운데로 돌아오기 τ <input type="range" id="tau" min="0" max="15" step="0.5" value="6"> <span id="tauV" class="note">6초 (멈추면 2초)</span></label>
   <h3>보기</h3>
   <label><input type="checkbox" id="showTrail" checked> 궤적</label>
   <label><input type="checkbox" id="showErr" checked> 오차 타원 (정직한 RMS)</label>
@@ -461,7 +467,16 @@ async function openRecording(files) {
   $('status').textContent = `녹음 재생: ${wav.name}` + (ghost.on ? ` · 🟩 웹캠 정답 겹침${ghost.calibOk ? '' : ' (calib 없음: 카메라 기본값)'}` : ' · 웹캠 정답 없음 (_vision.csv와 .json을 같이 고르면 겹쳐요)')
     + (inTrain ? ' · ⚠️ 이 세션은 기본 보정 학습에 쓰여서 실제보다 좋아 보일 수 있어요' : '');
 }
+// 🎬 caption: the honest numbers in one line (same source as the accuracy card)
+function filmCaption(s) {
+  const e = s && s.err, el = $('filmAcc');
+  if (!el) return;
+  if (!e || !e.rms) { el.textContent = s && s.sim ? '가상 움직임 (시험)' : '정확도 미확인 (보정 없음)'; return; }
+  const r = e.rms, scope = !s.calibScope || /leave-one/i.test(s.calibScope) ? '처음 보는 세션' : s.calibScope;
+  el.textContent = `${scope} 기준 250ms 이동 오차: 좌우 ±${r[0].toFixed(1)} · 앞뒤 ±${r[2].toFixed(1)} · 높이 ±${r[1].toFixed(1)}cm (높이는 약해요)`;
+}
 function renderAcc(s) {
+  filmCaption(s);
   const e = s && s.err;
   if (!e || !e.rms) { $('accNums').innerHTML = s && s.sim ? '가상 움직임이라 정확도가 없어요' : '정확도: 미확인 (보정 없음, 물리 풀이)'; errEl.userData.r = [0.04, 0.032, 0.045]; return; }
   const r = e.rms, c = e.corr || [], mo = e.motion || [];
@@ -504,7 +519,7 @@ function renderDebug() {
     const db = 20 * Math.log10(a[i] || 1e-9), dd = REF && REF[i] ? 20 * Math.log10((a[i] || 1e-9) / REF[i]) : NaN;
     h += `<tr><td>${nm[i] || i}</td><td align="center">${db.toFixed(0)} dBFS</td><td align="center" class="${!Number.isFinite(dd) ? '' : dd > -4 ? 'ok' : dd > -10 ? 'warn' : 'bad'}">${Number.isFinite(dd) ? (dd >= 0 ? '+' : '') + dd.toFixed(0) + ' dB' : '–'}</td><td align="center">${(q[i] || 0).toFixed(1)}</td><td align="center">${Math.round(100 * (act[i] || 0))}%</td></tr>`;
   }
-  $('dbgTone').innerHTML = a.length ? h + '</table>' : '시작하면 경로별 톤 크기가 보여요';
+  $('dbgTone').innerHTML = (a.length ? h + '</table>' : '시작하면 경로별 톤 크기가 보여요') + `<div>화면 ${perf.fps.toFixed(0)}fps${perf.reduced ? ' (느려서 화질을 낮췄어요)' : ''}</div>`;
   const c = $('dbgPlot'), g = c.getContext('2d'), W = c.width, H = c.height, t1 = disp.t || 0;
   g.clearRect(0, 0, W, H);
   g.strokeStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
@@ -580,8 +595,14 @@ async function saveFiles(files) {
 }
 const clock = new THREE.Clock();
 let frameN = 0;
+const perf = { n: 0, t0: performance.now(), fps: 60, low: 0, reduced: false };
 function frame() {
   requestAnimationFrame(frame);
+  perf.n++;
+  { const tn = performance.now(); if (tn - perf.t0 > 1000) { perf.fps = perf.n * 1000 / (tn - perf.t0); perf.n = 0; perf.t0 = tn;
+    // a slow laptop GPU: drop to pixel ratio 1 and a lighter bloom after 3 slow seconds (the hand must not lag behind)
+    perf.low = perf.fps < 40 ? perf.low + 1 : 0;
+    if (perf.low >= 3 && !perf.reduced) { perf.reduced = true; renderer.setPixelRatio(1); composer.setPixelRatio ? composer.setPixelRatio(1) : null; bloom.resolution.set(innerWidth / 2, innerHeight / 2); composer.setSize(innerWidth, innerHeight); } } }
   const now = performance.now(), el = clock.getElapsedTime();
   const P = T3(disp.pos);
   hand.position.copy(P);
@@ -628,7 +649,19 @@ requestAnimationFrame(frame);
 $('btnStart').onclick = () => start('mic');
 $('btnStop').onclick = () => { stop(); $('status').textContent = '멈춤'; };
 $('btnCenter').onclick = () => { if (engine && engine.originReset) engine.originReset(); recenter(); };
-addEventListener('keydown', (e) => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); $('btnCenter').click(); } });
+function setFilm(on) {
+  document.body.classList.toggle('film', on);
+  if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+  if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+$('btnFilm').onclick = () => setFilm(true);
+addEventListener('keydown', (e) => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); $('btnCenter').click(); }
+  else if (e.key === 'h' || e.key === 'H' || e.key === 'Escape') setFilm(e.key === 'Escape' ? false : !document.body.classList.contains('film'));
+  else if (e.key === 'f' || e.key === 'F') { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else document.documentElement.requestFullscreen().catch(() => {}); }
+});
 $('wavFile').onchange = (e) => openRecording([...e.target.files]);
 $('btnSettings').onclick = () => { const s = $('settings'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };
 $('btnAbout').onclick = () => { const s = $('about'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; };

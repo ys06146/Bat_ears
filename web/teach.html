@@ -148,7 +148,9 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
   const E = window.BatEars, R = window.BatRecorder;
   const Q = new URLSearchParams(location.search);
   const QUICK = Q.get('quick') === '1', NOFOLDER = Q.get('nofolder') === '1';
-  const PRESET = Q.get('preset') === 'above';   // the overhead-phone experiment in one link
+  const PRESET_NAME = Q.get('preset') || '';
+  const PRESET = PRESET_NAME === 'above';   // the overhead-phone experiment in one link
+  const PRESET_LAPTOP = PRESET_NAME === 'laptop';   // laptop speakers only, a new posture (more varied training data)
   const MP_VER = '0.10.21';
   const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
   const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
@@ -1115,6 +1117,18 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     const vis = cam.recent.length ? cam.recent.filter((x) => x[1]).length / cam.recent.length : 0;
     const dm = cam.dist.length >= 3 ? cam.dist.slice().sort((x, y) => x - y)[cam.dist.length >> 1] : null;
     const item = (ok, text, wait) => `<div>${ok === true ? '✅' : ok === false ? '⚠️' : '⬜'} ${text}${wait && ok == null ? ` <span class="muted">${wait}</span>` : ''}</div>`;
+    if (PRESET_LAPTOP) {
+      const okL = !tw && vis >= 0.8 && dm != null && dm >= 25 && dm <= 45;
+      $('presetList').innerHTML = [
+        '<div>💻 노트북 스피커만 써요. 폰은 모두 꺼요(표의 폰 \'사용\'도 꺼져 있어요)</div>',
+        '<div>🪑 지난 세션과 <b>다른 자세</b>로 해요: 의자 높이, 노트북과의 거리, 팔 각도를 조금 바꿔요. 손은 노트북 앞 모서리 위에요</div>',
+        item(audio.on ? !tw : null, '20kHz 경고 없음 (🔊 다른 Bat Ears 탭 닫기)', '① 켜기 뒤에 확인돼요'),
+        item(cam.on && cam.recent.length > 20 ? vis >= 0.8 : null, `손 보임 80% 이상 (지금 ${Math.round(100 * vis)}%)`, '카메라가 켜지면 확인돼요'),
+        item(dm != null ? dm >= 25 && dm <= 45 : null, `📏 웹캠에서 25~45cm (지금 ${dm != null ? Math.round(dm) + 'cm' : '–'})`, '손을 미리보기에 넣어요'),
+        `<div>${okL ? '👉 모두 됐어요. <b>② 세션 시작</b>을 눌러요' : '<span class="muted">모두 ✅가 되면 ② 세션 시작</span>'}</div>`,
+      ].join('');
+      return;
+    }
     const all = pre.fixed && heardA && !tw && vis >= 0.8 && dm != null && dm >= 25 && dm <= 45;
     $('presetList').innerHTML = [
       `<div><label><input type="checkbox" id="preFixed" ${pre.fixed ? 'checked' : ''}> 📱A를 노트북 가운데 · 경첩에서 앞으로 30cm · 책상 위 45cm에 세로로 고정했어요 (아래쪽 스피커가 손 자리를 향해요)</label></div>`,
@@ -1126,6 +1140,17 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     ].join('');
     const cb = $('preFixed');
     if (cb) cb.onchange = () => { pre.fixed = cb.checked; renderPreset(); };
+  }
+  if (PRESET_LAPTOP) {
+    for (const p of phones) p.on = false;
+    savePhones();
+    renderPhones();
+    if (!$('memo').value) $('memo').value = '노트북만, 다른 자세 (preset=laptop)';
+    $('presetBox').classList.remove('hidden');
+    $('presetBox').querySelector('b').textContent = '📋 노트북만 · 다른 자세';
+    $('presetBox').querySelector('.muted').textContent = '(폰은 모두 꺼져 있어요. 지난번과 다른 자세로 녹화해요)';
+    renderPreset();
+    setInterval(renderPreset, 700);
   }
   if (PRESET) {
     if (!phones.some((p) => p.id === 'A')) phones.unshift({ on: true, id: 'A', hz: 17000, x: '', h: '', z: '', note: '' });
@@ -1143,6 +1168,7 @@ pre{white-space:pre-wrap;font-size:13px;line-height:1.55;margin:0;font-family:ui
     renderPhones();
   }
   if (PRESET) setStatus('📋 폰 위에서 실험이에요. 위 체크를 따라 해요: ① 소리·카메라 켜기 → 모두 ✅ → ② 세션 시작');
+  if (PRESET_LAPTOP) setStatus('📋 노트북만 · 다른 자세예요. 위 체크를 따라 해요: ① 소리·카메라 켜기 → 모두 ✅ → ② 세션 시작');
   dataDir(false).then(showFolder);
   window.BatTeach = { get sess() { return sess; }, cam, audio, get vis() { return vis; }, plan, STEPS, derive, visionEvents, finish };   // for tests
 })();
