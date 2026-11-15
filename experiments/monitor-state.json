@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "checked_at_utc": "2026-11-15T09:15:00Z",
-  "main_sha": "175a455f58976822aecc01925d0b9a9328600f21",
-  "exp_sha_before_run": "30c83f5ccb37ee12ccbc657940147621b98aed58",
-  "report": "experiments/monitor-2026-11-15-0315.md",
+  "checked_at_utc": "2026-11-15T10:21:00Z",
+  "main_sha": "3b36d879c1eb3e4514b957df6bcbf14775a2029e",
+  "exp_sha_before_run": "b7b53f2ee8cca585c408e8fcbf255420cb21e1d0",
+  "report": "experiments/monitor-2026-11-15-0421.md",
   "github_files": [
     {
       "path": ".gitignore",
@@ -17,18 +17,18 @@
     },
     {
       "path": "README.md",
-      "sha": "b44563dd5017413af11096df27f993a6b770258d",
-      "size": 5325
+      "sha": "7e6f40bed001fbc88fa33c578276e734e32bccfa",
+      "size": 5892
     },
     {
       "path": "TEAM.md",
-      "sha": "32301b5c791bfe3af0537835d4e70a0882c80758",
-      "size": 9657
+      "sha": "37feb28f3b0d9fa813e3ad500fb82dcf9c85cdef",
+      "size": 11022
     },
     {
       "path": "docs/demo-script.md",
-      "sha": "60126999e764cda62c9de4d52728fccb3519c515",
-      "size": 2653
+      "sha": "4155228f11e2fb5128afd64f08a546d80f4f464d",
+      "size": 4394
     },
     {
       "path": "docs/devpost.md",
@@ -347,8 +347,8 @@
     },
     {
       "path": "ml/features.py",
-      "sha": "c862fd8381fe5327c5d8fcaaa114a140c09869b1",
-      "size": 6484
+      "sha": "11386820bf656acd3bb8a328ab4859a8499deca5",
+      "size": 6664
     },
     {
       "path": "ml/make_fake_data.py",
@@ -422,13 +422,13 @@
     },
     {
       "path": "tools/stamp.py",
-      "sha": "d09013350c0366058a86e91d4159595f6f90e1cf",
-      "size": 937
+      "sha": "10932cdafa937ad0e633d02bd3f2a203bc1f0f41",
+      "size": 951
     },
     {
       "path": "web/3d.html",
-      "sha": "80ce3b53460dd40b8699f5612efe4f02b527cd89",
-      "size": 32120
+      "sha": "d2ea83754e69822e68070e3c563436fce2194512",
+      "size": 41281
     },
     {
       "path": "web/app.js",
@@ -462,12 +462,12 @@
     },
     {
       "path": "web/dsp.js",
-      "sha": "a819d39ca9d925d7ab6210afad2b6f08a8ba41df",
-      "size": 62812
+      "sha": "1b999874064184edc2ac164a8acd9d753a686feb",
+      "size": 63137
     },
     {
       "path": "web/experiment-live.html",
-      "sha": "94dfb45dd9e96e08a49f491d146f36e1f510110e",
+      "sha": "87a900052e39b615c4843408798ac34eba83f327",
       "size": 27246
     },
     {
@@ -482,7 +482,7 @@
     },
     {
       "path": "web/index.html",
-      "sha": "6806d53ecc7c30f3bff5a5887eed22debe1877fb",
+      "sha": "05d31e485d4a2528b84c2b3806e4eb9b0730b173",
       "size": 9921
     },
     {
@@ -492,7 +492,7 @@
     },
     {
       "path": "web/key.html",
-      "sha": "400ab6d2f3bd2a48883cc7b16c43b0d85a0b2f0a",
+      "sha": "dc27c1950bde7e1115dac202eb8ffc6988c7a825",
       "size": 28152
     },
     {
@@ -531,9 +531,14 @@
       "size": 13997
     },
     {
+      "path": "web/teach.html",
+      "sha": "5850b2936d6ec2b5ed396bdc988e2dff23469fdb",
+      "size": 67664
+    },
+    {
       "path": "web/tone.html",
-      "sha": "eaf20ccb7ccd0c106892954f5e4b770bb6d75e55",
-      "size": 6062
+      "sha": "ed3b3adab2ce1b631102dc9e3766c982cae2dc83",
+      "size": 6958
     },
     {
       "path": "web/wave.js",
@@ -542,6 +547,14 @@
     }
   ],
   "drive_files": [
+    {
+      "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
+      "name": "teach",
+      "mime": "application/vnd.google-apps.folder",
+      "size": null,
+      "modified": "2026-11-15T09:56:04.453Z",
+      "url": "https://drive.google.com/drive/folders/1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG"
+    },
     {
       "id": "1Ln49gbuaSWfvbg9rDCLOQp1Di-WXS7zj",
       "name": "batears_auth_61f5.json",
@@ -1196,7 +1209,10 @@
     "2026-11-15T07:40:04.429Z_p1_sequence",
     "20261115_021834_anon_d30_quiet_circle_61f5",
     "20261115_022153_anon_d30_quiet_circle_61f5",
-    "auth61f5_snapshot_5attempts_084056"
+    "auth61f5_snapshot_5attempts_084056",
+    "20261115_035336_teach_61f5",
+    "20261115_040340_teach_61f5",
+    "20261115_040721_teach_61f5"
   ],
   "notified_findings": [
     "quiet85_noisy95_original_verified",
@@ -1213,9 +1229,13 @@
     "auth_prototype_added_synthetic7tests_no_realFAR",
     "auth_first_real5_genuine3accept_ambiguousSim1_noImpostors",
     "auth_sequence_rearm_keyOnly_practiceMADthreshold_changed",
-    "circle2_training_not_live_failure_pp2of6"
+    "circle2_training_not_live_failure_pp2of6",
+    "teach3sessions_presence83.6_88.2_95.2",
+    "3d250msDisplacementNotAbsolutePosition_yWeakBaseline",
+    "phoneB18750lowCalibrationR2_notJustHeard",
+    "featuresExcludesTeach_onlyPartialSchemaFix"
   ],
-  "notes": "Auth exports cumulative top-level attempts plus overlapping session.attempts: dedupe t/owner/performer, do not add nested duplicates. Historical pre02:35 simulated flag may mean missing motion rather than keyboard; report flagged included/excluded, preserve uncertainty. Auth matcher/template thresholds changed; no impostor trials yet so FAR/EER unavailable. Circle training live cw/ccw scores are not validated circle recognition metrics. Event schema via audit_event_logs.py; legacy train does not support new classes/schemas.",
+  "notes": "Always list watched_drive_subfolders (teach) even when root folder metadata is unchanged. Teacher schema page=teach.html: early=false and complete trials; separate vision/audio/iq streams and WAV per session. 3D DEFAULT_CALIB metrics are 250ms displacement RMSE, not absolute position or 95%CI; stored model numbers not independently replayed. Phone heard indicator changed across teacher versions. Current authentication cumulative attempts unchanged; preserve prior dedup/ambiguous simulated handling.",
   "duplicate_groups": [
     {
       "canonical": "batears_2026-11-15T07-40-04-429Z_p1_interference_on.json",
@@ -1254,5 +1274,149 @@
       "seojin",
       "seojin"
     ]
+  ],
+  "watched_drive_subfolders": [
+    {
+      "id": "1JYN9ic-3eaXJ5ECbti7uzi4uNDsy9apG",
+      "path": "nhng/ml/data/teach",
+      "files": [
+        {
+          "id": "16REuPpopbURxNXCoKwpowrK3GmpP9mW0",
+          "name": "batears_20261115_040721_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28321836",
+          "modified": "2026-11-15T10:09:53.418Z",
+          "url": "https://drive.google.com/file/d/16REuPpopbURxNXCoKwpowrK3GmpP9mW0/view?usp=drivesdk"
+        },
+        {
+          "id": "1hCYd8Ra-m8brRLc9wGxOgsEO9ZbEPLD_",
+          "name": "batears_20261115_040721_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "653871",
+          "modified": "2026-11-15T10:09:51.862Z",
+          "url": "https://drive.google.com/file/d/1hCYd8Ra-m8brRLc9wGxOgsEO9ZbEPLD_/view?usp=drivesdk"
+        },
+        {
+          "id": "1HyIcaOu7ovtn1dzOJdu4y5d4yuuM9ZX8",
+          "name": "batears_20261115_040721_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1594090",
+          "modified": "2026-11-15T10:09:50.841Z",
+          "url": "https://drive.google.com/file/d/1HyIcaOu7ovtn1dzOJdu4y5d4yuuM9ZX8/view?usp=drivesdk"
+        },
+        {
+          "id": "1BSqR5vDFhHTQFz_F_vnil7wR1i4zde9v",
+          "name": "batears_20261115_040721_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "2992716",
+          "modified": "2026-11-15T10:09:49.945Z",
+          "url": "https://drive.google.com/file/d/1BSqR5vDFhHTQFz_F_vnil7wR1i4zde9v/view?usp=drivesdk"
+        },
+        {
+          "id": "15atqUhHkj8sMmKb_2eMB3fpXdyHzfw8k",
+          "name": "batears_20261115_040721_teach_61f5.json",
+          "mime": "application/json",
+          "size": "99493",
+          "modified": "2026-11-15T10:09:49.549Z",
+          "url": "https://drive.google.com/file/d/15atqUhHkj8sMmKb_2eMB3fpXdyHzfw8k/view?usp=drivesdk"
+        },
+        {
+          "id": "1JoFKOBjPAzSuwNVMwsEQY0-5BsAPjMWI",
+          "name": "batears_20261115_040340_teach_61f5.calib.json",
+          "mime": "application/json",
+          "size": "3998",
+          "modified": "2026-11-15T10:07:59.244Z",
+          "url": "https://drive.google.com/file/d/1JoFKOBjPAzSuwNVMwsEQY0-5BsAPjMWI/view?usp=drivesdk"
+        },
+        {
+          "id": "1Dkismxxc3dJqaOMzDrPT98uoGCQ6ynkh",
+          "name": "batears_20261115_040340_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "2789011",
+          "modified": "2026-11-15T10:07:20.278Z",
+          "url": "https://drive.google.com/file/d/1Dkismxxc3dJqaOMzDrPT98uoGCQ6ynkh/view?usp=drivesdk"
+        },
+        {
+          "id": "1fZoSJn4ryIzGwj6wkU4e678fBgGOlJY7",
+          "name": "batears_20261115_040340_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1586787",
+          "modified": "2026-11-15T10:07:19.994Z",
+          "url": "https://drive.google.com/file/d/1fZoSJn4ryIzGwj6wkU4e678fBgGOlJY7/view?usp=drivesdk"
+        },
+        {
+          "id": "1KbUa25kthQwH6uRDU_gkhpQxr6khDUkL",
+          "name": "batears_20261115_040340_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "662874",
+          "modified": "2026-11-15T10:07:19.917Z",
+          "url": "https://drive.google.com/file/d/1KbUa25kthQwH6uRDU_gkhpQxr6khDUkL/view?usp=drivesdk"
+        },
+        {
+          "id": "1YHQRy1WNTi0W0KjIA1jcNIYWNIvGF4re",
+          "name": "batears_20261115_040340_teach_61f5.json",
+          "mime": "application/json",
+          "size": "110261",
+          "modified": "2026-11-15T10:07:18.498Z",
+          "url": "https://drive.google.com/file/d/1YHQRy1WNTi0W0KjIA1jcNIYWNIvGF4re/view?usp=drivesdk"
+        },
+        {
+          "id": "1_pjiH7IFWmGVA9QUOWpxWYO0R80ktuCN",
+          "name": "batears_20261115_040340_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28320300",
+          "modified": "2026-11-15T10:07:16.278Z",
+          "url": "https://drive.google.com/file/d/1_pjiH7IFWmGVA9QUOWpxWYO0R80ktuCN/view?usp=drivesdk"
+        },
+        {
+          "id": "1QSuyfLCzmPZt6H8Cx-WxPn6W6qQqKyy1",
+          "name": "batears_20261115_035336_teach_61f5.calib.json",
+          "mime": "application/json",
+          "size": "2125",
+          "modified": "2026-11-15T10:00:43.277Z",
+          "url": "https://drive.google.com/file/d/1QSuyfLCzmPZt6H8Cx-WxPn6W6qQqKyy1/view?usp=drivesdk"
+        },
+        {
+          "id": "1fF1f1XVbhIwbUapaMfXvbpgzxST7-afb",
+          "name": "batears_20261115_035336_teach_61f5.wav",
+          "mime": "audio/x-wav",
+          "size": "28321836",
+          "modified": "2026-11-15T09:56:33.133Z",
+          "url": "https://drive.google.com/file/d/1fF1f1XVbhIwbUapaMfXvbpgzxST7-afb/view?usp=drivesdk"
+        },
+        {
+          "id": "1wkYXzfLdSD8VxXJXT0bFTZnoq73jh02c",
+          "name": "batears_20261115_035336_teach_61f5_iq.csv",
+          "mime": "text/csv",
+          "size": "653402",
+          "modified": "2026-11-15T09:56:05.844Z",
+          "url": "https://drive.google.com/file/d/1wkYXzfLdSD8VxXJXT0bFTZnoq73jh02c/view?usp=drivesdk"
+        },
+        {
+          "id": "1kmI52uDTobFjSjXUm14Ie5V9j9F4QJUr",
+          "name": "batears_20261115_035336_teach_61f5_audio.csv",
+          "mime": "text/csv",
+          "size": "1473973",
+          "modified": "2026-11-15T09:56:05.337Z",
+          "url": "https://drive.google.com/file/d/1kmI52uDTobFjSjXUm14Ie5V9j9F4QJUr/view?usp=drivesdk"
+        },
+        {
+          "id": "1z0iWe4xTX0-G9UGzt4RmABB2GSh6aENB",
+          "name": "batears_20261115_035336_teach_61f5_vision.csv",
+          "mime": "text/csv",
+          "size": "2846894",
+          "modified": "2026-11-15T09:56:04.829Z",
+          "url": "https://drive.google.com/file/d/1z0iWe4xTX0-G9UGzt4RmABB2GSh6aENB/view?usp=drivesdk"
+        },
+        {
+          "id": "1sOfYqTRTjO5Ii213lljYrLyp4qNsO9Fa",
+          "name": "batears_20261115_035336_teach_61f5.json",
+          "mime": "application/json",
+          "size": "113278",
+          "modified": "2026-11-15T09:56:04.514Z",
+          "url": "https://drive.google.com/file/d/1sOfYqTRTjO5Ii213lljYrLyp4qNsO9Fa/view?usp=drivesdk"
+        }
+      ]
+    }
   ]
 }
