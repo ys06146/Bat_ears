@@ -1,382 +1,445 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bat Ears | Gesture key</title>
-<link rel="stylesheet" href="style.css?v=20261115124422">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bat Ears | Air Password</title>
 <style>
-body{max-width:none;margin:0;padding:0;background:#090c13;color:#e8eef9;font-family:Inter,system-ui,sans-serif}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #27303d}
-header h1{margin:0;font-size:19px}header span{font-size:12px;color:#a9b1c2;font-weight:400}
-main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;padding:16px}
-/* style.css fixes main's height and scrolls aside for the one-screen game page; these pages scroll as documents */
-main{height:auto}aside{overflow:visible}
-.tabs{position:static;transform:none;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.tabs a{padding:9px 12px;border-radius:8px;background:#171b24;color:#d7dce6;text-decoration:none;font-size:13px}
-.tabs .sel{background:#28394e;color:#b9e1ff}
-.card{margin-bottom:14px;padding:16px}h3{margin:0 0 10px;font-size:15px}
-p,.hint{color:#aab4c6;font-size:13px;line-height:1.5}
-label{display:inline-flex;gap:7px;align-items:center;font-size:13px;margin:4px 10px 4px 0}
-input,select{background:#141b28;color:#e8eef9;border:1px solid #39465c;border-radius:6px;padding:7px}
-input[type=text]{width:130px}
-button{cursor:pointer}button:disabled{opacity:.45}
-#lockCard{text-align:center;padding:28px 16px}
-#lockIcon{font-size:92px;line-height:1}
-#result{font-size:30px;font-weight:800;margin:10px 0 6px;min-height:40px}
-#detail{color:#aab4c6;font-size:14px;min-height:20px}
-.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0;min-height:42px}
-.chip2{padding:8px 12px;border-radius:999px;background:#1b2330;border:1px solid #39465c;font-weight:700;font-size:15px}
-.chip2.ok{border-color:#2e7d32;background:#0f2a14}.chip2.bad{border-color:#c62828;background:#2a0f0f}
-.meter{position:relative;height:14px;background:#252d3d;border-radius:8px;margin:14px auto 4px;max-width:520px;overflow:hidden}
-#scoreBar{height:100%;width:0;background:#48a6f6;transition:width .25s}
-#thrMark{position:absolute;top:-3px;bottom:-3px;width:3px;background:#ffd54f;left:50%}
-.parts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:560px;margin:12px auto 0;font-size:12px;color:#aab4c6}
-.parts .pb{height:6px;background:#252d3d;border-radius:4px;overflow:hidden;margin-top:4px}.parts .pb div{height:100%;width:0;background:#80cbc4}
-#dots{display:flex;gap:6px;margin:10px 0}#dots span{width:14px;height:14px;border-radius:50%;background:#252d3d;display:inline-block}#dots span.on{background:#66bb6a}
-table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:6px;border-bottom:1px solid #273448;text-align:left}
-.big{font-size:16px;padding:10px 16px}
-@media(max-width:950px){main{grid-template-columns:1fr}}
-@media(max-width:600px){header{flex-wrap:wrap;gap:6px;padding:10px 12px}header h1{font-size:16px}header h1 span{display:block}main{padding:10px}.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.tabs a{flex:0 0 auto}}
+:root{--bg:#070a10;--panel:#0f151f;--panel2:#131b27;--line:#243042;--text:#e9eef7;--muted:#8d9bb0;--dim:#5d6b80;--teal:#72daca;--teal-bg:#0d2724;--red:#ff8fa0;--red-bg:#2a1219;--gold:#e5bd72;--accent:#d8435a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#13233a 0%,transparent 60%),var(--bg);color:var(--text);font-family:Inter,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:16px;padding:14px 28px;border-bottom:1px solid #161e2b}
+.brand{font-weight:800;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+nav{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+nav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}nav a:hover{color:var(--text);background:#121a26}nav a.sel{color:var(--text);background:#18222f}
+.chip{font-size:12px;border:1px solid #2c3748;border-radius:100px;padding:6px 12px;white-space:nowrap;color:var(--muted)}.chip.on{color:var(--teal);border-color:#2a6b5f}
+.chip.on:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:7px;animation:pulse 1.4s infinite}
+.wrap{max-width:1240px;margin:auto;padding:34px 28px 48px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:26px}
+.eyebrow{font-size:11px;letter-spacing:.2em;color:var(--teal);font-weight:700}
+.hero h1{font-size:clamp(26px,3.4vw,40px);letter-spacing:-.04em;margin:8px 0 6px;line-height:1.15}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.steps{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);white-space:nowrap}
+.step i{width:26px;height:26px;border-radius:50%;border:1.5px solid #2c3748;display:grid;place-content:center;font-style:normal;font-size:12px;font-weight:700}
+.step+.step:before{content:'';width:28px;height:1.5px;background:#2c3748;margin:0 10px}
+.step.now{color:var(--text)}.step.now i{border-color:var(--teal);color:var(--bg);background:var(--teal)}
+.step.done{color:var(--teal)}.step.done i{border-color:var(--teal);color:var(--teal)}.step.done+.step:before{background:var(--teal)}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:20px}
+.card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:20px}
+.stage{padding:26px 26px 22px;display:flex;flex-direction:column}
+.say{font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-.03em;min-height:1.3em}
+.sub{color:var(--muted);font-size:14px;min-height:1.6em;margin:6px 0 18px;line-height:1.6}
+.canvas{position:relative;background:#080d15;border:1px solid #1c2636;border-radius:14px;overflow:hidden;flex:1;min-height:300px}
+.canvas svg{display:block;width:100%;height:100%;position:absolute;inset:0}
+.canvas .lbl{position:absolute;left:14px;top:12px;font-size:11px;color:var(--dim);letter-spacing:.06em;z-index:1;background:#080d15cc;padding:1px 5px;border-radius:4px}
+.inset{position:absolute;right:12px;bottom:12px;width:150px;height:150px;background:#0b121d;border:1px solid #1f2a3b;border-radius:10px}
+.inset svg{position:absolute;inset:0}.inset .lbl{left:8px;top:6px;font-size:10px}
+.speed{position:absolute;right:14px;top:10px;font-size:11px;color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
+.sbar{position:relative;width:140px;height:5px;background:#1a2433;border-radius:3px;margin-top:5px}.sbar i{position:absolute;inset:0 auto 0 0;width:0;background:#4d6178;border-radius:3px}.sbar i.go{background:#ffb74d}
+.sbar em{position:absolute;top:-3px;width:1.5px;height:11px;background:#5d6b80}.sbar .m1{left:20%}.sbar .m2{left:40%}
+.legend{position:absolute;left:14px;bottom:12px;font-size:11px;color:var(--dim);display:flex;gap:14px}.legend b{font-weight:500}
+.legend .k{color:#91a1b6}.legend .a{color:var(--teal)}.legend .l{color:#ffb74d}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+button{border:1px solid #2f3b4e;background:#172030;color:var(--text);border-radius:12px;padding:12px 18px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+button:hover:not(:disabled){background:#1e2a3d;border-color:#3d4c63}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;padding:12px 24px}button.primary:hover:not(:disabled){background:#e4566c}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted);font-weight:500}button.ghost:hover:not(:disabled){color:var(--text);background:#141c28}
+button:disabled{opacity:.35;cursor:default}#doneBtn:disabled,#cancelBtn:disabled,#resetBtn:disabled{display:none}
+button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+kbd{font:inherit;font-size:11px;border:1px solid #3a4659;border-bottom-width:2px;border-radius:5px;padding:1px 5px;margin-left:6px;color:var(--muted)}
+.warn{color:#ffd18b;font-size:13px;min-height:1.3em;margin-top:12px}
+.vault{padding:22px;display:flex;flex-direction:column}
+.vault .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.vault .top span{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.verdict{font-size:11px;letter-spacing:.1em;font-weight:800;padding:4px 9px;border-radius:6px;background:#1a2331;color:var(--muted)}
+.door{min-height:210px;background:#080d15;border:1px solid #1f2a3b;border-radius:14px;display:grid;place-content:center;text-align:center;padding:18px;transition:background .3s,border-color .3s}
+.door .icon{font-size:46px;transition:transform .3s}.door strong{display:block;font-size:20px;margin:10px 0 4px;letter-spacing:-.02em}.door small{color:var(--muted);font-size:13px}
+.vault.open .door{border-color:#3fa891;background:var(--teal-bg)}.vault.open .verdict{background:#123a33;color:var(--teal)}
+.vault.denied .door{border-color:#8c4252;background:var(--red-bg)}.vault.denied .verdict{background:#3a1820;color:var(--red)}.vault.denied .icon{animation:shake .4s}
+.file{display:none;background:#eef3f6;color:#172434;border-radius:10px;padding:16px 18px;text-align:left;width:min(300px,100%);box-shadow:0 12px 30px #0006}
+.file .tag{font-size:10px;letter-spacing:.14em;color:#1b7a66;font-weight:800}.file b{display:block;font-size:17px;margin:6px 0 2px}.file p{color:#56677a;margin:4px 0;font-size:12px}
+.vault.open .icon,.vault.open .door strong,.vault.open .door small{display:none}.vault.open .file{display:block;animation:reveal .45s ease-out}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.check{padding:10px 12px;background:#0c121c;border:1px solid #1a2433;border-radius:10px;font-size:12px;color:var(--muted)}
+.check div{display:flex;justify-content:space-between}.check b{color:var(--text);font-variant-numeric:tabular-nums}
+.check .mini{height:4px;background:#1f2938;border-radius:3px;margin-top:7px;position:relative;overflow:hidden}.check .mini i{position:absolute;inset:0 auto 0 0;width:0;background:var(--teal);border-radius:3px;transition:width .4s}
+.check.over .mini i{background:var(--red)}.check.over b{color:var(--red)}
+.score{font-size:12px;color:var(--muted);margin-top:16px}.score b{color:var(--text);font-variant-numeric:tabular-nums}
+.track{height:8px;position:relative;background:#1f2938;border-radius:5px;margin-top:8px}.track i{height:100%;display:block;border-radius:5px;width:0;background:var(--teal);transition:width .4s}
+.track:after{content:'';position:absolute;left:50%;height:14px;width:2px;top:-3px;background:var(--gold);border-radius:1px}
+.hint{font-size:12px;color:var(--dim);line-height:1.6;margin:8px 0 0}
+details.log{margin-top:22px;padding:4px 22px}details.log summary{cursor:pointer;padding:14px 0;font-size:14px;color:#c2cfe0;font-weight:600}
+details.log .bar{margin:0 0 12px}
+label{font-size:13px;color:var(--muted);display:inline-flex;gap:8px;align-items:center}
+input[type=text]{background:#0b111a;border:1px solid #2c3748;color:var(--text);border-radius:9px;padding:9px 11px;font:inherit;font-size:13px;width:10em}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}td,th{padding:8px 6px;border-bottom:1px solid #1c2534;text-align:left}th{color:var(--dim);font-weight:500;font-size:12px}
+.empty td{color:var(--dim);text-align:center;padding:18px}
+@keyframes reveal{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px) rotate(-6deg)}75%{transform:translateX(6px) rotate(6deg)}}
+@keyframes pulse{50%{opacity:.35}}
+.grid>*,.hero>*{min-width:0}.steps{max-width:100%}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.hero{display:block}.steps{margin-top:18px;overflow-x:auto}header{flex-wrap:wrap;padding:12px 16px}.wrap{padding:22px 16px 40px}.inset{width:110px;height:110px}}
+@media(max-width:560px){.step{font-size:12px}.step+.step:before{width:14px;margin:0 6px}.bar button{flex:1 1 auto}.stage,.vault{padding:18px}.canvas{min-height:240px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<header><h1>🔐 Bat Ears gesture key <span>Unlock with a gesture sequence + your own rhythm · no camera · records stay in this browser</span></h1><span id="status" class="chip">Waiting</span></header>
-<main>
-<section>
-<div class="tabs"><a href="index.html">🎮 Game</a><a href="experiment-live.html">🧪 Free experiment mode</a><a class="sel" href="key.html">🔐 Gesture key</a><a href="tone.html">📢 Tone player</a></div>
-<div class="card" id="lockCard">
-  <div id="lockIcon">🔒</div>
-  <div id="result">Turn on the mic and enroll first</div>
-  <div id="detail"></div>
-  <div id="live" class="chips"></div>
-  <div class="meter"><div id="scoreBar"></div><div id="thrMark"></div></div>
-  <div id="scoreText" class="hint"></div>
-  <div class="parts">
-    <div>Rhythm<div class="pb"><div id="p_rhythm"></div></div></div>
-    <div>Speed<div class="pb"><div id="p_speed"></div></div></div>
-    <div>Length<div class="pb"><div id="p_duration"></div></div></div>
-    <div>Shape<div class="pb"><div id="p_shape"></div></div></div>
+<header><span class="brand">🦇 Bat Ears</span>
+<nav aria-label="Pages"><a href="index.html">Game</a><a href="hologram.html">Hologram</a><a class="sel" href="key.html" aria-current="page">Air password</a><a href="key-lab.html">Sequence key (lab)</a><a href="tone.html">Tone player</a></nav>
+<span id="status" class="chip">Off</span></header>
+<div class="wrap">
+  <div class="hero">
+    <div><div class="eyebrow">AIR PASSWORD · NO CAMERA</div><h1>Draw your password in the air</h1>
+      <p>The laptop's own speakers and mic follow your hand in 3D. Same sound engine as the hologram.</p></div>
+    <ol class="steps" aria-label="Steps">
+      <li class="step" id="st-start"><i>1</i>Start</li><li class="step" id="st-set1"><i>2</i>Set gesture</li>
+      <li class="step" id="st-set2"><i>3</i>Confirm</li><li class="step" id="st-unlock"><i>4</i>Unlock</li>
+    </ol>
   </div>
+  <div class="grid">
+    <section class="card stage">
+      <div class="say" id="say" role="status" aria-live="polite">Press ▶ Start</div>
+      <div class="sub" id="sub">Keep your hand about 20 cm above the keyboard, in front of the screen.</div>
+      <div class="canvas"><span class="lbl">Hand path from above (left-right · toward-away) · screen at the top</span><div class="speed" aria-hidden="true"><span id="spdTxt">Hand speed —</span><div class="sbar"><i id="spdBar"></i><em class="m1"></em><em class="m2"></em></div></div><svg id="vFront" viewBox="-1.6 -1 3.2 2" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+        <div class="legend"><b class="k">┄ Password</b><b class="a">━ Last gesture</b><b class="l">━ Your hand now</b></div>
+        <div class="inset"><span class="lbl">From the front (height)</span><svg id="vTop" viewBox="-1 -1 2 2" aria-hidden="true"></svg></div></div>
+      <div class="bar">
+        <button class="primary" id="startBtn">▶ Start</button>
+        <button id="tryBtn" disabled>🔓 Try to unlock<kbd>Space</kbd></button>
+        <button class="ghost" id="resetBtn" disabled>Set a new password</button>
+        <button id="doneBtn" disabled>✓ Done drawing</button>
+        <button class="ghost" id="cancelBtn" disabled>Stop</button>
+      </div>
+      <div class="warn" id="warn"></div>
+    </section>
+    <section class="card vault" id="vault" aria-live="polite">
+      <div class="top"><span>VAULT</span><span class="verdict" id="verdict">LOCKED</span></div>
+      <div class="door"><div class="icon" id="vIcon">🔒</div><strong id="vTitle">Locked</strong><small id="vSub">Set a password and it opens here</small>
+        <div class="file"><span class="tag">ACCESS GRANTED · DEMO FILE</span><b>Research Notes</b><p>PRIVATE WORKSPACE / 01</p><p>Opened with one gesture. No camera, just sound.</p></div></div>
+      <div class="checks">
+        <div class="check" data-c="shape"><div>Shape <b data-p="shape">—</b></div><div class="mini"><i></i></div></div>
+        <div class="check" data-c="size"><div>Size <b data-p="size">—</b></div><div class="mini"><i></i></div></div>
+        <div class="check" data-c="duration"><div>Duration <b data-p="duration">—</b></div><div class="mini"><i></i></div></div>
+        <div class="check" data-c="rhythm"><div>Speed rhythm <b data-p="rhythm">—</b></div><div class="mini"><i></i></div></div>
+      </div>
+      <div class="score">Difference <b id="score">—</b> / limit <b id="thr">—</b><div class="track"><i id="trackI"></i></div></div>
+      <p class="hint">Each item's limit is 1.0. Lower means closer to the password.</p>
+    </section>
+  </div>
+  <details class="card log"><summary>Attempt log · export</summary>
+    <div class="bar"><label>Who is trying <input type="text" id="who" maxlength="16" placeholder="Name (optional)"></label>
+      <button id="exportBtn">Export log (JSON)</button><button class="ghost" id="clearLogBtn">Clear log</button></div>
+    <table><thead><tr><th>Time</th><th>Who</th><th>Result</th><th>Score</th><th>Biggest difference</th></tr></thead><tbody id="logBody"></tbody></table>
+    <p class="hint" style="margin-bottom:16px">The password and the log stay in this browser. Tracking uses the hologram's engine (bat3d.js), its built-in laptop calibration and the same filter. The limits are first estimates; we will retune them from exported logs.</p>
+  </details>
 </div>
-<div class="card"><h3>📋 Attempt log</h3><div id="statsLine" class="hint"></div>
-<table><thead><tr><th>Time</th><th>Lock</th><th>Performer</th><th>Type</th><th>Order</th><th>Score / threshold</th><th>Result</th></tr></thead><tbody id="rows"></tbody></table></div>
-</section>
-<aside>
-<div class="card"><h3>🎤 Microphone</h3>
-  <button id="mic" class="big">▶ Turn on mic</button>
-  <p class="hint">After turning it on, keep your hand away and wait 1.5 s. Hand about 20 cm from the screen. To just see the screen without a mic, use the keyboard: ↑ push · ↓ pull · W wave.</p>
-  <p id="micInfo" class="hint"></p></div>
-<div class="card"><h3>📝 Enroll</h3>
-  <label>Name <input id="owner" type="text" maxlength="16" placeholder="seojin"></label>
-  <div id="tokens"></div>
-  <div id="pick" class="chips" style="justify-content:flex-start"></div>
-  <label>Reps <select id="reps"><option>5</option><option selected>6</option><option>7</option><option>8</option><option>10</option></select></label>
-  <button id="enroll">📝 Start enrollment</button>
-  <div id="dots"></div>
-  <p class="hint">Pick 3–6 gestures in an order and repeat them in your own rhythm. The first one is practice and isn’t recorded. The more even your repetitions, the tighter the lock.</p></div>
-<div class="card"><h3>🔓 Unlock</h3>
-  <label>Lock <select id="tpl"></select></label>
-  <label>Person trying now <input id="performer" type="text" maxlength="16" placeholder="leave blank if the same"></label>
-  <label>Attempt type <select id="attack"><option value="genuine">Owner</option><option value="zero-effort">Someone else · just trying</option><option value="imitation-watched">Someone else · copying after watching</option><option value="imitation-blind">Someone else · knows only the order</option></select></label>
-  <button id="unlock" class="big">🔓 Try (Space)</button>
-  <p class="hint">Repeat the order and rhythm exactly. It decides 0.8 s after the last gesture.</p>
-  <button id="delTpl" class="secondary">Delete this lock</button></div>
-<div class="card"><h3>📁 Evaluation log</h3>
-  <p class="hint">Each attempt records the lock owner, performer, owner/other, order match and style score (for FAR and FRR, python ml/auth_report.py).</p>
-  <button id="save">📁 Save to data folder</button> <label><input id="autoSave" type="checkbox" checked> Auto-save every attempt</label>
-  <p id="saveStatus" class="hint">Uses the data folder picked on the main page (Drive nhng/ml/data).</p></div>
-</aside></main>
-<script src="robust.js?v=20261115124422"></script><script src="swipe.js?v=20261115124422"></script><script src="wave.js?v=20261115124422"></script><script src="iq.js?v=20261115124422"></script><script src="dsp.js?v=20261115124422"></script><script src="circle.js?v=20261115124422"></script><script src="auth.js?v=20261115124422"></script>
+<script src="bat3d.js?v=20261115101840"></script><script src="airkey.js?v=20261115101840"></script>
 <script>
 (() => {
 'use strict';
 const $ = (id) => document.getElementById(id);
-const E = window.BatEars, A = window.BatAuth;
-// Gesture tokens. Any kind the engine emits as a 'gesture' event can be a token; a token with a flag only shows when
-// that flag is on (?circles=1 or localStorage 'batears-auth-circles' = '1'), and stereo tokens run the engine in
-// stereo. cw / ccw need a circle detector that emits 'cw' / 'ccw' gestures (bravo's iq.js trackBetween area sign);
-// they stay off until it is validated on a real recording.
-const TOKENS = [
-  { id: 'push', label: '⟶ Push', name: 'Push' },
-  { id: 'pull', label: '⟵ Pull', name: 'Pull' },
-  { id: 'wave', label: '〰 Wave', name: 'Wave' },
-  { id: 'cw', label: '🔃 Clockwise circle', name: 'Clockwise circle', flag: 'circles', stereo: true },
-  { id: 'ccw', label: '🔄 Counter-clockwise circle', name: 'Counter-clockwise circle', flag: 'circles', stereo: true },
-];
-const flags = { circles: new URLSearchParams(location.search).get('circles') === '1' || (() => { try { return localStorage.getItem('batears-auth-circles') === '1'; } catch (e) { return false; } })() };
-const ON = TOKENS.filter((t) => !t.flag || flags[t.flag]);
-const STEREO = ON.some((t) => t.stereo);
-const NAMES = Object.fromEntries(TOKENS.map((t) => [t.id, t.name])), ICON = Object.fromEntries(TOKENS.map((t) => [t.id, t.label]));
-const REASON = { ok: '✅ Unlocked', order: '❌ Wrong order', rhythm: '❌ Rhythm (gaps between gestures) doesn’t match', speed: '❌ Hand speed doesn’t match',
-  duration: '❌ Gesture length doesn’t match', shape: '❌ Movement shape doesn’t match', timeout: '❌ Time ran out', none: '❌ No gesture caught' };
-const ATTACK = { genuine: 'Owner', 'zero-effort': 'Other · just trying', 'imitation-watched': 'Other · watched', 'imitation-blind': 'Other · order only' };
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* full / private */ } } };
-const clean = (s) => String(s || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 16);
-const device = (() => { try { let id = localStorage.getItem('batears-dev'); if (!id) { id = Math.random().toString(36).slice(2, 6); localStorage.setItem('batears-dev', id); } return id; } catch (e) { return 'anon'; } })();
-let templates = store.get('batears-auth-templates', {});
-// every attempt also goes into this browser's log, so closing the tab or a refused folder permission loses nothing
-let log = store.get('batears-auth-log', []);
-const savedN = () => store.get('batears-auth-saved', 0);
-let pick = [], buf = [], cap = null, busy = false, dir = null;
-const session = { started_at: new Date().toISOString(), device, ua: navigator.userAgent, matcher: 'BatAuth v' + A.VERSION, weights: A.WEIGHTS, attempts: [] };
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage off: this session only */ } } };
+const K = window.AirKey;
+const KEY_ID = 'batears-airkey', LOG_ID = 'batears-airkey-log';
+let key = store.get(KEY_ID, null);
+if (key && key.v !== K.VERSION) key = null;
+let log = store.get(LOG_ID, []);
+const REASON = { shape: 'shape', size: 'size', duration: 'duration', rhythm: 'speed rhythm' };
 
-// ---- engine: frames (for each gesture's motion) and gestures
-let calibrating = false;
-E.on('frame', (f) => {
-  calibrating = !!f.calibrating;
-  if (f.calibrating || !f.tone) return;
-  const a = Math.max(f.dUp || 0, f.dDown || 0);
-  buf.push({ t: f.t, v: f.v, a });
-  while (buf.length && buf[0].t < f.t - 15000) buf.shift();
-  if (STEREO && cap) circleStep(f.t, a);
-});
-// ---- circle tokens (flag 'circles', stereo): judge each finished motion run with bravo's BatCircle
-const CIRCLE = { quietMs: 300, needTurns: 1.1, minSpanCm: 3 };
-let run = null;
-function circleStep(t, a) {
-  if (a > 12) { if (!run) run = { t0: t }; run.t1 = t; return; }
-  if (!run || t - run.t1 < CIRCLE.quietMs) return;
-  const r = run; run = null;
-  const tr = E.iqTrack ? E.iqTrack(r.t0 - 300, r.t1) : null;
-  if (!tr || tr.n < 50 || !window.BatCircle) return;
-  const c = window.BatCircle.analyze(tr.t, tr.u, tr.w);
-  if (!(Math.abs(c.turns) >= CIRCLE.needTurns && c.ru >= CIRCLE.minSpanCm && c.rw >= CIRCLE.minSpanCm)) return;
-  const k = cap;
-  // the gestures the engine fired during the circle are its own strokes
-  k.gestures = k.gestures.filter((x) => !(x.te >= r.t0 - 100 && x.te <= r.t1 + 300));
-  const s = Math.sign(c.turns);
-  if (k.want) {                                          // enrollment: every circle votes on which sign is clockwise
-    const exp = k.want[k.gestures.length];
-    if (exp === 'cw' || exp === 'ccw') { k.vote = (k.vote || 0) + (exp === 'cw' ? 1 : -1) * c.turns; k.sign = Math.sign(k.vote) || null; }
+// ---- hologram.html's smoothing (One-Euro, 1.5 Hz / beta 60) on the engine's continuous position
+const alpha = (cut, dt) => { const r = 2 * Math.PI * cut * dt; return r / (r + 1); };
+class OneEuro {
+  constructor(minCutoff, beta, dCutoff = 1) { Object.assign(this, { minCutoff, beta, dCutoff, x: null, dx: 0, raw: null }); }
+  reset() { this.x = null; this.dx = 0; this.raw = null; }
+  filter(v, dt, scale = 1) {
+    if (this.x == null) { this.x = v; this.raw = v; return v; }
+    const d = (v - this.raw) / dt;
+    this.raw = v;
+    this.dx += alpha(this.dCutoff, dt) * (d - this.dx);
+    const cutoff = this.minCutoff * scale + this.beta * Math.abs(this.dx);
+    this.x += alpha(cutoff, dt) * (v - this.x);
+    return this.x;
   }
-  if (k.sign == null) return;
-  k.gestures.push({ kind: s * k.sign > 0 ? 'cw' : 'ccw', te: r.t1, simulated: false, circle: { turns: +c.turns.toFixed(2), ru: +c.ru.toFixed(1), rw: +c.rw.toFixed(1) } });
-  k.gestures.sort((x, y) => x.te - y.te);
-  k.last = performance.now();
-  showLive(k.gestures.map((x) => x.kind));
 }
-E.on('gesture', (g) => {
-  if (!cap) return;
-  // a wave's first stroke often fires as a push/pull just before the wave (wave.js t0): drop it
-  if (g.kind === 'wave' && g.t0) cap.gestures = cap.gestures.filter((x) => !(x.te >= g.t0 - 50 && (x.kind === 'push' || x.kind === 'pull')));
-  cap.gestures.push({ kind: g.kind, te: g.t, simulated: !!g.simulated });
-  cap.last = g.t;
-  showLive(cap.gestures.map((x) => x.kind));
-});
-E.on('state', (s) => {
-  $('status').textContent = !s.running ? 'Waiting' : s.calibrating ? 'Measuring baseline · hand away' : busy ? 'Listening' : 'Ready';
-  $('status').className = 'chip ' + (!s.running ? '' : s.calibrating ? 'cal' : 'on');
-});
+const euro = [new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1), new OneEuro(1.5, 60, 1)];
+const vadd = (a, b) => a.map((v, i) => v + b[i]), vsub = (a, b) => a.map((v, i) => v - b[i]);
+const disp = { cont: null, off: [0, 0, 0], last: null, pos: null, levelDb: null, trail: [] };
 
-// one attempt: n gestures, then 0.8 s of quiet; or 3 s of quiet after the first gesture; or 12 s in all
-async function capture(n, opts = {}) {
-  // never listen while the engine is still calibrating (gestures can't fire then)
-  for (let i = 0; E.running && calibrating && i < 60; i++) { $('detail').textContent = 'Measuring baseline · keep your hand away for a moment'; await sleep(100); }
-  return listen(n, opts);
+// ---- capture: still -> move -> still again
+// speeds in m/s of the drawn (half-size) position. Rest jitter after the One-Euro filter is ~2 mm per 50 ms, and over a
+// 150 ms window it mostly cancels; a deliberate air stroke draws at 15-40 cm/s. First guesses: check the speed readout
+// start point: the hand slow (< STOP_SPEED) for 1 s and within 4 cm (axis-weighted; tolerates ~3 cm/s of drift). ZONE = hologram.html's taught zone around the hand spot (half-widths, m)
+const HOLD_MS = 1000, HOLD_R = 0.04, ZONE = [0.18, 0.12, 0.15];
+// hologram.html default 'draw height at its true size': the engine runs the 'half' size, height gets matched k / half k (1.77 / 1.33)
+const CAL_AMP = ((((window.Bat3D || {}).DEFAULT_CALIB || {}).galaxy || {}).amp || {}).modes;
+const Y_GAIN = CAL_AMP && CAL_AMP.matched && CAL_AMP.half ? CAL_AMP.matched.k[1] / CAL_AMP.half.k[1] : 1;
+const AXIS_W = K.AXIS;   // left-right and depth are noisier than height: they count less in speed and in the match
+const MAX_DRIFT = 0.02;  // m/s: drift seen while the hand was held still, removed from the stroke (hologram hides it with its spring)
+const STILL_AFTER = 600, MAX_REC = 5000, WAIT_MOVE = 10000, SPEED_WIN = 150, GO_SPEED = 0.12, STOP_SPEED = 0.06;
+const cap = { phase: 'off', purpose: null, t0: 0, pts: [], still: 0, lastMove: 0, anchor: null, holdAt: null, out: false };
+let engine = null, running = false, first = null, timer = 0, confirmFails = 0;
+
+function onFrame(f) {
+  if (!f || !f.raw) return;
+  const t = f.t != null ? f.t : performance.now(), dt = disp.last == null ? 0.01 : Math.max(0.002, Math.min(0.1, (t - disp.last) / 1000));
+  disp.last = t;
+  let cont = vadd(f.raw, disp.off);
+  if (f.reset && disp.cont) { disp.off = vsub(disp.cont, f.raw); cont = disp.cont.slice(); }
+  disp.cont = cont;
+  const p = cont.map((v, i) => euro[i].filter(i === 1 ? v * Y_GAIN : v, dt, 1));
+  disp.pos = p;
+  if (f.levelDb != null) disp.levelDb = 0.9 * (disp.levelDb ?? f.levelDb) + 0.1 * f.levelDb;
+  disp.trail.push({ t, p }); while (disp.trail.length && disp.trail[0].t < t - 2500) disp.trail.shift();
+  // hand speed from the drawn position: net displacement over 150 ms (rest jitter mostly cancels; the engine's own
+  // 'moving' flag fires on 4 mm of path change per 100 ms, which room noise alone can hold on)
+  let k = disp.trail.length - 1; while (k > 0 && disp.trail[k].t > t - SPEED_WIN) k--;
+  const back = disp.trail[k], span = (t - back.t) / 1000;
+  disp.speed = span > 0.05 ? Math.hypot(...vsub(p, back.p).map((v, i) => v * AXIS_W[i])) / span : 0;
+  disp.engMoving = !!f.moving;
+  step(t, p, disp.speed, dt * 1000);
 }
-function listen(n, { timeoutMs = 12000, idleMs = 3000, want = null, sign = null, vote = 0 } = {}) {
-  return new Promise((resolve) => {
-    run = null;
-    cap = { gestures: [], start: performance.now(), last: 0, want, sign, vote };
-    const tick = () => {
-      const c = cap, now = performance.now();
-      if (!c) return;
-      const done = c.gestures.length >= n && now - c.last > 800;
-      const idle = c.gestures.length && now - c.last > idleMs;
-      if (done || idle || now - c.start > timeoutMs) {
-        cap = null;
-        const r = finish(c, done ? 'done' : idle ? 'idle' : 'timeout');
-        r.sign = c.sign; r.vote = c.vote;
-        // the attempt's frames (ms from the start, v, echo dB) so a missed gesture can be replayed later
-        r.frames = buf.filter((f) => f.t >= c.start - 300 && f.t <= now).map((f) => [Math.round(f.t - c.start), +f.v.toFixed(2), +f.a.toFixed(1)]);
-        r.te = c.gestures.map((g) => Math.round(g.te - c.start));
-        resolve(r); return;
+
+function step(t, p, speed, dtMs) {
+  if (cap.phase === 'wait-still') {
+    // hold: slow AND still near where the hold began (slow drift does not count)
+    if (speed < STOP_SPEED && cap.holdAt && Math.hypot(...vsub(p, cap.holdAt).map((v, i) => v * AXIS_W[i])) < HOLD_R) cap.still += dtMs;
+    else { cap.still = 0; cap.holdAt = speed < STOP_SPEED ? p.slice() : null; cap.holdT = t; }
+    if (cap.still >= HOLD_MS) {
+      const span = Math.max(0.2, (t - cap.holdT) / 1000);
+      cap.drift = vsub(p, cap.holdAt).map((v) => Math.max(-MAX_DRIFT, Math.min(MAX_DRIFT, v / span)));
+      cap.phase = 'ready'; cap.t0 = t; cap.tA = t; cap.anchor = p.slice(); cap.out = false; cap.lo = cap.hi = null;
+      say('📍 Start point set · draw now', purposeText());
+    }
+    else if (t - cap.t0 > 3000) sub('Your hand still looks like it is moving. Hold still, and ask people nearby to pause too. (Hand speed needs to drop below ' + STOP_SPEED * 100 + ' cm/s)');
+  } else if (cap.phase === 'ready') {
+    if (speed > GO_SPEED) {
+      cap.phase = 'rec'; cap.t0 = t; cap.still = 0;
+      cap.pts = disp.trail.filter((s) => s.t >= t - SPEED_WIN).map((s) => ({ t: s.t, p: undrift(s.p, s.t) })); cap.lastMove = cap.pts.length;   // keep the start of the move
+      say('👀 Drawing…', 'When you are done, hold still or press ✓ Done drawing'); $('doneBtn').disabled = false;
+    } else if (t - cap.t0 > WAIT_MOVE) end({ error: 'none' });
+  } else if (cap.phase === 'rec') {
+    p = undrift(p, t);
+    cap.pts.push({ t, p });
+    // the hologram's zone is the size the sound map is good for: the whole drawing should fit in it (box follows the drawing)
+    cap.lo = cap.lo ? cap.lo.map((v, i) => Math.min(v, p[i])) : p.slice(); cap.hi = cap.hi ? cap.hi.map((v, i) => Math.max(v, p[i])) : p.slice();
+    const out = cap.hi.some((v, i) => v - cap.lo[i] > 2 * ZONE[i]);
+    if (out !== cap.out) { cap.out = out; sub(out ? '⚠️ Too big to read accurately. Keep it within 36 cm across, 24 cm high and 30 cm deep' : 'When you are done, hold still or press ✓ Done drawing'); }
+    if (speed >= STOP_SPEED) { cap.still = 0; cap.lastMove = cap.pts.length; } else cap.still += dtMs;
+    if (cap.still >= STILL_AFTER || t - cap.t0 > MAX_REC) end(null);
+  }
+}
+
+function undrift(p, t) { const d = cap.drift || [0, 0, 0], s = (t - (cap.tA || t)) / 1000; return p.map((v, i) => v - d[i] * s); }
+function begin(purpose) {
+  cap.phase = 'wait-still'; cap.purpose = purpose; cap.pts = []; cap.t0 = disp.last || 0; cap.still = 0; cap.holdAt = null; cap.anchor = null; cap.out = false; cap.drift = null; cap.holdT = 0;
+  stepUi(purpose);
+  say('✋ Hold your hand still for 1 second', 'About 20 cm above the keyboard, centred in front of the screen. When the ring fills, that spot is your start point');
+  $('cancelBtn').disabled = false; $('tryBtn').disabled = true; $('resetBtn').disabled = true;
+  if (purpose === 'unlock') setVault(null);
+}
+function purposeText() {
+  return cap.purpose === 'set1' ? 'Draw flat, as if on a table: left-right and toward-away, like a circle, a zigzag or a star (15-30 cm). Up-down motion is hard to hear'
+    : cap.purpose === 'set2' ? 'The same gesture again, at the same size and speed'
+    : 'Draw your password gesture';
+}
+function end(err) {
+  const purpose = cap.purpose, stroke = cap.pts.slice(0, Math.max(cap.lastMove, 1));
+  cap.phase = 'idle'; $('cancelBtn').disabled = true; $('doneBtn').disabled = true;
+  const F = err || K.features(stroke);
+  if (F.error) {
+    const why = F.error === 'none' ? 'No movement detected' : F.error === 'small' ? 'Too small. Draw it bigger' : 'Too short. Draw a little longer';
+    if (purpose === 'unlock') { say('😶 ' + why, 'Please try again'); ready(); return; }
+    say('😶 ' + why, 'Starting again in a moment'); later(() => begin(purpose), 1600); return;
+  }
+  F.raw = stroke.map((s) => [Math.round(s.t - stroke[0].t), ...s.p.map((v) => +v.toFixed(4))]);
+  drawResult(F);
+  if (purpose === 'set1') { first = F; stepUi('set2'); say('✓ Got it', 'Now do the same gesture once more'); later(() => begin('set2'), 1300); return; }
+  if (purpose === 'set2') {
+    const k = K.makeKey(first, F);
+    if (!k.ok) {
+      // keep the first stroke: redo only the confirmation; twice in a row different -> set it again from the start
+      confirmFails++;
+      const diff = `${REASON[Object.keys(k.selfParts).reduce((m, x) => (k.selfParts[x] > k.selfParts[m] ? x : m), 'shape')]} differs too much (${k.self.toFixed(2)}, limit ${K.CONFIRM_MAX})`;
+      if (confirmFails < 2) { say('✗ Different from the first one', `${diff} · follow the dashed line and try again`); later(() => begin('set2'), 2200); return; }
+      confirmFails = 0; first = null; drawResult(null);
+      say('✗ Different twice in a row', `${diff} · let\'s set it again from the start`); later(() => begin('set1'), 2500); return;
+    }
+    confirmFails = 0;
+    key = k; store.set(KEY_ID, key); first = null;
+    say('🔐 Password saved', `Difference between the two: ${k.self.toFixed(2)} · now try to unlock`);
+    stepUi('unlock'); drawResult(F); ready(); if (SIM) later(() => begin('unlock'), 1500); return;
+  }
+  const r = K.check(key, F);
+  setVault(r);
+  say(r.accepted ? '🔓 Unlocked' : '🔒 Still locked', r.accepted ? 'This matches your password gesture' : `The ${REASON[r.reason]} differs too much`);
+  const row = { t: new Date().toISOString(), who: $('who').value.trim() || '-', accepted: r.accepted, score: +r.score.toFixed(3), threshold: r.threshold,
+    reason: r.reason, parts: Object.fromEntries(Object.entries(r.parts).map(([k2, v]) => [k2, +v.toFixed(3)])), dur: +F.dur.toFixed(3), size: +F.size.toFixed(4), raw: F.raw };
+  log.push(row); store.set(LOG_ID, log); renderLog(); ready();
+  if (SIM) later(() => begin('unlock'), 2500);
+}
+function later(fn, ms) { clearTimeout(timer); timer = setTimeout(fn, ms); }
+function ready() { $('tryBtn').disabled = !key || !running; $('resetBtn').disabled = !running; }
+function cancel() { clearTimeout(timer); cap.phase = 'idle'; $('cancelBtn').disabled = true; $('doneBtn').disabled = true; say('Stopped', key ? 'Press 🔓 Try to unlock' : 'Press Set a new password'); ready(); }
+
+// ---- UI
+function say(a, b) { $('say').textContent = a; if (b != null) $('sub').textContent = b; }
+function sub(b) { $('sub').textContent = b; }
+function stepUi(now) {
+  const order = ['start', 'set1', 'set2', 'unlock'], i = order.indexOf(now);
+  order.forEach((s, j) => { $('st-' + s).className = 'step' + (j < i ? ' done' : j === i ? ' now' : ''); });
+}
+function setVault(r) {
+  const v = $('vault');
+  v.className = 'card vault' + (r ? (r.accepted ? ' open' : ' denied') : '');
+  $('vIcon').textContent = r && r.accepted ? '🔓' : '🔒';
+  $('vTitle').textContent = !r ? (cap.phase === 'idle' || cap.phase === 'off' ? 'Locked' : 'Listening…') : r.accepted ? 'ACCESS GRANTED' : 'ACCESS DENIED';
+  $('vSub').textContent = !r ? (key ? 'Waiting for your gesture' : 'Set a password and it opens here') : r.accepted ? 'The demo file is open' : `The ${REASON[r.reason]} is past the limit`;
+  $('verdict').textContent = !r ? (cap.phase === 'idle' || cap.phase === 'off' ? 'LOCKED' : 'LISTENING') : r.accepted ? 'OPEN' : 'DENIED';
+  document.querySelectorAll('[data-p]').forEach((b) => { b.textContent = r ? r.parts[b.dataset.p].toFixed(2) : '—'; });
+  document.querySelectorAll('[data-c]').forEach((c) => {
+    const v = r ? r.parts[c.dataset.c] : null;
+    c.className = 'check' + (v != null && v > 1 ? ' over' : '');
+    c.querySelector('i').style.width = v == null ? '0' : Math.min(100, 50 * v) + '%';
+  });
+  $('score').textContent = r ? r.score.toFixed(2) : '—'; $('thr').textContent = key ? key.threshold.toFixed(2) : '—';
+  $('trackI').style.width = r ? Math.min(100, 50 * r.score / r.threshold) + '%' : '0';
+  $('trackI').style.background = r && !r.accepted ? '#ff94a5' : '#72daca';
+}
+function renderLog() {
+  const rows = log.slice(-30).reverse().map((a) => {
+    const tr = document.createElement('tr');
+    [a.t.slice(11, 19), a.who, a.accepted ? '🔓 Open' : '🔒 Locked', `${a.score.toFixed(2)} / ${a.threshold.toFixed(2)}`, a.accepted ? '-' : REASON[a.reason] || a.reason]
+      .forEach((x) => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); });
+    return tr;
+  });
+  if (!rows.length) { const tr = document.createElement('tr'); tr.className = 'empty'; const td = document.createElement('td'); td.colSpan = 5; td.textContent = 'No attempts yet'; tr.appendChild(td); rows.push(tr); }
+  $('logBody').replaceChildren(...rows);
+}
+
+// ---- drawing: enrolled samples (dashed) and the latest stroke (solid), unit-size shapes; live: the last 2.5 s of the hand
+const NS = 'http://www.w3.org/2000/svg';
+let shown = null;
+function poly(svg, pts, style) { const e = document.createElementNS(NS, 'polyline'); e.setAttribute('points', pts.map((q) => q.join(',')).join(' ')); e.setAttribute('fill', 'none'); for (const k in style) e.setAttribute(k, style[k]); svg.appendChild(e); }
+function grid(svg, wide) {
+  svg.replaceChildren();
+  const w = wide ? 1.6 : 1, st = { stroke: '#141d2a', 'stroke-width': 0.006 };
+  for (let x = -w + 0.2; x < w; x += 0.2) poly(svg, [[x, -1], [x, 1]], st);
+  for (let y = -0.8; y < 1; y += 0.2) poly(svg, [[-w, y], [w, y]], st);
+}
+const FRONT = (q, s) => [q[0] * s, -q[1] * s], TOP = (q, s) => [q[0] * s, -q[2] * s];
+function dot(svg, p, r, fill) { const e = document.createElementNS(NS, 'circle'); e.setAttribute('cx', p[0]); e.setAttribute('cy', p[1]); e.setAttribute('r', r); e.setAttribute('fill', fill); svg.appendChild(e); }
+function drawShapes(live) {
+  for (const [id, proj, wide] of [['vFront', TOP, true], ['vTop', FRONT, false]]) {
+    const svg = $(id), lw = wide ? 1 : 1.6, ref = key ? key.samples : first ? [first] : [];
+    grid(svg, wide);
+    ref.forEach((s) => poly(svg, fromStart(s).map((q) => proj(q, 4)), { stroke: '#91a1b6', 'stroke-width': 0.018 * lw, 'stroke-dasharray': `${0.05 * lw} ${0.04 * lw}`, 'stroke-linejoin': 'round' }));
+    // the last stroke stays until the next one starts recording; the live hand is drawn over it
+    if (shown && cap.phase !== 'rec') poly(svg, fromStart(shown).map((q) => proj(q, 4)), { stroke: '#72daca', 'stroke-width': 0.03 * lw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    if (live && live.length > 1) {
+      // centred like the hologram: on the start point once it is set, on the hand itself while it is being held
+      const o = cap.anchor || disp.pos, S = 4, lim = wide ? 1.55 : 0.95;
+      const pts = live.map((s) => proj(vsub(s.p, o), S).map((v, i) => Math.max(-lim, Math.min(lim, v))));
+      if (cap.anchor) {
+        const zx = ZONE[0] * S, zy = (proj === FRONT ? ZONE[1] : ZONE[2]) * S;
+        const mid = cap.phase === 'rec' && cap.lo ? proj(vsub(cap.lo.map((v, i) => (v + cap.hi[i]) / 2), o), S) : [0, 0];
+        rect(svg, mid[0] - zx, mid[1] - zy, 2 * zx, 2 * zy, { stroke: cap.out ? '#ff8fa0' : '#2c3a4f', 'stroke-width': 0.012 * lw, 'stroke-dasharray': `${0.04 * lw} ${0.03 * lw}`, fill: 'none', rx: 0.04 });
+        ring(svg, [0, 0], 0.07 * lw, 1, '#72daca', 0.014 * lw); dot(svg, [0, 0], 0.018 * lw, '#72daca');
       }
-      setTimeout(tick, 100);
-    };
-    tick();
-  });
-}
-function finish(c, why) {
-  let prevEnd = -Infinity;
-  const gs = c.gestures.map((g, i, all) => {
-    const hi = i + 1 < all.length ? all[i + 1].te - 120 : Infinity;   // don't run into the next gesture
-    const seg = g.simulated ? null : A.segment(buf, g.te, { lo: prevEnd, hi });
-    if (seg) prevEnd = seg.t1;
-    return { kind: g.kind, te: g.te, seg, simulated: g.simulated };
-  });
-  return { why, gestures: gs, att: A.attemptFeatures(gs) };
-}
-
-// ---- UI helpers
-const seqText = (ks) => ks.map((k) => NAMES[k] || k).join(' → ');
-function showLive(kinds, expected) {
-  $('live').replaceChildren(...kinds.map((k, i) => {
-    const d = document.createElement('span');
-    d.className = 'chip2' + (expected ? (expected[i] === k ? ' ok' : ' bad') : '');
-    d.textContent = ICON[k] || k;
-    return d;
-  }));
-}
-function say(icon, result, detail) { $('lockIcon').textContent = icon; $('result').textContent = result; $('detail').textContent = detail || ''; }
-function meter(sc) {
-  const thr = sc && sc.threshold, s = sc && sc.score;
-  const scale = (thr || 2) * 2;                                // the threshold sits in the middle of the bar
-  $('thrMark').style.left = '50%';
-  $('scoreBar').style.width = s == null ? '0%' : Math.min(100, (100 * s) / scale) + '%';
-  $('scoreBar').style.background = sc && sc.accepted ? '#66bb6a' : '#ef5350';
-  $('scoreText').textContent = s == null ? '' : `Score ${s} (lower = more similar) · threshold ${thr}`;
-  for (const k of ['rhythm', 'speed', 'duration', 'shape']) {
-    const v = sc && sc.parts ? sc.parts[k] : null;
-    $('p_' + k).style.width = v == null ? '0%' : Math.min(100, v * 25) + '%';
+      const col = cap.phase === 'rec' ? (cap.out ? '#ff8fa0' : '#ffb74d') : '#3d4d63';
+      poly(svg, pts, { stroke: col, 'stroke-width': 0.03 * lw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+      const h = pts[pts.length - 1];
+      dot(svg, h, 0.045 * lw, cap.phase === 'rec' ? col : '#c9d4e3');
+      if (cap.phase === 'wait-still') { ring(svg, h, 0.11 * lw, 1, '#1f2a3b', 0.02 * lw); ring(svg, h, 0.11 * lw, Math.min(1, cap.still / HOLD_MS), '#72daca', 0.02 * lw); }
+    }
   }
 }
-function lock(v) { ['enroll', 'unlock', 'delTpl', 'owner', 'tpl', 'reps', 'back'].forEach((id) => { $(id).disabled = v; }); document.querySelectorAll('[data-g]').forEach((b) => { b.disabled = v; }); }
-function renderPick() {
-  $('pick').replaceChildren(...pick.map((k) => { const d = document.createElement('span'); d.className = 'chip2'; d.textContent = ICON[k]; return d; }));
+function drawResult(F) { shown = F; }
+// a stroke at its real (drawn) size with its start point at the centre, like the live hand; old keys without raw: unit shape
+const fromStart = (F) => (F.raw && F.raw.length ? F.raw.map((r) => [r[1] - F.raw[0][1], r[2] - F.raw[0][2], r[3] - F.raw[0][3]]) : F.shape.map((q) => q.map((v) => v * 0.1)));
+function rect(svg, x, y, w, h, style) { const e = document.createElementNS(NS, 'rect'); Object.entries({ x, y, width: w, height: h, ...style }).forEach(([k, v]) => e.setAttribute(k, v)); svg.appendChild(e); }
+function ring(svg, c, r, frac, color, w) {   // a circle filled clockwise from 12 o'clock to frac
+  const e = document.createElementNS(NS, 'circle'), L = 2 * Math.PI * r;
+  Object.entries({ cx: c[0], cy: c[1], r, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-dasharray': `${L * frac} ${L}`, transform: `rotate(-90 ${c[0]} ${c[1]})`, 'stroke-linecap': 'round' }).forEach(([k, v]) => e.setAttribute(k, v));
+  svg.appendChild(e);
 }
-function refreshTpl(sel) {
-  const names = Object.keys(templates);
-  $('tpl').replaceChildren(...names.map((n) => { const o = document.createElement('option'); o.value = n; o.textContent = `${n} (${templates[n].kinds.length} gestures)${templates[n].v !== A.VERSION ? ' · re-enroll needed' : ''}`; return o; }));
-  if (sel) $('tpl').value = sel;
-}
-function stats() {
-  const by = {};
-  for (const a of session.attempts) {
-    const o = by[a.owner] || (by[a.owner] = { g: 0, gOk: 0, i: 0, iOk: 0 });
-    if (a.genuine) { o.g++; if (a.accepted) o.gOk++; } else { o.i++; if (a.accepted) o.iOk++; }
+function loop() {
+  if (running) {
+    const live = cap.phase === 'rec' ? cap.pts : cap.phase === 'wait-still' || cap.phase === 'ready' ? disp.trail : null;
+    drawShapes(live);
+    const sp = disp.speed || 0;
+    $('spdTxt').textContent = `Hand speed ${(sp * 100).toFixed(0)} cm/s` + (cap.phase === 'wait-still' ? ` · hold ${(Math.min(1, cap.still / HOLD_MS) * 100).toFixed(0)}%` : cap.phase === 'ready' ? ' · waiting for you to start' : '');
+    $('spdBar').style.width = Math.min(100, sp / 0.3 * 100) + '%'; $('spdBar').className = sp > GO_SPEED ? 'go' : '';
+    $('warn').textContent = disp.levelDb != null && disp.levelDb < -6 ? `🔈 The tone is ${(-disp.levelDb).toFixed(0)} dB quieter than calibration → turn the laptop volume up (unplug earphones or Bluetooth speakers)` : '';
   }
-  $('statsLine').textContent = Object.entries(by).map(([n, o]) => `${n}: owner ${o.gOk}/${o.g} passed (FRR ${o.g ? Math.round(100 * (o.g - o.gOk) / o.g) : '–'}%) · others ${o.iOk}/${o.i} passed (FAR ${o.i ? Math.round(100 * o.iOk / o.i) : '–'}%)`).join('  |  ') || 'No attempts yet';
-}
-function addRow(a) {
-  const tr = document.createElement('tr');
-  [a.t.slice(11, 19), a.owner, a.performer, ATTACK[a.attack] || a.attack, a.seq_ok ? 'Correct' : 'Wrong', a.style_score == null ? '–' : `${a.style_score} / ${a.threshold}`, a.accepted ? '✅' : '❌ ' + (REASON[a.reason] || a.reason).replace('❌ ', '')]
-    .forEach((x) => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); });
-  $('rows').prepend(tr);
+  requestAnimationFrame(loop);
 }
 
-// ---- data folder: the one picked on the main page (IndexedDB 'batears' / kv / dataDir), else ask once
-const idbOpen = () => new Promise((res, rej) => { const r = indexedDB.open('batears', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-const idbGet = async (k) => { const db = await idbOpen(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); };
-const idbPut = async (k, v) => { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
-async function dataDir(ask) {
-  if (dir) return dir;
-  try { const h = await idbGet('dataDir'); if (h) { let q = await h.queryPermission({ mode: 'readwrite' }); if (q !== 'granted' && ask) q = await h.requestPermission({ mode: 'readwrite' }); if (q === 'granted') return (dir = h); } } catch (e) { /* none */ }
-  if (!ask || !window.showDirectoryPicker) return null;
-  try { const h = await window.showDirectoryPicker({ id: 'batears-data', mode: 'readwrite' }); idbPut('dataDir', h).catch(() => {}); return (dir = h); } catch (e) { return null; }
+// ---- engine: the hologram's Bat3D with its default options (laptop tones only, built-in calibration, 'half' size)
+function startErrMsg(e) {
+  const n = (e && e.name) || '', m = (e && e.message) || String(e);
+  if (n === 'NotAllowedError' || n === 'SecurityError' || /permission|denied/i.test(m)) return '🎙️ The microphone is blocked: allow it from the left of the address bar, then reload';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '🎙️ No microphone found: check that the built-in mic is on';
+  if (n === 'NotReadableError' || n === 'AbortError') return '🎙️ Another app is using the mic: close Zoom, Teams or other Bat Ears tabs and start again';
+  return '⚠️ Could not start: ' + m;
 }
-const csvOf = (rows) => {
-  const keys = ['t', 'owner', 'performer', 'attack', 'genuine', 'expected', 'got', 'seq_ok', 'style_score', 'threshold', 'accepted', 'reason', 'rhythm', 'speed', 'duration', 'shape', 'intervals', 'device', 'freq'];
-  const esc = (x) => { const s = Array.isArray(x) ? x.join(';') : String(x ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  return [keys.join(','), ...rows.map((r) => keys.map((k) => esc(k in r ? r[k] : (r.parts || {})[k])).join(','))].join('\n');
+// ?sim=1: a fake hand for checking the screen without a microphone, drawing on the table plane (rest 1.8 s, a circle, rest; every 4th one a zigzag; after saving it keeps trying to unlock)
+const SIM = /[?&]sim=1/.test(location.search);
+function makeSim() {
+  let id = 0, cb = null;
+  return {
+    on(n, f) { if (n === 'frame') cb = f; },
+    async start() {
+      const t0 = performance.now(); let still = 0, last = 0;
+      id = setInterval(() => {
+        const t = performance.now() - t0, c = Math.floor(t / 3800), u = (t % 3800 - 1800) / 1500, mv = u > 0 && u < 1;
+        const zig = c % 4 === 3, q = !mv ? (u <= 0 ? [0, 0] : zig ? [0.14, 0] : [0, 0]) : zig ? [0.14 * u, 0.05 * Math.sin(6 * Math.PI * u)] : [0.07 * Math.sin(2 * Math.PI * u), 0.07 - 0.07 * Math.cos(2 * Math.PI * u)];
+        still = mv ? 0 : still + (t - last); last = t;
+        cb && cb({ t, raw: [q[0] + (Math.random() - 0.5) * 0.003, 0.12 + 0.02 * Math.sin(Math.PI * Math.max(0, Math.min(1, u))), q[1]], moving: mv, still, levelDb: 0 });
+      }, 10);
+    },
+    stop() { clearInterval(id); },
+  };
+}
+async function start() {
+  if (running) return;
+  if (!window.Bat3D) { say('⚠️ Could not load the sound engine (bat3d.js)', ''); return; }
+  $('startBtn').disabled = true;
+  euro.forEach((f) => f.reset()); Object.assign(disp, { cont: null, off: [0, 0, 0], last: null, trail: [] });
+  engine = SIM ? makeSim() : window.Bat3D.create({ geom: 'galaxy', phones: [], calib: null, model: 'learned', autoReset: false, amp: 'half' });
+  engine.on('frame', onFrame);
+  engine.on('status', (t) => { if (t) $('status').textContent = t; });
+  try { await engine.start({ mode: 'mic', volume: 1.2 }); } catch (e) { say(startErrMsg(e), ''); engine = null; $('startBtn').disabled = false; return; }
+  running = true;
+  $('status').textContent = 'Listening'; $('status').className = 'chip on';
+  $('startBtn').textContent = '■ Turn off'; $('startBtn').classList.remove('primary'); $('startBtn').disabled = false;
+  if (key) { stepUi('unlock'); say('🔐 A password is saved', 'Press 🔓 Try to unlock or Space'); setVault(null); ready(); }
+  else later(() => begin('set1'), 600);
+}
+function stopAll() {
+  clearTimeout(timer); cap.phase = 'off';
+  if (engine) { try { engine.stop(); } catch (e) { /* ignore */ } }
+  engine = null; running = false;
+  $('status').textContent = 'Off'; $('status').className = 'chip';
+  $('startBtn').textContent = '▶ Start'; $('startBtn').classList.add('primary');
+  ['tryBtn', 'resetBtn', 'cancelBtn', 'doneBtn'].forEach((id) => { $(id).disabled = true; });
+  say('Turned off', 'Press ▶ Start to listen again'); stepUi('start');
+}
+
+$('startBtn').onclick = () => (running ? stopAll() : start());
+$('tryBtn').onclick = (e) => { e.currentTarget.blur(); if (key && running && cap.phase === 'idle') begin('unlock'); };
+$('cancelBtn').onclick = cancel;
+$('doneBtn').onclick = () => { if (cap.phase === 'rec') { cap.lastMove = cap.pts.length; end(null); } };
+$('resetBtn').onclick = () => { if (key && !confirm('Delete the current password and set a new one?')) return; key = null; first = null; shown = null; store.set(KEY_ID, null); setVault(null); begin('set1'); };
+$('exportBtn').onclick = () => {
+  const data = { page: 'key.html', airkey: K.VERSION, tol: K.TOL, weights: K.W, axis: K.AXIS, yGain: Y_GAIN, ua: navigator.userAgent, exported: new Date().toISOString(),
+    key: key && { created: key.created, self: key.self, selfParts: key.selfParts, threshold: key.threshold, samples: key.samples.map((s) => ({ dur: s.dur, size: s.size, raw: s.raw })) }, attempts: log };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  a.download = `batears_airkey_${new Date().toISOString().replace(/\D/g, '').slice(0, 14)}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
-async function save(ask) {
-  if (!log.length) { $('saveStatus').textContent = 'No attempts to save yet'; return false; }
-  const base = 'batears_auth_' + device;   // one file per browser with its whole log (re-written each time)
-  const tpls = Object.fromEntries(Object.entries(templates).map(([n, t]) => [n, { kinds: t.kinds, n: t.n, threshold: t.threshold, loo: t.loo, created: t.created, device: t.device }]));
-  const files = [[base + '.json', JSON.stringify({ session, templates: tpls, attempts: log }, null, 1)], [base + '.csv', csvOf(log)]];
-  const d = await dataDir(ask);
-  if (!d) {
-    if (ask) { for (const [n, data] of files) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = n; a.click(); } $('saveStatus').textContent = 'No folder, so it downloaded. Please move it to ml/data'; return true; }
-    $('saveStatus').textContent = `⚠️ Not saved to the folder (no permission). Press '📁 Save to data folder' · ${log.length - savedN()} attempts are still in this browser`;
-    return false;
-  }
-  try {
-    for (const [n, data] of files) { const h = await d.getFileHandle(n, { create: true }), w = await h.createWritable(); await w.write(data); await w.close(); }
-    store.set('batears-auth-saved', log.length);
-    $('saveStatus').textContent = `✅ Saved: ${base}.json (${log.length} attempts)`;
-    return true;
-  } catch (e) { $('saveStatus').textContent = '⚠️ Save failed: ' + e.message + ' · press the 📁 button again'; return false; }
-}
-
-// ---- flows
-async function micOn() {
-  if (E.running) return;
-  $('mic').disabled = true;
-  const ok = await E.start({ freq: 20000, raw: true, stereo: STEREO, sequence: true }); // re-arm between strokes
-  $('mic').disabled = false;
-  if (!ok) { say('🎤', 'Can’t turn on the microphone', 'Allow the microphone left of the address bar'); return; }
-  $('mic').textContent = '🎤 Microphone on';
-  const i = E.info || {};
-  $('micInfo').textContent = `${i.f0 || E.freq}Hz · mic ${i.micRate || '?'}Hz · ${i.mic || ''}`;
-  say(templates[$('tpl').value] ? '🔒' : '📝', templates[$('tpl').value] ? 'Press 🔓 Try and perform your gesture password' : 'Pick a gesture order on the right and enroll');
-}
-async function enroll() {
-  if (busy) return;
-  const owner = clean($('owner').value);
-  if (!owner) { alert('Please enter a name (letters and digits)'); return; }
-  if (pick.length < 3 || pick.length > 6) { alert('Pick 3–6 gestures'); return; }
-  const N = Number($('reps').value) || 6, want = pick.slice();
-  busy = true; lock(true); meter(null);
-  // one practice repetition first (kept out of the template: real first reps ran far from the rest, bravo)
-  $('dots').replaceChildren(...Array.from({ length: N + 1 }, (_, i) => { const d = document.createElement('span'); if (!i) { d.title = 'Practice'; d.style.outline = '1px dashed #9aa3b2'; } return d; }));
-  const reps = [];
-  let practice = null, circleSign = null, circleVote = 0;
-  for (let tries = 0; reps.length < N && tries < (N + 1) * 3; tries++) {
-    say('📝', practice ? `${reps.length + 1}/${N}` : 'Practice 1 (not recorded)', seqText(want) + ' · go now (each gesture quick, with a short pause between)');
-    showLive([]);
-    const r = await capture(want.length, { want, sign: circleSign, vote: circleVote });
-    circleVote = r.vote || 0;
-    circleSign = Math.sign(circleVote) || null;
-    const k = r.att.kinds, ok = k.length === want.length && k.every((x, i) => x === want[i]);
-    showLive(k, want);
-    if (ok && !practice) { practice = r.att; $('dots').children[0].className = 'on'; say('✓', 'Practice done · now for real', `Gaps ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}s`); }
-    else if (ok) { reps.push(r.att); $('dots').children[reps.length].className = 'on'; say('✓', `${reps.length}/${N} recorded`, `Gaps ${r.att.intervals.map((x) => x.toFixed(2)).join(' · ')}s`); }
-    else say('↺', 'Please do it again', (k.length ? 'Caught order: ' + seqText(k) : 'No gesture caught') + ' · wanted order: ' + seqText(want));
-    await sleep(1100);
-  }
-  if (reps.length < 3) { say('❌', 'Couldn’t enroll', 'Fewer than 3 repetitions were caught. Please do it again'); busy = false; lock(false); return; }
-  const tpl = A.buildTemplate(reps);
-  Object.assign(tpl, { owner, device, freq: E.freq, circleSign, circleVote: +circleVote.toFixed(2), stereo: STEREO, practice });
-  templates[owner] = tpl;
-  store.set('batears-auth-templates', templates);
-  refreshTpl(owner);
-  say('✅', `${owner} enrolled`, `Gestures ${tpl.kinds.length} · ${tpl.n} reps · threshold score ${tpl.threshold} (spread between reps ${tpl.loo.join(' ')})`);
-  busy = false; lock(false);
-}
-async function unlock() {
-  if (busy) return;
-  const owner = $('tpl').value, tpl = templates[owner];
-  if (!tpl) { alert('Please enroll first'); return; }
-  if (tpl.v !== A.VERSION) { say('📝', 'The scoring method changed, so you need to re-enroll', `'${owner}': please re-enroll in the same order (rhythm is now measured at each gesture’s center)`); return; }
-  if (!E.running && !confirm('The microphone is off. Try with keyboard simulation (↑ ↓ W) only?')) return;
-  if ($('autoSave').checked) await dataDir(true); // ask for the folder now, while the click still counts as a gesture
-  busy = true; lock(true); meter(null);
-  say('👂', 'Perform your gesture password', `Gestures ${tpl.kinds.length} · each gesture quick, with a very short pause between`);
-  showLive([]);
-  const r = await capture(tpl.kinds.length, { sign: tpl.circleSign == null ? null : tpl.circleSign });
-  const sc = r.gestures.length ? A.score(tpl, r.att)
-    : { orderOk: false, accepted: false, reason: r.why === 'timeout' ? 'timeout' : 'none', score: null, threshold: tpl.threshold, parts: null };
-  showLive(r.att.kinds, tpl.kinds);
-  meter(sc);
-  say(sc.accepted ? '🔓' : '🔒', REASON[sc.reason] || sc.reason, sc.orderOk ? '' : `Caught order: ${seqText(r.att.kinds) || 'none'}`);
-  const attack = $('attack').value, performer = clean($('performer').value) || (attack === 'genuine' ? owner : 'other');
-  const a = { t: new Date().toISOString(), owner, performer, attack, genuine: attack === 'genuine', expected: tpl.kinds, got: r.att.kinds,
-    seq_ok: sc.orderOk, style_score: sc.score, threshold: sc.threshold, accepted: sc.accepted, reason: sc.reason, parts: sc.parts,
-    intervals: r.att.intervals.map((x) => +x.toFixed(3)), g: r.att.g.map((g) => g && { peak: +g.peak.toFixed(3), dur: Math.round(g.dur), tPeak: +g.tPeak.toFixed(3) }),
-    end: r.why, expected_n: tpl.kinds.length, detected_n: r.gestures.length, frames: r.frames, te_ms: r.te,
-    simulated: r.gestures.some((x) => x.simulated), noMotion: r.gestures.filter((x) => !x.seg && !x.simulated).length, device, freq: E.freq };
-  session.attempts.push(a);
-  log.push(a);
-  store.set('batears-auth-log', log);
-  addRow(a); stats();
-  if ($('autoSave').checked) save(false);
-  busy = false; lock(false);
-}
-
-// ---- wiring
-$('tokens').replaceChildren(...ON.map((t) => { const b = document.createElement('button'); b.className = 'secondary'; b.dataset.g = t.id; b.textContent = t.label; return b; }),
-  Object.assign(document.createElement('button'), { className: 'secondary', id: 'back', textContent: '⌫' }));
-document.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { if (pick.length < 6) pick.push(b.dataset.g); renderPick(); b.blur(); }; });
-$('back').onclick = () => { pick.pop(); renderPick(); };
-$('mic').onclick = micOn;
-$('enroll').onclick = (e) => { e.target.blur(); enroll(); };
-$('unlock').onclick = (e) => { e.target.blur(); unlock(); };
-$('save').onclick = () => save(true);
-$('delTpl').onclick = () => { const n = $('tpl').value; if (n && confirm(`'${n}' Delete the lock?`)) { delete templates[n]; store.set('batears-auth-templates', templates); refreshTpl(); } };
+$('clearLogBtn').onclick = () => { if (log.length && confirm(`Delete ${log.length} logged attempts?`)) { log = []; store.set(LOG_ID, log); renderLog(); } };
 window.addEventListener('keydown', (e) => {
   const tag = (e.target && e.target.tagName) || '';
-  if (e.code === 'Space' && !['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(tag)) { e.preventDefault(); unlock(); }
+  if (e.code === 'Space' && !['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT'].includes(tag)) { e.preventDefault(); $('tryBtn').click(); }
 });
-refreshTpl(); renderPick(); stats();
-if (log.length > savedN()) $('saveStatus').textContent = `⚠️ Unsaved attempts: ${log.length - savedN()} in this browser → '📁 Save to data folder'`;
-window.BatKey = { session, get templates() { return templates; } }; // for tests
+stepUi('start'); setVault(null); renderLog(); drawShapes(null); requestAnimationFrame(loop);
+if (SIM) { $('status').textContent = 'Simulated hand (screen test)'; setTimeout(start, 300); }
 })();
-</script></body></html>
+</script>
+</body></html>
