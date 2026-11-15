@@ -18,6 +18,9 @@
  *   info(): { freqs, phone, cal, learned, calName, amp ('half' default | 'matched' | 'mse'), err {rms, motion, corr, size} | null, sv [3], gain [3], swapLR }
  *   opts.amp: size scale after the learned map ('half': ~no error cost, height drawn 0.69 of true instead of 0.47;
  *     'matched': true size, +7-17 % error; 'mse': the raw least-squares map)
+ *   opts.model: 'gated' (default, bravo 11:45: the linear map's gains set every 10 ms by a small
+ *     net from the last 0.5 s of path change and gate activity; webcam-trained on teach + hologram compare sittings;
+ *     falls back to 'learned' when the calibration carries no gated model) | 'learned' (v15 linear map) | 'physics'. info().model says which runs.
  *   Node / tests: Bat3D.create(...).feed(workletMessage) runs the same per-batch code without audio.
  */
 (function (root, factory) {
@@ -115,7 +118,7 @@ registerProcessor('bat-iq6', BatIQ6);
   };
   const H0 = [0, 0.12, 0.0];
   // built-in Galaxy Book calibration (laptop only): learned on 8 webcam-taught sittings; error = leave-one-sitting-out
-  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (8 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.707955,0.600407,-0.385781,-0.680277,0.000195],[0.101656,0.128168,0.14253,0.125858,0.001],[-0.163739,-0.281395,-0.309395,-0.410128,0.000068]]},"all":null},"errors":{"learned, laptop only":{"rms":[3.74,2.42,4.18],"motion":[5.48,2.95,5.81],"corr":[0.73,0.57,0.7]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, Seojin, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652, 20261115_082736, 20261115_090503, 20261115_092315","amp":{"method":"leave-one-sitting-out over 8 sittings, scale estimated without the held-out sitting","corr":[0.73,0.57,0.7],"motion":[5.48,2.95,5.81],"modes":{"mse":{"k":[1,1,1],"rms":[3.74,2.42,4.18],"size":[0.68,0.57,0.69]},"half":{"k":[1.217,1.33,1.201],"rms":[3.76,2.48,4.26],"size":[0.83,0.75,0.83]},"matched":{"k":[1.481,1.77,1.442],"rms":[4.04,2.74,4.56],"size":[1.01,1,1]}}}} };
+  const DEFAULT_CALIB = { galaxy: {"v":1,"session":"default (8 sittings, leave-one-out)","winMs":250,"nearM":0.45,"cam":{"mirror":false,"tilt":0,"hfov":78},"lagMs":0,"mics":[[0.025,0.19,0.1],[-0.025,0.19,0.1]],"paths":[{"key":"18k","hz":18000,"ch":0,"pll":false,"pos":[-0.3221,-0.0389,-0.0986],"gain":0.18,"r2":0.592},{"key":"18k","hz":18000,"ch":1,"pll":false,"pos":[-0.2247,-0.0824,-0.0623],"gain":0.178,"r2":0.657},{"key":"19.5k","hz":19500,"ch":0,"pll":false,"pos":[0.1865,-0.0093,0.0172],"gain":0.215,"r2":0.683},{"key":"19.5k","hz":19500,"ch":1,"pll":false,"pos":[0.3623,0.1147,-0.0174],"gain":0.226,"r2":0.761}],"learned":{"laptop":{"idx":[0,1,2,3],"W":[[0.707955,0.600407,-0.385781,-0.680277,0.000195],[0.101656,0.128168,0.14253,0.125858,0.001],[-0.163739,-0.281395,-0.309395,-0.410128,0.000068]]},"all":null},"errors":{"learned, laptop only":{"rms":[3.74,2.42,4.18],"motion":[5.48,2.95,5.81],"corr":[0.73,0.57,0.7]}},"truthFloorCm":[0.2,0.09,0.15],"note":"Galaxy Book 61f5, Seojin, hand 25-45 cm from the webcam; error = leave-one-sitting-out over 20261115_035336, 20261115_040340, 20261115_040721, 20261115_043301, 20261115_044652, 20261115_082736, 20261115_090503, 20261115_092315","amp":{"method":"leave-one-sitting-out over 8 sittings, scale estimated without the held-out sitting","corr":[0.73,0.57,0.7],"motion":[5.48,2.95,5.81],"modes":{"mse":{"k":[1,1,1],"rms":[3.74,2.42,4.18],"size":[0.68,0.57,0.69]},"half":{"k":[1.217,1.33,1.201],"rms":[3.76,2.48,4.26],"size":[0.83,0.75,0.83]},"matched":{"k":[1.481,1.77,1.442],"rms":[4.04,2.74,4.56],"size":[1.01,1,1]}}},"gated":{"kind":"gated-v1","ticksMs":10,"ctx":"dD 250 ms (4), dD 250-500 ms (4), gated share 250 ms (4)","sittings":["035336","040340","040721","043301","044652","082736","090503","092315","110640c","111016c","111911c","112252c","112658c"],"amp":{"method":"corr / rms: leave-one-sitting-out over 13 sittings (8 teach + 5 hologram compare, engine-equivalent 10 ms ticks); size / k: in-sample (k slightly conservative)","corr":[0.78,0.6,0.7],"motion":[5.27,3.59,5.77],"modes":{"mse":{"k":[1,1,1],"rms":[3.31,2.77,4.13],"size":[0.81,0.69,0.71]},"half":{"k":[1.111,1.207,1.185],"rms":[3.35,2.82,4.2],"size":[0.9,0.83,0.84]},"matched":{"k":[1.234,1.457,1.404],"rms":[3.47,3.02,4.46],"size":[1,1,1]}}},"loso":{"all":{"ridge":[0.746,0.573,0.703],"gated":[0.782,0.603,0.703]},"compare":{"ridge":[0.81,0.583,0.736],"gated":[0.804,0.636,0.739]},"betterSittings":"11/13"},"W0":[[0.68748,0.541524,-0.343766,-0.674127],[0.115075,0.151035,0.135127,0.177029],[-0.117277,-0.226187,-0.346431,-0.378828]],"Sg":0.324491,"mu":[-0.00641501,-0.00616621,-0.00575098,-0.00620227,-0.00967944,-0.00969375,-0.00960631,-0.0103624,0.744447,0.749104,0.720879,0.737546],"sd":[0.0373735,0.0384048,0.0388313,0.0403669,0.0380066,0.0394395,0.038944,0.0407696,0.184911,0.183441,0.203841,0.195999],"H":8,"W1":[0.247866,0.554991,0.531509,0.822482,-0.492482,-0.0869633,-0.205203,-0.332563,-0.0366244,-0.0977166,-0.284394,0.00702831,0.15145,0.256114,0.681345,0.152683,0.167252,0.453633,-0.130318,-0.423736,0.118114,-0.184741,0.28915,0.156942,0.440241,0.390961,-0.477078,-0.414644,-0.111248,0.0304922,0.207969,-0.233302,-0.0395858,-0.466641,0.277659,0.495953,-0.477315,-0.0948929,0.74109,0.444048,0.136577,0.33249,0.209629,0.399267,-0.657853,0.54556,0.325497,0.283973,-0.152907,0.261811,0.38721,0.395826,-0.0141032,-0.159619,-0.718947,-0.569683,0.274536,0.18168,-0.279513,-0.119558,0.345107,0.595609,0.073203,-0.25088,-0.0331236,0.179765,-0.301964,-0.310077,-0.281553,0.0966768,-0.154575,0.159031,0.0140926,-0.331272,0.0117021,0.269928,-0.407156,0.417889,0.065142,0.0307554,-0.243429,-0.191049,-0.495514,-0.744227,0.742008,0.409791,0.440011,-0.129939,0.667277,-0.0275177,-0.323991,-0.313616,0.409742,-0.0690899,0.2673,-0.296248],"b1":[-1.72137,-1.17387,0.508891,0.824891,-0.231915,0.676093,0.344018,-0.0875237],"W2":[-1.04171,0.0321342,0.0717133,0.0162511,-0.182187,0.850633,0.808377,-0.236833,-0.777726,-0.146431,0.354716,-0.326411,-0.315666,0.293199,-0.013218,-0.0451345,0.320836,0.101271,0.165026,0.164081,-0.475345,0.295846,-0.392439,0.204724,0.60938,0.00866068,0.2052,0.0514251,0.0172593,0.341786,-0.378707,0.407537,0.446201,-0.584816,0.766012,0.6005,0.0704912,-0.39017,0.137547,-0.0588314,0.4555,-0.72181,0.570596,0.00851985,0.00808464,-0.603771,0.405738,0.546327,-0.155189,-0.587614,0.0393382,0.404303,0.296686,0.290549,-0.077906,0.477779,-0.300143,-0.521284,0.204982,0.35198,0.14478,0.0416662,0.494535,0.444035,-0.233314,-0.378533,0.60383,0.17894,0.313269,0.0931395,0.0960495,0.233258,-0.0147175,-0.226153,0.228211,0.344379,0.089694,-0.490421,0.0751517,0.0924848,-0.0340986,0.0908473,-0.0516218,0.415621,0.125228,-0.111022,-0.0207254,0.0960605,0.0926505,-0.0063004,0.0800386,-0.0788893,-0.125957,-0.242187,-0.28004,-0.205593],"b2":[-0.785571,-0.611528,0.222032,0.00149897,-0.235826,0.0448718,-0.561081,-0.389513,-0.388611,-0.174079,-0.114985,0.0720954]}} };
   // tone level the built-in calibration was learned at (worklet carrier amplitude per laptop stream, median of the teach
   // sittings, tones at 0.6 per channel). A quieter tone -> fewer phase steps pass the gate -> the map under-predicts motion.
   const REF_AMP = { galaxy: [0.0089, 0.0183, 0.0056, 0.0101] };
@@ -146,7 +149,7 @@ registerProcessor('bat-iq6', BatIQ6);
   const phonePos = (x, h, zf) => [Number(x) / 100, Number(h) / 100 - 0.015, 0.10 - Number(zf) / 100];
 
   function create(opts = {}) {
-    const o = { geom: 'galaxy', paths: 'avg', model: 'learned', useDefault: true, calib: null, flipDir: false, stillMode: 'origin', autoReset: true, actOn: 0.004, amp: 'half', ...opts };
+    const o = { geom: 'galaxy', paths: 'avg', model: 'gated', useDefault: true, calib: null, flipDir: false, stillMode: 'origin', autoReset: true, actOn: 0.004, amp: 'half', ...opts };
     if (o.calibName && CALIBS[o.calibName]) { const C = CALIBS[o.calibName]; o.calib = C.calib; if (!opts.phones) o.phones = C.phones; }
     let wavMode = false;
     let cfg = null, solver = null, calibInUse = null;
@@ -172,7 +175,7 @@ registerProcessor('bat-iq6', BatIQ6);
       const K = Ai.map((r) => J.map((_, n) => r.reduce((s, v, j) => s + v * J[n][j], 0)));
       const sv = eig3(JtJ).val.map((v) => Math.sqrt(Math.max(0, v)));
       const gain = [0, 1, 2].map((i) => Math.sqrt(Math.max(0, [0, 1, 2].reduce((s, j) => s + Ai[i][j] * [0, 1, 2].reduce((q, k) => q + JtJ[j][k] * Ai[i][k], 0), 0))));
-      const L = cal && cfg.model === 'learned' ? (phone ? cal.learned.all : cal.learned.laptop) : null;
+      const L = cal && (cfg.model === 'learned' || cfg.model === 'gated') ? (phone ? cal.learned.all : cal.learned.laptop) : null;   // 'gated' falls back to this
       calibInUse = cal;
       const meas = useAvg ? (D) => Array.from({ length: T }, (_, t) => (D[2 * t] + D[2 * t + 1]) / 2) : (D) => D.slice(0, 2 * T);
       // size scale: a least-squares map draws motion at (correlation) x its true size; 'half' = sqrt correction (almost no
@@ -182,7 +185,12 @@ registerProcessor('bat-iq6', BatIQ6);
         : (D) => { const m = meas(D); return H0.map((h, i) => h + K[i].reduce((s, v, n) => s + v * m[n], 0)); };
       const errKey = cal ? Object.keys(cal.errors).find((k) => k.startsWith(L ? 'learned' : 'physics') && (phone ? /phone/.test(k) : /laptop only/.test(k))) : null;
       const errA = L && ampMode ? { rms: cal.amp.modes[ampMode].rms, motion: cal.amp.motion, corr: cal.amp.corr, size: cal.amp.modes[ampMode].size, amp: ampMode } : null;
-      solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L, err: errA || (errKey ? cal.errors[errKey] : null), errName: errKey, solve, calName: cal ? cal.session : null, amp: L ? ampMode || 'mse' : null };
+      // context-gated map (bravo 11:45, model 'gated'): every 10 ms dPos = k .* G(ctx) . dD, G = W0 + Sg * net(ctx), ctx from the
+      // last 0.5 s of path change and gate activity; laptop only. Falls back to the linear map when the calibration has none.
+      const GM = cal && !phone && o.model === 'gated' && cal.gated && cal.gated.kind === 'gated-v1' ? cal.gated : null;
+      const gAmpMode = GM && GM.amp && GM.amp.modes[o.amp || 'half'] ? (o.amp || 'half') : null, gK = gAmpMode ? GM.amp.modes[gAmpMode].k : [1, 1, 1];
+      const errG = GM && gAmpMode ? { rms: GM.amp.modes[gAmpMode].rms, motion: GM.amp.motion, corr: GM.amp.corr, size: GM.amp.modes[gAmpMode].size, amp: gAmpMode } : null;
+      solver = { G, T, K, sv, gain, phone, cal: !!cal, learned: !!L || !!GM, err: errG || errA || (errKey ? cal.errors[errKey] : null), errName: errKey, solve, calName: cal ? cal.session : null, amp: GM ? gAmpMode || 'mse' : L ? ampMode || 'mse' : null, gated: GM, gK, model: GM ? 'gated' : L ? 'learned' : 'physics' };
     }
     // ---------------------------------------------------------------- Kalman (constant velocity, per axis)
     const kf = { p: H0.slice(), v: [0, 0, 0], P: [0, 1, 2].map(() => [[1e-4, 0], [0, 1e-2]]) };
@@ -233,11 +241,26 @@ registerProcessor('bat-iq6', BatIQ6);
     const live = { D: [], q: [], act: [], amp: [], off: [], identical: 1, mono: false, t: 0, still: 0, lastAct: [] };
     const trail = [];
     let sub10 = 0, lastCircle = null, circleEnd = -1e9, offset = [0, 0, 0];
+    // gated model state: integrated position P (m, relative to H0), per-path gated-step counts, 10 ms snapshots (51 = 0.5 s)
+    const gs = { P: [0, 0, 0], A: [0, 0, 0, 0], hD: [], hA: [] };
+    function gReset() { gs.P = [0, 0, 0]; gs.hD = []; gs.hA = []; }
+    function gTick() {   // one 10 ms tick of the gated map; returns H0 + P
+      const M = solver.gated, D = live.D.slice(0, 4), Ac = gs.A.slice();
+      gs.hD.push(D); gs.hA.push(Ac); if (gs.hD.length > 51) { gs.hD.shift(); gs.hA.shift(); }
+      const n = gs.hD.length, at = (h, back) => h[Math.max(0, n - 1 - back)];
+      const prev = at(gs.hD, 1), d25 = at(gs.hD, 25), d50 = at(gs.hD, 50), a25 = at(gs.hA, 25);
+      const dD = D.map((v, p) => v - prev[p]);
+      const c = [...D.map((v, p) => v - d25[p]), ...d25.map((v, p) => v - d50[p]), ...Ac.map((v, p) => (v - a25[p]) / 250)].map((v, i) => (v - M.mu[i]) / M.sd[i]);
+      const hh = []; for (let h = 0; h < M.H; h++) { let q = M.b1[h]; for (let i = 0; i < 12; i++) q += M.W1[h * 12 + i] * c[i]; hh.push(Math.tanh(q)); }
+      for (let a = 0; a < 3; a++) { let q = 0; for (let p = 0; p < 4; p++) { let g = M.b2[a * 4 + p]; for (let h = 0; h < M.H; h++) g += M.W2[(a * 4 + p) * M.H + h] * hh[h]; q += (M.W0[a][p] + M.Sg * g) * dD[p]; } gs.P[a] += solver.gK[a] * q; }
+      return H0.map((h, i) => h + gs.P[i]);
+    }
     function resetLive() {
       const S = 2 * solver.T;
       Object.assign(live, { D: new Array(S).fill(0), q: new Array(S).fill(0), act: new Array(S).fill(0), amp: new Array(S).fill(0), off: [], still: 0, lastAct: [] });
+      gs.A = new Array(S).fill(0); gReset();
     }
-    function originReset() { live.D = live.D.map(() => 0); offset = [0, 0, 0]; kfReset(); trail.length = 0; circleEnd = live.t; }
+    function originReset() { live.D = live.D.map(() => 0); offset = [0, 0, 0]; kfReset(); trail.length = 0; circleEnd = live.t; gReset(); }
     function feed(m) {
       const S = m.steps.length;
       if (live.D.length !== S) return;
@@ -246,11 +269,11 @@ registerProcessor('bat-iq6', BatIQ6);
       const n = m.steps[0].length;
       for (let k = 0; k < n; k++) {
         let a = 0;
-        for (let i = 0; i < S; i++) { const s = m.steps[i][k]; live.D[i] += s; a += Math.abs(s); }
+        for (let i = 0; i < S; i++) { const s = m.steps[i][k]; live.D[i] += s; a += Math.abs(s); if (s !== 0) gs.A[i]++; }
         live.t += 1; live.lastAct.push(a / S); if (live.lastAct.length > 800) live.lastAct.shift();
         if (++sub10 < 10) continue;
         sub10 = 0;
-        const z = solver.solve(live.D).map((v, i) => v + offset[i]); kfStep(z, 0.01);
+        const z = (solver.gated ? gTick() : solver.solve(live.D)).map((v, i) => v + offset[i]); kfStep(z, 0.01);
         const t = live.t, p = kf.p.slice(); trail.push({ t, p }); while (trail.length && trail[0].t < t - 3500) trail.shift();
         const n100 = Math.min(100, live.lastAct.length); let a100 = 0; for (let j = live.lastAct.length - n100; j < live.lastAct.length; j++) a100 += live.lastAct[j];
         const moving = a100 > o.actOn;
@@ -258,8 +281,8 @@ registerProcessor('bat-iq6', BatIQ6);
         let rebased = false;
         if (live.still === 1000 && o.autoReset !== false) {
           if (o.stillMode === 'rebase') {   // keep the position: zero the path sums, carry the current solve as an offset
-            offset = z.map((v, i) => v - H0[i]); live.D = live.D.map(() => 0); kf.v = [0, 0, 0];
-          } else { live.D = live.D.map(() => 0); offset = [0, 0, 0]; kfReset(); trail.length = 0; }   // held still 1 s: origin again
+            offset = z.map((v, i) => v - H0[i]); live.D = live.D.map(() => 0); kf.v = [0, 0, 0]; gReset();
+          } else { live.D = live.D.map(() => 0); offset = [0, 0, 0]; kfReset(); trail.length = 0; gReset(); }   // held still 1 s: origin again
           rebased = true;
         }
         let circle = null;
@@ -323,7 +346,7 @@ registerProcessor('bat-iq6', BatIQ6);
       setCalib(c) { o.calib = c; if (c) o.model = 'learned'; buildSolver(); resetLive(); },
       setOptions(x) { Object.assign(o, x); if (x.calibName && CALIBS[x.calibName]) { o.calib = CALIBS[x.calibName].calib; if (!x.phones) o.phones = CALIBS[x.calibName].phones; } buildSolver(); resetLive(); },
       setVolume(v) { if (gainNode) gainNode.gain.value = v; },
-      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, amp: solver.amp, calibName: o.calibName || null, calibScope: o.calibName && CALIBS[o.calibName] ? CALIBS[o.calibName].scope : null, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
+      info: () => ({ freqs: cfg.freqs.slice(), pll: cfg.pll.slice(), T: solver.T, amp: solver.amp, model: solver.model, calibName: o.calibName || null, calibScope: o.calibName && CALIBS[o.calibName] ? CALIBS[o.calibName].scope : null, phone: solver.phone, phones: cfg.phones.map((p) => ({ id: p.id, hz: p.hz, P: p.P })), cal: solver.cal, learned: solver.learned, calName: solver.calName, err: solver.err, sv: solver.sv, gain: solver.gain, swapLR: cfg.swap, H0,
         G: { SL: solver.G.SL, SR: solver.G.SR, M: solver.G.M }, calib: calibInUse ? { paths: calibInUse.paths.map((p) => ({ key: p.key, hz: p.hz, ch: p.ch, pos: p.pos, gain: p.gain })), mics: calibInUse.mics, cam: calibInUse.cam, lagMs: calibInUse.lagMs, truthFloorCm: calibInUse.truthFloorCm } : null }),
       onFrame(fn) { o.onFrame = fn; }, onCircle(fn) { o.onCircle = fn; }, onStatus(fn) { o.onStatus = fn; },
       on(name, fn) { if (name === 'frame') o.onFrame = fn; else if (name === 'circle') o.onCircle = fn; else if (name === 'status') o.onStatus = fn; },
