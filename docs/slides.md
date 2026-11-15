@@ -1,10 +1,10 @@
 # Slide outline (6 slides)
 
-A fuller draft with numbers, the video script and the 1-minute pitch is in [pitch.md](pitch.md).
+The video script and the live order are in [demo-script.md](demo-script.md); the 1-minute pitch in [pitch.md](pitch.md).
 
-1. **Title:** Bat Ears 🦇 "Your laptop hears your hands." A photo of a taped-over webcam, plus the team names.
-2. **Problem:** touchless control needs cameras (privacy, darkness) or special sensors. Every laptop already has a speaker and a mic.
-3. **How it works:** a diagram of speaker → 20 kHz tone → hand → echo → mic. Doppler: toward = higher pitch, away = lower, Δf = 2vf₀/c (0.5 m/s ≈ 58 Hz at 20 kHz). Runs in the browser, and the browser's voice filters are turned off.
-4. **Live demo:** Force Push, plus the live spectrum.
-5. **Results:** push/pull 81% (268 of 332 prompts, 17 sessions, Windows and MacBooks, 20–60 cm), about 0.6 false triggers per minute while typing or idle (`python ml/report.py`). Rule-based detection beat the learned classifier (66% leave-one-session-out). Left/right: 15/20 within a session but 7/20 on a new one, so it's experimental. [TBD: 10 cm and more people]
-6. **What's next:** left/right swipes from the echo's phase and the second mic, the in-browser classifier, real-world uses (kitchen, sterile rooms, accessibility), and phones. Close with "No camera. No extra hardware. Just sound."
+1. **Title:** Bat Ears 🦇 "Your laptop hears where your hand is, in 3D." A photo of a taped-over webcam next to the hologram hand, plus the team names.
+2. **Problem:** hand tracking needs a camera (privacy, darkness) or a special sensor. Every laptop already has speakers and a mic.
+3. **How it works:** two speakers play 18 / 19.5 kHz → the hand → the mic. Each echo path's length is followed from its phase (LLAP-style, in an AudioWorklet). A 2½-minute webcam session (MediaPipe) teaches a map from path changes to 3D movement; then the camera is off. Everything runs in the browser.
+4. **Live demo:** `hologram.html`, the holographic hand following the real one, camera taped over. Fallback: Force Push.
+5. **Results (honest):** on sittings the model never saw (5 sittings, leave-one-sitting-out, laptop speakers only, hand 25-45 cm from the webcam), the error of the hand's 250 ms movement is left-right 4.4 / toward-away 4.5 / up-down 3.1 cm RMS, against movements of 7.0 / 6.3 / 3.4 cm (correlation 0.78 / 0.72 / 0.47): height is weak. One person, one laptop so far. Gestures: push/pull 81% (268 of 332 prompts, 17 sessions, Windows and MacBooks, 20–60 cm), about 0.6 false triggers per minute.
+6. **What's next:** a phone above the hand for height, more people and laptops, absolute position. Close with "Trained with a camera, runs without one."

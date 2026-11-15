@@ -1,70 +1,74 @@
 # Bat Ears: Devpost draft
 
-> Fill in the `[TBD]` parts from the experiments (`experiments/`) and the classifier results (`ml/`). Don't claim numbers we haven't measured.
+> Numbers are measured ones only. Main story: 3D hand tracking from sound (`web/hologram.html`, `web/3d.html`), taught by the webcam (`web/teach.html`). Supporting: push / pull / wave (Force Push), the gesture key, the left/right experiment. `[TBD]` = not measured yet; don't fill it from memory.
 
-**Tagline:** Your laptop hears your hands, like a bat. Touchless gestures with no camera and no extra hardware.
+**Tagline:** Your laptop hears where your hand is, in 3D. Trained with a camera, runs without one.
 
 ## Inspiration
-Bats find their way in total darkness by listening to echoes. We wondered whether an ordinary laptop could do the same with our hands. Touchless control usually means a camera, which raises privacy concerns and fails in the dark, or a special sensor nobody owns. Every laptop already has a speaker and a microphone.
+Bats find their way in the dark by listening to echoes. We wondered whether an ordinary laptop could do the same with our hands. Touchless control usually means a camera, which raises privacy concerns and fails in the dark, or a special sensor nobody owns. Every laptop already has speakers and a microphone.
 
 ## What it does
-Bat Ears turns the laptop's own speaker and microphone into a gesture sensor:
-- The speaker plays a steady ~20 kHz tone, which most people can't hear.
-- When your hand moves toward the screen, its echo comes back slightly higher in pitch. When it moves away, the echo comes back lower. This is the Doppler effect.
-- Bat Ears reads that shift about 60 times per second and recognizes a **push**, a **pull** and a **wave**, along with how fast your hand moved.
-- An experimental stereo mode plays a different tone on each speaker to try for **left and right swipes**. A 90-second check tells you honestly whether your laptop can do it. Ours can't yet, so the demo sticks to push, pull and wave.
-- We built **Force Push** on top of it: push your palm to blast incoming meteors, pull to grab stars, and wave for a shockwave. The webcam can stay taped over the whole time.
-- A guided 2-minute **data collection** mode prompts you ("Push!") and labels everything automatically. We used it to measure accuracy and train a classifier.
+Bat Ears turns a stock laptop into a camera-free 3D hand tracker, in a web page:
+- The laptop's left and right speakers each play their own inaudible tone (18 and 19.5 kHz). The laptop mic hears the echoes off your hand.
+- From those echoes it follows your hand left-right, toward-away and up-down, and **`hologram.html`** draws a holographic hand that moves with yours. The webcam can stay taped over.
+- **Trained with a camera, runs without one.** In one guided session of about 2½ minutes (`teach.html`), the webcam watches your hand with MediaPipe and teaches the audio tracker where your hand really is. Only landmark numbers are kept, never video or images. After that, tracking uses sound alone.
+- **Measured, honestly.** We recorded 5 teach sittings and tested each one with a model trained on the other four:
+  - we predict how far the hand moves in every 250 ms from sound and compare with the webcam;
+  - RMS error: **left-right 4.4 cm, toward-away 4.5 cm, up-down 3.1 cm**, while the movements themselves were 7.0 / 6.3 / 3.4 cm RMS (correlation 0.78 / 0.72 / 0.47);
+  - left-right and depth follow the hand well; height is still weak with the laptop speakers alone;
+  - this is one person on one laptop (a Galaxy Book), hand 25-45 cm from the webcam. Other people and laptops: `[TBD]`.
+- Optional phones add sources: a phone opens `tone.html` and plays its own tone (17 kHz; iPhones can't play above about 20 kHz). With a phone held above the hand, height should improve: `[TBD, being measured]`.
+- On top of tracking: **push, pull and wave** gestures (the **Force Push** game), a **gesture key** (your sequence in your own rhythm), and an experimental left/right check.
+- No install, no server. The audio is analysed on the device and never sent anywhere.
 
-Everything runs inside the browser on the device. Nothing to install and no server; the audio is analysed on the device and never sent anywhere. Only the data-collection mode, which you start yourself, saves anything, and only to a folder you pick.
-
-Try it: https://ys06146.github.io/nhng/web/ (Chrome on a laptop, built-in speaker and mic)
+Try it (Chrome on a laptop, built-in speakers and mic):
+- 🦇 hologram: https://ys06146.github.io/nhng/web/hologram.html
+- 🧪 3D engineering view: https://ys06146.github.io/nhng/web/3d.html
+- 📷 teach session: https://ys06146.github.io/nhng/web/teach.html · 📢 phone tone: https://ys06146.github.io/nhng/web/tone.html
+- 🎮 Force Push and the gesture pages: https://ys06146.github.io/nhng/web/
 
 ## Prior work, and what's new here
-The idea of hearing gestures through Doppler-shifted ultrasound isn't ours. Microsoft Research's **SoundWave** (CHI 2012) showed it on laptops, and **FingerIO** (CHI 2016) used active sonar on phones to track fingers. Some laptops also ship ultrasound **presence** detection (Elliptic Labs). Those were native research prototypes or built-in vendor features. Bat Ears is, to our knowledge, a **zero-install web page** that does it with any laptop's stock speaker and mic: open a link and wave your hand. We also handle the problems a browser adds, such as voice-processing filters that erase ultrasound and microphones that run at too low a sample rate.
+Hearing hands with ultrasound isn't new. **SoundWave** (CHI 2012) read Doppler gestures on laptops; **FingerIO** (CHI 2016) used active sonar on phones; **LLAP** (MobiCom 2016) tracked fingers from the carrier phase, the basis of our path tracking; **CAT** (MobiCom 2016) and **MilliSonic** (CHI 2019) tracked devices with several speakers; **Strata** (MobiSys 2017), **RTrack** (MobiCom 2019), **FM-Track** (SenSys 2020), **ReflecTrack** (UIST 2021) and **Beyond-Voice** (2023) pushed device-free and 3D tracking. They report millimetre-level results with native code, research hardware or mic arrays.
+What's new for us: **a web page on a stock laptop** (optional ordinary phones), **no install and no server**, and **the camera as a teacher only**: a short webcam session gives 3D labels for training, then the camera is off. We report centimetre-level movement errors with height still weak, and that is the trade-off for zero setup.
 
 ## How we built it
-- **Web Audio API:** an `OscillatorNode` plays the tone, and an `AnalyserNode` takes an 8192-point FFT of the mic (≈5.9 Hz per bin at 48 kHz).
-- **Raw microphone:** we turn off echo cancellation, noise suppression and auto gain. We found that Chrome's voice processing erases the 20 kHz band; the level dropped from −32 dB to −179 dB in our test.
-- **Doppler math:** Δf = 2·v·f₀ / c, so a hand moving at 0.5 m/s shifts a 20 kHz echo by about 58 Hz. We measure the echo energy 25–300 Hz above and below the carrier against a baseline calibrated in the first 1.5 s. A push shows up as energy above the carrier, a pull as energy below.
-- **Detection:** adaptive noise floors (median/MAD) for each side of the carrier, then each motion burst is judged by the direction of its **largest** hand speed. An impulse veto drops bursts that coincide with claps or loud sounds, which lift the far noise band too. A burst that runs too long is body motion, not a gesture. A weak, slow burst right after other motion (typing, shifting in the chair) is ignored. A wave is four or more fast, alternating strokes within about a second. Every rule is mirrored in Python so we can replay real recordings and score a change against every session in seconds.
-- **Another device in the room:** a second laptop running Bat Ears (or any ultrasonic beacon) spoils detection on both. The page looks for narrow peaks between 15 and 23 kHz that aren't its own tones and warns you.
-- **Left/right swipes (stereo):** each speaker plays its own tone (18 kHz left, 19.5 kHz right). A sideways hand changes its distance to the two speakers in opposite ways, but only by about a fifth of its speed, so a single frame can't tell left from right. We judge the whole burst instead: the sideways speed integrated over the motion, the net change in depth, and whether the hand moved both toward and away. Each tone also reads a small speed even when nothing moves, because the noise floor around it is lopsided, so we subtract each tone's resting speed first. The cues still change from one sitting to the next, so a 2-minute guided check (6 swipes each way, 5 pushes and 5 pulls) learns them on the spot, with push/pull as a class of its own. Left/right switches on only if leave-one-out scoring with the live rule shows it works and pushes aren't mistaken for swipes.
-- **Classifier:** a learned classifier (softmax regression[, random forest]) uses features from each motion segment: duration, asymmetry, velocity sign changes, and the energy profile in 12 sub-bands.
-- **Data tools:** an in-page recorder with live labels exports CSV, and a pure-Python pipeline does segmentation, feature extraction and leave-one-session-out evaluation.
-- **Testing without a room full of noise:** we generate synthetic microphone input (Doppler-shifted echoes of one or two carriers, extra tones for the interference warning) and run the app in headless Chrome to check every gesture end to end.
-- **Guided collection:** a person drawn from behind shows each gesture in time with a 3-2-1 countdown, every prompt is scored live (✅/❌), and a session saves its CSV plus a JSON of conditions (distance, noise, device, mic, frame rate, detector settings) automatically.
-- **Game:** HTML Canvas with no dependencies.
+- **One tone per source, one mic.** Each source gets its own carrier: 18 / 19.5 kHz on the laptop's left and right speakers (a Web Audio `ChannelMergerNode`), 17 / 18.75 kHz on phones. The mic is opened raw: we turn off echo cancellation, noise suppression and auto gain, because Chrome's voice processing erases ultrasound (−32 dB → −179 dB in our test).
+- **Phase ranging in an AudioWorklet.** Each carrier is mixed down to I/Q, low-pass filtered (250 Hz) and decimated to about 1 kHz. The static part (direct sound and room reflections) is removed and the phase is unwrapped into path-length steps, as LLAP does: about 1.8 cm of path per turn at 19 kHz. Phone tones run on their own clocks, so a phase-locked loop on the direct phone-to-mic sound cancels their drift.
+- **From path changes to 3D.** Each speaker → hand → mic path is one constraint, and two laptop speakers can't pin down a 3D point by geometry alone. A **linear (ridge) map**, trained against the webcam, turns the path changes of all streams into the hand's movement over 250 ms windows; a geometric least-squares solver is the fallback.
+- **The webcam teacher (`teach.html`).** MediaPipe HandLandmarker (tasks-vision, in the browser) gives 21 landmarks per frame, plus world landmarks in metres, on the same `performance.now()` clock as the raw stereo WAV. A guided 2½-minute session (still, left-right, up-down, toward-away, flat and upright circles both ways, push, pull, wave, free motion) covers the space. Offline, the landmarks are placed in the laptop's frame (PnP with the webcam's field of view, fitted per session) and the map is fitted.
+- **Size correction.** A least-squares map draws each movement at about (correlation × true size), so the weak axis looked shrunken: height at 47 %. A square-root correction draws 85 / 86 / 69 % of true size (left-right / depth / height) at almost the same error; a "true size" mode draws ~100 % for 7-17 % more error.
+- **The hologram (`hologram.html`).** Sound gives movement, not absolute position, so the hand is re-centred by a slow spring (4 s while moving, 2 s when still) and smoothed by a **One Euro filter** (Casiez et al., CHI 2012). three.js draws the hand, with UnrealBloom glow, a trail and an error ellipsoid of the honest RMS per axis. A replay mode overlays the webcam truth (a green hand) on a recorded session.
+- **Honest evaluation:** leave-one-sitting-out across 5 sittings for 3D, leave-one-session-out across 17 sessions for gestures. Every live rule is mirrored offline so we can replay all recordings after each change.
+- **Testing:** synthetic microphone input and a synthetic hand video run through headless Chrome; recorded sessions are replayed against the camera labels.
 
 ## Challenges we ran into
-- **Disappearing ultrasound:** Chrome's built-in voice processing removed the 20 kHz tone entirely until we disabled all three filters.
-- **Microphone formats:** one webcam microphone ran at 16 kHz, so anything above 8 kHz simply didn't exist. We added a sample-rate check and a band check that measures which frequencies each speaker and mic pair can carry.
-- **People don't move the way you'd expect:** our first real recording showed that people wind up before a pull (the hand drifts forward first) and swing back after a push. A detector that trusts whichever direction crosses its threshold first caught only 3 of 20 prompted gestures. We switched to judging each motion burst by the direction of its **largest** hand speed, and the same recording went to 17 of 20 (85%). Across later sessions, slow pushes (0.6–1.0 m/s) were the main miss, so the prompt now says "fast out, slow back".
-- **Telling gestures from everything else:** typing, leaning and people walking by also create Doppler shifts. A classifier trained on our labelled recordings recognizes 76% of these "other" motions (leave-one-session-out).
-- **Too quiet, not too loud:** in a very quiet room the far noise band sat 80 dB under the tone, so a fast hand's own spill "raised the noise" by 6 dB and our clap veto blocked real gestures: one session scored 0 of 20. Now the veto only counts when the far band comes within 50 dB of the tone. Replaying the same recording gives 15 of 20.
-- **Two laptops, one room:** while we collected data on two laptops at once, one session dropped to 1 of 20, and every gesture lifted the far band by 15–33 dB. We believe the second laptop's tones were the cause, so the page now warns when it hears someone else's ultrasound.
-- **Left/right is physics, not tuning:** the obvious rule (compare the two tones' Doppler shifts frame by frame) scored at chance on our main laptop (7 of 14), because a sideways hand barely changes its distance to either speaker. Laptop audio effects (Dolby, "spatial sound") can also mix the two channels. We moved to whole-burst cues plus a per-laptop check that says plainly when a laptop can't do left/right. A second session on the same laptop showed how hard it is: within one session the cues got 15 of 20 swipes right, but the model learned in the first session got only 7 of 20 in the second (35%). One cue even flipped sign between sessions, and 9 of 20 pushes and pulls looked like right swipes. So left/right stays an experimental tab, and the demo uses push, pull and wave.
-- **A loud room:** we worried that a hackathon crowd would drown the tone. On the same MacBook, a room 43 dB louder in the speech band (300–4000 Hz) than our quiet sessions raised the noise next to our tones by less than 1 dB. At 60 cm two noisy sessions got 14 and 19 of 20 prompts (33 of 40) with none reversed and one false trigger while typing; the same person and laptop at the same distance in the quiet room got 17 of 20. Talking and music live far below 18 kHz; claps are what the impulse veto is for.
+- **Phones can't play ultrasound high enough.** Our first phone tones (20.5 / 21.5 kHz) simply weren't in the recordings: iPhone speakers stop around 20 kHz. We moved them to 17 and 18.75 kHz, between and below the laptop's tones.
+- **A quiet tone draws a small hand.** The hologram first played its tones 7.6 dB quieter than the teach sessions. Fewer phase steps passed the noise gate, and the map drew every movement too small. Matching the teach volume fixed it; the page now warns when the tone arrives more than 6 dB under the teach level.
+- **The weak axis looks frozen.** Height has little information with two speakers side by side, and a least-squares map shrinks what it isn't sure about. The size correction makes it visible without hiding the error.
+- **A stray tone in the room.** For hours every recording had a strong 20 kHz tone: an old Bat Ears tab still running. The pages now list the ultrasonic peaks they hear and name that case.
+- **Disappearing ultrasound, again.** Chrome's voice processing removed the tone until we disabled all three filters.
+- **People don't move the way you'd expect:** they wind up before a pull and swing back after a push. Judging each motion burst by its **largest** speed instead of its first threshold crossing took a detector from 3 of 20 to 17 of 20.
+- **Left/right is physics, not tuning:** a sideways hand barely changes its distance to either speaker. Within a session our cues got 15 of 20 swipes, but only 7 of 20 on the next session, so left/right stays an experiment. Phase tracking in 3D is our answer to it.
 
 ## Accomplishments that we're proud of
-- Touchless gestures from a stock laptop, entirely in a web page, with no camera.
-- Push/pull from real recordings: 268 of 332 prompted gestures (81%) across 17 sessions at 20–60 cm, recorded on a Windows laptop and on teammates' MacBooks, or 269 of 352 (76%) if we also count the session spoiled by a second laptop. That's about 0.6 false triggers per minute while typing or idle, and only 12 of the 332 were read the wrong way round (`python ml/report.py`). A MacBook Air got 19 of 20 at 55 cm and 86 of 100 over five sessions at 60 cm. [TBD: 10 cm.]
-- An honest classifier result: a 5-class learned model reached 66% leave-one-session-out. It is best at rejecting non-gestures, but the rule-based burst detector is better at push vs pull, so the live app keeps the rules.
+- Camera-free 3D hand tracking from a stock laptop, in a web page, taught by its own webcam in 2½ minutes: on sittings the model never saw (leave-one-sitting-out, hand 25-45 cm from the webcam), the RMS error of 250 ms movements is left-right 4.4 / toward-away 4.5 / up-down 3.1 cm.
+- Push/pull from real recordings: 268 of 332 prompted gestures (81 %) across 17 sessions at 20-60 cm, on a Windows laptop and MacBooks, with about 0.6 false triggers per minute while typing or idle (`python ml/report.py`).
+- Honest numbers on screen: the hologram shows its held-out error and the size it draws, and the replay mode shows the webcam truth next to the sound.
 
 ## What we learned
-- The browser audio pipeline does a lot behind your back. Knowing what it filters made the difference.
-- Small, well-chosen features (asymmetry, duration, velocity sign changes) go a long way on a small dataset.
-- Record first, then tune: replaying every saved session through each rule change caught regressions that a single live try would have hidden.
-- Check the physics before the code: left/right had to be redesigned because the signal we were thresholding was mostly not there.
+- The browser audio pipeline does a lot behind your back; knowing what it filters made the difference.
+- A camera is a great teacher for a sensor it then doesn't need.
+- A least-squares map draws motion at (correlation × true size). Weak axes look frozen, and that's information, not a bug.
+- Record first, then tune: replaying every saved session after each change caught regressions a live try would hide.
 
 ## What's next
-- **Left and right swipes:** measure each speaker's path length from the echo's phase, as LLAP (MobiCom 2016) does, instead of from the Doppler spectrum, and use the laptop's two microphones where the browser exposes them.
-- **In-browser classifier:** run `ml/model.json` live in the page.
-- **Real uses:** cooking with messy hands, sterile environments, accessibility for people with limited mobility, and privacy-first smart devices.
-- **Phones:** a phone version using its speaker and microphone.
+- **Height:** a phone above the hand as an extra source `[TBD]`, then more sources from ordinary phones.
+- **More people and laptops:** we have one person on one laptop so far.
+- **Absolute position:** anchor the drift with the direct-path phase and short re-teach moments.
+- **Uses:** cooking with messy hands, sterile rooms, accessibility, and privacy-first smart devices.
 
 ## Built with
-`javascript` · `web-audio-api` · `html5-canvas` · `python` · `signal-processing` · `machine-learning` [· `scikit-learn`]
+`javascript` · `web-audio-api` · `audioworklet` · `three.js` · `mediapipe` · `html5-canvas` · `python` · `signal-processing` · `machine-learning`
 
 ## Team
 배서진 (data and classifier, lead and pitch) · 이재윤 (signal engine) · 최서희 (game and UI) · 강소연 (experiments and thresholds)
