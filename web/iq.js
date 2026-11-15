@@ -112,6 +112,16 @@ registerProcessor('bat-iq', BatIQ);
         const pStroke = imax > imin ? xmax - xmin : xmin - xmax;
         return { pPk: xp, pDPk: yp, pStroke, n };
       },
+      // bravo: the running sideways (u) / depth (w) path change as a 2D track (m, ~1 kHz; every = keep every n-th
+      // sample). area = signed area swept: > 0 = clockwise for a flat circle over the keyboard, seen from above
+      trackBetween(ta, tb, every = 1) {
+        const t = [], u = [], w = []; let x = 0, y = 0, px = 0, py = 0, area = 0, j = 0;
+        for (let i = h; i < T.length && T[i] <= tb; i++) if (T[i] >= ta) {
+          x += (R[i] - L[i]) / 2; y += -(R[i] + L[i]) / 2; area += (px * y - x * py) / 2; px = x; py = y;
+          if (j++ % every === 0) { t.push(T[i]); u.push(x); w.push(y); }
+        }
+        return { t, u, w, area, n: j };
+      },
       pathBetween(ta, tb) {
         let dL = 0, dR = 0, activeL = 0, activeR = 0, n = 0;
         for (let i = h; i < T.length && T[i] <= tb; i++) if (T[i] >= ta) {

@@ -254,7 +254,7 @@
       // stereo sessions also keep the raw mic signal (WAV next to the CSV) so left/right ideas can be tested offline
       if (stereo && opt.capture !== false && (await BatEars.captureStart())) ui.head.textContent = headText() + ' · 🎙️ 원음 저장 중';
       if (opt.circleOnly) {
-        say('손을 키보드 위 10~15cm에 두세요', '원은 책상과 나란하게, 지름 15~20cm로 1바퀴 반. 시계 방향 = 화면을 마주 보고 봤을 때 화면 쪽(위)→오른쪽→내 쪽(아래)→왼쪽. 기록만 해요');
+        say('손을 키보드 가운데~앞쪽 위 10~15cm에 두세요', '원은 책상과 나란하게, 지름 15~20cm로 1바퀴 반 (화면 경첩 쪽으로 넘어가지 않게). 시계 방향 = 화면을 마주 보고 봤을 때 화면 쪽(위)→오른쪽→내 쪽(아래)→왼쪽. 기록만 해요');
         await sleep(5000 * speed);
       } else if (opt.swipeOnly) {
         // left/right needs the hand close: at 55 cm the swipe echo was 7 dB weaker and the check failed (224420)

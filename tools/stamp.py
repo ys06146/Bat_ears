@@ -11,7 +11,7 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 stamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-for page in ('index.html', 'experiment-live.html'):
+for page in ('index.html', 'experiment-live.html', 'key.html'):
     path = os.path.join(HERE, '..', 'web', page)
     with open(path, encoding='utf-8') as f:
         html = f.read()
