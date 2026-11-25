@@ -1,8 +1,8 @@
 {
   "schema": 2,
-  "checked_at_utc": "2026-11-25T21:51:53Z",
+  "checked_at_utc": "2026-11-25T22:18:41Z",
   "main_sha": "03ef39d52bcb46ca6735d480b64b9443c9b097a1",
-  "exp_sha_before_run": "45fb5302bec543d803bb836f89e2e042b356d06b",
+  "exp_sha_before_run": "d4261df7c701397e1f2483373fcc2234f23b5f2f",
   "report": "experiments/monitor-2026-11-15-1537.md",
   "github_files": [
     {
@@ -1475,8 +1475,8 @@
     "pending_bundles_unchanged": true,
     "pr_state": "open",
     "pr_draft": true,
-    "pr_updated_at": "2026-11-25T20:52:29Z",
-    "pr_head_sha": "45fb5302bec543d803bb836f89e2e042b356d06b",
+    "pr_updated_at": "2026-11-25T21:52:13Z",
+    "pr_head_sha": "d4261df7c701397e1f2483373fcc2234f23b5f2f",
     "notification_sent": false
   }
 }
